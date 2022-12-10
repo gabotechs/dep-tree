@@ -45,8 +45,8 @@ jobs:
 
       - name: Tag
         run: |
-          SEM_VER=$(.github/semver.sh)
+          version=$(.github/semver.sh)
           git config --global user.email "gabimtme@hotmail.com"
           git config --global user.name "Automatic bumper"
-          git tag "v$version"
+          git tag "$version"
           git push --tags
