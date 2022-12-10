@@ -26,4 +26,6 @@ jobs:
       - uses: ./.github/actions/setup-go
       - name: Lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          args: '-v'
 
