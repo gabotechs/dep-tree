@@ -1,0 +1,15 @@
+name: Test/Tag
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  unit-test:
+    if: ${{ !startsWith(github.event.head_commit.message, 'tag') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-go
+      -
+
