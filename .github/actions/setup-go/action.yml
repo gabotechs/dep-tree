@@ -1,4 +1,5 @@
 name: 'setup-go'
+description: 'Setup cached go'
 runs:
   using: composite
   steps:
