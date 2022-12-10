@@ -17,11 +17,11 @@ var Extensions = []string{
 }
 
 var importRegex = regexp.MustCompile(
-	"(import|export)\\s+?(?:(?:(?:[\\w*\\s{},]*)\\s+from\\s+?)|)(?:(?:\".*?\")|(?:'.*?'))\\s*?(?:;|$|)",
+	"(import|export)\\s+?((([\\w*\\s{},]*)\\s+from\\s+?)|)((\".*?\")|('.*?'))\\s*?(?:;|$|)",
 )
 
 var importPathRegex = regexp.MustCompile(
-	"(?:\".*?\")|(?:'.*?')",
+	"(\".*?\")|('.*?')",
 )
 
 type Data struct {
