@@ -2,6 +2,7 @@ package js
 
 import (
 	"github.com/stretchr/testify/require"
+
 	"path"
 	"path/filepath"
 	"testing"

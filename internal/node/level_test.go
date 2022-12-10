@@ -2,8 +2,9 @@ package node
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNode_Level(t *testing.T) {
@@ -22,7 +23,7 @@ func TestNode_Level(t *testing.T) {
 	ctx, lvl0 := node0.Level(ctx, "0")
 	ctx, lvl1 := node1.Level(ctx, "0")
 	ctx, lvl2 := node2.Level(ctx, "0")
-	ctx, lvl3 := node3.Level(ctx, "0")
+	_, lvl3 := node3.Level(ctx, "0")
 
 	a.Equal(0, lvl0)
 	a.Equal(1, lvl1)
@@ -50,7 +51,7 @@ func TestNode_Level_Circular(t *testing.T) {
 	ctx, lvl1 := node1.Level(ctx, "0")
 	ctx, lvl2 := node2.Level(ctx, "0")
 	ctx, lvl3 := node3.Level(ctx, "0")
-	ctx, lvl4 := node4.Level(ctx, "0")
+	_, lvl4 := node4.Level(ctx, "0")
 
 	a.Equal(0, lvl0)
 	a.Equal(1, lvl1)

@@ -1,11 +1,12 @@
 package utils
 
 func Clamp(min int, n, max int) int {
-	if n < min {
+	switch {
+	case n < min:
 		return min
-	} else if n > max {
+	case n > max:
 		return max
-	} else {
+	default:
 		return n
 	}
 }

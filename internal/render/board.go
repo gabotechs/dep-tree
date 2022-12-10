@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-const underlineRune = '\u0332'
-
 type Point struct {
 	x int
 	y int
@@ -76,7 +74,6 @@ func (b *Board) AddBlock(id string, display string, level int, index int) error 
 		} else {
 			b.elements[y][x+i].PlaceChar(rune(display[idIndex]))
 		}
-
 	}
 	b.blocks[id] = Point{x, y}
 	return nil

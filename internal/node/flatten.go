@@ -13,7 +13,7 @@ func flatten[T any](root *Node[T], storage *orderedmap.OrderedMap[string, *Node[
 	}
 }
 
-// Flatten retrieves a hashmap of unique non-repeated nodes
+// Flatten retrieves a hashmap of unique non-repeated nodes.
 func (n *Node[T]) Flatten() *orderedmap.OrderedMap[string, *Node[T]] {
 	storage := orderedmap.NewOrderedMap[string, *Node[T]]()
 	flatten(n, storage)

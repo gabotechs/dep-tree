@@ -4,12 +4,13 @@ import (
 	"dep-tree/internal/node"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"
@@ -35,7 +36,7 @@ func (t *TestGraph) Parse(id string) (*node.Node[[]int], error) {
 }
 
 func (t *TestGraph) Deps(n *node.Node[[]int]) []string {
-	var result []string
+	result := make([]string, 0)
 	for _, child := range n.Data {
 		result = append(result, strconv.Itoa(child))
 	}
@@ -68,6 +69,7 @@ func TestMakeGraph(t *testing.T) {
 			a.NoError(err)
 			var testParser TestGraph
 			err = json.Unmarshal(content, &testParser.Spec)
+			a.NoError(err)
 
 			result, err := RenderGraph[[]int]("0", &testParser)
 			a.NoError(err)

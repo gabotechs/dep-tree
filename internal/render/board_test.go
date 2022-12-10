@@ -1,8 +1,10 @@
 package render
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
+
+	"github.com/stretchr/testify/require"
+
 	"path"
 	"testing"
 )

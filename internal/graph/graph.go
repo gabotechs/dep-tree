@@ -52,7 +52,7 @@ func renderGraph[T any](
 	ctx := context.Background()
 	allNodes := root.Flatten()
 
-	var nodesWithLevel []graphNode[T]
+	nodesWithLevel := make([]graphNode[T], 0)
 	maxLevel := 0
 	maxSize := 0
 	for _, k := range allNodes.Keys() {

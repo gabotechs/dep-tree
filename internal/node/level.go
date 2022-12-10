@@ -2,7 +2,11 @@ package node
 
 import "context"
 
-const cycleKey = "cycle"
+type key int
+
+const (
+	cycleKey key = iota
+)
 
 const unknown = -2
 const cyclic = -1
@@ -63,7 +67,7 @@ func calculateLevel[T any](
 	}
 }
 
-// Level retrieves the longest path until going to "rootId" avoiding cyclical loops
+// Level retrieves the longest path until going to "rootId" avoiding cyclical loops.
 func (n *Node[T]) Level(ctx context.Context, rootId string) (context.Context, int) {
 	return calculateLevel(ctx, n, rootId, 0, []string{})
 }

@@ -15,11 +15,11 @@ var Extensions = []string{
 	"js", "ts", "tsx", "jsx",
 }
 
-var importRegex, _ = regexp.Compile(
-	"(import|export)\\s+?(?:(?:(?:[\\w*\\s{},]*)\\s+from\\s+?)|)(?:(?:\".*?\")|(?:'.*?'))[\\s]*?(?:;|$|)",
+var importRegex = regexp.MustCompile(
+	"(import|export)\\s+?(?:(?:(?:[\\w*\\s{},]*)\\s+from\\s+?)|)(?:(?:\".*?\")|(?:'.*?'))\\s*?(?:;|$|)",
 )
 
-var importPathRegex, _ = regexp.Compile(
+var importPathRegex = regexp.MustCompile(
 	"(?:\".*?\")|(?:'.*?')",
 )
 
@@ -83,7 +83,7 @@ func (p *parser) Parse(id string) (*node.Node[Data], error) {
 
 func (p *parser) Deps(n *node.Node[Data]) []string {
 	matched := importRegex.FindAll(n.Data.content, -1)
-	var deps []string
+	deps := make([]string, 0)
 	for _, importMatch := range matched {
 		importPathMatched := importPathRegex.Find(importMatch)
 		match := strings.Trim(string(importPathMatched), "'\" \n")

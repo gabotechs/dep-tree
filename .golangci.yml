@@ -1,0 +1,31 @@
+run:
+  timeout: 3m
+
+linters-settings:
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocyclo:
+    min-complexity: 15
+  godot:
+    check-all: true
+  revive:
+    confidence: 0.8
+
+linters:
+  enable:
+    - asciicheck
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - goimports
+    - gosec
+    - misspell
+    - nolintlint
+    - prealloc
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
