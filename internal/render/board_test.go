@@ -2,11 +2,10 @@ package render
 
 import (
 	"os"
-
-	"github.com/stretchr/testify/require"
-
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"

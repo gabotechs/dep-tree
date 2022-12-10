@@ -10,10 +10,10 @@ import (
 func TestNode_Level(t *testing.T) {
 	a := require.New(t)
 
-	node0 := MakeNode("0", 0)
-	node1 := MakeNode("1", 0)
-	node2 := MakeNode("2", 0)
-	node3 := MakeNode("3", 0)
+	node0 := MakeNode("0", testGroup, 0)
+	node1 := MakeNode("1", testGroup, 0)
+	node2 := MakeNode("2", testGroup, 0)
+	node3 := MakeNode("3", testGroup, 0)
 
 	node0.AddChild(node1, node2)
 	node1.AddChild(node3)
@@ -34,11 +34,11 @@ func TestNode_Level(t *testing.T) {
 func TestNode_Level_Circular(t *testing.T) {
 	a := require.New(t)
 
-	node0 := MakeNode("0", 0)
-	node1 := MakeNode("1", 0)
-	node2 := MakeNode("2", 0)
-	node3 := MakeNode("3", 0)
-	node4 := MakeNode("4", 0)
+	node0 := MakeNode("0", testGroup, 0)
+	node1 := MakeNode("1", testGroup, 0)
+	node2 := MakeNode("2", testGroup, 0)
+	node3 := MakeNode("3", testGroup, 0)
+	node4 := MakeNode("4", testGroup, 0)
 
 	node0.AddChild(node1, node2, node3)
 	node1.AddChild(node2, node4)

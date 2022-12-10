@@ -1,6 +1,10 @@
 package node
 
-import "context"
+import (
+	"context"
+
+	"dep-tree/internal/utils"
+)
 
 type key int
 
@@ -10,15 +14,6 @@ const (
 
 const unknown = -2
 const cyclic = -1
-
-func elementInArray[T comparable](value T, array []T) bool {
-	for _, el := range array {
-		if value == el {
-			return true
-		}
-	}
-	return false
-}
 
 func hashDep[T any](a *Node[T], b *Node[T]) string {
 	return a.Id + " -> " + b.Id
@@ -47,7 +42,7 @@ func calculateLevel[T any](
 		knownCycles, _ := ctx.Value(cycleKey).([]string)
 		if knownCycles == nil {
 			knownCycles = []string{}
-		} else if elementInArray(dep, knownCycles) {
+		} else if utils.InArray(dep, knownCycles) {
 			continue
 		}
 
