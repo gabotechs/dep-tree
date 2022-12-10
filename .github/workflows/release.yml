@@ -1,0 +1,21 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v**'
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0' # https://github.com/actions/checkout/issues/217
+          token: ${{ secrets.CI_TOKEN }}
+      - uses: ./.github/actions/setup-go
+      - uses: goreleaser/goreleaser-action@v2
+        with:
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+
+

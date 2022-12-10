@@ -29,3 +29,24 @@ jobs:
         with:
           args: '-v'
 
+  tag:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - unit-test
+      - lint
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0' # https://github.com/actions/checkout/issues/217
+          token: ${{ secrets.CI_TOKEN }}
+
+      - uses: ./.github/actions/setup-go
+
+      - name: Tag
+        run: |
+          SEM_VER=$(.github/semver.sh)
+          git config --global user.email "gabimtme@hotmail.com"
+          git config --global user.name "Automatic bumper"
+          git tag "v$version"
+          git push --tags
