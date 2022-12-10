@@ -9,6 +9,8 @@ linters-settings:
     min-complexity: 15
   godot:
     check-all: true
+  goimports:
+    local-prefixes: dep-tree
   revive:
     confidence: 0.8
 

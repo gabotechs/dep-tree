@@ -2,9 +2,10 @@ package graph
 
 import (
 	"context"
+	"sort"
+
 	"dep-tree/internal/node"
 	"dep-tree/internal/render"
-	"sort"
 )
 
 type NodeParser[T any] interface {

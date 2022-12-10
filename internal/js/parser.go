@@ -1,14 +1,15 @@
 package js
 
 import (
-	"dep-tree/internal/graph"
-	"dep-tree/internal/node"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"dep-tree/internal/graph"
+	"dep-tree/internal/node"
 )
 
 var Extensions = []string{

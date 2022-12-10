@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"errors"
+	"strings"
+
 	"dep-tree/internal/graph"
 	"dep-tree/internal/js"
-	"errors"
+
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 func endsWith(string string, substrings []string) bool {

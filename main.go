@@ -1,8 +1,9 @@
 package main
 
 import (
-	"dep-tree/cmd"
 	"os"
+
+	"dep-tree/cmd"
 )
 
 func main() {

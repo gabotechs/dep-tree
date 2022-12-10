@@ -1,8 +1,9 @@
 package render
 
 import (
-	"dep-tree/internal/utils"
 	"fmt"
+
+	"dep-tree/internal/utils"
 )
 
 type Point struct {

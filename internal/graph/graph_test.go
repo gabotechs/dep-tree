@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"dep-tree/internal/node"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -11,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/node"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"
