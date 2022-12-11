@@ -56,7 +56,7 @@ func calculateLevel[T any](
 		}
 	}
 	if maxLevel == unknown {
-		// TODO: there is a but here, there are cases where this is reached
+		// TODO: there is a but here, there are cases where this is reached.
 		panic("This should not be reachable")
 	} else {
 		return ctx, maxLevel

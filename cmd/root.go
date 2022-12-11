@@ -37,7 +37,7 @@ var Root = &cobra.Command{
 
 		if endsWith(entrypoint, js.Extensions) {
 			content, err := graph.RenderGraph[js.Data](entrypoint, &js.Parser{
-				path.Dir(entrypoint),
+				RootDir: path.Dir(entrypoint),
 			})
 			if err != nil {
 				return err

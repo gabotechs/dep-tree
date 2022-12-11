@@ -30,13 +30,13 @@ func MakeBoard(options BoardOptions) *Board {
 }
 
 func (b *Board) Render() (string, error) {
-	// 1. Create Cell matrix
+	// 1. Create Cell matrix.
 	elements := make([][]graphics.CellStack, b.h)
 	for i := range elements {
 		elements[i] = make([]graphics.CellStack, b.w)
 	}
 
-	// 2. Render blocks
+	// 2. Render blocks.
 	for _, k := range b.blocks.Keys() {
 		block, _ := b.blocks.Get(k)
 		err := block.Render(elements)
@@ -45,7 +45,7 @@ func (b *Board) Render() (string, error) {
 		}
 	}
 
-	// 3. Render connectors
+	// 3. Render connectors.
 	for _, k := range b.connectors.Keys() {
 		connector, _ := b.connectors.Get(k)
 		err := connector.Render(elements)
@@ -54,7 +54,7 @@ func (b *Board) Render() (string, error) {
 		}
 	}
 
-	// 4. dump Cells to a string
+	// 4. dump Cells to a string.
 	rendered := ""
 	for j := 0; j < b.h; j++ {
 		for i := 0; i < b.w; i++ {
