@@ -4,34 +4,43 @@ import (
 	"fmt"
 
 	"dep-tree/internal/render/graphics"
+	"dep-tree/internal/vector"
 )
 
-type Point struct {
-	x int
-	y int
-}
+const (
+	cellType = "cellType"
+	block    = "block"
+	arrow    = "arrow"
+)
 
 type Block struct {
 	Id       string
 	Label    string
-	Position Point
+	Position vector.Vector
 }
 
-func (b *Block) Render(cells [][]graphics.CellStack) error {
-	x := b.Position.x
-	y := b.Position.y
+func (b *Block) Render(matrix *graphics.Matrix) error {
+	x := b.Position.X
+	y := b.Position.Y
 	for i := 0; i < len(b.Label); i++ {
 		idIndex := i
 		if idIndex >= len(b.Label) || idIndex < 0 {
 			// nothing here.
 		} else {
-			cells[y][x+i].PlaceChar(rune(b.Label[idIndex]))
+			cell := matrix.Cell(vector.Vec(x+i, y))
+			cell.PlaceChar(rune(b.Label[idIndex]))
+			cell.Tag(cellType, block)
 		}
 	}
 	return nil
 }
 
-func (b *Board) AddBlock(id string, label string, column int, row int) error {
+func (b *Board) AddBlock(
+	id string,
+	label string,
+	column int,
+	row int,
+) error {
 	if _, ok := b.blocks.Get(id); ok {
 		return fmt.Errorf("block %s is already present", id)
 	}
@@ -52,7 +61,7 @@ func (b *Board) AddBlock(id string, label string, column int, row int) error {
 	b.blocks.Set(id, &Block{
 		Id:       id,
 		Label:    label,
-		Position: Point{x, y},
+		Position: vector.Vec(x, y),
 	})
 	return nil
 }

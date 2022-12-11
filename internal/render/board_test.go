@@ -90,3 +90,31 @@ func TestBoard_CrossedDeps(t *testing.T) {
 	a.NoError(err)
 	expectTest(t, result)
 }
+
+func TestBoard_RoundTripSolid(t *testing.T) {
+	a := require.New(t)
+	board := MakeBoard(BoardOptions{})
+	blockA := "a"
+	blockB := "b"
+	blockC := "c"
+	blockD := "d"
+	blockE := "e"
+
+	_ = board.AddBlock(blockA, blockA, 0, 0)
+	_ = board.AddBlock(blockB, blockB, 2, 1)
+	_ = board.AddBlock(blockC, blockC, 2, 3)
+	_ = board.AddBlock(blockD, blockD, 2, 5)
+	_ = board.AddBlock(blockE, blockE, 4, 6)
+
+	_ = board.AddConnector(blockA, blockB)
+	_ = board.AddConnector(blockA, blockC)
+	_ = board.AddConnector(blockA, blockD)
+
+	_ = board.AddConnector(blockC, blockE)
+	_ = board.AddConnector(blockD, blockE)
+	_ = board.AddConnector(blockB, blockE)
+
+	result, err := board.Render()
+	a.NoError(err)
+	expectTest(t, result)
+}
