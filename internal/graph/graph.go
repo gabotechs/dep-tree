@@ -79,8 +79,7 @@ func renderGraph[T any](
 	})
 
 	board := render.MakeBoard(render.BoardOptions{
-		Indent:    2,
-		BlockSize: maxSize,
+		Indent: 2,
 	})
 
 	for i, nodeWithLevel := range nodesWithLevel {
@@ -98,14 +97,14 @@ func renderGraph[T any](
 	for _, nodeWithLevel := range nodesWithLevel {
 		for _, childId := range nodeWithLevel.node.Children.Keys() {
 			child, _ := nodeWithLevel.node.Children.Get(childId)
-			err := board.AddDep(nodeWithLevel.node.Id, child.Id)
+			err := board.AddConnector(nodeWithLevel.node.Id, child.Id)
 			if err != nil {
 				return "", err
 			}
 		}
 	}
 
-	return board.Render(), nil
+	return board.Render()
 }
 
 func RenderGraph[T any](

@@ -1,6 +1,8 @@
-package render
+package graphics
 
-import "golang.org/x/text/unicode/norm"
+import (
+	"golang.org/x/text/unicode/norm"
+)
 
 var lineCharMap = map[int]rune{
 	0b_0000: ' ',

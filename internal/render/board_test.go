@@ -33,9 +33,8 @@ func expectTest(t *testing.T, result string) {
 }
 
 func TestBoard_SimpleDeps(t *testing.T) {
-	board := MakeBoard(BoardOptions{
-		BlockSize: len("index.ts"),
-	})
+	a := require.New(t)
+	board := MakeBoard(BoardOptions{})
 	blockA := "index.ts"
 	blockB := "foo.ts"
 	blockC := "bar.ts"
@@ -43,26 +42,32 @@ func TestBoard_SimpleDeps(t *testing.T) {
 	_ = board.AddBlock(blockA, blockA, 0, 0)
 	_ = board.AddBlock(blockB, blockB, 3, 4)
 	_ = board.AddBlock(blockC, blockC, 5, 5)
-	_ = board.AddDep(blockA, blockB)
-	_ = board.AddDep(blockA, blockC)
-	_ = board.AddDep(blockB, blockC)
+	_ = board.AddConnector(blockA, blockB)
+	_ = board.AddConnector(blockA, blockC)
+	_ = board.AddConnector(blockB, blockC)
 
-	expectTest(t, board.Render())
+	result, err := board.Render()
+	a.NoError(err)
+	expectTest(t, result)
 }
 
 func TestBoard_ReverseDeps(t *testing.T) {
+	a := require.New(t)
 	board := MakeBoard(BoardOptions{})
 	one := "a"
 	other := "b"
 
 	_ = board.AddBlock(one, one, 0, 0)
 	_ = board.AddBlock(other, other, 1, 1)
-	_ = board.AddDep(other, one)
+	_ = board.AddConnector(other, one)
 
-	expectTest(t, board.Render())
+	result, err := board.Render()
+	a.NoError(err)
+	expectTest(t, result)
 }
 
 func TestBoard_CrossedDeps(t *testing.T) {
+	a := require.New(t)
 	board := MakeBoard(BoardOptions{})
 	blockA := "a"
 	blockB := "b"
@@ -75,11 +80,13 @@ func TestBoard_CrossedDeps(t *testing.T) {
 	_ = board.AddBlock(blockC, blockC, 2, 2)
 	_ = board.AddBlock(blockD, blockD, 3, 3)
 	_ = board.AddBlock(blockE, blockE, 4, 4)
-	_ = board.AddDep(blockA, blockB)
-	_ = board.AddDep(blockA, blockC)
-	_ = board.AddDep(blockA, blockD)
-	_ = board.AddDep(blockB, blockD)
-	_ = board.AddDep(blockB, blockE)
+	_ = board.AddConnector(blockA, blockB)
+	_ = board.AddConnector(blockA, blockC)
+	_ = board.AddConnector(blockA, blockD)
+	_ = board.AddConnector(blockB, blockD)
+	_ = board.AddConnector(blockB, blockE)
 
-	expectTest(t, board.Render())
+	result, err := board.Render()
+	a.NoError(err)
+	expectTest(t, result)
 }

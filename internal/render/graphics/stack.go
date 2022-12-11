@@ -1,39 +1,26 @@
-package render
-
-const (
-	charCell = iota
-	linesCell
-	arrowCell
-)
-
-type Lines struct {
-	l     bool
-	t     bool
-	r     bool
-	b     bool
-	cross bool
-}
-
-type Char struct {
-	runes []rune
-}
-
-type Cell struct {
-	t             int
-	char          Char
-	lines         Lines
-	arrowInverted bool
-}
+package graphics
 
 type CellStack struct {
-	cells []Cell
+	IsSolid bool
+	cells   []Cell
+}
+
+func NewCellStack() CellStack {
+	return CellStack{
+		cells: []Cell{},
+	}
 }
 
 func (c *CellStack) add(cell Cell) {
 	c.cells = append([]Cell{cell}, c.cells...)
 }
 
+func (c *CellStack) solid() {
+	c.IsSolid = true
+}
+
 func (c *CellStack) PlaceChar(chars ...rune) {
+	c.solid()
 	c.add(Cell{
 		t: charCell,
 		char: Char{

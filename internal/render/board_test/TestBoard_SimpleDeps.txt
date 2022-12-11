@@ -1,6 +1,6 @@
-index.ts          
-│                 
-│                 
-│                 
-├────▷foo.ts      
-└─────┴──▷bar.ts  
+index.ts        
+│               
+│               
+│               
+├────▷foo.ts    
+└─────┴──▷bar.ts

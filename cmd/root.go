@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"path"
 	"strings"
 
 	"dep-tree/internal/graph"
@@ -35,7 +36,9 @@ var Root = &cobra.Command{
 		entrypoint := args[0]
 
 		if endsWith(entrypoint, js.Extensions) {
-			content, err := graph.RenderGraph[js.Data](entrypoint, js.Parser)
+			content, err := graph.RenderGraph[js.Data](entrypoint, &js.Parser{
+				path.Dir(entrypoint),
+			})
 			if err != nil {
 				return err
 			}

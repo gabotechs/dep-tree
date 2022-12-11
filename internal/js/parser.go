@@ -29,11 +29,11 @@ type Data struct {
 	content []byte
 }
 
-type parser struct{}
+type Parser struct {
+	RootDir string
+}
 
-var Parser = &parser{}
-
-var _ graph.NodeParser[Data] = &parser{}
+var _ graph.NodeParser[Data] = &Parser{}
 
 func retrieveWithExt(absPath string) string {
 	for _, ext := range Extensions {
@@ -51,7 +51,7 @@ func retrieveWithExt(absPath string) string {
 	return ""
 }
 
-func (p *parser) Parse(id string) (*node.Node[Data], error) {
+func (p *Parser) Parse(id string) (*node.Node[Data], error) {
 	absPath, err := filepath.Abs(id)
 	if err != nil {
 		return nil, err
@@ -76,13 +76,15 @@ func (p *parser) Parse(id string) (*node.Node[Data], error) {
 		return nil, err
 	}
 
-	return node.MakeNode(absPath, Data{
-		dirname: path.Dir(absPath),
+	dirname := path.Dir(absPath)
+
+	return node.MakeNode(absPath, dirname, Data{
+		dirname: dirname,
 		content: content,
 	}), nil
 }
 
-func (p *parser) Deps(n *node.Node[Data]) []string {
+func (p *Parser) Deps(n *node.Node[Data]) []string {
 	matched := importRegex.FindAll(n.Data.content, -1)
 	deps := make([]string, 0)
 	for _, importMatch := range matched {
@@ -97,6 +99,6 @@ func (p *parser) Deps(n *node.Node[Data]) []string {
 	return deps
 }
 
-func (p *parser) Display(n *node.Node[Data]) string {
+func (p *Parser) Display(n *node.Node[Data]) string {
 	return path.Join(path.Base(path.Dir(n.Id)), path.Base(n.Id))
 }
