@@ -42,9 +42,11 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 		collides, err := matrix.RayCastVertical(
 			cur,
 			map[string]func(string) bool{
+				// if an arrow or a block is already present, then that is a hit.
 				cellType: func(value string) bool {
 					return utils.InArray(value, []string{block, arrow})
 				},
+				// if there is a line, belonging to another connector which claimed ownership, then hit.
 				noCrossOwnership: func(value string) bool {
 					return value != c.from.Id
 				},
