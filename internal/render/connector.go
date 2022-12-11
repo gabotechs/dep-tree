@@ -11,9 +11,7 @@ type Connector struct {
 	to   *Block
 }
 
-func (c *Connector) Render(
-	d [][]graphics.CellStack,
-) error {
+func (c *Connector) Render(cells [][]graphics.CellStack) error {
 	dir := Point{1, 1}
 	if c.to.Position.x < c.from.Position.x {
 		dir.x = -1
@@ -28,10 +26,10 @@ func (c *Connector) Render(
 		cur.x += len(c.from.Label) - 1
 	}
 	for dir.y*cur.y < dir.y*c.to.Position.y {
-		d[cur.y][cur.x].DrawVerticalLine()
+		cells[cur.y][cur.x].DrawVerticalLine()
 		cur.y += dir.y
 	}
-	d[cur.y][cur.x].DrawJoint(dir.x > 0, dir.y < 0)
+	cells[cur.y][cur.x].DrawJoint(dir.x > 0, dir.y < 0)
 
 	stopBefore := 1
 	if dir.x < 0 {
@@ -40,9 +38,9 @@ func (c *Connector) Render(
 
 	for dir.x*cur.x < dir.x*c.to.Position.x-stopBefore {
 		cur.x += dir.x
-		d[cur.y][cur.x].DrawHorizontalLine()
+		cells[cur.y][cur.x].DrawHorizontalLine()
 	}
-	d[cur.y][cur.x].PlaceArrow(dir.x < 0)
+	cells[cur.y][cur.x].PlaceArrow(dir.x < 0)
 	return nil
 }
 

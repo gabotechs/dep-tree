@@ -17,7 +17,7 @@ type Block struct {
 	Position Point
 }
 
-func (b *Block) Render(d [][]graphics.CellStack) error {
+func (b *Block) Render(cells [][]graphics.CellStack) error {
 	x := b.Position.x
 	y := b.Position.y
 	for i := 0; i < len(b.Label); i++ {
@@ -25,7 +25,7 @@ func (b *Block) Render(d [][]graphics.CellStack) error {
 		if idIndex >= len(b.Label) || idIndex < 0 {
 			// nothing here.
 		} else {
-			d[y][x+i].PlaceChar(rune(b.Label[idIndex]))
+			cells[y][x+i].PlaceChar(rune(b.Label[idIndex]))
 		}
 	}
 	return nil
