@@ -19,13 +19,12 @@ func makeNodes[T any](
 	parser NodeParser[T],
 	seen map[string]*node.Node[T],
 ) (*node.Node[T], error) {
-	if cached, ok := seen[entrypoint]; ok {
-		return cached, nil
-	}
 	root, err := parser.Parse(entrypoint)
 	if err != nil {
 		return nil, err
-	} else if _, ok := seen[entrypoint]; !ok {
+	} else if cached, ok := seen[root.Id]; ok {
+		return cached, nil
+	} else {
 		seen[entrypoint] = root
 	}
 
