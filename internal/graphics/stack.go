@@ -115,10 +115,8 @@ func (c *CellStack) Render() string {
 		case arrowCell:
 			return string(arrowMap[cell.arrowInverted])
 		case linesCell:
-			if lines == nil {
+			if lines == nil || !linesCrosses {
 				lines = &Lines{}
-			} else if !linesCrosses {
-				continue
 			}
 			if cell.lines.l {
 				lines.l = true

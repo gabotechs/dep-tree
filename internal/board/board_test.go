@@ -1,4 +1,4 @@
-package render
+package board
 
 import (
 	"os"
@@ -80,8 +80,8 @@ func TestBoard(t *testing.T) {
 				{name: "e", x: 8, y: 4},
 			},
 			Connections: []TestConnection{
-				{from: 1, to: []int{3, 4}},
 				{from: 0, to: []int{1, 2, 3}},
+				{from: 1, to: []int{3, 4}},
 			},
 		},
 		{
@@ -94,9 +94,49 @@ func TestBoard(t *testing.T) {
 				{name: "e", x: 8, y: 4},
 			},
 			Connections: []TestConnection{
-				{from: 3, to: []int{4}},
-				{from: 2, to: []int{4}},
+				{from: 0, to: []int{1, 2, 3}},
 				{from: 1, to: []int{4}},
+				{from: 2, to: []int{4}},
+				{from: 3, to: []int{4}},
+			},
+		},
+		{
+			Name: "Two in same X",
+			Blocks: []TestBlock{
+				{name: "a", x: 2, y: 0},
+				{name: "b", x: 2, y: 2},
+				{name: "c", x: 4, y: 3},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{2}},
+				{from: 1, to: []int{2}},
+			},
+		},
+		{
+			Name: "Two in same X and an arrow in between",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 3, y: 1},
+				{name: "c", x: 3, y: 3},
+				{name: "d", x: 5, y: 4},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1, 2, 3}},
+				{from: 1, to: []int{3}},
+				{from: 2, to: []int{3}},
+			},
+		},
+		{
+			Name: "Two in same X but one leaves space",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 3, y: 1},
+				{name: " c", x: 3, y: 3},
+				{name: "d", x: 6, y: 4},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{3}},
+				{from: 2, to: []int{3}},
 				{from: 0, to: []int{1, 2, 3}},
 			},
 		},

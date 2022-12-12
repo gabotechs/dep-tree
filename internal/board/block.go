@@ -1,4 +1,4 @@
-package render
+package board
 
 import (
 	"fmt"
@@ -31,8 +31,11 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 			if cell == nil {
 				return fmt.Errorf("tried to render in invalid cell (%d, %d)", x+i, y)
 			}
-			cell.PlaceChar(rune(b.Label[idIndex]))
-			cell.Tag(cellType, block)
+			char := rune(b.Label[idIndex])
+			if char != ' ' {
+				cell.PlaceChar(char)
+				cell.Tag(cellType, block)
+			}
 		}
 	}
 	return nil

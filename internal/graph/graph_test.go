@@ -1,12 +1,10 @@
 package graph
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -56,31 +54,49 @@ func fileExists(path string) bool {
 }
 
 func TestMakeGraph(t *testing.T) {
-	a := require.New(t)
-	files, err := os.ReadDir(testDir)
-	a.NoError(err)
-	for _, file := range files {
-		if file.IsDir() || !strings.Contains(file.Name(), ".json") {
-			continue
-		}
+	tests := []struct {
+		Name string
+		Spec [][]int
+	}{
+		{
+			Name: "Simple",
+			Spec: [][]int{
+				{1, 2, 3},
+				{2, 4},
+				{3, 4},
+				{4},
+				{3},
+			},
+		},
+		{
+			Name: "Two in the same level",
+			Spec: [][]int{
+				{1, 2, 3},
+				{3},
+				{3},
+				{},
+			},
+		},
+	}
 
-		t.Run(file.Name(), func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			content, err := os.ReadFile(path.Join(testDir, file.Name()))
-			a.NoError(err)
-			var testParser TestGraph
-			err = json.Unmarshal(content, &testParser.Spec)
-			a.NoError(err)
+			testParser := TestGraph{
+				Spec: tt.Spec,
+			}
 
 			result, err := RenderGraph[[]int]("0", &testParser)
 			a.NoError(err)
+			print(result)
 
-			outFile := path.Join(testDir, strings.ReplaceAll(file.Name(), ".json", ".txt"))
+			outFile := path.Join(testDir, path.Base(tt.Name+".txt"))
 			if fileExists(outFile) && os.Getenv(RebuildTestsEnv) != "true" {
 				expected, err := os.ReadFile(outFile)
 				a.NoError(err)
 				a.Equal(string(expected), result)
 			} else {
+				_ = os.Mkdir(testDir, os.ModePerm)
 				err := os.WriteFile(outFile, []byte(result), os.ModePerm)
 				a.NoError(err)
 			}

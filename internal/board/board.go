@@ -1,4 +1,4 @@
-package render
+package board
 
 import (
 	"fmt"

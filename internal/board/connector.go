@@ -1,4 +1,4 @@
-package render
+package board
 
 import (
 	"fmt"
@@ -24,6 +24,8 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 	from := c.from.Position
 	if reverseY {
 		from.X += len(c.from.Label) - 1
+	} else {
+		from.X += utils.PrefixN(c.from.Label, ' ')
 	}
 
 	// 2. start with just one vertical step.
@@ -31,7 +33,7 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 
 	cur := tracer.MoveVertical(reverseY)
 	cell := matrix.Cell(cur)
-	if cell.Is(cellType, block) && cell.Is(cellType, arrow) {
+	if cell.Is(cellType, block) || cell.Is(cellType, arrow) {
 		return fmt.Errorf("could not draw first vertical step on (%d, %d) because there is no space", cur.X, cur.Y)
 	}
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"sort"
 
+	"dep-tree/internal/board"
 	"dep-tree/internal/node"
-	"dep-tree/internal/render"
 )
 
 type NodeParser[T any] interface {
@@ -67,48 +67,53 @@ func sortNodes[T any](root *node.Node[T]) []graphNode[T] {
 	return result
 }
 
-const indent = 4
+const indent = 2
 
 func renderGraph[T any](
 	parser NodeParser[T],
 	nodes []graphNode[T],
 ) (string, error) {
-	board := render.MakeBoard()
+	b := board.MakeBoard()
 
 	lastLevel := -1
-	yOffset := 0
+	prefix := ""
+	xOffsetCount := 0
+	xOffset := 0
 	for i, n := range nodes {
 		if n.level == lastLevel {
 			if nodes[i-1].node.Children.Len() > 0 {
-				yOffset++
+				xOffsetCount++
+				prefix += " "
 			}
 		} else {
 			lastLevel = n.level
+			xOffset += xOffsetCount
+			xOffsetCount = 0
+			prefix = ""
 		}
 
-		err := board.AddBlock(
+		err := b.AddBlock(
 			n.node.Id,
-			parser.Display(n.node),
-			indent*n.level,
-			i+yOffset,
+			prefix+parser.Display(n.node),
+			indent*n.level+xOffset,
+			i,
 		)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	for i := range nodes {
-		n := nodes[len(nodes)-1-i]
+	for _, n := range nodes {
 		for _, childId := range n.node.Children.Keys() {
 			child, _ := n.node.Children.Get(childId)
-			err := board.AddConnector(n.node.Id, child.Id)
+			err := b.AddConnector(n.node.Id, child.Id)
 			if err != nil {
 				return "", err
 			}
 		}
 	}
 
-	return board.Render()
+	return b.Render()
 }
 
 func RenderGraph[T any](
