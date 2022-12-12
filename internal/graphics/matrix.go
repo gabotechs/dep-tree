@@ -24,6 +24,23 @@ func NewMatrix(w int, h int) *Matrix {
 	}
 }
 
+func (m *Matrix) H() int {
+	return m.h
+}
+
+func (m *Matrix) W() int {
+	return m.w
+}
+
+func (m *Matrix) ExpandRight(n int) {
+	for row := range m.elements {
+		for i := 0; i < n; i++ {
+			m.elements[row] = append(m.elements[row], CellStack{})
+		}
+	}
+	m.w += n
+}
+
 func (m *Matrix) Cell(v vector.Vector) *CellStack {
 	if v.Y >= 0 && v.X >= 0 && v.Y < len(m.elements) && v.X < len(m.elements[v.Y]) {
 		return &m.elements[v.Y][v.X]

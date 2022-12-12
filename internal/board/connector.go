@@ -3,8 +3,9 @@ package board
 import (
 	"fmt"
 
-	graphics2 "dep-tree/internal/graphics"
+	"dep-tree/internal/graphics"
 	"dep-tree/internal/utils"
+	"dep-tree/internal/vector"
 )
 
 const (
@@ -16,7 +17,8 @@ type Connector struct {
 	to   *Block
 }
 
-func (c *Connector) Render(matrix *graphics2.Matrix) error {
+//nolint:gocyclo
+func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this function out.
 	reverseX := c.to.Position.X < c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
@@ -29,9 +31,16 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 	}
 
 	// 2. start with just one vertical step.
-	tracer := graphics2.NewLineTracer(from)
-
-	cur := tracer.MoveVertical(reverseY)
+	tracer := graphics.NewLineTracer(from)
+	var cur vector.Vector
+	if reverseY {
+		cur = tracer.MoveHorizontal(false)
+		if matrix.Cell(cur) == nil {
+			matrix.ExpandRight(1)
+		}
+	} else {
+		cur = tracer.MoveVertical(false)
+	}
 	cell := matrix.Cell(cur)
 	if cell.Is(cellType, block) || cell.Is(cellType, arrow) {
 		return fmt.Errorf("could not draw first vertical step on (%d, %d) because there is no space", cur.X, cur.Y)
@@ -60,6 +69,10 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 		}
 		cur = tracer.MoveHorizontal(!reverseX)
 		cell := matrix.Cell(cur)
+		if cell == nil && reverseX {
+			matrix.ExpandRight(1)
+			cell = matrix.Cell(cur)
+		}
 		if cell == nil {
 			return fmt.Errorf("moved to invalid position (%d, %d) while tracing horizontal line", cur.X, cur.Y)
 		}
@@ -67,7 +80,7 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 	}
 
 	// 3. displacing vertically until aligned...
-	for cur.Y != c.to.Position.Y {
+	for cur.Y != c.to.Position.Y && cur.Y >= 0 && cur.Y < matrix.H() {
 		cur = tracer.MoveVertical(reverseY)
 		matrix.Cell(cur).Tag(noCrossOwnership, c.from.Id)
 	}
@@ -77,7 +90,7 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 	if reverseX {
 		stopBefore = -len(c.to.Label)
 	}
-	for cur.X != c.to.Position.X-stopBefore {
+	for cur.X != c.to.Position.X-stopBefore && cur.X >= 0 && cur.X < matrix.W() {
 		cur = tracer.MoveHorizontal(reverseX)
 	}
 	err := tracer.Dump(matrix)
@@ -87,8 +100,10 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error {
 
 	// 5. placing arrow in target node...
 	cell = matrix.Cell(cur)
-	cell.PlaceArrow(reverseX)
-	cell.Tag(cellType, arrow)
+	if cell != nil {
+		cell.PlaceArrow(reverseX)
+		cell.Tag(cellType, arrow)
+	}
 	return nil
 }
 

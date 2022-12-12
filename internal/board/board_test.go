@@ -140,6 +140,17 @@ func TestBoard(t *testing.T) {
 				{from: 0, to: []int{1, 2, 3}},
 			},
 		},
+		{
+			Name: "Reverse dep with first node very long",
+			Blocks: []TestBlock{
+				{name: "some-really-long-file", x: 0, y: 0},
+				{name: "b", x: 3, y: 1},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
+				{from: 1, to: []int{0}},
+			},
+		},
 	}
 
 	for _, tt := range tests {
