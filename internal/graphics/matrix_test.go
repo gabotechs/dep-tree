@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/vector"
+	"dep-tree/internal/utils"
 )
 
 const (
@@ -22,11 +22,11 @@ func TestMatrix_RayCastVertical(t *testing.T) {
 	tag1Y := 9
 	tag2Y := 7
 
-	matrix.Cell(vector.Vec(x, tag1Y)).Tag(testKey, tag1)
-	matrix.Cell(vector.Vec(x, tag2Y)).Tag(testKey, tag2)
+	matrix.Cell(utils.Vec(x, tag1Y)).Tag(testKey, tag1)
+	matrix.Cell(utils.Vec(x, tag2Y)).Tag(testKey, tag2)
 
 	hit, err := matrix.RayCastVertical(
-		vector.Vec(x, 3),
+		utils.Vec(x, 3),
 		map[string]func(string) bool{
 			testKey: func(value string) bool {
 				return value == tag1
@@ -38,7 +38,7 @@ func TestMatrix_RayCastVertical(t *testing.T) {
 	a.Equal(true, hit)
 
 	hit, err = matrix.RayCastVertical(
-		vector.Vec(x, 3),
+		utils.Vec(x, 3),
 		map[string]func(string) bool{
 			testKey: func(value string) bool {
 				return value == tag1
@@ -50,7 +50,7 @@ func TestMatrix_RayCastVertical(t *testing.T) {
 	a.Equal(false, hit)
 
 	hit, err = matrix.RayCastVertical(
-		vector.Vec(x, 3),
+		utils.Vec(x, 3),
 		map[string]func(string) bool{
 			testKey: func(value string) bool {
 				return value == tag2
@@ -67,10 +67,10 @@ func TestMatrix_RayCastVertical_reverse(t *testing.T) {
 	x := 4
 	matrix := NewMatrix(10, 10)
 
-	matrix.Cell(vector.Vec(x, 4)).Tag(testKey, tag1)
+	matrix.Cell(utils.Vec(x, 4)).Tag(testKey, tag1)
 
 	hit, err := matrix.RayCastVertical(
-		vector.Vec(x, 8),
+		utils.Vec(x, 8),
 		map[string]func(string) bool{
 			testKey: func(value string) bool {
 				return value == tag1
@@ -82,7 +82,7 @@ func TestMatrix_RayCastVertical_reverse(t *testing.T) {
 	a.Equal(true, hit)
 
 	hit, err = matrix.RayCastVertical(
-		vector.Vec(x, 8),
+		utils.Vec(x, 8),
 		map[string]func(string) bool{
 			testKey: func(value string) bool {
 				return value == tag1
@@ -98,6 +98,6 @@ func TestMatrix_RayCastVertical_Fail(t *testing.T) {
 	a := require.New(t)
 	matrix := NewMatrix(10, 10)
 
-	_, err := matrix.RayCastVertical(vector.Vec(0, 10), map[string]func(string) bool{}, 2)
+	_, err := matrix.RayCastVertical(utils.Vec(0, 10), map[string]func(string) bool{}, 2)
 	a.Error(err)
 }

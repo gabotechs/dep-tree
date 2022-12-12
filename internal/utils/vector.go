@@ -1,4 +1,4 @@
-package vector
+package utils
 
 type Vector struct {
 	X int

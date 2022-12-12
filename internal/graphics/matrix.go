@@ -3,7 +3,7 @@ package graphics
 import (
 	"fmt"
 
-	"dep-tree/internal/vector"
+	"dep-tree/internal/utils"
 )
 
 type Matrix struct {
@@ -41,7 +41,7 @@ func (m *Matrix) ExpandRight(n int) {
 	m.w += n
 }
 
-func (m *Matrix) Cell(v vector.Vector) *CellStack {
+func (m *Matrix) Cell(v utils.Vector) *CellStack {
 	if v.Y >= 0 && v.X >= 0 && v.Y < len(m.elements) && v.X < len(m.elements[v.Y]) {
 		return &m.elements[v.Y][v.X]
 	} else {
@@ -50,8 +50,8 @@ func (m *Matrix) Cell(v vector.Vector) *CellStack {
 }
 
 func (m *Matrix) rayCast(
-	origin vector.Vector,
-	dir vector.Vector,
+	origin utils.Vector,
+	dir utils.Vector,
 	query map[string]func(string) bool,
 	length int,
 ) (bool, error) {
@@ -82,7 +82,7 @@ func (m *Matrix) rayCast(
 }
 
 func (m *Matrix) RayCastVertical(
-	origin vector.Vector,
+	origin utils.Vector,
 	query map[string]func(string) bool,
 	length int,
 ) (bool, error) {
@@ -91,7 +91,7 @@ func (m *Matrix) RayCastVertical(
 		dir = -1
 		length = -length
 	}
-	return m.rayCast(origin, vector.Vec(0, dir), query, length)
+	return m.rayCast(origin, utils.Vec(0, dir), query, length)
 }
 
 func (m *Matrix) Render() string {

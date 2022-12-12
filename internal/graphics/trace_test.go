@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/vector"
+	"dep-tree/internal/utils"
 )
 
 const (
@@ -52,7 +52,7 @@ func TestLineTracer(t *testing.T) {
 
 			matrix := NewMatrix(5, 5)
 
-			position := vector.Vec(tt.StartX, tt.StartY)
+			position := utils.Vec(tt.StartX, tt.StartY)
 			tracer := NewLineTracer(position)
 			for _, dir := range dirs {
 				switch dir {

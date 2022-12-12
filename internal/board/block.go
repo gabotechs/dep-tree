@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"dep-tree/internal/graphics"
-	"dep-tree/internal/vector"
+	"dep-tree/internal/utils"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 type Block struct {
 	Id       string
 	Label    string
-	Position vector.Vector
+	Position utils.Vector
 }
 
 func (b *Block) Render(matrix *graphics.Matrix) error {
@@ -27,7 +27,7 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 		if idIndex >= len(b.Label) || idIndex < 0 {
 			// nothing here.
 		} else {
-			cell := matrix.Cell(vector.Vec(x+i, y))
+			cell := matrix.Cell(utils.Vec(x+i, y))
 			if cell == nil {
 				return fmt.Errorf("tried to render in invalid cell (%d, %d)", x+i, y)
 			}
@@ -64,7 +64,7 @@ func (b *Board) AddBlock(
 	b.blocks.Set(id, &Block{
 		Id:       id,
 		Label:    label,
-		Position: vector.Vec(x, y),
+		Position: utils.Vec(x, y),
 	})
 	return nil
 }

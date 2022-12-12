@@ -4,20 +4,19 @@ import (
 	"errors"
 
 	"dep-tree/internal/utils"
-	"dep-tree/internal/vector"
 )
 
 type LineTracer struct {
-	slices []vector.Vector
+	slices []utils.Vector
 }
 
-func NewLineTracer(start vector.Vector) *LineTracer {
+func NewLineTracer(start utils.Vector) *LineTracer {
 	return &LineTracer{
-		slices: []vector.Vector{start},
+		slices: []utils.Vector{start},
 	}
 }
 
-func (l *LineTracer) MoveVertical(reverse bool) vector.Vector {
+func (l *LineTracer) MoveVertical(reverse bool) utils.Vector {
 	last := l.slices[len(l.slices)-1]
 	current := last
 	current.Y += utils.Bool2Int(!reverse)
@@ -25,7 +24,7 @@ func (l *LineTracer) MoveVertical(reverse bool) vector.Vector {
 	return current
 }
 
-func (l *LineTracer) MoveHorizontal(reverse bool) vector.Vector {
+func (l *LineTracer) MoveHorizontal(reverse bool) utils.Vector {
 	last := l.slices[len(l.slices)-1]
 	current := last
 	current.X += utils.Bool2Int(!reverse)

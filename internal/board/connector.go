@@ -5,7 +5,6 @@ import (
 
 	"dep-tree/internal/graphics"
 	"dep-tree/internal/utils"
-	"dep-tree/internal/vector"
 )
 
 const (
@@ -32,7 +31,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this
 
 	// 2. start with just one vertical step.
 	tracer := graphics.NewLineTracer(from)
-	var cur vector.Vector
+	var cur utils.Vector
 	if reverseY {
 		cur = tracer.MoveHorizontal(false)
 		if matrix.Cell(cur) == nil {
