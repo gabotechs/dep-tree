@@ -39,10 +39,10 @@ var Root = &cobra.Command{
 			content, err := graph.RenderGraph[js.Data](entrypoint, &js.Parser{
 				RootDir: path.Dir(entrypoint),
 			})
+			print(content)
 			if err != nil {
 				return err
 			}
-			print(content)
 		} else {
 			return errors.New("file not supported")
 		}

@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/elliotchance/orderedmap/v2"
 
@@ -31,7 +32,7 @@ func (b *Board) Render() (string, error) {
 		block, _ := b.blocks.Get(k)
 		err := block.Render(matrix)
 		if err != nil {
-			return "", fmt.Errorf("error rendering block %s: %w", block.Id, err)
+			return matrix.Render(), fmt.Errorf("error rendering block %s: %w", block.Label, err)
 		}
 	}
 
@@ -40,7 +41,12 @@ func (b *Board) Render() (string, error) {
 		connector, _ := b.connectors.Get(k)
 		err := connector.Render(matrix)
 		if err != nil {
-			return "", fmt.Errorf("error rendering connector from %s to %s: %w", connector.from.Id, connector.to.Id, err)
+			return matrix.Render(), fmt.Errorf(
+				"error rendering connector from %s to %s: %w",
+				strings.TrimSpace(connector.from.Label),
+				strings.TrimSpace(connector.to.Label),
+				err,
+			)
 		}
 	}
 
