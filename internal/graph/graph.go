@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"dep-tree/internal/board"
-	"dep-tree/internal/node"
+	"dep-tree/internal/graph/node"
 )
 
 type NodeParser[T any] interface {

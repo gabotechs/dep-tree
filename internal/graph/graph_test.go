@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/node"
+	"dep-tree/internal/graph/node"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"

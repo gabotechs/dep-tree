@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"dep-tree/internal/graph"
-	"dep-tree/internal/node"
+	"dep-tree/internal/graph/node"
 )
 
 var Extensions = []string{
