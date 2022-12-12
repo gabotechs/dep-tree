@@ -93,3 +93,11 @@ func TestMatrix_RayCastVertical_reverse(t *testing.T) {
 	a.NoError(err)
 	a.Equal(false, hit)
 }
+
+func TestMatrix_RayCastVertical_Fail(t *testing.T) {
+	a := require.New(t)
+	matrix := NewMatrix(10, 10)
+
+	_, err := matrix.RayCastVertical(vector.Vec(0, 10), map[string]func(string) bool{}, 2)
+	a.Error(err)
+}
