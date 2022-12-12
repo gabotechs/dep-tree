@@ -38,15 +38,12 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 func (b *Board) AddBlock(
 	id string,
 	label string,
-	column int,
-	row int,
+	x int,
+	y int,
 ) error {
 	if _, ok := b.blocks.Get(id); ok {
 		return fmt.Errorf("block %s is already present", id)
 	}
-
-	x := column * b.options.Indent
-	y := row
 
 	newW := x + len(label)
 	newH := y + 1

@@ -5,7 +5,6 @@ import (
 
 	"dep-tree/internal/render/graphics"
 	"dep-tree/internal/utils"
-	"dep-tree/internal/vector"
 )
 
 const (
@@ -21,7 +20,6 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	reverseX := c.to.Position.X < c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
-	dir := vector.Vec(utils.Bool2Int(!reverseX), utils.Bool2Int(!reverseY))
 	// 1. If the line is going upwards, start at the end of the block.
 	from := c.from.Position
 	if reverseY {
@@ -63,17 +61,17 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	}
 
 	// 3. displacing vertically until aligned...
-	for dir.Y*cur.Y < dir.Y*c.to.Position.Y {
+	for cur.Y != c.to.Position.Y {
 		cur = tracer.MoveVertical(reverseY)
 		matrix.Cell(cur).Tag(noCrossOwnership, c.from.Id)
 	}
 
 	// 4. moving horizontally until meeting target node...
 	stopBefore := 1
-	if dir.X < 0 {
+	if reverseX {
 		stopBefore = len(c.to.Label)
 	}
-	for dir.X*cur.X < dir.X*c.to.Position.X-stopBefore {
+	for cur.X != c.to.Position.X-stopBefore {
 		cur = tracer.MoveHorizontal(reverseX)
 	}
 	err := tracer.Dump(matrix)

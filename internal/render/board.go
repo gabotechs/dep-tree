@@ -4,26 +4,17 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 
 	"dep-tree/internal/render/graphics"
-	"dep-tree/internal/utils"
 )
-
-type BoardOptions struct {
-	Indent int
-}
 
 type Board struct {
 	w          int
 	h          int
-	options    BoardOptions
 	blocks     *orderedmap.OrderedMap[string, *Block]
 	connectors *orderedmap.OrderedMap[string, *Connector]
 }
 
-func MakeBoard(options BoardOptions) *Board {
+func MakeBoard() *Board {
 	return &Board{
-		options: BoardOptions{
-			Indent: utils.Clamp(2, options.Indent, 8),
-		},
 		blocks:     orderedmap.NewOrderedMap[string, *Block](),
 		connectors: orderedmap.NewOrderedMap[string, *Connector](),
 	}

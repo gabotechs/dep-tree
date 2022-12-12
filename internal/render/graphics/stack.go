@@ -6,7 +6,7 @@ type CellStack struct {
 }
 
 func (c *CellStack) add(cell *Cell) {
-	c.cells = append([]*Cell{cell}, c.cells...)
+	c.cells = append(c.cells, cell)
 }
 
 func (c *CellStack) Tag(key string, value string) {
