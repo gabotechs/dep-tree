@@ -3,7 +3,7 @@ package board
 import (
 	"fmt"
 
-	"dep-tree/internal/graphics"
+	graphics2 "dep-tree/internal/board/graphics"
 	"dep-tree/internal/utils"
 )
 
@@ -17,7 +17,7 @@ type Connector struct {
 }
 
 //nolint:gocyclo
-func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this function out.
+func (c *Connector) Render(matrix *graphics2.Matrix) error { // TODO: factor this function out.
 	reverseX := c.to.Position.X < c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
@@ -30,7 +30,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this
 	}
 
 	// 2. start with just one vertical step.
-	tracer := graphics.NewLineTracer(from)
+	tracer := graphics2.NewLineTracer(from)
 	var cur utils.Vector
 	if reverseY {
 		cur = tracer.MoveHorizontal(false)

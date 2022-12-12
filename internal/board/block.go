@@ -3,7 +3,7 @@ package board
 import (
 	"fmt"
 
-	"dep-tree/internal/graphics"
+	"dep-tree/internal/board/graphics"
 	"dep-tree/internal/utils"
 )
 
