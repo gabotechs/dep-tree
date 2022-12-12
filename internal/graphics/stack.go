@@ -1,8 +1,54 @@
 package graphics
 
-import (
-	"golang.org/x/text/unicode/norm"
-)
+import "golang.org/x/text/unicode/norm"
+
+type CellStack struct {
+	tags  map[string]string
+	cells []*Cell
+}
+
+func (c *CellStack) add(cell *Cell) {
+	if c.cells == nil {
+		c.cells = make([]*Cell, 0)
+	}
+	c.cells = append(c.cells, cell)
+}
+
+func (c *CellStack) Tag(key string, value string) {
+	if c.tags == nil {
+		c.tags = map[string]string{key: value}
+	} else {
+		c.tags[key] = value
+	}
+}
+
+func (c *CellStack) Is(key string, value string) bool {
+	if c.tags == nil {
+		return false
+	} else if v, ok := c.tags[key]; ok {
+		return value == v
+	} else {
+		return false
+	}
+}
+
+func (c *CellStack) PlaceChar(chars ...rune) bool {
+	c.add(&Cell{
+		t: charCell,
+		char: Char{
+			runes: chars,
+		},
+	})
+	return true
+}
+
+func (c *CellStack) PlaceArrow(inverted bool) bool {
+	c.add(&Cell{
+		t:             arrowCell,
+		arrowInverted: inverted,
+	})
+	return true
+}
 
 var lineCharMap = map[int]rune{
 	0b_0000: ' ',

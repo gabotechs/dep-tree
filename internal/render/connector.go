@@ -3,7 +3,7 @@ package render
 import (
 	"fmt"
 
-	"dep-tree/internal/render/graphics"
+	graphics2 "dep-tree/internal/graphics"
 	"dep-tree/internal/utils"
 )
 
@@ -16,7 +16,7 @@ type Connector struct {
 	to   *Block
 }
 
-func (c *Connector) Render(matrix *graphics.Matrix) error {
+func (c *Connector) Render(matrix *graphics2.Matrix) error {
 	reverseX := c.to.Position.X < c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
@@ -27,7 +27,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	}
 
 	// 2. start with just one vertical step.
-	tracer := graphics.NewLineTracer(from)
+	tracer := graphics2.NewLineTracer(from)
 
 	cur := tracer.MoveVertical(reverseY)
 	cell := matrix.Cell(cur)
@@ -57,7 +57,11 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 			break
 		}
 		cur = tracer.MoveHorizontal(!reverseX)
-		matrix.Cell(cur).Tag(noCrossOwnership, c.from.Id)
+		cell := matrix.Cell(cur)
+		if cell == nil {
+			return fmt.Errorf("moved to invalid position (%d, %d) while tracing horizontal line", cur.X, cur.Y)
+		}
+		cell.Tag(noCrossOwnership, c.from.Id)
 	}
 
 	// 3. displacing vertically until aligned...
@@ -69,7 +73,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	// 4. moving horizontally until meeting target node...
 	stopBefore := 1
 	if reverseX {
-		stopBefore = len(c.to.Label)
+		stopBefore = -len(c.to.Label)
 	}
 	for cur.X != c.to.Position.X-stopBefore {
 		cur = tracer.MoveHorizontal(reverseX)

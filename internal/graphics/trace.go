@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"errors"
+	"fmt"
 
 	"dep-tree/internal/utils"
 	"dep-tree/internal/vector"
@@ -43,6 +44,9 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 			return errors.New("cannot draw diagonal lines")
 		}
 		startCellStack := matrix.Cell(from)
+		if startCellStack == nil {
+			return fmt.Errorf("could not trace line in (%d, %d)", from.X, from.Y)
+		}
 		lines := Lines{
 			l: fromTo.X < 0,
 			r: fromTo.X > 0,
@@ -58,6 +62,9 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 		}
 
 		endCellStack := matrix.Cell(to)
+		if endCellStack == nil {
+			return fmt.Errorf("could not trace line in (%d, %d)", to.X, to.Y)
+		}
 		newCell := LinesCell(Lines{
 			l: fromTo.X > 0,
 			r: fromTo.X < 0,

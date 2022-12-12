@@ -3,7 +3,7 @@ package render
 import (
 	"fmt"
 
-	"dep-tree/internal/render/graphics"
+	"dep-tree/internal/graphics"
 	"dep-tree/internal/vector"
 )
 
@@ -28,6 +28,9 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 			// nothing here.
 		} else {
 			cell := matrix.Cell(vector.Vec(x+i, y))
+			if cell == nil {
+				return fmt.Errorf("tried to render in invalid cell (%d, %d)", x+i, y)
+			}
 			cell.PlaceChar(rune(b.Label[idIndex]))
 			cell.Tag(cellType, block)
 		}

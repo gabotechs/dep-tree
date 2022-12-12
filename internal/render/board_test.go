@@ -20,7 +20,7 @@ func fileExists(path string) bool {
 func expectTest(t *testing.T, result string) {
 	a := require.New(t)
 	_ = os.Mkdir(testPath, os.ModePerm)
-	fullPath := path.Join(testPath, t.Name()+".txt")
+	fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
 	if fileExists(fullPath) && os.Getenv(RebuildTestsEnv) != "true" {
 		expected, err := os.ReadFile(fullPath)
 		a.NoError(err)
@@ -32,89 +32,96 @@ func expectTest(t *testing.T, result string) {
 	}
 }
 
-func TestBoard_SimpleDeps(t *testing.T) {
-	a := require.New(t)
-	board := MakeBoard(BoardOptions{})
-	blockA := "index.ts"
-	blockB := "foo.ts"
-	blockC := "bar.ts"
-
-	_ = board.AddBlock(blockA, blockA, 0, 0)
-	_ = board.AddBlock(blockB, blockB, 3, 4)
-	_ = board.AddBlock(blockC, blockC, 5, 5)
-	_ = board.AddConnector(blockA, blockB)
-	_ = board.AddConnector(blockA, blockC)
-	_ = board.AddConnector(blockB, blockC)
-
-	result, err := board.Render()
-	a.NoError(err)
-	expectTest(t, result)
+type TestBlock struct {
+	name string
+	x    int
+	y    int
+}
+type TestConnection struct {
+	from int
+	to   []int
 }
 
-func TestBoard_ReverseDeps(t *testing.T) {
-	a := require.New(t)
-	board := MakeBoard(BoardOptions{})
-	one := "a"
-	other := "b"
+func TestBoard(t *testing.T) {
+	tests := []struct {
+		Name        string
+		Blocks      []TestBlock
+		Connections []TestConnection
+	}{
+		{
+			Name: "SimpleDeps",
+			Blocks: []TestBlock{
+				{name: "index.ts", x: 0, y: 0},
+				{name: "foo.ts", x: 3, y: 4},
+				{name: "bar.ts", x: 5, y: 5},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
+				{from: 1, to: []int{2}},
+			},
+		},
+		{
+			Name: "ReverseDeps",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "CrossedDeps",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+				{name: "d", x: 6, y: 3},
+				{name: "e", x: 8, y: 4},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{3, 4}},
+				{from: 0, to: []int{1, 2, 3}},
+			},
+		},
+		{
+			Name: "RoundTrip",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+				{name: "d", x: 6, y: 3},
+				{name: "e", x: 8, y: 4},
+			},
+			Connections: []TestConnection{
+				{from: 3, to: []int{4}},
+				{from: 2, to: []int{4}},
+				{from: 1, to: []int{4}},
+				{from: 0, to: []int{1, 2, 3}},
+			},
+		},
+	}
 
-	_ = board.AddBlock(one, one, 0, 0)
-	_ = board.AddBlock(other, other, 1, 1)
-	_ = board.AddConnector(other, one)
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			board := MakeBoard()
+			for _, block := range tt.Blocks {
+				err := board.AddBlock(block.name, block.name, block.x, block.y)
+				a.NoError(err)
+			}
+			for _, connections := range tt.Connections {
+				from := tt.Blocks[connections.from]
+				for _, toI := range connections.to {
+					to := tt.Blocks[toI]
+					err := board.AddConnector(from.name, to.name)
+					a.NoError(err)
+				}
+			}
 
-	result, err := board.Render()
-	a.NoError(err)
-	expectTest(t, result)
-}
-
-func TestBoard_CrossedDeps(t *testing.T) {
-	a := require.New(t)
-	board := MakeBoard(BoardOptions{})
-	blockA := "a"
-	blockB := "b"
-	blockC := "c"
-	blockD := "d"
-	blockE := "e"
-
-	_ = board.AddBlock(blockA, blockA, 0, 0)
-	_ = board.AddBlock(blockB, blockB, 1, 1)
-	_ = board.AddBlock(blockC, blockC, 2, 2)
-	_ = board.AddBlock(blockD, blockD, 3, 3)
-	_ = board.AddBlock(blockE, blockE, 4, 4)
-	_ = board.AddConnector(blockA, blockB)
-	_ = board.AddConnector(blockA, blockC)
-	_ = board.AddConnector(blockA, blockD)
-	_ = board.AddConnector(blockB, blockD)
-	_ = board.AddConnector(blockB, blockE)
-
-	result, err := board.Render()
-	a.NoError(err)
-	expectTest(t, result)
-}
-
-func TestBoard_RoundTripSolid(t *testing.T) {
-	a := require.New(t)
-	board := MakeBoard(BoardOptions{})
-	blockA := "a"
-	blockB := "b"
-	blockC := "c"
-	blockD := "d"
-	blockE := "e"
-
-	_ = board.AddBlock(blockA, blockA, 0, 0)
-	_ = board.AddBlock(blockB, blockB, 2, 1)
-	_ = board.AddBlock(blockC, blockC, 2, 3)
-	_ = board.AddBlock(blockD, blockD, 2, 5)
-	_ = board.AddBlock(blockE, blockE, 4, 6)
-
-	_ = board.AddConnector(blockA, blockB)
-	_ = board.AddConnector(blockA, blockC)
-	_ = board.AddConnector(blockA, blockD)
-
-	_ = board.AddConnector(blockC, blockE)
-	_ = board.AddConnector(blockD, blockE)
-	_ = board.AddConnector(blockB, blockE)
-
-	result, err := board.Render()
-	a.NoError(err)
-	expectTest(t, result)
+			result, err := board.Render()
+			a.NoError(err)
+			expectTest(t, result)
+		})
+	}
 }

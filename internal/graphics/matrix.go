@@ -25,7 +25,11 @@ func NewMatrix(w int, h int) *Matrix {
 }
 
 func (m *Matrix) Cell(v vector.Vector) *CellStack {
-	return &m.elements[v.Y][v.X]
+	if v.Y >= 0 && v.X >= 0 && v.Y < len(m.elements) && v.X < len(m.elements[v.Y]) {
+		return &m.elements[v.Y][v.X]
+	} else {
+		return nil
+	}
 }
 
 func (m *Matrix) rayCast(
@@ -34,28 +38,20 @@ func (m *Matrix) rayCast(
 	query map[string]func(string) bool,
 	length int,
 ) (bool, error) {
-	cur := origin
-	for i := 0; i < length; i++ {
+	for i := 0; i < length+1; i++ {
+		cur := origin
 		cur.X += dir.X * i
 		cur.Y += dir.Y * i
 
-		if cur.X < 0 || cur.Y < 0 {
+		cellStack := m.Cell(cur)
+
+		if cellStack == nil {
 			if i == 0 {
 				return false, fmt.Errorf("cannot ray cast in origin (%d, %d) because it is out of bounds", origin.X, origin.Y)
 			} else {
 				return false, nil
 			}
 		}
-
-		if cur.X >= m.w || cur.Y >= m.h {
-			if i == 0 {
-				return false, fmt.Errorf("cannot ray cast in origin (%d, %d) because it is out of bounds", origin.X, origin.Y)
-			} else {
-				return false, nil
-			}
-		}
-
-		cellStack := m.elements[cur.Y][cur.X]
 
 		for queryTag, queryFunction := range query {
 			if value, ok := cellStack.tags[queryTag]; ok {
@@ -76,6 +72,7 @@ func (m *Matrix) RayCastVertical(
 	dir := 1
 	if length < 0 {
 		dir = -1
+		length = -length
 	}
 	return m.rayCast(origin, vector.Vec(0, dir), query, length)
 }

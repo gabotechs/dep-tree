@@ -1,9 +1,11 @@
 package render
 
 import (
+	"fmt"
+
 	"github.com/elliotchance/orderedmap/v2"
 
-	"dep-tree/internal/render/graphics"
+	"dep-tree/internal/graphics"
 )
 
 type Board struct {
@@ -29,7 +31,7 @@ func (b *Board) Render() (string, error) {
 		block, _ := b.blocks.Get(k)
 		err := block.Render(matrix)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("error rendering block %s: %w", block.Id, err)
 		}
 	}
 
@@ -38,7 +40,7 @@ func (b *Board) Render() (string, error) {
 		connector, _ := b.connectors.Get(k)
 		err := connector.Render(matrix)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("error rendering connector from %s to %s: %w", connector.from.Id, connector.to.Id, err)
 		}
 	}
 
