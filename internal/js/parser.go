@@ -29,11 +29,9 @@ type Data struct {
 	content []byte
 }
 
-type Parser struct {
-	RootDir string
-}
+type parser struct{}
 
-var _ graph.NodeParser[Data] = &Parser{}
+var Parser graph.NodeParser[Data] = &parser{}
 
 func retrieveWithExt(absPath string) string {
 	for _, ext := range Extensions {
@@ -51,24 +49,32 @@ func retrieveWithExt(absPath string) string {
 	return ""
 }
 
-func (p *Parser) Parse(id string) (*node.Node[Data], error) {
+func normalizeId(id string) (string, error) {
 	absPath, err := filepath.Abs(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	stat, _ := os.Stat(id)
 	if stat != nil && stat.IsDir() {
 		newAbsPath := retrieveWithExt(path.Join(absPath, "index"))
 		if newAbsPath == "" {
-			return nil, fmt.Errorf("tried to import from dir %s, but there is no index file", absPath)
+			return "", fmt.Errorf("tried to import from dir %s, but there is no index file", absPath)
 		}
 		absPath = newAbsPath
 	} else {
 		newAbsPath := retrieveWithExt(absPath)
 		if newAbsPath == "" {
-			return nil, fmt.Errorf("no matching JS externsion for file %s", absPath)
+			return "", fmt.Errorf("no matching JS externsion for file %s", absPath)
 		}
 		absPath = newAbsPath
+	}
+	return absPath, nil
+}
+
+func (p *parser) Parse(id string) (*node.Node[Data], error) {
+	absPath, err := normalizeId(id)
+	if err != nil {
+		return nil, err
 	}
 
 	content, err := os.ReadFile(absPath)
@@ -84,7 +90,7 @@ func (p *Parser) Parse(id string) (*node.Node[Data], error) {
 	}), nil
 }
 
-func (p *Parser) Deps(n *node.Node[Data]) []string {
+func (p *parser) Deps(n *node.Node[Data]) []string {
 	matched := importRegex.FindAll(n.Data.content, -1)
 	deps := make([]string, 0)
 	for _, importMatch := range matched {
@@ -99,6 +105,6 @@ func (p *Parser) Deps(n *node.Node[Data]) []string {
 	return deps
 }
 
-func (p *Parser) Display(n *node.Node[Data]) string {
+func (p *parser) Display(n *node.Node[Data]) string {
 	return path.Join(path.Base(path.Dir(n.Id)), path.Base(n.Id))
 }
