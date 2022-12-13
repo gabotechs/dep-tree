@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"fmt"
 
 	"dep-tree/internal/utils"
 )
@@ -50,14 +51,17 @@ func calculateLevel[T any](
 		ctx, newLevel = calculateLevel(ctx, parent, rootId, level+1, append(stack, node.Id))
 		if newLevel == cyclic {
 			ctx = context.WithValue(ctx, cycleKey, append(knownCycles, dep))
-			continue
 		} else if newLevel > maxLevel {
 			maxLevel = newLevel
 		}
 	}
 	if maxLevel == unknown {
-		// TODO: there is a but here, there are cases where this is reached.
-		panic("This should not be reachable")
+		// TODO: there is a bug here, there are cases where this is reached.
+		msg := "This should not be reachable"
+		msg += fmt.Sprintf("\nhappened while calculating level for node %s", node.Id)
+		msg += fmt.Sprintf("\nthis node has %d parents", node.Parents.Len())
+
+		panic(msg)
 	} else {
 		return ctx, maxLevel
 	}

@@ -2,60 +2,63 @@ package node
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestNode_Level(t *testing.T) {
-	a := require.New(t)
+	tests := []struct {
+		Name           string
+		NumNodes       int
+		Children       map[int][]int
+		ExpectedLevels []int
+	}{
+		{
+			Name:     "Simple",
+			NumNodes: 4,
+			Children: map[int][]int{
+				0: {1, 2},
+				1: {3},
+				2: {3},
+			},
+			ExpectedLevels: []int{0, 1, 1, 2},
+		},
+		{
+			Name:     "Cycle",
+			NumNodes: 5,
 
-	node0 := MakeNode("0", testGroup, 0)
-	node1 := MakeNode("1", testGroup, 0)
-	node2 := MakeNode("2", testGroup, 0)
-	node3 := MakeNode("3", testGroup, 0)
+			Children: map[int][]int{
+				0: {1, 2, 3},
+				1: {2, 4},
+				2: {3, 4},
+				3: {4},
+				4: {3},
+			},
+			ExpectedLevels: []int{0, 1, 2, 4, 3},
+		},
+	}
 
-	node0.AddChild(node1, node2)
-	node1.AddChild(node3)
-	node2.AddChild(node3)
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			nodes := make([]*Node[int], tt.NumNodes)
+			for i := 0; i < tt.NumNodes; i++ {
+				nodes[i] = MakeNode(strconv.Itoa(i), testGroup, 0)
+			}
 
-	ctx := context.Background()
-	ctx, lvl0 := node0.Level(ctx, "0")
-	ctx, lvl1 := node1.Level(ctx, "0")
-	ctx, lvl2 := node2.Level(ctx, "0")
-	_, lvl3 := node3.Level(ctx, "0")
-
-	a.Equal(0, lvl0)
-	a.Equal(1, lvl1)
-	a.Equal(1, lvl2)
-	a.Equal(2, lvl3)
-}
-
-func TestNode_Level_Circular(t *testing.T) {
-	a := require.New(t)
-
-	node0 := MakeNode("0", testGroup, 0)
-	node1 := MakeNode("1", testGroup, 0)
-	node2 := MakeNode("2", testGroup, 0)
-	node3 := MakeNode("3", testGroup, 0)
-	node4 := MakeNode("4", testGroup, 0)
-
-	node0.AddChild(node1, node2, node3)
-	node1.AddChild(node2, node4)
-	node2.AddChild(node3, node4)
-	node3.AddChild(node4)
-	node4.AddChild(node3)
-
-	ctx := context.Background()
-	ctx, lvl0 := node0.Level(ctx, "0")
-	ctx, lvl1 := node1.Level(ctx, "0")
-	ctx, lvl2 := node2.Level(ctx, "0")
-	ctx, lvl3 := node3.Level(ctx, "0")
-	_, lvl4 := node4.Level(ctx, "0")
-
-	a.Equal(0, lvl0)
-	a.Equal(1, lvl1)
-	a.Equal(2, lvl2)
-	a.Equal(4, lvl3)
-	a.Equal(3, lvl4)
+			for n, children := range tt.Children {
+				for _, child := range children {
+					nodes[n].AddChild(nodes[child])
+				}
+			}
+			ctx := context.Background()
+			for i := 0; i < tt.NumNodes; i++ {
+				var lvl int
+				ctx, lvl = nodes[i].Level(ctx, nodes[0].Id)
+				a.Equal(tt.ExpectedLevels[i], lvl)
+			}
+		})
+	}
 }
