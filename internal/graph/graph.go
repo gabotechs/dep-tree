@@ -25,7 +25,7 @@ func makeNodes[T any](
 	} else if cached, ok := seen[root.Id]; ok {
 		return cached, nil
 	} else {
-		seen[entrypoint] = root
+		seen[root.Id] = root
 	}
 
 	deps := parser.Deps(root)

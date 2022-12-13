@@ -63,6 +63,13 @@ func TestParser_Deps(t *testing.T) {
 				"parser_test/with-imports-index-imported/index.js",
 			},
 		},
+
+		{
+			Name: "custom-1",
+			Expected: []string{
+				"@parsers/DateSchema",
+			},
+		},
 	}
 
 	for _, tt := range tests {

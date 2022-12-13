@@ -21,12 +21,12 @@ func expectTest(t *testing.T, result string) {
 	a := require.New(t)
 	_ = os.Mkdir(testPath, os.ModePerm)
 	fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
+	print(result)
 	if fileExists(fullPath) && os.Getenv(RebuildTestsEnv) != "true" {
 		expected, err := os.ReadFile(fullPath)
 		a.NoError(err)
 		a.Equal(string(expected), result)
 	} else {
-		print(result)
 		err := os.WriteFile(fullPath, []byte(result), os.ModePerm)
 		a.NoError(err)
 	}
@@ -145,6 +145,17 @@ func TestBoard(t *testing.T) {
 			Blocks: []TestBlock{
 				{name: "some-really-long-file", x: 0, y: 0},
 				{name: "b", x: 3, y: 1},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
+				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "Reverse dep with exactly same length",
+			Blocks: []TestBlock{
+				{name: "aaa", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
 			},
 			Connections: []TestConnection{
 				{from: 0, to: []int{1}},

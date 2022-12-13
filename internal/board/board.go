@@ -32,7 +32,7 @@ func (b *Board) Render() (string, error) {
 		block, _ := b.blocks.Get(k)
 		err := block.Render(matrix)
 		if err != nil {
-			return matrix.Render(), fmt.Errorf("error rendering block %s: %w", block.Label, err)
+			return matrix.Render(), fmt.Errorf("error rendering blockChar %s: %w", block.Label, err)
 		}
 	}
 

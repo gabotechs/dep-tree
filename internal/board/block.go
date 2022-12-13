@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	cellType = "cellType"
-	block    = "block"
-	arrow    = "arrow"
+	cellType   = "cellType"
+	blockChar  = "blockChar"
+	blockSpace = "blockSpace"
+	arrow      = "arrow"
 )
 
 type Block struct {
@@ -34,7 +35,9 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 			char := rune(b.Label[idIndex])
 			if char != ' ' {
 				cell.PlaceChar(char)
-				cell.Tag(cellType, block)
+				cell.Tag(cellType, blockChar)
+			} else {
+				cell.Tag(cellType, blockSpace)
 			}
 		}
 	}
@@ -48,7 +51,7 @@ func (b *Board) AddBlock(
 	y int,
 ) error {
 	if _, ok := b.blocks.Get(id); ok {
-		return fmt.Errorf("block %s is already present", id)
+		return fmt.Errorf("blockChar %s is already present", id)
 	}
 
 	newW := x + len(label)
