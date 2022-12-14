@@ -86,7 +86,7 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error { // TODO: factor thi
 	}
 
 	// 4. moving horizontally until meeting target node...
-	for cur.X >= 0 && cur.X < matrix.W() {
+	for cur.X != c.to.Position.X && cur.X >= 0 && cur.X < matrix.W() {
 		next := matrix.Cell(utils.Vec(cur.X+utils.Bool2Int(!reverseX), cur.Y))
 		if next != nil && (next.Is(cellType, blockChar) || next.Is(cellType, blockSpace)) {
 			break

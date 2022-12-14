@@ -44,9 +44,10 @@ type TestConnection struct {
 
 func TestBoard(t *testing.T) {
 	tests := []struct {
-		Name        string
-		Blocks      []TestBlock
-		Connections []TestConnection
+		Name          string
+		Blocks        []TestBlock
+		Connections   []TestConnection
+		ExpectedError string
 	}{
 		{
 			Name: "SimpleDeps",
@@ -175,6 +176,23 @@ func TestBoard(t *testing.T) {
 				{from: 2, to: []int{1}},
 			},
 		},
+		{
+			Name: "Does not hang",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+				{name: "d", x: 8, y: 3},
+				{name: " e", x: 8, y: 4},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1, 2, 3}},
+				{from: 1, to: []int{2, 4}},
+				{from: 2, to: []int{3, 4}},
+				{from: 3, to: []int{4}},
+				{from: 4, to: []int{3}},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -195,8 +213,12 @@ func TestBoard(t *testing.T) {
 			}
 
 			result, err := board.Render()
-			a.NoError(err)
-			expectTest(t, result)
+			if tt.ExpectedError == "" {
+				a.NoError(err)
+				expectTest(t, result)
+			} else {
+				a.ErrorContains(err, tt.ExpectedError)
+			}
 		})
 	}
 }
