@@ -77,6 +77,14 @@ func TestMakeGraph(t *testing.T) {
 				{},
 			},
 		},
+		{
+			Name: "Cyclic deps",
+			Spec: [][]int{
+				{1},
+				{2},
+				{1},
+			},
+		},
 	}
 
 	for _, tt := range tests {

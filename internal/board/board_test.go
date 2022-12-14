@@ -162,6 +162,19 @@ func TestBoard(t *testing.T) {
 				{from: 1, to: []int{0}},
 			},
 		},
+		{
+			Name: "Cyclic deps",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
+				{from: 1, to: []int{2}},
+				{from: 2, to: []int{1}},
+			},
+		},
 	}
 
 	for _, tt := range tests {

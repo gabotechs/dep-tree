@@ -28,7 +28,6 @@ func TestNode_Level(t *testing.T) {
 		{
 			Name:     "Cycle",
 			NumNodes: 5,
-
 			Children: map[int][]int{
 				0: {1, 2, 3},
 				1: {2, 4},
@@ -37,6 +36,26 @@ func TestNode_Level(t *testing.T) {
 				4: {3},
 			},
 			ExpectedLevels: []int{0, 1, 2, 4, 3},
+		},
+		{
+			Name:     "Cycle 2",
+			NumNodes: 3,
+			Children: map[int][]int{
+				0: {1, 2},
+				1: {2, 0},
+				2: {0, 1},
+			},
+			ExpectedLevels: []int{0, 2, 1},
+		},
+		{
+			Name:     "Cycle 3",
+			NumNodes: 3,
+			Children: map[int][]int{
+				0: {1},
+				1: {2},
+				2: {1},
+			},
+			ExpectedLevels: []int{0, 1, 2},
 		},
 	}
 
