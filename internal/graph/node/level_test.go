@@ -73,11 +73,13 @@ func TestNode_Level(t *testing.T) {
 				}
 			}
 			ctx := context.Background()
+			var lvls []int
 			for i := 0; i < tt.NumNodes; i++ {
 				var lvl int
 				ctx, lvl = nodes[i].Level(ctx, nodes[0].Id)
-				a.Equal(tt.ExpectedLevels[i], lvl)
+				lvls = append(lvls, lvl)
 			}
+			a.Equal(tt.ExpectedLevels, lvls)
 		})
 	}
 }
