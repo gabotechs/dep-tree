@@ -27,16 +27,15 @@ func calculateLevel[T any](
 	ctx context.Context,
 	node *Node[T],
 	rootId string,
-	level int,
 	seen map[string]bool,
 ) (context.Context, int) {
 	var cachedLevelKey = cacheKey("level-" + node.Id)
 	if cachedLevel, ok := ctx.Value(cachedLevelKey).(int); ok {
 		// 1. Check first the cache, we do not like to work more than need.
-		return ctx, cachedLevel + level
+		return ctx, cachedLevel
 	} else if node.Id == rootId {
 		// 2. If it is the root node where are done.
-		return ctx, level
+		return ctx, 0
 	} else if _, ok := seen[node.Id]; ok {
 		// 3. Check if we have closed a loop.
 		return ctx, cyclic
@@ -55,12 +54,12 @@ func calculateLevel[T any](
 			continue
 		}
 
-		var newLevel int
-		ctx, newLevel = calculateLevel(ctx, parent, rootId, level+1, seen)
-		if newLevel == cyclic {
+		var level int
+		ctx, level = calculateLevel(ctx, parent, rootId, seen)
+		if level == cyclic {
 			ctx = context.WithValue(ctx, cachedCycleKey, true)
-		} else if newLevel > maxLevel {
-			maxLevel = newLevel
+		} else if level > maxLevel {
+			maxLevel = level
 		}
 	}
 	// 5. If ignoring previously seen cyclical deps we are not able
@@ -69,22 +68,22 @@ func calculateLevel[T any](
 		for _, parentId := range node.Parents.Keys() {
 			parent, _ := node.Parents.Get(parentId)
 
-			var newLevel int
-			ctx, newLevel = calculateLevel(ctx, parent, rootId, level+1, seen)
-			if newLevel > maxLevel {
-				maxLevel = newLevel
+			var level int
+			ctx, level = calculateLevel(ctx, parent, rootId, seen)
+			if level > maxLevel {
+				maxLevel = level
 			}
 		}
 	}
-	//if maxLevel >= 0 {
-	//	ctx = context.WithValue(ctx, cachedLevelKey, maxLevel)
-	//}
-	return ctx, maxLevel
+	if maxLevel >= 0 {
+		ctx = context.WithValue(ctx, cachedLevelKey, maxLevel+1)
+	}
+	return ctx, maxLevel + 1
 }
 
 // Level retrieves the longest path until going to "rootId" avoiding cyclical loops.
 func (n *Node[T]) Level(ctx context.Context, rootId string) (context.Context, int) {
-	ctx, lvl := calculateLevel(ctx, n, rootId, 0, map[string]bool{})
+	ctx, lvl := calculateLevel(ctx, n, rootId, map[string]bool{})
 	if lvl == unknown {
 		// TODO: there is a bug here, there are cases where this is reached.
 		msg := "This should not be reachable"
