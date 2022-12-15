@@ -13,7 +13,7 @@ import (
 )
 
 var Extensions = []string{
-	"js", "ts", "tsx", "jsx",
+	"js", "ts", "tsx", "jsx", "d.ts",
 }
 
 var importRegex = regexp.MustCompile(
