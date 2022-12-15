@@ -63,6 +63,13 @@ func TestParser_Deps(t *testing.T) {
 				"parser_test/with-imports-index-imported/index.js",
 			},
 		},
+		{
+			Name:      "with-imports-nested",
+			Normalize: true,
+			Expected: []string{
+				"parser_test/with-imports-nested/generated/generated.js",
+			},
+		},
 
 		{
 			Name: "custom-1",
@@ -76,6 +83,9 @@ func TestParser_Deps(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			id := path.Join(testFolder, path.Base(t.Name())+".js")
+			if _, err := os.Stat(id); err != nil {
+				id = path.Join(testFolder, path.Base(t.Name()), "index.js")
+			}
 
 			node, err := Parser.Parse(id)
 			a.NoError(err)
