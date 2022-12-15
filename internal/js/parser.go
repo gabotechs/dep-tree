@@ -64,7 +64,7 @@ func normalizeId(id string) (string, error) {
 	} else {
 		newAbsPath := retrieveWithExt(absPath)
 		if newAbsPath == "" {
-			return "", fmt.Errorf("no matching JS externsion for file %s", absPath)
+			return "", fmt.Errorf("no matching JS extension for file %s", absPath)
 		}
 		absPath = newAbsPath
 	}
