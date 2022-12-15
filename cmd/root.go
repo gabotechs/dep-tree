@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"dep-tree/internal/graph"
@@ -36,14 +37,10 @@ var Root = &cobra.Command{
 
 		if endsWith(entrypoint, js.Extensions) {
 			content, err := graph.RenderGraph(entrypoint, js.Parser)
-			print(content)
-			if err != nil {
-				return err
-			}
+			fmt.Print(content)
+			return err
 		} else {
 			return errors.New("file not supported")
 		}
-
-		return nil
 	},
 }
