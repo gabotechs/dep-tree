@@ -71,7 +71,7 @@ func normalizeId(id string) (string, error) {
 	return absPath, nil
 }
 
-func (p *parser) Parse(id string) (*node.Node[Data], error) {
+func (p *parser) Entrypoint(id string) (*node.Node[Data], error) {
 	absPath, err := normalizeId(id)
 	if err != nil {
 		return nil, err
@@ -90,21 +90,35 @@ func (p *parser) Parse(id string) (*node.Node[Data], error) {
 	}), nil
 }
 
-func (p *parser) Deps(n *node.Node[Data]) []string {
+func (p *parser) Deps(n *node.Node[Data]) ([]*node.Node[Data], error) {
 	matched := importRegex.FindAll(n.Data.content, -1)
-	deps := make([]string, 0)
+	deps := make([]*node.Node[Data], 0)
 	for _, importMatch := range matched {
 		importPathMatched := importPathRegex.Find(importMatch)
 		match := strings.Trim(string(importPathMatched), "'\" \n")
 		if match[:1] != "." {
 			continue
 		}
-		match = path.Join(n.Data.dirname, match)
-		deps = append(deps, match)
+		entrypoint := path.Join(n.Data.dirname, match)
+		dep, err := p.Entrypoint(entrypoint)
+		if err == nil {
+			deps = append(deps, dep)
+		} else {
+			deps = append(deps, node.MakeNode(entrypoint, n.Data.dirname, Data{
+				dirname: "",
+				content: []byte{},
+			}))
+		}
 	}
-	return deps
+	return deps, nil
 }
 
-func (p *parser) Display(n *node.Node[Data]) string {
-	return path.Join(path.Base(path.Dir(n.Id)), path.Base(n.Id))
+func (p *parser) Display(n *node.Node[Data], root *node.Node[Data]) string {
+	base := root.Data.dirname
+	rel, err := filepath.Rel(base, n.Id)
+	if err != nil {
+		return n.Id
+	} else {
+		return rel
+	}
 }
