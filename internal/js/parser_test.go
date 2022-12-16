@@ -4,7 +4,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,13 +11,13 @@ import (
 
 const testFolder = "parser_test"
 
-func TestParser_Parse(t *testing.T) {
+func TestParser_Entrypoint(t *testing.T) {
 	a := require.New(t)
 	id := path.Join(testFolder, t.Name()+".js")
 	absPath, err := filepath.Abs(id)
 	a.NoError(err)
 
-	node, err := Parser.Parse(id)
+	node, err := Parser.Entrypoint(id)
 	a.NoError(err)
 	a.Equal(node.Id, absPath)
 	a.Equal(node.Data.dirname, path.Dir(absPath))
@@ -26,8 +25,6 @@ func TestParser_Parse(t *testing.T) {
 }
 
 func TestParser_Deps(t *testing.T) {
-	thisDir, _ := os.Getwd()
-
 	tests := []struct {
 		Name      string
 		Expected  []string
@@ -36,45 +33,45 @@ func TestParser_Deps(t *testing.T) {
 		{
 			Name: "deps",
 			Expected: []string{
-				"geometries/Geometries.js",
-				"geometries/Geometries.js",
-				"parser_test/.export",
-				"parser_test/views/ListView",
-				"parser_test/views/AddView",
-				"parser_test/views/EditView",
-				"parser_test/views/ListView",
-				"parser_test/views/AddView",
-				"parser_test/views/EditView",
+				"../geometries/Geometries.js",
+				"../geometries/Geometries.js",
+				".export",
+				"views/ListView",
+				"views/AddView",
+				"views/EditView",
+				"views/ListView",
+				"views/AddView",
+				"views/EditView",
 			},
 		},
 		{
 			Name:      "with-imports",
 			Normalize: true,
 			Expected: []string{
-				"parser_test/with-imports-imported/imported.js",
+				"with-imports-imported/imported.js",
 			},
 		},
 		{
 			Name:      "with-imports-index",
 			Normalize: true,
 			Expected: []string{
-				"parser_test/with-imports-index-imported/other.js",
-				"parser_test/with-imports-index-imported/one.js",
-				"parser_test/with-imports-index-imported/index.js",
+				"with-imports-index-imported/other.js",
+				"with-imports-index-imported/one.js",
+				"with-imports-index-imported/index.js",
 			},
 		},
 		{
 			Name:      "with-imports-nested",
 			Normalize: true,
 			Expected: []string{
-				"parser_test/with-imports-nested/generated/generated.js",
+				"generated/generated.js",
 			},
 		},
 
 		{
 			Name: "custom-1",
 			Expected: []string{
-				"@parsers/DateSchema",
+				"../@parsers/DateSchema",
 			},
 		},
 	}
@@ -87,16 +84,14 @@ func TestParser_Deps(t *testing.T) {
 				id = path.Join(testFolder, path.Base(t.Name()), "index.js")
 			}
 
-			node, err := Parser.Parse(id)
+			node, err := Parser.Entrypoint(id)
 			a.NoError(err)
-			deps := Parser.Deps(node)
+			deps, err := Parser.Deps(node)
+			a.NoError(err)
 			result := make([]string, 0)
 			for _, dep := range deps {
-				if tt.Normalize {
-					dep, err = normalizeId(dep)
-					a.NoError(err)
-				}
-				result = append(result, strings.ReplaceAll(dep, thisDir+"/", ""))
+				display := Parser.Display(dep, node)
+				result = append(result, display)
 			}
 
 			a.Equal(tt.Expected, result)

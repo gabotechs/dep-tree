@@ -20,7 +20,7 @@ type TestGraph struct {
 
 var _ NodeParser[[]int] = &TestGraph{}
 
-func (t *TestGraph) Parse(id string) (*node.Node[[]int], error) {
+func (t *TestGraph) Entrypoint(id string) (*node.Node[[]int], error) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
@@ -34,15 +34,16 @@ func (t *TestGraph) Parse(id string) (*node.Node[[]int], error) {
 	return node.MakeNode(id, id, children), nil
 }
 
-func (t *TestGraph) Deps(n *node.Node[[]int]) []string {
-	result := make([]string, 0)
+func (t *TestGraph) Deps(n *node.Node[[]int]) ([]*node.Node[[]int], error) {
+	result := make([]*node.Node[[]int], 0)
 	for _, child := range n.Data {
-		result = append(result, strconv.Itoa(child))
+		c, _ := t.Entrypoint(strconv.Itoa(child))
+		result = append(result, c)
 	}
-	return result
+	return result, nil
 }
 
-func (t *TestGraph) Display(n *node.Node[[]int]) string {
+func (t *TestGraph) Display(n *node.Node[[]int], _ *node.Node[[]int]) string {
 	return n.Id
 }
 
