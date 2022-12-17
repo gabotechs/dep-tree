@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testFolder = "parser_test"
+const testFolder = ".parser_test"
 
 func TestParser_Entrypoint(t *testing.T) {
 	a := require.New(t)
@@ -17,7 +17,9 @@ func TestParser_Entrypoint(t *testing.T) {
 	absPath, err := filepath.Abs(id)
 	a.NoError(err)
 
-	node, err := Parser.Entrypoint(id)
+	parser, err := MakeJsParser(id)
+	a.NoError(err)
+	node, err := parser.Entrypoint(id)
 	a.NoError(err)
 	a.Equal(node.Id, absPath)
 	a.Equal(node.Data.dirname, path.Dir(absPath))
@@ -26,34 +28,18 @@ func TestParser_Entrypoint(t *testing.T) {
 
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
-		Name      string
-		Expected  []string
-		Normalize bool
+		Name     string
+		Files    map[string]string
+		Expected []string
 	}{
 		{
-			Name: "deps",
-			Expected: []string{
-				"../geometries/Geometries.js",
-				"../geometries/Geometries.js",
-				".export",
-				"views/ListView",
-				"views/AddView",
-				"views/EditView",
-				"views/ListView",
-				"views/AddView",
-				"views/EditView",
-			},
-		},
-		{
-			Name:      "with-imports",
-			Normalize: true,
+			Name: "with-imports",
 			Expected: []string{
 				"with-imports-imported/imported.js",
 			},
 		},
 		{
-			Name:      "with-imports-index",
-			Normalize: true,
+			Name: "with-imports-index",
 			Expected: []string{
 				"with-imports-index-imported/other.js",
 				"with-imports-index-imported/one.js",
@@ -61,17 +47,9 @@ func TestParser_Deps(t *testing.T) {
 			},
 		},
 		{
-			Name:      "with-imports-nested",
-			Normalize: true,
+			Name: "with-imports-nested",
 			Expected: []string{
 				"generated/generated.js",
-			},
-		},
-
-		{
-			Name: "custom-1",
-			Expected: []string{
-				"../@parsers/DateSchema",
 			},
 		},
 	}
@@ -84,13 +62,15 @@ func TestParser_Deps(t *testing.T) {
 				id = path.Join(testFolder, path.Base(t.Name()), "index.js")
 			}
 
-			node, err := Parser.Entrypoint(id)
+			parser, err := MakeJsParser(id)
 			a.NoError(err)
-			deps, err := Parser.Deps(node)
+			node, err := parser.Entrypoint(id)
+			a.NoError(err)
+			deps, err := parser.Deps(node)
 			a.NoError(err)
 			result := make([]string, 0)
 			for _, dep := range deps {
-				display := Parser.Display(dep, node)
+				display := parser.Display(dep, node)
 				result = append(result, display)
 			}
 

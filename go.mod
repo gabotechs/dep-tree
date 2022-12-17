@@ -3,6 +3,7 @@ module dep-tree
 go 1.19
 
 require (
+	github.com/alecthomas/participle/v2 v2.0.0-beta.5
 	github.com/elliotchance/orderedmap/v2 v2.2.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1

@@ -36,7 +36,11 @@ var Root = &cobra.Command{
 		entrypoint := args[0]
 
 		if endsWith(entrypoint, js.Extensions) {
-			content, err := graph.RenderGraph(entrypoint, js.Parser)
+			parser, err := js.MakeJsParser(entrypoint)
+			if err != nil {
+				return err
+			}
+			content, err := graph.RenderGraph[js.Data](entrypoint, parser)
 			fmt.Print(content)
 			return err
 		} else {
