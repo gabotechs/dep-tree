@@ -1,4 +1,3 @@
-
 import {
     Component
 } from '@angular2/core';
@@ -45,7 +44,7 @@ import {
 } from '../geometries/Geometries.js'
 
 import("whatever.js");
-import("whatever.js")
+import('whatever.js')
 
 export * from ".export"
 

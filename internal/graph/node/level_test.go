@@ -64,7 +64,7 @@ func TestNode_Level(t *testing.T) {
 			a := require.New(t)
 			nodes := make([]*Node[int], tt.NumNodes)
 			for i := 0; i < tt.NumNodes; i++ {
-				nodes[i] = MakeNode(strconv.Itoa(i), testGroup, 0)
+				nodes[i] = MakeNode(strconv.Itoa(i), 0)
 			}
 
 			for n, children := range tt.Children {

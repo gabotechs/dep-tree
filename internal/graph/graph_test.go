@@ -31,7 +31,7 @@ func (t *TestGraph) Entrypoint(id string) (*node.Node[[]int], error) {
 	} else {
 		children = t.Spec[idInt]
 	}
-	return node.MakeNode(id, id, children), nil
+	return node.MakeNode(id, children), nil
 }
 
 func (t *TestGraph) Deps(n *node.Node[[]int]) ([]*node.Node[[]int], error) {

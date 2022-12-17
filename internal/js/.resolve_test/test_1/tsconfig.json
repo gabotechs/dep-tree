@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@utils": ["utils"],
+      "@/helpers/*": ["helpers/*"]
+    }
+  }
+}
