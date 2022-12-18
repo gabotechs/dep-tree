@@ -1,6 +1,7 @@
 package js
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -15,20 +16,26 @@ type Import struct {
 	AbsPath string
 }
 
-func (p *Parser) ParseImport(unparsed []byte, dir string) (*Import, error) {
+func (p *Parser) ParseImport(imp *grammar.Import, dir string) (*Import, error) {
 	result := Import{
 		Names: make([]string, 0),
 	}
-	matches := grammar.ParsePathFromImport(unparsed)
-	if len(matches) == 0 {
-		return nil, fmt.Errorf("could not parse import importFrom from '%s'", string(unparsed))
+	importFrom := ""
+	if imp == nil {
+		return nil, errors.New("programming error: nil import")
+	} else if imp.StaticImport != nil {
+		importFrom = imp.StaticImport.Path
+	} else if imp.DynamicImport != nil {
+		importFrom = imp.DynamicImport.Path
+	} else {
+		return nil, errors.New("programming error: import is neither static or dynamic")
 	}
-	importFrom := strings.Trim(string(matches[0]), " \n\"'")
+
 	// 1. If import is relative.
 	if importFrom[0] == '.' {
 		result.AbsPath = getFileAbsPath(path.Join(dir, importFrom))
 		if result.AbsPath == "" {
-			return nil, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", string(unparsed))
+			return nil, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", importFrom)
 		}
 		return &result, nil
 	}
@@ -78,8 +85,13 @@ type FileInfo struct {
 
 func (p *Parser) ParseFileInfo(content []byte, dir string) (*FileInfo, error) {
 	fileInfo := FileInfo{}
-	for _, importMatch := range grammar.ParseImport(content) {
-		parsedImport, err := p.ParseImport(importMatch, dir)
+	jsFile, err := grammar.Parse(content)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing file: %w\n\n%s", err, string(content))
+	}
+
+	for _, imp := range jsFile.Imports {
+		parsedImport, err := p.ParseImport(imp, dir)
 		if err != nil {
 			return nil, err
 		} else if parsedImport != nil {
@@ -87,14 +99,6 @@ func (p *Parser) ParseFileInfo(content []byte, dir string) (*FileInfo, error) {
 		}
 	}
 
-	for _, exportMatch := range grammar.ParseExport(content) {
-		parsedExport, err := p.ParseExport(exportMatch, dir)
-		if err != nil {
-			return nil, err
-		} else if parsedExport != nil {
-			fileInfo.exports = append(fileInfo.exports, parsedExport)
-		}
-	}
 	return &fileInfo, nil
 }
 
