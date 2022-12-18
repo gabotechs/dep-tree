@@ -7,11 +7,11 @@ import (
 )
 
 type Deconstruction struct {
-	Names []string `"{" @Ident (AS Ident)? ("," @Ident (AS Ident)?)* "}"`
+	Names []string `"{" @Ident ("as" Ident)? ("," (@Ident ("as" Ident)?)?)* "}"`
 }
 
 type AllImport struct {
-	Alias string `ALL (AS @Ident)?`
+	Alias string `ALL ("as" @Ident)?`
 }
 
 type SelectionImport struct {
@@ -25,12 +25,12 @@ type Imported struct {
 }
 
 type StaticImport struct {
-	Imported *Imported `IMPORT (@@ FROM)?`
+	Imported *Imported `"import" (@@ "from")?`
 	Path     string    `@String`
 }
 
 type DynamicImport struct {
-	Path string `IMPORT "(" @String ")"`
+	Path string `"import" "(" @String ")"`
 }
 type Import struct {
 	DynamicImport *DynamicImport `@@`
@@ -38,34 +38,41 @@ type Import struct {
 }
 
 type File struct {
-	Imports []*Import `((@@? ANY?)!)*`
+	Imports []*Import `((@@? (ANY | FALSE_IMPORT_1 | FALSE_IMPORT_2)?)!)*`
 }
 
 var (
-	lex = lexer.MustSimple([]lexer.SimpleRule{
-		// Keywords.
-		{"IMPORT", "import"},
-		{"AS", "as"},
-		{"COMMA", ","},
-		{"COLON", ";"},
-		{"FROM", "from"},
-		{"ALL", `\*`},
-		{"BRACKET_L", `{`},
-		{"BRACKET_R", `}`},
-		{"PARENTHESIS_L", `\(`},
-		{"PARENTHESIS_R", `\)`},
-		// Other.
-		{"Ident", `[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*`},
-		{"String", `'[^']*'|"[^"]*"`},
-		{"Comment", `//.*|/\*.*?\*/`},
-		{"Whitespace", `\s+`},
-		// Any.
-		{"ANY", `.`},
+	lex = lexer.MustStateful(lexer.Rules{
+		"Root": {
+			{"FALSE_IMPORT_1", `import[_$a-zA-Z0-9\\xA0-\\uFFFF]+`, nil},
+			{"FALSE_IMPORT_2", `[_$a-zA-Z0-9\\xA0-\\uFFFF]+import`, nil},
+			{"IMPORT", `import`, lexer.Push("Import")},
+			{"Whitespace", `\s+`, nil},
+			{"ANY", `.`, nil},
+		},
+		"Import": {
+			// Keywords.
+			{"COMMA", ",", nil},
+			{"ALL", `\*`, nil},
+			{"BRACKET_L", `{`, nil},
+			{"BRACKET_R", `}`, nil},
+			{"PARENTHESIS_L", `\(`, nil},
+			{"PARENTHESIS_R", `\)`, nil},
+			// Other.
+			{"Ident", `[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*`, nil},
+			{"String", `'[^']*'|"[^"]*"`, lexer.Pop()},
+			{"Comment", `//.*|/\*.*?\*/`, nil},
+			{"Whitespace", `\s+`, nil},
+		},
 	})
-	Parser = participle.MustBuild[File](
+	parser = participle.MustBuild[File](
 		participle.Lexer(lex),
 		participle.Elide("Whitespace", "Comment"),
 		participle.Unquote("String"),
 		participle.UseLookahead(2),
 	)
 )
+
+func Parse(content []byte) (*File, error) {
+	return parser.ParseBytes("", content)
+}
