@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGrammar(t *testing.T) {
+func TestImport(t *testing.T) {
 	tests := []struct {
 		Name            string
 		ExpectedStatic  []string
@@ -80,6 +80,10 @@ func TestGrammar(t *testing.T) {
 			ExpectedStatic: []string{"variable"},
 		},
 		{
+			Name:           "import '.export'",
+			ExpectedStatic: []string{".export"},
+		},
+		{
 			Name: "import-regex.js",
 			ExpectedStatic: []string{
 				"@angular2/core",
@@ -147,7 +151,7 @@ func TestGrammar(t *testing.T) {
 			var content []byte
 			if strings.HasSuffix(tt.Name, ".js") {
 				var err error
-				content, err = os.ReadFile(path.Join("grammar_test", tt.Name))
+				content, err = os.ReadFile(path.Join(".import_test", tt.Name))
 				a.NoError(err)
 			} else {
 				content = []byte(tt.Name)

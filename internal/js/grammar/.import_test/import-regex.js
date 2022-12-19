@@ -46,8 +46,6 @@ import {
 import("whatever.js");
 import('whatever.js')
 
-export * from ".export"
-
 import { Field } from "redux-form";
 import MultiContentListView from "./views/ListView";
 import MultiContentAddView from "./views/AddView";
