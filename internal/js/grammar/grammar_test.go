@@ -157,11 +157,11 @@ func TestGrammar(t *testing.T) {
 
 			var staticResults []string
 			var dynamicResults []string
-			for _, imp := range parsed.Imports {
-				if imp.StaticImport != nil {
-					staticResults = append(staticResults, imp.StaticImport.Path)
-				} else if imp.DynamicImport != nil {
-					dynamicResults = append(dynamicResults, imp.DynamicImport.Path)
+			for _, stmt := range parsed.Statements {
+				if stmt.StaticImport != nil {
+					staticResults = append(staticResults, stmt.StaticImport.Path)
+				} else if stmt.DynamicImport != nil {
+					dynamicResults = append(dynamicResults, stmt.DynamicImport.Path)
 				}
 			}
 			a.Equal(tt.ExpectedStatic, staticResults)

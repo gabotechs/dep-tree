@@ -32,13 +32,13 @@ type StaticImport struct {
 type DynamicImport struct {
 	Path string `"import" "(" @String ")"`
 }
-type Import struct {
+type Statement struct {
 	DynamicImport *DynamicImport `@@`
 	StaticImport  *StaticImport  `| @@`
 }
 
 type File struct {
-	Imports []*Import `((@@? (ANY | FALSE_IMPORT_1 | FALSE_IMPORT_2)?)!)*`
+	Statements []*Statement `(@@ | ANY | FALSE_IMPORT_1 | FALSE_IMPORT_2)*`
 }
 
 var (
