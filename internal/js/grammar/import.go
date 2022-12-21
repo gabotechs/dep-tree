@@ -1,8 +1,6 @@
 //nolint:govet
 package grammar
 
-import "github.com/alecthomas/participle/v2/lexer"
-
 type ImportDeconstruction struct {
 	Names []string `"{" @Ident ("as" Ident)? ("," (@Ident ("as" Ident)?)?)* "}"`
 }
@@ -28,15 +26,4 @@ type StaticImport struct {
 
 type DynamicImport struct {
 	Path string `"import" "(" @String ")"`
-}
-
-var importLexer = lexer.Rules{
-	"Import": {
-		{"ALL", `\*`, nil},
-		{"Punct", `[,{}()]`, nil},
-		{"Ident", `[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*`, nil},
-		{"String", `'[^']*'|"[^"]*"`, lexer.Pop()},
-		{"Comment", `//.*|/\*.*?\*/`, nil},
-		{"Whitespace", `\s+`, nil},
-	},
 }
