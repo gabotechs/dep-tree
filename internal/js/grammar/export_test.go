@@ -42,6 +42,14 @@ func TestExport(t *testing.T) {
 			ExpectedDeclaration: []string{"generatorFunctionName"},
 		},
 		{
+			Name:                `export type MyType`,
+			ExpectedDeclaration: []string{"MyType"},
+		},
+		{
+			Name:                `export interface MyInterface`,
+			ExpectedDeclaration: []string{"MyInterface"},
+		},
+		{
 			Name: `export { name1, nameN };`,
 			ExpectedList: []AliasedName{
 				{
