@@ -20,7 +20,7 @@ type Imported struct {
 }
 
 type StaticImport struct {
-	Imported *Imported `"import" (@@ "from")?`
+	Imported *Imported `"import" "type"? (@@ "from")?`
 	Path     string    `@String`
 }
 

@@ -11,7 +11,7 @@ type ExportDeconstruction struct {
 }
 
 type DeclarationExport struct {
-	Name string `"export" "async"? ("let"|"const"|"var"|"function"|"class") ALL? @Ident`
+	Name string `"export" "async"? ("let"|"const"|"var"|"function"|"class"|"type"|"interface") ALL? @Ident`
 }
 
 type ListExport struct {
