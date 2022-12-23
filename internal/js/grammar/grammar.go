@@ -2,15 +2,18 @@
 package grammar
 
 import (
+	"context"
+	"os"
+
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
 type Statement struct {
-	// imports
+	// imports.
 	DynamicImport *DynamicImport `  @@`
 	StaticImport  *StaticImport  `| @@`
-	// exports
+	// exports.
 	DeclarationExport *DeclarationExport `| @@`
 	DefaultExport     *DefaultExport     `| @@`
 	ProxyExport       *ProxyExport       `| @@`
@@ -41,6 +44,21 @@ var (
 	)
 )
 
-func Parse(content []byte) (*File, error) {
-	return parser.ParseBytes("", content)
+type CacheKey string
+
+func Parse(ctx context.Context, filePath string) (context.Context, *File, error) {
+	if cached, ok := ctx.Value(CacheKey(filePath)).(*File); ok {
+		return ctx, cached, nil
+	} else {
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			return ctx, nil, err
+		}
+		file, err := parser.ParseBytes(filePath, content)
+		if err != nil {
+			return ctx, nil, err
+		}
+		ctx = context.WithValue(ctx, CacheKey(filePath), file)
+		return ctx, file, nil
+	}
 }

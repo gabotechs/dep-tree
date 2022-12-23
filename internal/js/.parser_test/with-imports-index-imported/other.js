@@ -1,1 +1,3 @@
 import './'
+
+export class A {}

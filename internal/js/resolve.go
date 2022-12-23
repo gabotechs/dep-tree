@@ -1,107 +1,77 @@
 package js
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"dep-tree/internal/js/grammar"
 	"dep-tree/internal/utils"
 )
 
-type Import struct {
-	Names   []string
-	AbsPath string
+type ResolveCacheKey string
+
+func makeResolveCacheKey(unresolved string, dir string) ResolveCacheKey {
+	return ResolveCacheKey(unresolved + dir)
 }
 
-func (p *Parser) ParseImport(importPath string, dir string) (*Import, error) {
-	result := Import{
-		Names: make([]string, 0),
+func (p *Parser) ResolvePath(ctx context.Context, unresolved string, dir string) (context.Context, string, error) {
+	cacheKey := makeResolveCacheKey(unresolved, dir)
+	if cached, ok := ctx.Value(cacheKey).(string); ok {
+		return ctx, cached, nil
+	} else {
+		resolved, err := p._uncachedResolvePath(unresolved, dir)
+		if err != nil {
+			return ctx, "", err
+		}
+		ctx = context.WithValue(ctx, cacheKey, resolved)
+		return ctx, resolved, nil
 	}
+}
+
+// ResolvePath resolves an unresolved import based on the dir where the import was executed.
+func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, error) {
+	absPath := ""
 
 	// 1. If import is relative.
-	if importPath[0] == '.' {
-		result.AbsPath = getFileAbsPath(path.Join(dir, importPath))
-		if result.AbsPath == "" {
-			return nil, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", importPath)
+	if unresolved[0] == '.' {
+		absPath = getFileAbsPath(path.Join(dir, unresolved))
+		if absPath == "" {
+			return absPath, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)
 		}
-		return &result, nil
+		return absPath, nil
 	}
 
 	// 2. If is imported from baseUrl.
 	baseUrl := p.TsConfig.CompilerOptions.BaseUrl
-	importFromBaseUrl := path.Join(p.ProjectRoot, baseUrl, importPath)
-	result.AbsPath = getFileAbsPath(importFromBaseUrl)
-	if result.AbsPath != "" {
-		return &result, nil
+	importFromBaseUrl := path.Join(p.ProjectRoot, baseUrl, unresolved)
+	absPath = getFileAbsPath(importFromBaseUrl)
+	if absPath != "" {
+		return absPath, nil
 	}
 
 	// 3. If imported from a path override.
 	pathOverrides := p.TsConfig.CompilerOptions.Paths
 	if pathOverrides == nil {
-		return nil, nil
+		return absPath, nil
 	}
 	for pathOverride, searchPaths := range pathOverrides {
 		pathOverride = strings.ReplaceAll(pathOverride, "*", "")
-		if strings.HasPrefix(importPath, pathOverride) {
+		if strings.HasPrefix(unresolved, pathOverride) {
 			for _, searchPath := range searchPaths {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
-				newImportFrom := strings.ReplaceAll(importPath, pathOverride, searchPath)
+				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
 				importFromBaseUrlAndPaths := path.Join(p.ProjectRoot, baseUrl, newImportFrom)
-				result.AbsPath = getFileAbsPath(importFromBaseUrlAndPaths)
-				if result.AbsPath != "" {
-					return &result, nil
+				absPath = getFileAbsPath(importFromBaseUrlAndPaths)
+				if absPath != "" {
+					return absPath, nil
 				}
 			}
-			return nil, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", importPath, pathOverride)
+			return absPath, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, pathOverride)
 		}
 	}
-	return nil, nil
-}
-
-type Export struct {
-	SourceMap map[string]string
-}
-
-func (p *Parser) ParseExport(unparsed []byte, dir string) (*Export, error) {
-	result := Export{}
-	return &result, nil
-}
-
-type FileInfo struct {
-	imports []*Import
-	exports []*Export
-}
-
-func (p *Parser) ParseFileInfo(content []byte, dir string) (*FileInfo, error) {
-	fileInfo := FileInfo{}
-	jsFile, err := grammar.Parse(content)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing file: %w\n\n%s", err, string(content))
-	}
-
-	for _, stmt := range jsFile.Statements {
-		var importPath string
-		switch {
-		case stmt == nil:
-			continue
-		case stmt.StaticImport != nil:
-			importPath = stmt.StaticImport.Path
-		case stmt.DynamicImport != nil:
-			importPath = stmt.DynamicImport.Path
-		default:
-			continue
-		}
-		parsedImport, err := p.ParseImport(importPath, dir)
-		if err != nil {
-			return nil, err
-		} else if parsedImport != nil {
-			fileInfo.imports = append(fileInfo.imports, parsedImport)
-		}
-	}
-
-	return &fileInfo, nil
+	return absPath, nil
 }
 
 func retrieveWithExt(absPath string) string {

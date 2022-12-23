@@ -1,6 +1,7 @@
 package js
 
 import (
+	"context"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,15 +22,13 @@ func TestParser_Entrypoint(t *testing.T) {
 	a.NoError(err)
 	node, err := parser.Entrypoint(id)
 	a.NoError(err)
-	a.Equal(node.Id, absPath)
-	a.Equal(node.Data.dirname, path.Dir(absPath))
-	a.Equal(node.Data.content, []byte("console.log(\"hello world!\")\n"))
+	a.Equal(absPath, node.Id)
+	a.Equal(absPath, node.Data.filePath)
 }
 
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
 		Name     string
-		Files    map[string]string
 		Expected []string
 	}{
 		{
@@ -66,12 +65,11 @@ func TestParser_Deps(t *testing.T) {
 			a.NoError(err)
 			node, err := parser.Entrypoint(id)
 			a.NoError(err)
-			deps, err := parser.Deps(node)
+			_, deps, err := parser.Deps(context.Background(), node)
 			a.NoError(err)
-			result := make([]string, 0)
-			for _, dep := range deps {
-				display := parser.Display(dep, node)
-				result = append(result, display)
+			result := make([]string, len(deps))
+			for i, dep := range deps {
+				result[i] = parser.Display(dep, node)
 			}
 
 			a.Equal(tt.Expected, result)

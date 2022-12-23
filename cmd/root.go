@@ -33,6 +33,7 @@ var Root = &cobra.Command{
 `,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
 		entrypoint := args[0]
 
 		if endsWith(entrypoint, js.Extensions) {
@@ -40,7 +41,7 @@ var Root = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			content, err := graph.RenderGraph[js.Data](entrypoint, parser)
+			_, content, err := graph.RenderGraph[js.Data](ctx, entrypoint, parser)
 			fmt.Print(content)
 			return err
 		} else {

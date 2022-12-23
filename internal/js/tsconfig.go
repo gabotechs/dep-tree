@@ -5,11 +5,13 @@ import (
 	"os"
 )
 
+type CompilerOptions struct {
+	BaseUrl string              `json:"baseUrl,omitempty"`
+	Paths   map[string][]string `json:"paths,omitempty"`
+}
+
 type TsConfig struct {
-	CompilerOptions struct {
-		BaseUrl string              `json:"baseUrl,omitempty"`
-		Paths   map[string][]string `json:"paths,omitempty"`
-	} `json:"compilerOptions,omitempty"`
+	CompilerOptions CompilerOptions `json:"compilerOptions,omitempty"`
 }
 
 func ParseTsConfig(path string) (TsConfig, error) {

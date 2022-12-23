@@ -1,8 +1,13 @@
 //nolint:govet
 package grammar
 
+type AliasedName struct {
+	Original string `@Ident`
+	Alias    string `("as" @Ident)?`
+}
+
 type ExportDeconstruction struct {
-	Names []string `"{" ((Ident "as" @Ident) | @Ident) ("," ((Ident "as" @Ident) | @Ident))* "}"`
+	Names []AliasedName `"{" @@ ("," @@)* "}"`
 }
 
 type DeclarationExport struct {
