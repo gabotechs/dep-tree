@@ -1,8 +1,9 @@
 package js
 
 import (
-	"os"
+	"context"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,52 +11,49 @@ import (
 
 const resolverTestFolder = ".resolve_test"
 
-func TestFileInfo(t *testing.T) {
-	cwd, _ := os.Getwd()
+func TestParser_ResolvePath(t *testing.T) {
+	absPath, _ := filepath.Abs(resolverTestFolder)
+
 	tests := []struct {
-		Name            string
-		Entrypoint      string
-		ExpectedImports []*Import
-		ExpectedExports []*Export
+		Name       string
+		Unresolved string
+		Cwd        string
+		Resolved   string
 	}{
 		{
-			Name:       "test 1",
-			Entrypoint: path.Join(resolverTestFolder, "test_1", "src", "index.ts"),
-			ExpectedImports: []*Import{
-				{
-					AbsPath: path.Join(cwd, resolverTestFolder, "test_1", "src", "foo.ts"),
-				},
-				{
-					AbsPath: path.Join(cwd, resolverTestFolder, "test_1", "src", "utils", "sum.ts"),
-				},
-				{
-					AbsPath: path.Join(cwd, resolverTestFolder, "test_1", "src", "helpers", "diff.ts"),
-				},
-			},
+			Name:       "from relative",
+			Cwd:        path.Join(resolverTestFolder, "src", "utils"),
+			Unresolved: "../foo",
+			Resolved:   path.Join(absPath, "src", "foo.ts"),
+		},
+		{
+			Name:       "from baseUrl",
+			Cwd:        path.Join(resolverTestFolder, "src"),
+			Unresolved: "foo",
+			Resolved:   path.Join(absPath, "src", "foo.ts"),
+		},
+		{
+			Name:       "from paths override",
+			Cwd:        path.Join(resolverTestFolder, "src"),
+			Unresolved: "@utils/sum",
+			Resolved:   path.Join(absPath, "src", "utils", "sum.ts"),
+		},
+		{
+			Name:       "from paths override with glob pattern",
+			Cwd:        path.Join(resolverTestFolder, "src"),
+			Unresolved: "@/helpers/diff",
+			Resolved:   path.Join(absPath, "src", "helpers", "diff.ts"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			parser, err := MakeJsParser(tt.Entrypoint)
+			parser, err := MakeJsParser(tt.Cwd)
 			a.NoError(err)
-			content, err := os.ReadFile(tt.Entrypoint)
+			_, resolved, err := parser.ResolvePath(context.Background(), tt.Unresolved, tt.Cwd)
 			a.NoError(err)
-			dirname := path.Dir(tt.Entrypoint)
-			fileInfo, err := parser.ParseFileInfo(content, dirname)
-			a.NoError(err)
-			expectedImports := make([]string, len(tt.ExpectedImports))
-			for i, expectedImport := range tt.ExpectedImports {
-				expectedImports[i] = expectedImport.AbsPath
-			}
-
-			actualImports := make([]string, len(fileInfo.imports))
-			for i, actualImport := range fileInfo.imports {
-				actualImports[i] = actualImport.AbsPath
-			}
-
-			a.Equal(expectedImports, actualImports)
+			a.Equal(tt.Resolved, resolved)
 		})
 	}
 }

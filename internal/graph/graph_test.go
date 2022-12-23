@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -34,13 +35,13 @@ func (t *TestGraph) Entrypoint(id string) (*node.Node[[]int], error) {
 	return node.MakeNode(id, children), nil
 }
 
-func (t *TestGraph) Deps(n *node.Node[[]int]) ([]*node.Node[[]int], error) {
+func (t *TestGraph) Deps(ctx context.Context, n *node.Node[[]int]) (context.Context, []*node.Node[[]int], error) {
 	result := make([]*node.Node[[]int], 0)
 	for _, child := range n.Data {
 		c, _ := t.Entrypoint(strconv.Itoa(child))
 		result = append(result, c)
 	}
-	return result, nil
+	return ctx, result, nil
 }
 
 func (t *TestGraph) Display(n *node.Node[[]int], _ *node.Node[[]int]) string {
@@ -95,7 +96,9 @@ func TestMakeGraph(t *testing.T) {
 				Spec: tt.Spec,
 			}
 
-			result, err := RenderGraph[[]int]("0", &testParser)
+			ctx := context.Background()
+
+			_, result, err := RenderGraph[[]int](ctx, "0", &testParser)
 			a.NoError(err)
 			print(result)
 

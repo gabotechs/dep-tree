@@ -13,7 +13,7 @@ func TestExport(t *testing.T) {
 	tests := []struct {
 		Name                string
 		ExpectedDeclaration []string
-		ExpectedList        []string
+		ExpectedList        []AliasedName
 		ExpectedDefault     []bool
 		ExpectedProxy       []*ProxyExport
 	}{
@@ -42,16 +42,40 @@ func TestExport(t *testing.T) {
 			ExpectedDeclaration: []string{"generatorFunctionName"},
 		},
 		{
-			Name:         `export { name1, nameN };`,
-			ExpectedList: []string{"name1", "nameN"},
+			Name: `export { name1, nameN };`,
+			ExpectedList: []AliasedName{
+				{
+					Original: "name1",
+				},
+				{
+					Original: "nameN",
+				},
+			},
 		},
 		{
-			Name:         `export { variable1 as name1, variable2 as name2, nameN };`,
-			ExpectedList: []string{"name1", "name2", "nameN"},
+			Name: `export { variable1 as name1, variable2 as name2, nameN };`,
+			ExpectedList: []AliasedName{
+				{
+					Original: "variable1",
+					Alias:    "name1",
+				},
+				{
+					Original: "variable2",
+					Alias:    "name2",
+				},
+				{
+					Original: "nameN",
+				},
+			},
 		},
 		{
-			Name:         `export { name1 as default /*, … */ };`,
-			ExpectedList: []string{"default"},
+			Name: `export { name1 as default /*, … */ };`,
+			ExpectedList: []AliasedName{
+				{
+					Original: "name1",
+					Alias:    "default",
+				},
+			},
 		},
 		{
 			Name:            `export default expression;`,
@@ -100,7 +124,14 @@ func TestExport(t *testing.T) {
 			Name: `export { name1, /* …, */ nameN } from "module-name";`,
 			ExpectedProxy: []*ProxyExport{{
 				ExportDeconstruction: &ExportDeconstruction{
-					Names: []string{"name1", "nameN"},
+					Names: []AliasedName{
+						{
+							Original: "name1",
+						},
+						{
+							Original: "nameN",
+						},
+					},
 				},
 				From: "module-name",
 			}},
@@ -109,7 +140,19 @@ func TestExport(t *testing.T) {
 			Name: `export { import1 as name1, import2 as name2, /* …, */ nameN } from "module-name";`,
 			ExpectedProxy: []*ProxyExport{{
 				ExportDeconstruction: &ExportDeconstruction{
-					Names: []string{"name1", "name2", "nameN"},
+					Names: []AliasedName{
+						{
+							Original: "import1",
+							Alias:    "name1",
+						},
+						{
+							Original: "import2",
+							Alias:    "name2",
+						},
+						{
+							Original: "nameN",
+						},
+					},
 				},
 				From: "module-name",
 			}},
@@ -118,69 +161,14 @@ func TestExport(t *testing.T) {
 			Name: `export { default } from "module-name"; `,
 			ExpectedProxy: []*ProxyExport{{
 				ExportDeconstruction: &ExportDeconstruction{
-					Names: []string{"default"},
+					Names: []AliasedName{
+						{
+							Original: "default",
+						},
+					},
 				},
 				From: "module-name",
 			}},
-		},
-		{
-			Name: "export.js",
-			ExpectedDeclaration: []string{
-				"name1",
-				"name1",
-				"functionName",
-				"ClassName",
-				"generatorFunctionName",
-			},
-			ExpectedList: []string{
-				"name1",
-				"nameN",
-				"name1",
-				"name2",
-				"nameN",
-				"default",
-			},
-			ExpectedDefault: []bool{
-				true,
-				true,
-				true,
-				true,
-				true,
-				true,
-				true,
-			},
-
-			ExpectedProxy: []*ProxyExport{
-				{
-					ExportAll: true,
-					From:      "module-name",
-				},
-				{
-					ExportAll:      true,
-					ExportAllAlias: "name1",
-					From:           "module-name",
-				},
-				{
-					ExportDeconstruction: &ExportDeconstruction{
-						Names: []string{"name1", "nameN"},
-					},
-					From: "module-name",
-				},
-				{
-
-					ExportDeconstruction: &ExportDeconstruction{
-						Names: []string{"name1", "name2", "nameN"},
-					},
-					From: "module-name",
-				},
-				{
-
-					ExportDeconstruction: &ExportDeconstruction{
-						Names: []string{"default"},
-					},
-					From: "module-name",
-				},
-			},
 		},
 	}
 
@@ -199,17 +187,18 @@ func TestExport(t *testing.T) {
 			a.NoError(err)
 
 			var declarationResults []string
-			var listResults []string
+			var listResults []AliasedName
 			var defaultResults []bool
 			var proxyResult []*ProxyExport
 			for _, stmt := range parsed.Statements {
-				if stmt.DeclarationExport != nil {
+				switch {
+				case stmt.DeclarationExport != nil:
 					declarationResults = append(declarationResults, stmt.DeclarationExport.Name)
-				} else if stmt.ListExport != nil {
+				case stmt.ListExport != nil:
 					listResults = append(listResults, stmt.ListExport.ExportDeconstruction.Names...)
-				} else if stmt.DefaultExport != nil {
+				case stmt.DefaultExport != nil:
 					defaultResults = append(defaultResults, stmt.DefaultExport.Default)
-				} else if stmt.ProxyExport != nil {
+				case stmt.ProxyExport != nil:
 					proxyResult = append(proxyResult, stmt.ProxyExport)
 				}
 			}

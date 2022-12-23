@@ -1,10 +1,13 @@
 package js
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/elliotchance/orderedmap/v2"
 
 	"dep-tree/internal/graph"
 	"dep-tree/internal/graph/node"
@@ -64,25 +67,56 @@ func (p *Parser) Entrypoint(entrypoint string) (*node.Node[Data], error) {
 	return MakeJsNode(entrypointAbsPath)
 }
 
-func (p *Parser) Deps(n *node.Node[Data]) ([]*node.Node[Data], error) {
-	fileInfo, err := p.ParseFileInfo(n.Data.content, n.Data.dirname)
+func (p *Parser) Deps(ctx context.Context, n *node.Node[Data]) (context.Context, []*node.Node[Data], error) {
+	ctx, imports, err := p.parseImports(ctx, n.Data.filePath)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
+	}
+
+	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
+	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
+	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
+	for _, importedPath := range imports.Keys() {
+		importedNames, _ := imports.Get(importedPath)
+		var exports map[string]string
+		ctx, exports, err = p.parseExports(ctx, importedPath)
+		if err != nil {
+			return ctx, nil, err
+		}
+		for _, name := range importedNames {
+			// If all imported, then dump every path in the resolved imports.
+			if name == "*" {
+				for _, fromPath := range exports {
+					if _, ok := resolvedImports.Get(fromPath); ok {
+						continue
+					}
+					resolvedImports.Set(fromPath, true)
+				}
+				break
+			}
+
+			if resolvedImport, ok := exports[name]; ok {
+				if _, ok := resolvedImports.Get(resolvedImport); ok {
+					continue
+				}
+				resolvedImports.Set(resolvedImport, true)
+			}
+		}
 	}
 
 	deps := make([]*node.Node[Data], 0)
-	for _, imported := range fileInfo.imports {
-		dep, err := MakeJsNode(imported.AbsPath)
+	for _, imported := range resolvedImports.Keys() {
+		dep, err := MakeJsNode(imported)
 		if err != nil {
-			return nil, err
+			return ctx, nil, err
 		}
 		deps = append(deps, dep)
 	}
-	return deps, nil
+	return ctx, deps, nil
 }
 
 func (p *Parser) Display(n *node.Node[Data], root *node.Node[Data]) string {
-	base := root.Data.dirname
+	base := path.Dir(root.Data.filePath)
 	rel, err := filepath.Rel(base, n.Id)
 	if err != nil {
 		return n.Id

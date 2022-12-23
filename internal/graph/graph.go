@@ -11,32 +11,33 @@ import (
 type NodeParser[T any] interface {
 	Display(node *node.Node[T], root *node.Node[T]) string
 	Entrypoint(entrypoint string) (*node.Node[T], error)
-	Deps(node *node.Node[T]) ([]*node.Node[T], error)
+	Deps(ctx context.Context, node *node.Node[T]) (context.Context, []*node.Node[T], error)
 }
 
 func computeDeps[T any](
+	ctx context.Context,
 	root *node.Node[T],
 	parser NodeParser[T],
 	seen map[string]*node.Node[T],
-) error {
+) (context.Context, error) {
 	if _, ok := seen[root.Id]; ok {
-		return nil
+		return ctx, nil
 	} else {
 		seen[root.Id] = root
 	}
 
-	deps, err := parser.Deps(root)
+	ctx, deps, err := parser.Deps(ctx, root)
 	if err != nil {
-		return err
+		return ctx, err
 	}
 	for _, dep := range deps {
 		root.AddChild(dep)
-		err = computeDeps(dep, parser, seen)
+		ctx, err = computeDeps(ctx, dep, parser, seen)
 		if err != nil {
-			return err
+			return ctx, err
 		}
 	}
-	return nil
+	return ctx, nil
 }
 
 type graphNode[T any] struct {
@@ -69,10 +70,11 @@ func sortNodes[T any](root *node.Node[T]) []graphNode[T] {
 const indent = 2
 
 func renderGraph[T any](
+	ctx context.Context,
 	parser NodeParser[T],
 	root *node.Node[T],
 	nodes []graphNode[T],
-) (string, error) {
+) (context.Context, string, error) {
 	b := board.MakeBoard()
 
 	lastLevel := -1
@@ -99,7 +101,7 @@ func renderGraph[T any](
 			i,
 		)
 		if err != nil {
-			return "", err
+			return ctx, "", err
 		}
 	}
 
@@ -108,26 +110,27 @@ func renderGraph[T any](
 			child, _ := n.node.Children.Get(childId)
 			err := b.AddConnector(n.node.Id, child.Id)
 			if err != nil {
-				return "", err
+				return ctx, "", err
 			}
 		}
 	}
-
-	return b.Render()
+	rendered, err := b.Render()
+	return ctx, rendered, err
 }
 
 func RenderGraph[T any](
+	ctx context.Context,
 	entrypoint string,
 	parser NodeParser[T],
-) (string, error) {
+) (context.Context, string, error) {
 	root, err := parser.Entrypoint(entrypoint)
 	if err != nil {
-		return "", err
+		return ctx, "", err
 	}
-	err = computeDeps(root, parser, map[string]*node.Node[T]{})
+	ctx, err = computeDeps(ctx, root, parser, map[string]*node.Node[T]{})
 	if err != nil {
-		return "", err
+		return ctx, "", err
 	}
 	nodes := sortNodes(root)
-	return renderGraph(parser, root, nodes)
+	return renderGraph(ctx, parser, root, nodes)
 }
