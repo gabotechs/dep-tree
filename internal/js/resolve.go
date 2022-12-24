@@ -71,7 +71,7 @@ func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, er
 			return absPath, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, pathOverride)
 		}
 	}
-	return absPath, nil
+	return absPath, fmt.Errorf("import '%s' cannot be resolved", unresolved)
 }
 
 func retrieveWithExt(absPath string) string {
