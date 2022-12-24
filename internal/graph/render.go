@@ -82,6 +82,7 @@ func (g *Graph[T]) renderGraph(
 	prefix := ""
 	xOffsetCount := 0
 	xOffset := 0
+	yOffset := 0
 	for i, n := range nodes {
 		if n.level == lastLevel {
 			if len(g.Children(nodes[i-1].node.Id)) > 0 {
@@ -93,13 +94,16 @@ func (g *Graph[T]) renderGraph(
 			xOffset += xOffsetCount
 			xOffsetCount = 0
 			prefix = ""
+			if i != 0 {
+				yOffset++
+			}
 		}
 
 		err := b.AddBlock(
 			n.node.Id,
 			prefix+parser.Display(n.node),
 			indent*n.level+xOffset,
-			i,
+			i+yOffset,
 		)
 		if err != nil {
 			return ctx, "", err
