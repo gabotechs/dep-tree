@@ -12,13 +12,6 @@ func Vec(x int, y int) Vector {
 	}
 }
 
-func (v *Vector) Plus(other Vector) Vector {
-	return Vector{
-		X: v.X + other.X,
-		Y: v.Y + other.Y,
-	}
-}
-
 func (v *Vector) Minus(other Vector) Vector {
 	return Vector{
 		X: v.X - other.X,
