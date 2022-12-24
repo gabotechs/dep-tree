@@ -16,8 +16,7 @@ type Connector struct {
 	to   *Block
 }
 
-//nolint:gocyclo
-func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this function out.
+func (c *Connector) Render(matrix *graphics.Matrix) error {
 	reverseX := c.to.Position.X <= c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
