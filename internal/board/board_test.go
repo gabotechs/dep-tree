@@ -10,7 +10,7 @@ import (
 
 const RebuildTestsEnv = "REBUILD_TESTS"
 
-const testPath = "board_test"
+const testPath = ".board_test"
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)

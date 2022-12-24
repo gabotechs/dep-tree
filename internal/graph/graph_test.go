@@ -48,7 +48,7 @@ func (t *TestGraph) Display(n *node.Node[[]int], _ *node.Node[[]int]) string {
 	return n.Id
 }
 
-const testDir = "graph_test"
+const testDir = ".graph_test"
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
