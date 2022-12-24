@@ -58,14 +58,14 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	var cur utils.Vector
 	if reverseY {
 		cur = tracer.MoveHorizontal(false)
-		if cur.X >= matrix.H() {
+		if cur.X >= matrix.W() {
 			matrix.ExpandRight(1)
 		}
 	} else {
 		cur = tracer.MoveVertical(false)
 	}
 	cell := matrix.Cell(cur)
-	if cell.Is(cellType, blockChar) || cell.Is(cellType, arrow) {
+	if cell == nil || cell.Is(cellType, blockChar) || cell.Is(cellType, arrow) {
 		return fmt.Errorf("could not draw first vertical step on (%d, %d) because there is no space", cur.X, cur.Y)
 	}
 
@@ -86,7 +86,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 			cell = matrix.Cell(cur)
 		}
 		if cell == nil {
-			return fmt.Errorf("moved to invalid position (%d, %d) while tracing horizontal line", cur.X, cur.Y)
+			return fmt.Errorf("moved to invalid position (%d, %d) while tracing horizontal line. This error should not be reachable", cur.X, cur.Y)
 		}
 		cell.Tag(noCrossOwnership, c.from.Id)
 	}
