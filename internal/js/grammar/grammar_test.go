@@ -19,6 +19,10 @@ func TestGrammar(t *testing.T) {
 			Name:    "Quoted string with inner quotes",
 			Content: `export const a = 'this is a \'string\''`,
 		},
+		{
+			Name:    "Quoted string with inner escaped quotes",
+			Content: `'\\\\').replace(/'/g, "\\'")`,
+		},
 	}
 
 	for _, tt := range tests {
