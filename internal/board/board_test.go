@@ -193,6 +193,17 @@ func TestBoard(t *testing.T) {
 				{from: 4, to: []int{3}},
 			},
 		},
+		{
+			Name: "Reverse deps are drawn on the right",
+			Blocks: []TestBlock{
+				{name: " ../../../i18n/strings.ts", x: 8, y: 0},
+				{name: "  ../../../services/ucloud/ackWebsocket/baseSocket.ts", x: 8, y: 1},
+				{name: "   ../../../services/user.ts", x: 8, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 2, to: []int{0}},
+			},
+		},
 	}
 
 	for _, tt := range tests {

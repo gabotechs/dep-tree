@@ -87,6 +87,14 @@ func TestMakeGraph(t *testing.T) {
 				{1},
 			},
 		},
+		{
+			Name: "Children and Parents should be consistent",
+			Spec: [][]int{
+				{1, 2},
+				{},
+				{1},
+			},
+		},
 	}
 
 	for _, tt := range tests {
