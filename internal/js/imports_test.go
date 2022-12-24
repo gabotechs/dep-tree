@@ -5,13 +5,35 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 const importsTestFolder = ".imports_test"
 
-func TestFileInfo(t *testing.T) {
+func TestParser_parseImports_IsCached(t *testing.T) {
+	a := require.New(t)
+	ctx := context.Background()
+	file := path.Join(importsTestFolder, "index.ts")
+	parser, err := MakeJsParser(file)
+	a.NoError(err)
+
+	start := time.Now()
+	ctx, _, err = parser.parseImports(ctx, file)
+	a.NoError(err)
+	nonCached := time.Since(start)
+
+	start = time.Now()
+	_, _, err = parser.parseImports(ctx, file)
+	a.NoError(err)
+	cached := time.Since(start)
+
+	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
+	a.Greater(ratio, int64(10))
+}
+
+func TestParser_parseImports(t *testing.T) {
 	wd, _ := os.Getwd()
 
 	tests := []struct {

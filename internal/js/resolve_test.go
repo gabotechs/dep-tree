@@ -28,7 +28,8 @@ func TestParser_ResolvePath_IsCached(t *testing.T) {
 	a.NoError(err)
 	cached := time.Since(start)
 
-	a.Greater(nonCached.Nanoseconds(), cached.Nanoseconds())
+	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
+	a.Greater(ratio, int64(5))
 }
 
 func TestParser_ResolvePath(t *testing.T) {
