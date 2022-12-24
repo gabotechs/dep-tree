@@ -30,4 +30,4 @@ brews:
     homepage: https://github.com/gabotechs/dep-tree
     tap:
       owner: gabotechs
-      name: homebrew-gabotechs
+      name: homebrew-taps
