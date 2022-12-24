@@ -40,57 +40,86 @@ func (p *Parser) uncachedParseExports(
 	for _, stmt := range jsFile.Statements {
 		switch {
 		case stmt == nil:
-			continue
+			// Is this even possible?
 		case stmt.DeclarationExport != nil:
-			exported[stmt.DeclarationExport.Name] = filePath
+			handleDeclarationExport(stmt.DeclarationExport, filePath, exported)
 		case stmt.ListExport != nil:
-			if stmt.ListExport.ExportDeconstruction != nil {
-				for _, name := range stmt.ListExport.ExportDeconstruction.Names {
-					exportedName := name.Alias
-					if exportedName == "" {
-						exportedName = name.Original
-					}
-					exported[exportedName] = filePath
-				}
-			}
+			handleListExport(stmt.ListExport, filePath, exported)
 		case stmt.DefaultExport != nil:
-			if stmt.DefaultExport.Default {
-				exported["default"] = filePath
-			}
+			handleDefaultExport(stmt.DefaultExport, filePath, exported)
 		case stmt.ProxyExport != nil:
-			var exportFrom string
-			ctx, exportFrom, err = p.ResolvePath(ctx, stmt.ProxyExport.From, path.Dir(filePath))
-			if err != nil {
-				return ctx, nil, err
-			}
-			var proxyExports map[string]string
-			ctx, proxyExports, err = p.parseExports(ctx, exportFrom)
-			if err != nil {
-				return ctx, nil, err
-			}
-			if stmt.ProxyExport.ExportAll {
-				if stmt.ProxyExport.ExportAllAlias != "" {
-					exported[stmt.ProxyExport.ExportAllAlias] = filePath
-				} else {
-					exported = utils.Merge(exported, proxyExports)
-				}
-			} else if stmt.ProxyExport.ExportDeconstruction != nil {
-				for _, name := range stmt.ProxyExport.ExportDeconstruction.Names {
-					alias := name.Alias
-					original := name.Original
-					if alias == "" {
-						alias = original
-					}
-					if proxyPath, ok := proxyExports[original]; ok {
-						exported[alias] = proxyPath
-					} else {
-						return ctx, nil, fmt.Errorf("cannot import \"%s\" from %s", original, exportFrom)
-					}
-				}
-			}
-		default:
-			continue
+			ctx, err = p.handleProxyExport(ctx, stmt.ProxyExport, filePath, exported)
+		}
+		if err != nil {
+			return ctx, nil, err
 		}
 	}
 	return ctx, exported, nil
+}
+
+func handleDeclarationExport(
+	stmt *grammar.DeclarationExport,
+	filePath string,
+	dumpOn map[string]string,
+) {
+	dumpOn[stmt.Name] = filePath
+}
+
+func handleListExport(
+	stmt *grammar.ListExport,
+	filePath string,
+	dumpOn map[string]string,
+) {
+	if stmt.ExportDeconstruction != nil {
+		for _, name := range stmt.ExportDeconstruction.Names {
+			exportedName := name.Alias
+			if exportedName == "" {
+				exportedName = name.Original
+			}
+			dumpOn[exportedName] = filePath
+		}
+	}
+}
+
+func handleDefaultExport(
+	stmt *grammar.DefaultExport,
+	filePath string,
+	dumpOn map[string]string,
+) {
+	if stmt.Default {
+		dumpOn["default"] = filePath
+	}
+}
+
+func (p *Parser) handleProxyExport(
+	ctx context.Context,
+	stmt *grammar.ProxyExport,
+	filePath string,
+	dumpOn map[string]string,
+) (context.Context, error) {
+	ctx, exportFrom, err := p.ResolvePath(ctx, stmt.From, path.Dir(filePath))
+	if err != nil {
+		return ctx, err
+	}
+	// WARN: this call is recursive, be aware!!!
+	ctx, proxyExports, err := p.parseExports(ctx, exportFrom)
+	switch {
+	case err != nil:
+		return ctx, err
+	case stmt.ExportAll:
+		if stmt.ExportAllAlias != "" {
+			dumpOn[stmt.ExportAllAlias] = filePath
+		} else {
+			utils.Merge(dumpOn, proxyExports)
+		}
+	case stmt.ExportDeconstruction != nil:
+		for _, name := range stmt.ExportDeconstruction.Names {
+			if proxyPath, ok := proxyExports[name.Original]; ok {
+				dumpOn[name.AliasOrOriginal()] = proxyPath
+			} else {
+				return ctx, fmt.Errorf("cannot import \"%s\" from %s", name.Original, exportFrom)
+			}
+		}
+	}
+	return ctx, nil
 }

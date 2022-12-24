@@ -1,11 +1,9 @@
 package utils
 
-func Merge[T any](rules ...map[string]T) map[string]T {
-	acc := make(map[string]T)
-	for _, rule := range rules {
+func Merge[T any](acc map[string]T, maps ...map[string]T) {
+	for _, rule := range maps {
 		for k, v := range rule {
 			acc[k] = v
 		}
 	}
-	return acc
 }
