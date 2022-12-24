@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"dep-tree/internal/graph/node"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"
@@ -21,7 +19,7 @@ type TestGraph struct {
 
 var _ NodeParser[[]int] = &TestGraph{}
 
-func (t *TestGraph) Entrypoint(id string) (*node.Node[[]int], error) {
+func (t *TestGraph) Entrypoint(id string) (*Node[[]int], error) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
@@ -32,11 +30,11 @@ func (t *TestGraph) Entrypoint(id string) (*node.Node[[]int], error) {
 	} else {
 		children = t.Spec[idInt]
 	}
-	return node.MakeNode(id, children), nil
+	return MakeNode(id, children), nil
 }
 
-func (t *TestGraph) Deps(ctx context.Context, n *node.Node[[]int]) (context.Context, []*node.Node[[]int], error) {
-	result := make([]*node.Node[[]int], 0)
+func (t *TestGraph) Deps(ctx context.Context, n *Node[[]int]) (context.Context, []*Node[[]int], error) {
+	result := make([]*Node[[]int], 0)
 	for _, child := range n.Data {
 		c, _ := t.Entrypoint(strconv.Itoa(child))
 		result = append(result, c)
@@ -44,7 +42,7 @@ func (t *TestGraph) Deps(ctx context.Context, n *node.Node[[]int]) (context.Cont
 	return ctx, result, nil
 }
 
-func (t *TestGraph) Display(n *node.Node[[]int], _ *node.Node[[]int]) string {
+func (t *TestGraph) Display(n *Node[[]int]) string {
 	return n.Id
 }
 
@@ -55,7 +53,7 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
-func TestMakeGraph(t *testing.T) {
+func TestRenderGraph(t *testing.T) {
 	tests := []struct {
 		Name string
 		Spec [][]int

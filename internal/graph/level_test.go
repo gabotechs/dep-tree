@@ -1,4 +1,4 @@
-package node
+package graph
 
 import (
 	"context"
@@ -68,7 +68,7 @@ func TestNode_Level(t *testing.T) {
 			a := require.New(t)
 			numNodes := len(tt.ExpectedLevels)
 
-			fr := NewFamilyRegistry[int]()
+			fr := NewGraph[int]()
 			for i := 0; i < numNodes; i++ {
 				fr.AddNode(MakeNode(strconv.Itoa(i), 0))
 			}

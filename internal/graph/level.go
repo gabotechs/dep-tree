@@ -1,4 +1,4 @@
-package node
+package graph
 
 import (
 	"context"
@@ -23,7 +23,7 @@ func hashDep(a string, b string) string {
 	return a + " -> " + b
 }
 
-func (f *FamilyRegistry[T]) calculateLevel(
+func (g *Graph[T]) calculateLevel(
 	ctx context.Context,
 	nodeId string,
 	rootId string,
@@ -45,7 +45,7 @@ func (f *FamilyRegistry[T]) calculateLevel(
 	seen = copyMap(seen)
 	seen[nodeId] = true
 	maxLevel := unknown
-	for _, parent := range f.Parents(nodeId) {
+	for _, parent := range g.Parents(nodeId) {
 		dep := hashDep(parent.Id, nodeId)
 
 		cachedCycleKey := cycleKey("cycle-" + dep)
@@ -54,7 +54,7 @@ func (f *FamilyRegistry[T]) calculateLevel(
 		}
 
 		var level int
-		ctx, level = f.calculateLevel(ctx, parent.Id, rootId, seen)
+		ctx, level = g.calculateLevel(ctx, parent.Id, rootId, seen)
 		if level == cyclic {
 			ctx = context.WithValue(ctx, cachedCycleKey, true)
 		} else if level > maxLevel {
@@ -64,9 +64,9 @@ func (f *FamilyRegistry[T]) calculateLevel(
 	// 5. If ignoring previously seen cyclical deps we are not able
 	//  to tell the level, then recalculate without ignoring them.
 	if maxLevel == unknown {
-		for _, parent := range f.Parents(nodeId) {
+		for _, parent := range g.Parents(nodeId) {
 			var level int
-			ctx, level = f.calculateLevel(ctx, parent.Id, rootId, seen)
+			ctx, level = g.calculateLevel(ctx, parent.Id, rootId, seen)
 			if level > maxLevel {
 				maxLevel = level
 			}
@@ -79,13 +79,13 @@ func (f *FamilyRegistry[T]) calculateLevel(
 }
 
 // Level retrieves the longest path until going to "rootId" avoiding cyclical loops.
-func (f *FamilyRegistry[T]) Level(ctx context.Context, nodeId string, rootId string) (context.Context, int) {
-	ctx, lvl := f.calculateLevel(ctx, nodeId, rootId, map[string]bool{})
+func (g *Graph[T]) Level(ctx context.Context, nodeId string, rootId string) (context.Context, int) {
+	ctx, lvl := g.calculateLevel(ctx, nodeId, rootId, map[string]bool{})
 	if lvl == unknown {
 		// TODO: there is a bug here, there are cases where this is reached.
 		msg := "This should not be reachable"
 		msg += fmt.Sprintf("\nhappened while calculating level for node %s", nodeId)
-		msg += fmt.Sprintf("\nthis node has %d parents", len(f.Parents(nodeId)))
+		msg += fmt.Sprintf("\nthis node has %d parents", len(g.Parents(nodeId)))
 
 		panic(msg)
 	}

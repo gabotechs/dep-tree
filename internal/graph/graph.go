@@ -1,142 +1,108 @@
 package graph
 
 import (
-	"context"
-	"sort"
+	"fmt"
 
-	"dep-tree/internal/board"
-	"dep-tree/internal/graph/node"
+	om "github.com/elliotchance/orderedmap/v2"
 )
 
-type NodeParser[T any] interface {
-	Display(node *node.Node[T], root *node.Node[T]) string
-	Entrypoint(entrypoint string) (*node.Node[T], error)
-	Deps(ctx context.Context, node *node.Node[T]) (context.Context, []*node.Node[T], error)
+type Node[T any] struct {
+	Id   string
+	Data T
 }
 
-func computeDeps[T any](
-	ctx context.Context,
-	root *node.Node[T],
-	parser NodeParser[T],
-	fr *node.FamilyRegistry[T],
-) (context.Context, error) {
-	if fr.Has(root.Id) {
-		return ctx, nil
+func MakeNode[T any](id string, data T) *Node[T] {
+	return &Node[T]{
+		Id:   id,
+		Data: data,
 	}
+}
 
-	ctx, deps, err := parser.Deps(ctx, root)
-	if err != nil {
-		return ctx, err
+type Graph[T any] struct {
+	nodes       *om.OrderedMap[string, *Node[T]]
+	childEdges  *om.OrderedMap[string, *om.OrderedMap[string, bool]]
+	parentEdges *om.OrderedMap[string, *om.OrderedMap[string, bool]]
+}
+
+func NewGraph[T any]() *Graph[T] {
+	return &Graph[T]{
+		nodes:       om.NewOrderedMap[string, *Node[T]](),
+		childEdges:  om.NewOrderedMap[string, *om.OrderedMap[string, bool]](),
+		parentEdges: om.NewOrderedMap[string, *om.OrderedMap[string, bool]](),
 	}
+}
 
-	fr.AddNode(root)
+func (g *Graph[T]) Has(nodeId string) bool {
+	_, ok := g.nodes.Get(nodeId)
+	return ok
+}
 
-	for _, dep := range deps {
-		ctx, err = computeDeps(ctx, dep, parser, fr)
-		if err != nil {
-			return ctx, err
+func (g *Graph[T]) AddNode(node *Node[T]) {
+	g.nodes.Set(node.Id, node)
+}
+
+func (g *Graph[T]) AddChild(parent string, children ...string) error {
+	if _, ok := g.nodes.Get(parent); !ok {
+		return fmt.Errorf("'%s' is not in graph", parent)
+	}
+	for _, child := range children {
+		if _, ok := g.nodes.Get(child); !ok {
+			return fmt.Errorf("'%s' is not in graph", child)
 		}
-		err = fr.AddChild(root.Id, dep.Id)
-		if err != nil {
-			return ctx, err
-		}
-	}
-	return ctx, nil
-}
-
-type graphNode[T any] struct {
-	node  *node.Node[T]
-	level int
-}
-
-func sortNodes[T any](
-	ctx context.Context,
-	root *node.Node[T],
-	fr *node.FamilyRegistry[T],
-) (context.Context, []graphNode[T]) {
-	allNodes := fr.Nodes()
-	result := make([]graphNode[T], 0)
-	for _, n := range allNodes {
-		var level int
-		ctx, level = fr.Level(ctx, n.Id, root.Id)
-		result = append(result, graphNode[T]{node: n, level: level})
 	}
 
-	sort.SliceStable(result, func(i, j int) bool {
-		if result[i].level == result[j].level {
-			return result[i].node.Id < result[j].node.Id
+	for _, child := range children {
+		if childEdges, ok := g.childEdges.Get(parent); ok {
+			childEdges.Set(child, true)
 		} else {
-			return result[i].level < result[j].level
+			childEdges = om.NewOrderedMap[string, bool]()
+			childEdges.Set(child, true)
+			g.childEdges.Set(parent, childEdges)
 		}
-	})
-	return ctx, result
-}
-
-const indent = 2
-
-func renderGraph[T any](
-	ctx context.Context,
-	root *node.Node[T],
-	parser NodeParser[T],
-	fr *node.FamilyRegistry[T],
-	nodes []graphNode[T],
-) (context.Context, string, error) {
-	b := board.MakeBoard()
-
-	lastLevel := -1
-	prefix := ""
-	xOffsetCount := 0
-	xOffset := 0
-	for i, n := range nodes {
-		if n.level == lastLevel {
-			if len(fr.Children(nodes[i-1].node.Id)) > 0 {
-				xOffsetCount++
-				prefix += " "
-			}
+		if parentEdges, ok := g.parentEdges.Get(child); ok {
+			parentEdges.Set(parent, true)
 		} else {
-			lastLevel = n.level
-			xOffset += xOffsetCount
-			xOffsetCount = 0
-			prefix = ""
-		}
-
-		err := b.AddBlock(
-			n.node.Id,
-			prefix+parser.Display(n.node, root),
-			indent*n.level+xOffset,
-			i,
-		)
-		if err != nil {
-			return ctx, "", err
+			parentEdges = om.NewOrderedMap[string, bool]()
+			parentEdges.Set(parent, true)
+			g.parentEdges.Set(child, parentEdges)
 		}
 	}
+	return nil
+}
 
-	for _, n := range nodes {
-		for _, child := range fr.Children(n.node.Id) {
-			err := b.AddConnector(n.node.Id, child.Id)
-			if err != nil {
-				return ctx, "", err
+func (g *Graph[T]) Nodes() []*Node[T] {
+	result := make([]*Node[T], g.nodes.Len())
+	for i, nodeId := range g.nodes.Keys() {
+		node, _ := g.nodes.Get(nodeId)
+		result[i] = node
+	}
+	return result
+}
+
+func (g *Graph[T]) Children(id string) []*Node[T] {
+	if children, ok := g.childEdges.Get(id); ok {
+		result := make([]*Node[T], children.Len())
+		for i, child := range children.Keys() {
+			if childNode, ok := g.nodes.Get(child); ok {
+				result[i] = childNode
 			}
 		}
+		return result
+	} else {
+		return make([]*Node[T], 0)
 	}
-	rendered, err := b.Render()
-	return ctx, rendered, err
 }
 
-func RenderGraph[T any](
-	ctx context.Context,
-	entrypoint string,
-	parser NodeParser[T],
-) (context.Context, string, error) {
-	root, err := parser.Entrypoint(entrypoint)
-	if err != nil {
-		return ctx, "", err
+func (g *Graph[T]) Parents(id string) []*Node[T] {
+	if parents, ok := g.parentEdges.Get(id); ok {
+		result := make([]*Node[T], parents.Len())
+		for i, parent := range parents.Keys() {
+			if parentNode, ok := g.nodes.Get(parent); ok {
+				result[i] = parentNode
+			}
+		}
+		return result
+	} else {
+		return make([]*Node[T], 0)
 	}
-	fr := node.NewFamilyRegistry[T]()
-	ctx, err = computeDeps(ctx, root, parser, fr)
-	if err != nil {
-		return ctx, "", err
-	}
-	ctx, nodes := sortNodes(ctx, root, fr)
-	return renderGraph(ctx, root, parser, fr, nodes)
 }
