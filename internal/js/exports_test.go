@@ -5,11 +5,33 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 const exportsTestFolder = ".exports_test"
+
+func TestParser_parseExports_IsCached(t *testing.T) {
+	a := require.New(t)
+	ctx := context.Background()
+	file := path.Join(exportsTestFolder, "src", "index.js")
+	parser, err := MakeJsParser(file)
+	a.NoError(err)
+
+	start := time.Now()
+	ctx, _, err = parser.parseExports(ctx, file)
+	a.NoError(err)
+	nonCached := time.Since(start)
+
+	start = time.Now()
+	_, _, err = parser.parseExports(ctx, file)
+	a.NoError(err)
+	cached := time.Since(start)
+
+	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
+	a.Greater(ratio, int64(10))
+}
 
 func TestParser_parseExports(t *testing.T) {
 	cwd, _ := os.Getwd()
