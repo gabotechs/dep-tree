@@ -10,11 +10,11 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 
 	"dep-tree/internal/graph"
-	"dep-tree/internal/graph/node"
 	"dep-tree/internal/utils"
 )
 
 type Parser struct {
+	entrypoint  string
 	ProjectRoot string
 	TsConfig    TsConfig
 }
@@ -47,12 +47,13 @@ func MakeJsParser(entrypoint string) (*Parser, error) {
 		}
 	}
 	return &Parser{
+		entrypoint:  entrypointAbsPath,
 		ProjectRoot: projectRoot,
 		TsConfig:    tsConfig,
 	}, nil
 }
 
-func (p *Parser) Entrypoint(entrypoint string) (*node.Node[Data], error) {
+func (p *Parser) Entrypoint(entrypoint string) (*graph.Node[Data], error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func (p *Parser) Entrypoint(entrypoint string) (*node.Node[Data], error) {
 	return MakeJsNode(entrypointAbsPath)
 }
 
-func (p *Parser) Deps(ctx context.Context, n *node.Node[Data]) (context.Context, []*node.Node[Data], error) {
+func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context, []*graph.Node[Data], error) {
 	ctx, imports, err := p.parseImports(ctx, n.Data.filePath)
 	if err != nil {
 		return ctx, nil, err
@@ -104,7 +105,7 @@ func (p *Parser) Deps(ctx context.Context, n *node.Node[Data]) (context.Context,
 		}
 	}
 
-	deps := make([]*node.Node[Data], 0)
+	deps := make([]*graph.Node[Data], 0)
 	for _, imported := range resolvedImports.Keys() {
 		dep, err := MakeJsNode(imported)
 		if err != nil {
@@ -115,8 +116,8 @@ func (p *Parser) Deps(ctx context.Context, n *node.Node[Data]) (context.Context,
 	return ctx, deps, nil
 }
 
-func (p *Parser) Display(n *node.Node[Data], root *node.Node[Data]) string {
-	base := path.Dir(root.Data.filePath)
+func (p *Parser) Display(n *graph.Node[Data]) string {
+	base := path.Dir(p.entrypoint)
 	rel, err := filepath.Rel(base, n.Id)
 	if err != nil {
 		return n.Id

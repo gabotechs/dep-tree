@@ -69,7 +69,7 @@ func TestParser_Deps(t *testing.T) {
 			a.NoError(err)
 			result := make([]string, len(deps))
 			for i, dep := range deps {
-				result[i] = parser.Display(dep, node)
+				result[i] = parser.Display(dep)
 			}
 
 			a.Equal(tt.Expected, result)
