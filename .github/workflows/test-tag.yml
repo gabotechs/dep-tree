@@ -41,8 +41,6 @@ jobs:
           fetch-depth: '0' # https://github.com/actions/checkout/issues/217
           token: ${{ secrets.CI_TOKEN }}
 
-      - uses: ./.github/actions/setup-go
-
       - name: Tag
         run: |
           version=$(.github/semver.sh)
