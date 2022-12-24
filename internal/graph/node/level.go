@@ -19,35 +19,34 @@ func copyMap[K comparable, V any](m map[K]V) map[K]V {
 	return result
 }
 
-func hashDep[T any](a *Node[T], b *Node[T]) string {
-	return a.Id + " -> " + b.Id
+func hashDep(a string, b string) string {
+	return a + " -> " + b
 }
 
-func calculateLevel[T any](
+func (f *FamilyRegistry[T]) calculateLevel(
 	ctx context.Context,
-	node *Node[T],
+	nodeId string,
 	rootId string,
 	seen map[string]bool,
 ) (context.Context, int) {
-	var cachedLevelKey = cacheKey("level-" + node.Id)
+	var cachedLevelKey = cacheKey("level-" + nodeId)
 	if cachedLevel, ok := ctx.Value(cachedLevelKey).(int); ok {
 		// 1. Check first the cache, we do not like to work more than need.
 		return ctx, cachedLevel
-	} else if node.Id == rootId {
+	} else if nodeId == rootId {
 		// 2. If it is the root node where are done.
 		return ctx, 0
-	} else if _, ok := seen[node.Id]; ok {
+	} else if _, ok := seen[nodeId]; ok {
 		// 3. Check if we have closed a loop.
 		return ctx, cyclic
 	}
 
 	// 4. Calculate the maximum level for this node ignore deps that where previously seen as cyclical.
 	seen = copyMap(seen)
-	seen[node.Id] = true
+	seen[nodeId] = true
 	maxLevel := unknown
-	for _, parentId := range node.Parents.Keys() {
-		parent, _ := node.Parents.Get(parentId)
-		dep := hashDep(parent, node)
+	for _, parent := range f.Parents(nodeId) {
+		dep := hashDep(parent.Id, nodeId)
 
 		cachedCycleKey := cycleKey("cycle-" + dep)
 		if _, ok := ctx.Value(cachedCycleKey).(bool); ok {
@@ -55,7 +54,7 @@ func calculateLevel[T any](
 		}
 
 		var level int
-		ctx, level = calculateLevel(ctx, parent, rootId, seen)
+		ctx, level = f.calculateLevel(ctx, parent.Id, rootId, seen)
 		if level == cyclic {
 			ctx = context.WithValue(ctx, cachedCycleKey, true)
 		} else if level > maxLevel {
@@ -65,11 +64,9 @@ func calculateLevel[T any](
 	// 5. If ignoring previously seen cyclical deps we are not able
 	//  to tell the level, then recalculate without ignoring them.
 	if maxLevel == unknown {
-		for _, parentId := range node.Parents.Keys() {
-			parent, _ := node.Parents.Get(parentId)
-
+		for _, parent := range f.Parents(nodeId) {
 			var level int
-			ctx, level = calculateLevel(ctx, parent, rootId, seen)
+			ctx, level = f.calculateLevel(ctx, parent.Id, rootId, seen)
 			if level > maxLevel {
 				maxLevel = level
 			}
@@ -82,13 +79,13 @@ func calculateLevel[T any](
 }
 
 // Level retrieves the longest path until going to "rootId" avoiding cyclical loops.
-func (n *Node[T]) Level(ctx context.Context, rootId string) (context.Context, int) {
-	ctx, lvl := calculateLevel(ctx, n, rootId, map[string]bool{})
+func (f *FamilyRegistry[T]) Level(ctx context.Context, nodeId string, rootId string) (context.Context, int) {
+	ctx, lvl := f.calculateLevel(ctx, nodeId, rootId, map[string]bool{})
 	if lvl == unknown {
 		// TODO: there is a bug here, there are cases where this is reached.
 		msg := "This should not be reachable"
-		msg += fmt.Sprintf("\nhappened while calculating level for node %s", n.Id)
-		msg += fmt.Sprintf("\nthis node has %d parents", n.Parents.Len())
+		msg += fmt.Sprintf("\nhappened while calculating level for node %s", nodeId)
+		msg += fmt.Sprintf("\nthis node has %d parents", len(f.Parents(nodeId)))
 
 		panic(msg)
 	}

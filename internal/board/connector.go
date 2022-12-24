@@ -3,7 +3,7 @@ package board
 import (
 	"fmt"
 
-	graphics2 "dep-tree/internal/board/graphics"
+	"dep-tree/internal/board/graphics"
 	"dep-tree/internal/utils"
 )
 
@@ -17,8 +17,8 @@ type Connector struct {
 }
 
 //nolint:gocyclo
-func (c *Connector) Render(matrix *graphics2.Matrix) error { // TODO: factor this function out.
-	reverseX := c.to.Position.X < c.from.Position.X
+func (c *Connector) Render(matrix *graphics.Matrix) error { // TODO: factor this function out.
+	reverseX := c.to.Position.X <= c.from.Position.X
 	reverseY := c.to.Position.Y < c.from.Position.Y
 
 	// 1. If the line is going upwards, start at the end of the blockChar.
@@ -30,7 +30,7 @@ func (c *Connector) Render(matrix *graphics2.Matrix) error { // TODO: factor thi
 	}
 
 	// 2. start with just one vertical step.
-	tracer := graphics2.NewLineTracer(from)
+	tracer := graphics.NewLineTracer(from)
 	var cur utils.Vector
 	if reverseY {
 		cur = tracer.MoveHorizontal(false)

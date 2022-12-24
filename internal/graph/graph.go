@@ -18,21 +18,25 @@ func computeDeps[T any](
 	ctx context.Context,
 	root *node.Node[T],
 	parser NodeParser[T],
-	seen map[string]*node.Node[T],
+	fr *node.FamilyRegistry[T],
 ) (context.Context, error) {
-	if _, ok := seen[root.Id]; ok {
+	if fr.Has(root.Id) {
 		return ctx, nil
-	} else {
-		seen[root.Id] = root
 	}
 
 	ctx, deps, err := parser.Deps(ctx, root)
 	if err != nil {
 		return ctx, err
 	}
+
+	fr.AddNode(root)
+
 	for _, dep := range deps {
-		root.AddChild(dep)
-		ctx, err = computeDeps(ctx, dep, parser, seen)
+		ctx, err = computeDeps(ctx, dep, parser, fr)
+		if err != nil {
+			return ctx, err
+		}
+		err = fr.AddChild(root.Id, dep.Id)
 		if err != nil {
 			return ctx, err
 		}
@@ -45,15 +49,16 @@ type graphNode[T any] struct {
 	level int
 }
 
-func sortNodes[T any](root *node.Node[T]) []graphNode[T] {
-	ctx := context.Background()
-	allNodes := root.Flatten()
-
+func sortNodes[T any](
+	ctx context.Context,
+	root *node.Node[T],
+	fr *node.FamilyRegistry[T],
+) (context.Context, []graphNode[T]) {
+	allNodes := fr.Nodes()
 	result := make([]graphNode[T], 0)
-	for _, k := range allNodes.Keys() {
-		n, _ := allNodes.Get(k)
+	for _, n := range allNodes {
 		var level int
-		ctx, level = n.Level(ctx, root.Id)
+		ctx, level = fr.Level(ctx, n.Id, root.Id)
 		result = append(result, graphNode[T]{node: n, level: level})
 	}
 
@@ -64,15 +69,16 @@ func sortNodes[T any](root *node.Node[T]) []graphNode[T] {
 			return result[i].level < result[j].level
 		}
 	})
-	return result
+	return ctx, result
 }
 
 const indent = 2
 
 func renderGraph[T any](
 	ctx context.Context,
-	parser NodeParser[T],
 	root *node.Node[T],
+	parser NodeParser[T],
+	fr *node.FamilyRegistry[T],
 	nodes []graphNode[T],
 ) (context.Context, string, error) {
 	b := board.MakeBoard()
@@ -83,7 +89,7 @@ func renderGraph[T any](
 	xOffset := 0
 	for i, n := range nodes {
 		if n.level == lastLevel {
-			if nodes[i-1].node.Children.Len() > 0 {
+			if len(fr.Children(nodes[i-1].node.Id)) > 0 {
 				xOffsetCount++
 				prefix += " "
 			}
@@ -106,8 +112,7 @@ func renderGraph[T any](
 	}
 
 	for _, n := range nodes {
-		for _, childId := range n.node.Children.Keys() {
-			child, _ := n.node.Children.Get(childId)
+		for _, child := range fr.Children(n.node.Id) {
 			err := b.AddConnector(n.node.Id, child.Id)
 			if err != nil {
 				return ctx, "", err
@@ -127,10 +132,11 @@ func RenderGraph[T any](
 	if err != nil {
 		return ctx, "", err
 	}
-	ctx, err = computeDeps(ctx, root, parser, map[string]*node.Node[T]{})
+	fr := node.NewFamilyRegistry[T]()
+	ctx, err = computeDeps(ctx, root, parser, fr)
 	if err != nil {
 		return ctx, "", err
 	}
-	nodes := sortNodes(root)
-	return renderGraph(ctx, parser, root, nodes)
+	ctx, nodes := sortNodes(ctx, root, fr)
+	return renderGraph(ctx, root, parser, fr, nodes)
 }
