@@ -32,7 +32,7 @@ func MakeJsParser(entrypoint string) (*Parser, error) {
 	for len(searchPath) > 1 {
 		packageJsonPath := path.Join(searchPath, "package.json")
 		if utils.FileExists(packageJsonPath) {
-			tsConfigPath := path.Join(searchPath, "tsConfig.json")
+			tsConfigPath := path.Join(searchPath, "tsconfig.json")
 			if utils.FileExists(tsConfigPath) {
 				var err error
 				tsConfig, err = ParseTsConfig(tsConfigPath)
