@@ -21,8 +21,5 @@ func ParseTsConfig(path string) (TsConfig, error) {
 		return TsConfig{}, err
 	}
 	err = json.Unmarshal(data, &tsConfig)
-	if err != nil {
-		return tsConfig, err
-	}
-	return tsConfig, nil
+	return tsConfig, err
 }
