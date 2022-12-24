@@ -17,26 +17,12 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
-func expectTest(t *testing.T, result string) {
-	a := require.New(t)
-	_ = os.Mkdir(testPath, os.ModePerm)
-	fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
-	print(result)
-	if fileExists(fullPath) && os.Getenv(RebuildTestsEnv) != "true" {
-		expected, err := os.ReadFile(fullPath)
-		a.NoError(err)
-		a.Equal(string(expected), result)
-	} else {
-		err := os.WriteFile(fullPath, []byte(result), os.ModePerm)
-		a.NoError(err)
-	}
-}
-
 type TestBlock struct {
 	name string
 	x    int
 	y    int
 }
+
 type TestConnection struct {
 	from int
 	to   []int
@@ -62,6 +48,17 @@ func TestBoard(t *testing.T) {
 			},
 		},
 		{
+			Name: "Cannot draw line when one is just above",
+			Blocks: []TestBlock{
+				{name: "foo.ts", x: 3, y: 4},
+				{name: "bar.ts", x: 3, y: 5},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
+			},
+			ExpectedError: "could not draw first vertical step on (3, 5) because there is no space",
+		},
+		{
 			Name: "ReverseDeps",
 			Blocks: []TestBlock{
 				{name: "a", x: 0, y: 0},
@@ -69,6 +66,36 @@ func TestBoard(t *testing.T) {
 			},
 			Connections: []TestConnection{
 				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "it should increase the board's size if necessary",
+			Blocks: []TestBlock{
+				{name: "long", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "it should increase the board's size if necessary 2",
+			Blocks: []TestBlock{
+				{name: "a", x: 1, y: 0},
+				{name: "bb", x: 0, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "it should increase the board's size if necessary 3",
+			Blocks: []TestBlock{
+				{name: "a", x: 1, y: 0},
+				{name: "bb", x: 0, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 0, to: []int{1}},
 			},
 		},
 		{
@@ -226,7 +253,17 @@ func TestBoard(t *testing.T) {
 			result, err := board.Render()
 			if tt.ExpectedError == "" {
 				a.NoError(err)
-				expectTest(t, result)
+				_ = os.Mkdir(testPath, os.ModePerm)
+				fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
+				print(result)
+				if fileExists(fullPath) && os.Getenv(RebuildTestsEnv) != "true" {
+					expected, err := os.ReadFile(fullPath)
+					a.NoError(err)
+					a.Equal(string(expected), result)
+				} else {
+					err := os.WriteFile(fullPath, []byte(result), os.ModePerm)
+					a.NoError(err)
+				}
 			} else {
 				a.ErrorContains(err, tt.ExpectedError)
 			}
