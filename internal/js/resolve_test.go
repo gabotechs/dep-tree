@@ -79,10 +79,14 @@ func TestParser_ResolvePath(t *testing.T) {
 			ExpectedError: "could not perform relative import for './foo' because the file or dir was not found",
 		},
 		{
-			Name:          "Does not resolve invalid relative import",
-			Cwd:           resolverTestFolder,
-			Unresolved:    path.Join("src", "utils", "foo"),
-			ExpectedError: "import 'src/utils/foo' cannot be resolved",
+			Name:       "Does not resolve invalid import",
+			Cwd:        resolverTestFolder,
+			Unresolved: path.Join("react"),
+		},
+		{
+			Name:       "Does not resolve invalid relative import",
+			Cwd:        resolverTestFolder,
+			Unresolved: path.Join("src", "utils", "foo"),
 		},
 		{
 			Name:          "Does not resolve invalid path override import",
