@@ -67,12 +67,6 @@ func TestParser_ResolvePath(t *testing.T) {
 			Resolved:   path.Join(absPath, "src", "helpers", "diff.ts"),
 		},
 		{
-			Name:          "Does not resolve invalid import",
-			Cwd:           path.Join(resolverTestFolder, "src"),
-			Unresolved:    "bar",
-			ExpectedError: "import 'bar' cannot be resolved",
-		},
-		{
 			Name:          "Does not resolve invalid relative import",
 			Cwd:           path.Join(resolverTestFolder, "src", "utils"),
 			Unresolved:    "./foo",
@@ -81,7 +75,7 @@ func TestParser_ResolvePath(t *testing.T) {
 		{
 			Name:       "Does not resolve invalid import",
 			Cwd:        resolverTestFolder,
-			Unresolved: path.Join("react"),
+			Unresolved: "react",
 		},
 		{
 			Name:       "Does not resolve invalid relative import",
