@@ -102,7 +102,7 @@ func (m *Matrix) Render() string {
 	rendered := ""
 	for j := 0; j < m.h; j++ {
 		for i := 0; i < m.w; i++ {
-			rendered += string(m.elements[j][i].Render())
+			rendered += string(m.elements[j][i].Render(nil))
 		}
 		rendered += "\n"
 	}

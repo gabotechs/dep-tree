@@ -46,18 +46,15 @@ func (l *LineStack) add(cell *LinesCell) {
 }
 
 func areCrossing(first *LinesCell, last *LinesCell) bool {
-	if first != nil && last != nil {
-		if last.l && last.r && !last.t && !last.b {
-			if !first.l && !first.r && first.t && first.b {
-				// lines have crossed.
-				return true
-			}
-		} else if !last.l && !last.r && last.t && last.b {
-			if first.l && first.r && !first.t && !first.b {
-				// lines have crossed.
-				return true
-			}
-		}
+	if first == nil || last == nil {
+		return false
+	}
+	if hashLines(first) == 0b_0101 && hashLines(last) == 0b_1010 {
+		// lines have crossed.
+		return true
+	} else if hashLines(last) == 0b_0101 && hashLines(first) == 0b_1010 {
+		// lines have crossed.
+		return true
 	}
 	return false
 }

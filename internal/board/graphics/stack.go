@@ -33,6 +33,18 @@ func (cs *CellStack) Is(key string, value string) bool {
 	return false
 }
 
+func (cs *CellStack) Match(tags map[string]string) bool {
+	if tags == nil {
+		return false
+	}
+	for k, v := range tags {
+		if cs.Is(k, v) {
+			return true
+		}
+	}
+	return false
+}
+
 func (cs *CellStack) PlaceChar(char rune) *TaggedCell {
 	charTaggedCell := NewTaggedCell(CharCell(char))
 	cs.add(charTaggedCell)
@@ -56,10 +68,22 @@ var arrowMap = map[bool]rune{
 	false: '▷',
 }
 
-func (cs *CellStack) Render() rune {
+func (cs *CellStack) Render(
+	priorityTags map[string]string,
+) rune {
 	lineStack := LineStack{}
+	priorityCellStack := *cs
 
-	for _, taggedCell := range *cs {
+	if cs.Match(priorityTags) {
+		priorityCellStack = CellStack{}
+		for _, cell := range *cs {
+			if cell.Match(priorityTags) {
+				priorityCellStack.add(cell)
+			}
+		}
+	}
+
+	for _, taggedCell := range priorityCellStack {
 		switch cell := taggedCell.Cell.(type) {
 		case EmptyCell:
 			// nothing.

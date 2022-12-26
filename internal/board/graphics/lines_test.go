@@ -34,5 +34,5 @@ func TestLineStack_Render_Crossed_2(t *testing.T) {
 	lineStack.add(&LinesCell{l: true, r: true})
 	a.Equal('┴', lineStack.Render())
 	lineStack.add(&LinesCell{t: true, b: true})
-	a.Equal('┼', lineStack.Render())
+	a.Equal('│', lineStack.Render())
 }

@@ -43,7 +43,9 @@ func Loop(b *board.Board) error {
 				s.SetContent(
 					j,
 					i,
-					cells[i][j].Render(),
+					cells[i][j].Render(map[string]string{
+						"nodeIndex": strconv.Itoa(state.selected),
+					}),
 					nil,
 					style,
 				)

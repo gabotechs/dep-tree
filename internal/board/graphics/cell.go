@@ -78,3 +78,15 @@ func (tc *TaggedCell) Is(key string, value string) bool {
 		return false
 	}
 }
+
+func (tc *TaggedCell) Match(tags map[string]string) bool {
+	if tags == nil {
+		return false
+	}
+	for k, v := range tags {
+		if tc.Is(k, v) {
+			return true
+		}
+	}
+	return false
+}
