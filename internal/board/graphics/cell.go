@@ -1,9 +1,12 @@
 package graphics
 
+import "dep-tree/internal/utils"
+
 const (
 	charCell = iota
 	linesCell
 	arrowCell
+	emptyCell
 )
 
 type Lines struct {
@@ -14,15 +17,41 @@ type Lines struct {
 	cross bool
 }
 
-type Char struct {
-	runes []rune
-}
-
 type Cell struct {
 	t             int
-	char          Char
+	char          rune
 	lines         Lines
 	arrowInverted bool
+
+	tags map[string]string
+}
+
+func (c *Cell) Tags(tags map[string]string) *Cell {
+	if c.tags == nil {
+		c.tags = tags
+	} else {
+		utils.Merge(c.tags, tags)
+	}
+	return c
+}
+
+func (c *Cell) Tag(key string, value string) *Cell {
+	if c.tags == nil {
+		c.tags = map[string]string{key: value}
+	} else {
+		c.tags[key] = value
+	}
+	return c
+}
+
+func (c *Cell) Is(key string, value string) bool {
+	if c.tags == nil {
+		return false
+	} else if v, ok := c.tags[key]; ok {
+		return value == v
+	} else {
+		return false
+	}
 }
 
 func LinesCell(lines Lines) *Cell {

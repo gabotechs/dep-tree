@@ -1,9 +1,8 @@
 package graphics
 
-import "golang.org/x/text/unicode/norm"
+import "dep-tree/internal/utils"
 
 type CellStack struct {
-	tags  map[string]string
 	cells []*Cell
 }
 
@@ -14,40 +13,56 @@ func (c *CellStack) add(cell *Cell) {
 	c.cells = append(c.cells, cell)
 }
 
-func (c *CellStack) Tag(key string, value string) {
-	if c.tags == nil {
-		c.tags = map[string]string{key: value}
-	} else {
-		c.tags[key] = value
+func (c *CellStack) Tags() map[string]string {
+	tags := map[string]string{}
+	if c.cells != nil {
+		for _, cell := range c.cells {
+			utils.Merge(tags, cell.tags)
+		}
 	}
+	return tags
 }
 
 func (c *CellStack) Is(key string, value string) bool {
-	if c.tags == nil {
-		return false
-	} else if v, ok := c.tags[key]; ok {
-		return value == v
-	} else {
+	if c.cells == nil {
 		return false
 	}
+	for _, cell := range c.cells {
+		if cell.Is(key, value) {
+			return true
+		}
+	}
+	return false
 }
 
-func (c *CellStack) PlaceChar(chars ...rune) bool {
-	c.add(&Cell{
-		t: charCell,
-		char: Char{
-			runes: chars,
-		},
-	})
-	return true
+func (c *CellStack) PlaceChar(
+	char rune,
+) *Cell {
+	cell := &Cell{
+		t:    charCell,
+		char: char,
+	}
+	c.add(cell)
+	return cell
 }
 
-func (c *CellStack) PlaceArrow(inverted bool) bool {
-	c.add(&Cell{
+func (c *CellStack) PlaceArrow(
+	inverted bool,
+) *Cell {
+	cell := &Cell{
 		t:             arrowCell,
 		arrowInverted: inverted,
-	})
-	return true
+	}
+	c.add(cell)
+	return cell
+}
+
+func (c *CellStack) PlaceEmpty() *Cell {
+	cell := &Cell{
+		t: emptyCell,
+	}
+	c.add(cell)
+	return cell
 }
 
 var lineCharMap = map[int]rune{
@@ -94,7 +109,7 @@ func hashLines(lines *Lines) int {
 	return result
 }
 
-func (c *CellStack) Render() string {
+func (c *CellStack) Render() rune {
 	var lines *Lines
 
 	linesCrosses := false
@@ -107,13 +122,9 @@ func (c *CellStack) Render() string {
 	for _, cell := range c.cells {
 		switch cell.t {
 		case charCell:
-			result := ""
-			for _, r := range cell.char.runes {
-				result += string(r)
-			}
-			return norm.NFC.String(result)
+			return cell.char
 		case arrowCell:
-			return string(arrowMap[cell.arrowInverted])
+			return arrowMap[cell.arrowInverted]
 		case linesCell:
 			if lines == nil || !linesCrosses {
 				lines = &Lines{}
@@ -132,5 +143,5 @@ func (c *CellStack) Render() string {
 			}
 		}
 	}
-	return string(lineCharMap[hashLines(lines)])
+	return lineCharMap[hashLines(lines)]
 }

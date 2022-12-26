@@ -22,8 +22,8 @@ func TestMatrix_RayCastVertical(t *testing.T) {
 	tag1Y := 9
 	tag2Y := 7
 
-	matrix.Cell(utils.Vec(x, tag1Y)).Tag(testKey, tag1)
-	matrix.Cell(utils.Vec(x, tag2Y)).Tag(testKey, tag2)
+	matrix.Cell(utils.Vec(x, tag1Y)).PlaceEmpty().Tag(testKey, tag1)
+	matrix.Cell(utils.Vec(x, tag2Y)).PlaceEmpty().Tag(testKey, tag2)
 
 	hit, err := matrix.RayCastVertical(
 		utils.Vec(x, 3),
@@ -67,7 +67,7 @@ func TestMatrix_RayCastVertical_reverse(t *testing.T) {
 	x := 4
 	matrix := NewMatrix(10, 10)
 
-	matrix.Cell(utils.Vec(x, 4)).Tag(testKey, tag1)
+	matrix.Cell(utils.Vec(x, 4)).PlaceEmpty().Tag(testKey, tag1)
 
 	hit, err := matrix.RayCastVertical(
 		utils.Vec(x, 8),

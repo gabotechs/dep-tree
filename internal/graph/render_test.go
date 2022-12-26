@@ -104,7 +104,9 @@ func TestRenderGraph(t *testing.T) {
 
 			ctx := context.Background()
 
-			_, result, err := RenderGraph[[]int](ctx, "0", &testParser)
+			_, board, err := RenderGraph[[]int](ctx, "0", &testParser)
+			a.NoError(err)
+			result, err := board.Render()
 			a.NoError(err)
 			print(result)
 

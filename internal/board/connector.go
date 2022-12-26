@@ -7,13 +7,10 @@ import (
 	"dep-tree/internal/utils"
 )
 
-const (
-	noCrossOwnership = "noCrossOwnership"
-)
-
 type Connector struct {
 	from *Block
 	to   *Block
+	tags map[string]string
 }
 
 func checkCollision(
@@ -28,10 +25,6 @@ func checkCollision(
 			// if an arrow or a blockChar is already present, then that is a hit.
 			cellType: func(value string) bool {
 				return utils.InArray(value, []string{blockChar, arrow})
-			},
-			// if there is a line, belonging to another connector which claimed ownership, then hit.
-			noCrossOwnership: func(value string) bool {
-				return value != from.Id
 			},
 		},
 		to.Position.Y-from.Position.Y,
@@ -52,9 +45,11 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	} else {
 		from.X += utils.PrefixN(c.from.Label, ' ')
 	}
-
 	// 2. start with just one vertical step.
-	tracer := graphics.NewLineTracer(from)
+	tracer := graphics.
+		NewLineTracer(from).
+		WithTags(c.tags)
+
 	var cur utils.Vector
 	if reverseY {
 		cur = tracer.MoveHorizontal(false)
@@ -88,13 +83,11 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 		if cell == nil {
 			return fmt.Errorf("moved to invalid position (%d, %d) while tracing horizontal line. This error should not be reachable", cur.X, cur.Y)
 		}
-		cell.Tag(noCrossOwnership, c.from.Id)
 	}
 
 	// 4. displacing vertically until aligned...
 	for cur.Y != c.to.Position.Y && cur.Y >= 0 && cur.Y < matrix.H() {
 		cur = tracer.MoveVertical(cur.Y > c.to.Position.Y)
-		matrix.Cell(cur).Tag(noCrossOwnership, c.from.Id)
 	}
 
 	// 5. moving horizontally until meeting target node...
@@ -113,13 +106,18 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	// 6. placing arrow in target node...
 	cell = matrix.Cell(cur)
 	if cell != nil {
-		cell.PlaceArrow(reverseX)
-		cell.Tag(cellType, arrow)
+		cell.PlaceArrow(reverseX).
+			Tag(cellType, arrow).
+			Tags(c.tags)
 	}
 	return nil
 }
 
-func (b *Board) AddConnector(from string, to string) error {
+func (b *Board) AddConnector(
+	from string,
+	to string,
+	tags map[string]string,
+) error {
 	var fromBlock *Block
 	var toBlock *Block
 	if block, ok := b.blocks.Get(from); ok {
@@ -140,6 +138,7 @@ func (b *Board) AddConnector(from string, to string) error {
 	b.connectors.Set(key, &Connector{
 		from: fromBlock,
 		to:   toBlock,
+		tags: tags,
 	})
 	return nil
 }

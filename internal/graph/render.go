@@ -3,8 +3,10 @@ package graph
 import (
 	"context"
 	"sort"
+	"strconv"
 
 	"dep-tree/internal/board"
+	"dep-tree/internal/utils"
 )
 
 type NodeParser[T any] interface {
@@ -75,7 +77,7 @@ func (g *Graph[T]) renderGraph(
 	ctx context.Context,
 	parser NodeParser[T],
 	nodes []graphNode[T],
-) (context.Context, string, error) {
+) (context.Context, *board.Board, error) {
 	b := board.MakeBoard()
 
 	lastLevel := -1
@@ -99,42 +101,51 @@ func (g *Graph[T]) renderGraph(
 			}
 		}
 
+		tags := map[string]string{
+			"nodeIndex": strconv.Itoa(i),
+		}
+
 		err := b.AddBlock(
-			n.node.Id,
-			prefix+parser.Display(n.node),
-			indent*n.level+xOffset,
-			i+yOffset,
+			&board.Block{
+				Id:       n.node.Id,
+				Label:    prefix + parser.Display(n.node),
+				Position: utils.Vec(indent*n.level+xOffset, i+yOffset),
+				Tags:     tags,
+			},
 		)
 		if err != nil {
-			return ctx, "", err
+			return ctx, nil, err
 		}
 	}
 
-	for _, n := range nodes {
+	for i, n := range nodes {
+		tags := map[string]string{
+			"nodeIndex": strconv.Itoa(i),
+		}
+
 		for _, child := range g.Children(n.node.Id) {
-			err := b.AddConnector(n.node.Id, child.Id)
+			err := b.AddConnector(n.node.Id, child.Id, tags)
 			if err != nil {
-				return ctx, "", err
+				return ctx, nil, err
 			}
 		}
 	}
-	rendered, err := b.Render()
-	return ctx, rendered, err
+	return ctx, b, nil
 }
 
 func RenderGraph[T any](
 	ctx context.Context,
 	entrypoint string,
 	parser NodeParser[T],
-) (context.Context, string, error) {
+) (context.Context, *board.Board, error) {
 	root, err := parser.Entrypoint(entrypoint)
 	if err != nil {
-		return ctx, "", err
+		return ctx, nil, err
 	}
 	g := NewGraph[T]()
 	ctx, err = g.computeDeps(ctx, root, parser)
 	if err != nil {
-		return ctx, "", err
+		return ctx, nil, err
 	}
 	ctx, nodes := g.getSortNodes(ctx, root)
 	return g.renderGraph(ctx, parser, nodes)

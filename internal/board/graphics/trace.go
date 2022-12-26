@@ -8,12 +8,19 @@ import (
 
 type LineTracer struct {
 	slices []utils.Vector
+	tags   map[string]string
 }
 
 func NewLineTracer(start utils.Vector) *LineTracer {
 	return &LineTracer{
 		slices: []utils.Vector{start},
+		tags:   make(map[string]string),
 	}
+}
+
+func (l *LineTracer) WithTags(tags map[string]string) *LineTracer {
+	utils.Merge(l.tags, tags)
+	return l
 }
 
 func (l *LineTracer) MoveVertical(reverse bool) utils.Vector {
@@ -49,7 +56,7 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 		}
 
 		if lastCell == nil {
-			lastCell = LinesCell(lines)
+			lastCell = LinesCell(lines).Tags(l.tags)
 			startCellStack := matrix.Cell(from)
 			if startCellStack != nil {
 				startCellStack.add(lastCell)
@@ -64,7 +71,7 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 			r: fromTo.X < 0,
 			t: fromTo.Y > 0,
 			b: fromTo.Y < 0,
-		})
+		}).Tags(l.tags)
 
 		if endCellStack != nil {
 			endCellStack.add(newCell)

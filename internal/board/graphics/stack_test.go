@@ -15,7 +15,7 @@ func TestCellStack_Render_lines(t *testing.T) {
 	cs.add(LinesCell(Lines{
 		b: true,
 	}))
-	a.Equal("╷", cs.Render())
+	a.Equal('╷', cs.Render())
 }
 
 func TestCellStack_Render_charHasPriority(t *testing.T) {
@@ -25,7 +25,7 @@ func TestCellStack_Render_charHasPriority(t *testing.T) {
 		t: true,
 	}))
 	cs.PlaceChar('a')
-	a.Equal("a", cs.Render())
+	a.Equal('a', cs.Render())
 }
 
 func TestCellStack_Render_arrowHasPriority(t *testing.T) {
@@ -35,19 +35,5 @@ func TestCellStack_Render_arrowHasPriority(t *testing.T) {
 	cs.add(LinesCell(Lines{
 		t: true,
 	}))
-	a.Equal("▷", cs.Render())
-}
-
-func TestCellStack_Tag(t *testing.T) {
-	a := require.New(t)
-	cs := CellStack{}
-
-	a.Equal(false, cs.Is("key", "foo"))
-	cs.Tag("key", "bar")
-	a.Equal(false, cs.Is("key", "foo"))
-	a.Equal(true, cs.Is("key", "bar"))
-	cs.Tag("key", "foo")
-	cs.Tag("otherKey", "bar")
-	a.Equal(true, cs.Is("key", "foo"))
-	a.Equal(true, cs.Is("otherKey", "bar"))
+	a.Equal('▷', cs.Render())
 }

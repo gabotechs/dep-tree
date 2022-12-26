@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/utils"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"
@@ -238,14 +240,18 @@ func TestBoard(t *testing.T) {
 			a := require.New(t)
 			board := MakeBoard()
 			for _, block := range tt.Blocks {
-				err := board.AddBlock(block.name, block.name, block.x, block.y)
+				err := board.AddBlock(&Block{
+					Id:       block.name,
+					Label:    block.name,
+					Position: utils.Vec(block.x, block.y),
+				})
 				a.NoError(err)
 			}
 			for _, connections := range tt.Connections {
 				from := tt.Blocks[connections.from]
 				for _, toI := range connections.to {
 					to := tt.Blocks[toI]
-					err := board.AddConnector(from.name, to.name)
+					err := board.AddConnector(from.name, to.name, nil)
 					a.NoError(err)
 				}
 			}

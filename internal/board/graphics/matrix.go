@@ -71,7 +71,7 @@ func (m *Matrix) rayCast(
 		}
 
 		for queryTag, queryFunction := range query {
-			if value, ok := cellStack.tags[queryTag]; ok {
+			if value, ok := cellStack.Tags()[queryTag]; ok {
 				if queryFunction(value) {
 					return true, nil
 				}
@@ -94,11 +94,15 @@ func (m *Matrix) RayCastVertical(
 	return m.rayCast(origin, utils.Vec(0, dir), query, length)
 }
 
+func (m *Matrix) Cells() [][]CellStack {
+	return m.elements
+}
+
 func (m *Matrix) Render() string {
 	rendered := ""
 	for j := 0; j < m.h; j++ {
 		for i := 0; i < m.w; i++ {
-			rendered += m.elements[j][i].Render()
+			rendered += string(m.elements[j][i].Render())
 		}
 		rendered += "\n"
 	}

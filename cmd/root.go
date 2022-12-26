@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"dep-tree/internal/graph"
 	"dep-tree/internal/js"
+	"dep-tree/internal/tui"
 
 	"github.com/spf13/cobra"
 )
@@ -41,9 +41,12 @@ var Root = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			_, content, err := graph.RenderGraph[js.Data](ctx, entrypoint, parser)
-			fmt.Print(content)
-			return err
+			_, board, err := graph.RenderGraph[js.Data](ctx, entrypoint, parser)
+			if err != nil {
+				return err
+			}
+
+			return tui.Loop(board)
 		} else {
 			return errors.New("file not supported")
 		}

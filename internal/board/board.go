@@ -23,25 +23,22 @@ func MakeBoard() *Board {
 	}
 }
 
-func (b *Board) Render() (string, error) {
-	// 1. Create Cell matrix.
+func (b *Board) makeMatrix() (*graphics.Matrix, error) {
 	matrix := graphics.NewMatrix(b.w, b.h)
 
-	// 2. Render blocks.
 	for _, k := range b.blocks.Keys() {
 		block, _ := b.blocks.Get(k)
 		err := block.Render(matrix)
 		if err != nil {
-			return matrix.Render(), fmt.Errorf("error rendering blockChar %s: %w", block.Label, err)
+			return matrix, fmt.Errorf("error rendering blockChar %s: %w", block.Label, err)
 		}
 	}
 
-	// 3. Render connectors.
 	for _, k := range b.connectors.Keys() {
 		connector, _ := b.connectors.Get(k)
 		err := connector.Render(matrix)
 		if err != nil {
-			return matrix.Render(), fmt.Errorf(
+			return matrix, fmt.Errorf(
 				"error rendering connector from %s to %s: %w",
 				strings.TrimSpace(connector.from.Label),
 				strings.TrimSpace(connector.to.Label),
@@ -49,7 +46,15 @@ func (b *Board) Render() (string, error) {
 			)
 		}
 	}
+	return matrix, nil
+}
 
-	// 4. dump Cells to a string.
-	return matrix.Render(), nil
+func (b *Board) Cells() ([][]graphics.CellStack, error) {
+	matrix, err := b.makeMatrix()
+	return matrix.Cells(), err
+}
+
+func (b *Board) Render() (string, error) {
+	matrix, err := b.makeMatrix()
+	return matrix.Render(), err
 }

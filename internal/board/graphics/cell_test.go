@@ -30,3 +30,17 @@ func TestCell_mergeLines(t *testing.T) {
 	a.Equal(cell.lines.b, true)
 	a.Equal(cell.lines.cross, true)
 }
+
+func TestCell_Tag(t *testing.T) {
+	a := require.New(t)
+	c := Cell{}
+
+	a.Equal(false, c.Is("key", "foo"))
+	c.Tag("key", "bar")
+	a.Equal(false, c.Is("key", "foo"))
+	a.Equal(true, c.Is("key", "bar"))
+	c.Tag("key", "foo")
+	c.Tag("otherKey", "bar")
+	a.Equal(true, c.Is("key", "foo"))
+	a.Equal(true, c.Is("otherKey", "bar"))
+}
