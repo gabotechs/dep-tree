@@ -107,8 +107,8 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 	cell = matrix.Cell(cur)
 	if cell != nil {
 		cell.PlaceArrow(reverseX).
-			Tag(cellType, arrow).
-			Tags(c.tags)
+			WithTag(cellType, arrow).
+			WithTags(c.tags)
 	}
 	return nil
 }

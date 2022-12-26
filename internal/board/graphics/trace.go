@@ -40,7 +40,7 @@ func (l *LineTracer) MoveHorizontal(reverse bool) utils.Vector {
 }
 
 func (l *LineTracer) Dump(matrix *Matrix) error {
-	var lastCell *Cell
+	var lastCell *LinesCell
 	for i := 1; i < len(l.slices); i++ {
 		from := l.slices[i-1]
 		to := l.slices[i]
@@ -48,7 +48,7 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 		if fromTo.X != 0 && fromTo.Y != 0 {
 			return errors.New("cannot draw diagonal lines")
 		}
-		lines := Lines{
+		lines := LinesCell{
 			l: fromTo.X < 0,
 			r: fromTo.X > 0,
 			t: fromTo.Y < 0,
@@ -56,27 +56,38 @@ func (l *LineTracer) Dump(matrix *Matrix) error {
 		}
 
 		if lastCell == nil {
-			lastCell = LinesCell(lines).Tags(l.tags)
+			lastCell = &lines
 			startCellStack := matrix.Cell(from)
 			if startCellStack != nil {
-				startCellStack.add(lastCell)
+				startCellStack.add(NewTaggedCell(lastCell).WithTags(l.tags))
 			}
 		} else {
-			lastCell.mergeLines(lines)
+			if lines.l {
+				lastCell.l = true
+			}
+			if lines.t {
+				lastCell.t = true
+			}
+			if lines.r {
+				lastCell.r = true
+			}
+			if lines.b {
+				lastCell.b = true
+			}
 		}
 
 		endCellStack := matrix.Cell(to)
-		newCell := LinesCell(Lines{
+		newCell := LinesCell{
 			l: fromTo.X > 0,
 			r: fromTo.X < 0,
 			t: fromTo.Y > 0,
 			b: fromTo.Y < 0,
-		}).Tags(l.tags)
+		}
 
 		if endCellStack != nil {
-			endCellStack.add(newCell)
+			endCellStack.add(NewTaggedCell(&newCell).WithTags(l.tags))
 		}
-		lastCell = newCell
+		lastCell = &newCell
 	}
 	return nil
 }

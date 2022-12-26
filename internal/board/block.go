@@ -37,11 +37,11 @@ func (b *Block) Render(matrix *graphics.Matrix) error {
 			char := rune(b.Label[idIndex])
 			if char != ' ' {
 				cell.PlaceChar(char).
-					Tag(cellType, blockChar).
-					Tags(b.Tags)
+					WithTag(cellType, blockChar).
+					WithTags(b.Tags)
 			} else {
 				cell.PlaceEmpty().
-					Tag(cellType, blockSpace)
+					WithTag(cellType, blockSpace)
 			}
 		}
 	}
