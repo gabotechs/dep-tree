@@ -33,6 +33,19 @@ func (cs *CellStack) Is(key string, value string) bool {
 	return false
 }
 
+func (cs *CellStack) Tag(key string) string {
+	if cs == nil {
+		return ""
+	}
+	for _, cell := range *cs {
+		tag := cell.Tag(key)
+		if tag != "" {
+			return tag
+		}
+	}
+	return ""
+}
+
 func (cs *CellStack) Match(tags map[string]string) bool {
 	if tags == nil {
 		return false

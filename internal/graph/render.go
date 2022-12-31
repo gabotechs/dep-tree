@@ -72,6 +72,10 @@ func (g *Graph[T]) getSortNodes(
 }
 
 const indent = 2
+const NodeIdTag = "nodeId"
+const NodeIndexTag = "nodeIndex"
+const ConnectorOriginNodeIdTag = "connectorOrigin"
+const ConnectorDestinationNodeIdTag = "connectorDestination"
 
 func (g *Graph[T]) renderGraph(
 	ctx context.Context,
@@ -102,7 +106,8 @@ func (g *Graph[T]) renderGraph(
 		}
 
 		tags := map[string]string{
-			"nodeIndex": strconv.Itoa(i),
+			NodeIdTag:    n.node.Id,
+			NodeIndexTag: strconv.Itoa(i),
 		}
 
 		err := b.AddBlock(
@@ -118,12 +123,13 @@ func (g *Graph[T]) renderGraph(
 		}
 	}
 
-	for i, n := range nodes {
-		tags := map[string]string{
-			"nodeIndex": strconv.Itoa(i),
-		}
-
+	for _, n := range nodes {
 		for _, child := range g.Children(n.node.Id) {
+			tags := map[string]string{
+				ConnectorOriginNodeIdTag:      n.node.Id,
+				ConnectorDestinationNodeIdTag: child.Id,
+			}
+
 			err := b.AddConnector(n.node.Id, child.Id, tags)
 			if err != nil {
 				return ctx, nil, err

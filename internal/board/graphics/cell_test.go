@@ -20,4 +20,7 @@ func TestCell_WithTag(t *testing.T) {
 	})
 	a.Equal(true, c.Is("key", "foo"))
 	a.Equal(true, c.Is("otherKey", "bar"))
+
+	a.Equal("foo", c.Tag("key"))
+	a.Equal("bar", c.Tag("otherKey"))
 }

@@ -79,6 +79,16 @@ func (tc *TaggedCell) Is(key string, value string) bool {
 	}
 }
 
+func (tc *TaggedCell) Tag(key string) string {
+	if tc.tags == nil {
+		return ""
+	} else if v, ok := tc.tags[key]; ok {
+		return v
+	} else {
+		return ""
+	}
+}
+
 func (tc *TaggedCell) Match(tags map[string]string) bool {
 	if tags == nil {
 		return false

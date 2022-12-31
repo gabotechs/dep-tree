@@ -7,6 +7,7 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 
 	"dep-tree/internal/board/graphics"
+	"dep-tree/internal/utils"
 )
 
 type Board struct {
@@ -21,6 +22,10 @@ func MakeBoard() *Board {
 		blocks:     orderedmap.NewOrderedMap[string, *Block](),
 		connectors: orderedmap.NewOrderedMap[string, *Connector](),
 	}
+}
+
+func (b *Board) Size() utils.Vector {
+	return utils.Vec(b.w, b.h)
 }
 
 func (b *Board) makeMatrix() (*graphics.Matrix, error) {
