@@ -5,6 +5,7 @@ import (
 
 	"dep-tree/internal/board"
 	s "dep-tree/internal/tui/state"
+	"dep-tree/internal/utils"
 )
 
 func Loop(b *board.Board) error {
@@ -16,42 +17,53 @@ func Loop(b *board.Board) error {
 	if err != nil {
 		return err
 	}
-	state := s.NewState(cells, screen.Size())
+	cursor := utils.Vec(0, 0)
+	renderState := s.NewRenderState(&cursor, cells)
+	runtimeState := s.NewRuntimeState()
+	spatialState := s.NewSpatialState(&cursor, screen.Size(), len(cells)-1)
+
+	renderState.Update()
+	spatialState.Update()
+	runtimeState.Update()
 
 	for {
 		screen.Clear()
-		if state.ShouldQuit {
+		if runtimeState.ShouldQuit {
 			screen.Fini()
 			return nil
 		}
 
-		state.ForEachCell(func(info s.RenderInfo) {
-			style := defStyle
-			if info.IsSelected {
-				style = selectedStyle
-			}
+		renderState.ForEachCell(
+			utils.Vec(spatialState.Offset.X, spatialState.Offset.Y),
+			utils.Vec(spatialState.Offset.X+spatialState.ScreenSize.X, spatialState.Offset.Y+spatialState.ScreenSize.Y),
+			func(info s.RenderInfo) {
+				style := defStyle
+				if info.IsSelected {
+					style = selectedStyle
+				}
 
-			screen.SetContent(
-				info.Position.X,
-				info.Position.Y,
-				info.Char,
-				nil,
-				style,
-			)
-		})
+				screen.SetContent(
+					info.Position.X,
+					info.Position.Y,
+					info.Char,
+					nil,
+					style,
+				)
+			})
 
 		screen.Show()
 
 		ev := screen.PollEvent()
-
-		switch ev := ev.(type) {
-		case *tcell.EventInterrupt:
-			state.Quit()
-		case *tcell.EventResize:
+		if _, ok := ev.(*tcell.EventResize); ok {
 			screen.Sync()
-			state.SetSize(screen.Size())
-		case *tcell.EventKey:
-			state.Key(ev)
 		}
+
+		renderState.Action(ev)
+		spatialState.Action(ev)
+		runtimeState.Action(ev)
+
+		renderState.Update()
+		spatialState.Update()
+		runtimeState.Update()
 	}
 }
