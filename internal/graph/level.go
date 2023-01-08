@@ -29,7 +29,7 @@ func (g *Graph[T]) calculateLevel(
 	rootId string,
 	seen map[string]bool,
 ) (context.Context, int) {
-	var cachedLevelKey = cacheKey("level-" + nodeId)
+	var cachedLevelKey = cacheKey("level-" + rootId + "-" + nodeId)
 	if cachedLevel, ok := ctx.Value(cachedLevelKey).(int); ok {
 		// 1. Check first the cache, we do not like to work more than need.
 		return ctx, cachedLevel
@@ -48,7 +48,7 @@ func (g *Graph[T]) calculateLevel(
 	for _, parent := range g.Parents(nodeId) {
 		dep := hashDep(parent.Id, nodeId)
 
-		cachedCycleKey := cycleKey("cycle-" + dep)
+		cachedCycleKey := cycleKey("cycle-" + rootId + "-" + dep)
 		if _, ok := ctx.Value(cachedCycleKey).(bool); ok {
 			continue
 		}
