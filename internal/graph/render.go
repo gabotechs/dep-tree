@@ -76,6 +76,7 @@ const NodeIdTag = "nodeId"
 const NodeIndexTag = "nodeIndex"
 const ConnectorOriginNodeIdTag = "connectorOrigin"
 const ConnectorDestinationNodeIdTag = "connectorDestination"
+const NodeParentsTag = "nodeParents"
 
 func (g *Graph[T]) renderGraph(
 	ctx context.Context,
@@ -105,9 +106,16 @@ func (g *Graph[T]) renderGraph(
 			}
 		}
 
+		parents := g.Parents(n.node.Id)
+
 		tags := map[string]string{
-			NodeIdTag:    n.node.Id,
-			NodeIndexTag: strconv.Itoa(i),
+			NodeIdTag:      n.node.Id,
+			NodeIndexTag:   strconv.Itoa(i),
+			NodeParentsTag: "",
+		}
+
+		for _, parent := range parents {
+			tags[NodeParentsTag] += parent.Id + ";"
 		}
 
 		err := b.AddBlock(

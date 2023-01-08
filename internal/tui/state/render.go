@@ -1,6 +1,8 @@
 package state
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 
 	"dep-tree/internal/board/graphics"
@@ -23,9 +25,10 @@ func NewRenderState(cursor *utils.Vector, cells [][]graphics.CellStack) *RenderS
 }
 
 type RenderInfo struct {
-	Position   utils.Vector
-	Char       rune
-	IsSelected bool
+	Position      utils.Vector
+	Char          rune
+	IsSelected    bool
+	IsHighlighted bool
 }
 
 func (rs *RenderState) computeCursor() {
@@ -57,16 +60,23 @@ func (rs *RenderState) ForEachCell(
 			cell := rs.cells[i][j]
 			priorityTags := map[string]string{}
 			isSelected := false
-			if cell.Is(graph.NodeIdTag, rs.SelectedId) {
+			isHighlighted := false
+			switch {
+			case rs.SelectedId == "":
+				// nothing here.
+			case cell.Is(graph.NodeIdTag, rs.SelectedId):
 				isSelected = true
-			} else if cell.Is(graph.ConnectorOriginNodeIdTag, rs.SelectedId) {
+			case cell.Is(graph.ConnectorOriginNodeIdTag, rs.SelectedId):
 				isSelected = true
 				priorityTags[graph.ConnectorOriginNodeIdTag] = rs.SelectedId
+			case strings.Contains(cell.Tag(graph.NodeParentsTag), rs.SelectedId):
+				isHighlighted = true
 			}
 			f(RenderInfo{
-				Position:   utils.Vec(j-from.X, i-from.Y),
-				Char:       cell.Render(priorityTags),
-				IsSelected: isSelected,
+				Position:      utils.Vec(j-from.X, i-from.Y),
+				Char:          cell.Render(priorityTags),
+				IsSelected:    isSelected,
+				IsHighlighted: isHighlighted,
 			})
 		}
 	}

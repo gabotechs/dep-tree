@@ -37,9 +37,11 @@ func Loop(b *board.Board) error {
 			utils.Vec(spatialState.Offset.X, spatialState.Offset.Y),
 			utils.Vec(spatialState.Offset.X+spatialState.ScreenSize.X, spatialState.Offset.Y+spatialState.ScreenSize.Y),
 			func(info s.RenderInfo) {
-				style := defStyle
+				style := defaultStyle
 				if info.IsSelected {
-					style = selectedStyle
+					style = primaryStyle
+				} else if info.IsHighlighted {
+					style = secondaryStyle
 				}
 
 				screen.SetContent(

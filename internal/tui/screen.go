@@ -6,8 +6,9 @@ import (
 	"dep-tree/internal/utils"
 )
 
-var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-var selectedStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorGreen)
+var defaultStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+var primaryStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorGreen)
+var secondaryStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorBlue)
 
 type Screen struct {
 	tcell.Screen
@@ -20,7 +21,7 @@ func NewScreen() (*Screen, error) {
 	} else if err = s.Init(); err != nil {
 		return nil, err
 	}
-	s.SetStyle(defStyle)
+	s.SetStyle(defaultStyle)
 
 	return &Screen{Screen: s}, nil
 }
