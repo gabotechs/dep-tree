@@ -4,6 +4,7 @@ import "github.com/gdamore/tcell/v2"
 
 type RunTimeState struct {
 	ShouldQuit bool
+	Next       bool
 }
 
 func NewRuntimeState() *RunTimeState {
@@ -23,6 +24,9 @@ func (rts *RunTimeState) Action(ev tcell.Event) {
 	case *tcell.EventKey:
 		if ev.Rune() == 'q' {
 			rts.ShouldQuit = true
+			rts.Next = false
+		} else if ev.Key() == tcell.KeyEnter {
+			rts.Next = true
 		}
 	}
 }

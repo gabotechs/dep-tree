@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 
-	"dep-tree/internal/graph"
 	"dep-tree/internal/js"
 	"dep-tree/internal/tui"
 
@@ -41,12 +40,8 @@ var Root = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			_, board, err := graph.RenderGraph[js.Data](ctx, entrypoint, parser)
-			if err != nil {
-				return err
-			}
 
-			return tui.Loop(board)
+			return tui.Loop[js.Data](ctx, entrypoint, parser)
 		} else {
 			return errors.New("file not supported")
 		}
