@@ -6,8 +6,7 @@ import (
 	"dep-tree/internal/utils"
 )
 
-const horizontalMargin = 0.2
-const verticalMargin = 0.3
+const horizontalMargin = 0.5
 
 type SpatialState struct {
 	ScreenSize utils.Vector
@@ -28,12 +27,12 @@ func NewSpatialState(
 
 func (s *SpatialState) computeScreenOffset() {
 	verticalUpperLimit := s.Offset.Y
-	verticalLowerLimit := s.Offset.Y + int(float32(s.ScreenSize.Y)*verticalMargin)
+	verticalLowerLimit := s.Offset.Y + s.ScreenSize.Y
 
 	if s.Cursor.Y < verticalUpperLimit {
 		s.Offset.Y += s.Cursor.Y - verticalUpperLimit
-	} else if s.Cursor.Y > verticalLowerLimit {
-		s.Offset.Y += s.Cursor.Y - verticalLowerLimit
+	} else if s.Cursor.Y >= verticalLowerLimit {
+		s.Offset.Y += s.Cursor.Y - verticalLowerLimit + 1
 	}
 
 	horizontalUpperLimit := s.Offset.X
@@ -46,10 +45,6 @@ func (s *SpatialState) computeScreenOffset() {
 	}
 }
 
-func (s *SpatialState) SetSize(size utils.Vector) {
-	s.ScreenSize = size
-}
-
 func (s *SpatialState) up(n int) {
 	s.Cursor.Y -= n
 	s.Cursor.Y = utils.Clamp(0, s.Cursor.Y, s.maxY)
@@ -58,10 +53,6 @@ func (s *SpatialState) up(n int) {
 func (s *SpatialState) down(n int) {
 	s.Cursor.Y += n
 	s.Cursor.Y = utils.Clamp(0, s.Cursor.Y, s.maxY)
-}
-
-func (s *SpatialState) SetOffset(offset utils.Vector) {
-	s.Offset = offset
 }
 
 func (s *SpatialState) Action(ev tcell.Event) {
@@ -82,9 +73,9 @@ func (s *SpatialState) Action(ev tcell.Event) {
 		case tcell.KeyUp:
 			s.up(1)
 		case tcell.KeyCtrlU:
-			s.up(s.ScreenSize.Y)
+			s.up(s.ScreenSize.Y / 2)
 		case tcell.KeyCtrlD:
-			s.down(s.ScreenSize.Y)
+			s.down(s.ScreenSize.Y / 2)
 		}
 	}
 }
