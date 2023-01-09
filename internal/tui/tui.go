@@ -5,92 +5,83 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
+	"dep-tree/internal/ecs"
 	"dep-tree/internal/graph"
-	s "dep-tree/internal/tui/state"
+	"dep-tree/internal/tui/systems"
 	"dep-tree/internal/utils"
 )
 
+var style = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+
 func Loop[T any](ctx context.Context, entrypoint string, parser graph.NodeParser[T]) error {
-	screen, err := NewScreen()
+	screen, err := tcell.NewScreen()
 	if err != nil {
 		return err
 	}
-
+	err = screen.Init()
+	if err != nil {
+		return err
+	}
+	screen.SetStyle(style)
+	if err != nil {
+		return err
+	}
 	_, board, err := graph.RenderGraph(ctx, entrypoint, parser)
 	if err != nil {
 		return err
 	}
-
 	cells, err := board.Cells()
 	if err != nil {
 		return err
 	}
-	cursor := utils.Vec(0, 0)
 
-	renderState := s.NewRenderState(&cursor, cells)
-	runtimeState := s.NewRuntimeState()
-	spatialState := s.NewSpatialState(&cursor, screen.Size(), len(cells)-1)
-
-	states := s.States{
-		renderState,
-		spatialState,
-		runtimeState,
+	renderState := &systems.RenderState{
+		Cells: cells,
+	}
+	spatialState := &systems.SpatialState{
+		ScreenSize: utils.Vec(screen.Size()),
+		Offset:     utils.Vec(0, 0),
+		MaxY:       len(cells) - 1,
+	}
+	globalState := &systems.State{
+		Cursor:     utils.Vec(0, 0),
+		Screen:     screen,
+		SelectedId: "",
+		Event:      nil,
 	}
 
-	states.Update()
+	world := ecs.NewWorld().
+		WithEntity(ecs.NewEntity().
+			With(globalState).
+			With(renderState).
+			With(spatialState),
+		).
+		WithSystem(systems.SpatialSystem).
+		WithSystem(systems.RenderSystem).
+		WithSystem(systems.RuntimeSystem)
 
 	for {
-		if runtimeState.ShouldQuit {
-			screen.Fini()
+		err = world.Update()
+		switch {
+		case systems.IsShouldQuit(err):
 			return nil
-		} else if runtimeState.Next {
-			if renderState.SelectedId != "" {
-				err = screen.Suspend()
-				if err != nil {
-					return err
-				}
-				err = Loop[T](ctx, renderState.SelectedId, parser)
-				if err != nil {
-					return err
-				}
-				err = screen.Resume()
-				if err != nil {
-					return err
-				}
+		case systems.IsShouldNavigate(err):
+			_ = screen.Suspend()
+			err = Loop[T](ctx, globalState.SelectedId, parser)
+			if err != nil {
+				return err
 			}
-			runtimeState.Next = false
+			_ = screen.Resume()
+			_ = world.Update()
+		case err != nil:
+			return err
 		}
-
-		screen.Clear()
-
-		renderState.ForEachCell(
-			utils.Vec(spatialState.Offset.X, spatialState.Offset.Y),
-			utils.Vec(spatialState.Offset.X+spatialState.ScreenSize.X, spatialState.Offset.Y+spatialState.ScreenSize.Y),
-			func(info s.RenderInfo) {
-				style := defaultStyle
-				if info.IsSelected {
-					style = primaryStyle
-				} else if info.IsHighlighted {
-					style = secondaryStyle
-				}
-
-				screen.SetContent(
-					info.Position.X,
-					info.Position.Y,
-					info.Char,
-					nil,
-					style,
-				)
-			})
-
 		screen.Show()
 
 		ev := screen.PollEvent()
 		if _, ok := ev.(*tcell.EventResize); ok {
 			screen.Sync()
 		}
-
-		states.Action(ev)
-		states.Update()
+		globalState.Event = ev
 	}
 }
