@@ -41,7 +41,7 @@ var Root = &cobra.Command{
 				return err
 			}
 
-			return tui.Loop[js.Data](ctx, entrypoint, parser)
+			return tui.Loop[js.Data](ctx, entrypoint, parser, nil)
 		} else {
 			return errors.New("file not supported")
 		}

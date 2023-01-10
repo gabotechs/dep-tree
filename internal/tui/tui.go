@@ -13,12 +13,20 @@ import (
 
 var style = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
-func Loop[T any](ctx context.Context, entrypoint string, parser graph.NodeParser[T]) error {
-	screen, err := tcell.NewScreen()
-	if err != nil {
-		return err
+func Loop[T any](
+	ctx context.Context,
+	entrypoint string,
+	parser graph.NodeParser[T],
+	screen tcell.Screen,
+) error {
+	if screen == nil {
+		var err error
+		screen, err = tcell.NewScreen()
+		if err != nil {
+			return err
+		}
 	}
-	err = screen.Init()
+	err := screen.Init()
 	if err != nil {
 		return err
 	}
@@ -67,7 +75,7 @@ func Loop[T any](ctx context.Context, entrypoint string, parser graph.NodeParser
 			return nil
 		case systems.IsShouldNavigate(err):
 			_ = screen.Suspend()
-			err = Loop[T](ctx, globalState.SelectedId, parser)
+			err = Loop[T](ctx, globalState.SelectedId, parser, nil)
 			if err != nil {
 				return err
 			}
