@@ -77,6 +77,17 @@ func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context
 	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
 	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
+	if n.Id == p.entrypoint {
+		// Take exports into account if top level root node is exporting stuff.
+		var exports map[string]string
+		ctx, exports, err = p.parseExports(ctx, p.entrypoint)
+		if err != nil {
+			return nil, nil, err
+		}
+		for _, exportFrom := range exports {
+			resolvedImports.Set(exportFrom, true)
+		}
+	}
 	for _, importedPath := range imports.Keys() {
 		importedNames, _ := imports.Get(importedPath)
 		var exports map[string]string
