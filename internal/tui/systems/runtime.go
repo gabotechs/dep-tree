@@ -13,8 +13,7 @@ func IsShouldQuit(err error) bool {
 	return ok
 }
 
-type ShouldNavigate struct {
-}
+type ShouldNavigate struct{}
 
 func (s *ShouldNavigate) Error() string {
 	return "Should Navigate"
