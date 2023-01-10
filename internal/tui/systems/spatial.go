@@ -45,8 +45,6 @@ func down(n int, s *State, ss *SpatialState) {
 }
 
 func SpatialSystem(s *State, ss *SpatialState) {
-	computeScreenOffset(s, ss)
-
 	switch key := s.Event.(type) {
 	case *tcell.EventResize:
 		s.Screen.Sync()
@@ -70,4 +68,5 @@ func SpatialSystem(s *State, ss *SpatialState) {
 			down(ss.ScreenSize.Y/2, s, ss)
 		}
 	}
+	computeScreenOffset(s, ss)
 }
