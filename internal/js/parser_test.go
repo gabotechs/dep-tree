@@ -38,6 +38,12 @@ func TestParser_Deps(t *testing.T) {
 			},
 		},
 		{
+			Name: "with-exports",
+			Expected: []string{
+				"with-imports-imported/imported.js",
+			},
+		},
+		{
 			Name: "with-imports-index",
 			Expected: []string{
 				"with-imports-index-imported/other.js",
