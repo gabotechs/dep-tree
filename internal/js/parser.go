@@ -21,30 +21,39 @@ type Parser struct {
 
 var _ graph.NodeParser[Data] = &Parser{}
 
+func findPackageJson(searchPath string) (TsConfig, string, error) {
+	if len(searchPath) < 2 {
+		return TsConfig{}, "", nil
+	}
+	packageJsonPath := path.Join(searchPath, "package.json")
+	if utils.FileExists(packageJsonPath) {
+		tsConfigPath := path.Join(searchPath, "tsconfig.json")
+		var tsConfig TsConfig
+		var err error
+		if utils.FileExists(tsConfigPath) {
+			tsConfig, err = ParseTsConfig(tsConfigPath)
+			if err != nil {
+				err = fmt.Errorf("found TypeScript config file in %s but there was an error reading it: %w", tsConfigPath, err)
+			}
+		}
+		return tsConfig, searchPath, err
+	} else {
+		return findPackageJson(path.Dir(searchPath))
+	}
+}
+
 func MakeJsParser(entrypoint string) (*Parser, error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return nil, err
 	}
-	searchPath := entrypointAbsPath
-	var tsConfig TsConfig
-	var projectRoot string
-	for len(searchPath) > 1 {
-		packageJsonPath := path.Join(searchPath, "package.json")
-		if utils.FileExists(packageJsonPath) {
-			tsConfigPath := path.Join(searchPath, "tsconfig.json")
-			if utils.FileExists(tsConfigPath) {
-				var err error
-				tsConfig, err = ParseTsConfig(tsConfigPath)
-				if err != nil {
-					return nil, fmt.Errorf("found TypeScript config file in %s but there was an error reading it: %w", tsConfigPath, err)
-				}
-			}
-			projectRoot = searchPath
-			break
-		} else {
-			searchPath = path.Dir(searchPath)
-		}
+	tsConfig, packageJsonPath, err := findPackageJson(entrypointAbsPath)
+	if err != nil {
+		return nil, err
+	}
+	projectRoot := path.Dir(entrypointAbsPath)
+	if packageJsonPath != "" {
+		projectRoot = packageJsonPath
 	}
 	return &Parser{
 		entrypoint:  entrypointAbsPath,
