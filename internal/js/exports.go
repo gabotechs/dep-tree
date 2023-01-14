@@ -11,12 +11,17 @@ import (
 
 type ExportsCacheKey string
 
+type ExportsResult struct {
+	Exports map[string]string
+	Errors  []error
+}
+
 func (p *Parser) parseExports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, map[string]string, error) {
+) (context.Context, *ExportsResult, error) {
 	cacheKey := ExportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(map[string]string); ok {
+	if cached, ok := ctx.Value(cacheKey).(*ExportsResult); ok {
 		return ctx, cached, nil
 	} else {
 		ctx, result, err := p.uncachedParseExports(ctx, filePath)
@@ -31,30 +36,35 @@ func (p *Parser) parseExports(
 func (p *Parser) uncachedParseExports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, map[string]string, error) {
+) (context.Context, *ExportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err
 	}
-	exported := make(map[string]string)
+
+	results := &ExportsResult{
+		Exports: make(map[string]string),
+		Errors:  []error{},
+	}
+
 	for _, stmt := range jsFile.Statements {
 		switch {
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.DeclarationExport != nil:
-			handleDeclarationExport(stmt.DeclarationExport, filePath, exported)
+			handleDeclarationExport(stmt.DeclarationExport, filePath, results.Exports)
 		case stmt.ListExport != nil:
-			handleListExport(stmt.ListExport, filePath, exported)
+			handleListExport(stmt.ListExport, filePath, results.Exports)
 		case stmt.DefaultExport != nil:
-			handleDefaultExport(stmt.DefaultExport, filePath, exported)
+			handleDefaultExport(stmt.DefaultExport, filePath, results.Exports)
 		case stmt.ProxyExport != nil:
-			ctx, err = p.handleProxyExport(ctx, stmt.ProxyExport, filePath, exported)
+			ctx, err = p.handleProxyExport(ctx, stmt.ProxyExport, filePath, results.Exports)
 		}
 		if err != nil {
-			return ctx, nil, err
+			results.Errors = append(results.Errors, err)
 		}
 	}
-	return ctx, exported, nil
+	return ctx, results, nil
 }
 
 func handleDeclarationExport(
@@ -110,11 +120,11 @@ func (p *Parser) handleProxyExport(
 		if stmt.ExportAllAlias != "" {
 			dumpOn[stmt.ExportAllAlias] = filePath
 		} else {
-			utils.Merge(dumpOn, proxyExports)
+			utils.Merge(dumpOn, proxyExports.Exports)
 		}
 	case stmt.ExportDeconstruction != nil:
 		for _, name := range stmt.ExportDeconstruction.Names {
-			if proxyPath, ok := proxyExports[name.Original]; ok {
+			if proxyPath, ok := proxyExports.Exports[name.Original]; ok {
 				dumpOn[name.AliasOrOriginal()] = proxyPath
 			} else {
 				return ctx, fmt.Errorf("cannot import \"%s\" from %s", name.Original, exportFrom)

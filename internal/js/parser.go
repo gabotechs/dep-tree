@@ -79,35 +79,40 @@ func (p *Parser) Entrypoint(entrypoint string) (*graph.Node[Data], error) {
 
 func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context, []*graph.Node[Data], error) {
 	ctx, imports, err := p.parseImports(ctx, n.Data.filePath)
+	n.AddErrors(imports.Errors...)
 	if err != nil {
 		return ctx, nil, err
 	}
 
-	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
-	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
 	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
+
+	// Take exports into account if top level root node is exporting stuff.
 	if n.Id == p.entrypoint {
-		// Take exports into account if top level root node is exporting stuff.
-		var exports map[string]string
+		var exports *ExportsResult
 		ctx, exports, err = p.parseExports(ctx, p.entrypoint)
+		n.AddErrors(exports.Errors...)
 		if err != nil {
 			return nil, nil, err
 		}
-		for _, exportFrom := range exports {
+		for _, exportFrom := range exports.Exports {
 			resolvedImports.Set(exportFrom, true)
 		}
 	}
-	for _, importedPath := range imports.Keys() {
-		importedNames, _ := imports.Get(importedPath)
-		var exports map[string]string
+
+	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
+	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
+	for _, importedPath := range imports.Imports.Keys() {
+		importedNames, _ := imports.Imports.Get(importedPath)
+		var exports *ExportsResult
 		ctx, exports, err = p.parseExports(ctx, importedPath)
+		n.AddErrors(exports.Errors...)
 		if err != nil {
 			return ctx, nil, err
 		}
 		for _, name := range importedNames {
 			// If all imported, then dump every path in the resolved imports.
 			if name == "*" {
-				for _, fromPath := range exports {
+				for _, fromPath := range exports.Exports {
 					if _, ok := resolvedImports.Get(fromPath); ok {
 						continue
 					}
@@ -116,7 +121,7 @@ func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context
 				break
 			}
 
-			if resolvedImport, ok := exports[name]; ok {
+			if resolvedImport, ok := exports.Exports[name]; ok {
 				if _, ok := resolvedImports.Get(resolvedImport); ok {
 					continue
 				}

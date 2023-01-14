@@ -11,12 +11,17 @@ import (
 
 type ImportsCacheKey string
 
+type ImportsResult struct {
+	Imports *orderedmap.OrderedMap[string, []string]
+	Errors  []error
+}
+
 func (p *Parser) parseImports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *orderedmap.OrderedMap[string, []string], error) {
+) (context.Context, *ImportsResult, error) {
 	cacheKey := ImportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*orderedmap.OrderedMap[string, []string]); ok {
+	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
 		return ctx, cached, nil
 	} else {
 		ctx, result, err := p.uncachedParseImports(ctx, filePath)
@@ -31,13 +36,16 @@ func (p *Parser) parseImports(
 func (p *Parser) uncachedParseImports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *orderedmap.OrderedMap[string, []string], error) {
+) (context.Context, *ImportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err
 	}
 
-	imports := orderedmap.NewOrderedMap[string, []string]()
+	result := &ImportsResult{
+		Imports: orderedmap.NewOrderedMap[string, []string](),
+		Errors:  make([]error, 0),
+	}
 
 	for _, stmt := range jsFile.Statements {
 		var importPath string
@@ -57,12 +65,12 @@ func (p *Parser) uncachedParseImports(
 		var resolvedPath string
 		ctx, resolvedPath, err = p.ResolvePath(ctx, importPath, path.Dir(filePath))
 		if err != nil {
-			return ctx, nil, err
+			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {
-			imports.Set(resolvedPath, names)
+			result.Imports.Set(resolvedPath, names)
 		}
 	}
-	return ctx, imports, nil
+	return ctx, result, nil
 }
 
 func gatherNamesFromStaticImport(si *grammar.StaticImport) []string {

@@ -37,9 +37,10 @@ func TestParser_parseExports(t *testing.T) {
 	cwd, _ := os.Getwd()
 
 	tests := []struct {
-		Name     string
-		File     string
-		Expected map[string]string
+		Name           string
+		File           string
+		Expected       map[string]string
+		ExpectedErrors []string
 	}{
 		{
 			Name: "test",
@@ -51,6 +52,10 @@ func TestParser_parseExports(t *testing.T) {
 				"abs":      path.Join(cwd, exportsTestFolder, "src", "utils", "math", "index.js"),
 				"sum":      path.Join(cwd, exportsTestFolder, "src", "utils", "math", "sum.js"),
 			},
+			ExpectedErrors: []string{
+				"cannot import \"Unexisting\" from ",
+				"could not perform relative import for './unexisting'",
+			},
 		},
 	}
 
@@ -61,7 +66,14 @@ func TestParser_parseExports(t *testing.T) {
 			a.NoError(err)
 			_, exports, err := parser.parseExports(context.Background(), tt.File)
 			a.NoError(err)
-			a.Equal(tt.Expected, exports)
+			a.Equal(tt.Expected, exports.Exports)
+
+			a.Equal(len(tt.ExpectedErrors), len(exports.Errors))
+			if exports.Exports != nil {
+				for i, err := range exports.Errors {
+					a.ErrorContains(err, tt.ExpectedErrors[i])
+				}
+			}
 		})
 	}
 }
