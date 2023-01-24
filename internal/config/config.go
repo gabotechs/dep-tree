@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"path"
 
 	"gopkg.in/yaml.v3"
 )
@@ -34,13 +33,13 @@ func ParseConfig(path string) (*Config, error) {
 
 func (c *Config) whiteListCheck(from, to string) (bool, error) {
 	for k, v := range c.WhiteList {
-		match, err := path.Match(k, from)
+		doesMatch, err := match(k, from)
 		if err != nil {
 			return false, err
 		}
-		if match {
+		if doesMatch {
 			for _, dest := range v {
-				shouldPass, err := path.Match(dest, to)
+				shouldPass, err := match(dest, to)
 				if err != nil {
 					return false, err
 				}
@@ -56,13 +55,13 @@ func (c *Config) whiteListCheck(from, to string) (bool, error) {
 
 func (c *Config) blackListCheck(from, to string) (bool, error) {
 	for k, v := range c.BlackList {
-		match, err := path.Match(k, from)
+		doesMatch, err := match(k, from)
 		if err != nil {
 			return false, err
 		}
-		if match {
+		if doesMatch {
 			for _, dest := range v {
-				shouldReject, err := path.Match(dest, to)
+				shouldReject, err := match(dest, to)
 				if err != nil {
 					return false, err
 				}
