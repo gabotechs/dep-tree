@@ -18,4 +18,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
 
-
+  release-github-action:
+    runs-on: ubuntu-latest
+    needs:
+      - create-release
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: gabotechs/dep-tree-action
+          token: ${{ secrets.CI_TOKEN }}
+      - run: |
+          VERSION="${GITHUB_REF_NAME:1}"
+          jq ".version=\"$VERSION\"" package.json > _package.json
+          mv _package.json package.json
+          git config --global user.email $(git --no-pager show -s --format='%ae' HEAD)
+          git config --global user.name  $(git --no-pager show -s --format='%an' HEAD)
+          git commit -a -m "bump: version $VERSION"
+          git push origin main
+          git push --tags
