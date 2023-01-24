@@ -54,7 +54,9 @@ func TestValidateGraph(t *testing.T) {
 			_, dt, err := NewDepTree[[]int](ctx, &testParser)
 			a.NoError(err)
 
-			err = dt.Validate(&tt.Config)
+			err = dt.Validate(&tt.Config, func(id string) string {
+				return id
+			})
 			if err == nil {
 				a.Equal(tt.Failures, 0)
 			} else {
