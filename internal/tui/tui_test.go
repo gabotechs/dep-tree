@@ -12,7 +12,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/js"
 )
 
@@ -59,9 +58,7 @@ func TestTui(t *testing.T) {
 				wait <- Loop[js.Data](
 					context.Background(),
 					entrypointPath,
-					func(s string) (dep_tree.NodeParser[js.Data], error) {
-						return js.MakeJsParser(s)
-					},
+					js.MakeJsParser,
 					screen,
 				)
 			}()
