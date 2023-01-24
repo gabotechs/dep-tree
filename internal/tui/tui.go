@@ -43,7 +43,6 @@ func Loop[T any](
 		}
 	}
 	err = screen.Init()
-	defer screen.Fini()
 	if err != nil {
 		return err
 	}
@@ -86,6 +85,7 @@ func Loop[T any](
 			_ = screen.Suspend()
 			err = Loop[T](ctx, globalState.SelectedId, parserBuilder, nil)
 			if err != nil {
+				screen.Fini()
 				return err
 			}
 			_ = screen.Resume()
