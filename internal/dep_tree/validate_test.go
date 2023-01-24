@@ -51,11 +51,10 @@ func TestValidateGraph(t *testing.T) {
 
 			ctx := context.Background()
 
-			ctx, dt, err := NewDepTree[[]int](ctx, &testParser)
+			_, dt, err := NewDepTree[[]int](ctx, &testParser)
 			a.NoError(err)
 
-			_, err = dt.Validate(ctx, &tt.Config)
-
+			err = dt.Validate(&tt.Config)
 			if err == nil {
 				a.Equal(tt.Failures, 0)
 			} else {
