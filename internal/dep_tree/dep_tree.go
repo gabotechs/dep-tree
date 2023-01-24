@@ -3,6 +3,8 @@ package dep_tree
 import (
 	"context"
 
+	"github.com/elliotchance/orderedmap/v2"
+
 	"dep-tree/internal/graph"
 )
 
@@ -21,7 +23,7 @@ type DepTree[T any] struct {
 	Nodes  []*DepTreeNode[T]
 	Graph  *graph.Graph[T]
 	RootId string
-	Cycles [][]string
+	Cycles *orderedmap.OrderedMap[[2]string, DepCycle]
 }
 
 func NewDepTree[T any](
@@ -36,11 +38,11 @@ func NewDepTree[T any](
 		return ctx, nil, err
 	}
 	// 3. get sorted by level.
-	ctx, nodes := GetDepTreeNodes(ctx, g, rootId)
+	ctx, nodes, cycles := GetDepTreeNodes(ctx, g, rootId)
 	return ctx, &DepTree[T]{
 		Nodes:  nodes,
 		Graph:  g,
 		RootId: rootId,
-		Cycles: [][]string{}, // TODO.
+		Cycles: cycles,
 	}, nil
 }
