@@ -1,4 +1,4 @@
-package graph
+package dep_tree
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/graph"
 )
 
 func TestNode_Level(t *testing.T) {
@@ -68,14 +70,14 @@ func TestNode_Level(t *testing.T) {
 			a := require.New(t)
 			numNodes := len(tt.ExpectedLevels)
 
-			fr := NewGraph[int]()
+			g := graph.NewGraph[int]()
 			for i := 0; i < numNodes; i++ {
-				fr.AddNode(MakeNode(strconv.Itoa(i), 0))
+				g.AddNode(graph.MakeNode(strconv.Itoa(i), 0))
 			}
 
 			for n, children := range tt.Children {
 				for _, child := range children {
-					err := fr.AddChild(strconv.Itoa(n), strconv.Itoa(child))
+					err := g.AddChild(strconv.Itoa(n), strconv.Itoa(child))
 					a.NoError(err)
 				}
 			}
@@ -83,7 +85,7 @@ func TestNode_Level(t *testing.T) {
 			var lvls []int
 			for i := 0; i < numNodes; i++ {
 				var lvl int
-				ctx, lvl = fr.Level(ctx, strconv.Itoa(i), "0")
+				ctx, lvl = level(ctx, g, strconv.Itoa(i), "0")
 				lvls = append(lvls, lvl)
 			}
 			a.Equal(tt.ExpectedLevels, lvls)

@@ -4,11 +4,13 @@ go 1.19
 
 require (
 	github.com/alecthomas/participle/v2 v2.0.0-beta.5
+	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/elliotchance/orderedmap/v2 v2.2.0
 	github.com/gdamore/tcell/v2 v2.5.3
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -40,5 +42,4 @@ require (
 	golang.org/x/term v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

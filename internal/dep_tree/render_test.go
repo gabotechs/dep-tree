@@ -1,4 +1,4 @@
-package graph
+package dep_tree
 
 import (
 	"context"
@@ -9,44 +9,51 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/graph"
 )
 
 const RebuildTestsEnv = "REBUILD_TESTS"
 
 type TestGraph struct {
-	Spec [][]int
+	Start string
+	Spec  [][]int
 }
 
 var _ NodeParser[[]int] = &TestGraph{}
 
-func (t *TestGraph) Entrypoint(id string) (*Node[[]int], error) {
+func (t *TestGraph) getNode(id string) (*graph.Node[[]int], error) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
 	}
 	var children []int
 	if idInt >= len(t.Spec) {
-		return nil, fmt.Errorf("%s not present in spec", id)
+		return nil, fmt.Errorf("%s not present in spec", t.Start)
 	} else {
 		children = t.Spec[idInt]
 	}
-	return MakeNode(id, children), nil
+	return graph.MakeNode(id, children), nil
 }
 
-func (t *TestGraph) Deps(ctx context.Context, n *Node[[]int]) (context.Context, []*Node[[]int], error) {
-	result := make([]*Node[[]int], 0)
+func (t *TestGraph) Entrypoint() (*graph.Node[[]int], error) {
+	return t.getNode(t.Start)
+}
+
+func (t *TestGraph) Deps(ctx context.Context, n *graph.Node[[]int]) (context.Context, []*graph.Node[[]int], error) {
+	result := make([]*graph.Node[[]int], 0)
 	for _, child := range n.Data {
-		c, _ := t.Entrypoint(strconv.Itoa(child))
+		c, _ := t.getNode(strconv.Itoa(child))
 		result = append(result, c)
 	}
 	return ctx, result, nil
 }
 
-func (t *TestGraph) Display(n *Node[[]int]) string {
+func (t *TestGraph) Display(n *graph.Node[[]int]) string {
 	return n.Id
 }
 
-const testDir = ".graph_test"
+const testDir = ".render_test"
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
@@ -99,12 +106,16 @@ func TestRenderGraph(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			testParser := TestGraph{
-				Spec: tt.Spec,
+				Start: "0",
+				Spec:  tt.Spec,
 			}
 
 			ctx := context.Background()
 
-			_, board, err := RenderGraph[[]int](ctx, "0", &testParser)
+			ctx, dt, err := NewDepTree[[]int](ctx, &testParser)
+			a.NoError(err)
+
+			_, board, err := dt.Render(ctx, testParser.Display)
 			a.NoError(err)
 			result, err := board.Render()
 			a.NoError(err)

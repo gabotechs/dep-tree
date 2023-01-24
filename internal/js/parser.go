@@ -3,23 +3,23 @@ package js
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/elliotchance/orderedmap/v2"
 
+	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/graph"
 	"dep-tree/internal/utils"
 )
 
 type Parser struct {
-	entrypoint  string
+	rootId      string
 	ProjectRoot string
 	TsConfig    TsConfig
 }
 
-var _ graph.NodeParser[Data] = &Parser{}
+var _ dep_tree.NodeParser[Data] = &Parser{}
 
 func findPackageJson(searchPath string) (TsConfig, string, error) {
 	if len(searchPath) < 2 {
@@ -56,40 +56,29 @@ func MakeJsParser(entrypoint string) (*Parser, error) {
 		projectRoot = packageJsonPath
 	}
 	return &Parser{
-		entrypoint:  entrypointAbsPath,
+		rootId:      entrypointAbsPath,
 		ProjectRoot: projectRoot,
 		TsConfig:    tsConfig,
 	}, nil
 }
 
-func (p *Parser) Entrypoint(entrypoint string) (*graph.Node[Data], error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	} else if !utils.FileExists(entrypoint) {
-		return nil, fmt.Errorf("file '%s' does not exist or is not visible form CWD %s", entrypoint, cwd)
-	}
-	entrypointAbsPath, err := filepath.Abs(entrypoint)
-	if err != nil {
-		return nil, err
-	}
-
-	return MakeJsNode(entrypointAbsPath)
+func (p *Parser) Entrypoint() (*graph.Node[Data], error) {
+	return MakeJsNode(p.rootId)
 }
 
 func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context, []*graph.Node[Data], error) {
 	ctx, imports, err := p.parseImports(ctx, n.Data.filePath)
-	n.AddErrors(imports.Errors...)
 	if err != nil {
 		return ctx, nil, err
 	}
+	n.AddErrors(imports.Errors...)
 
 	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
 
 	// Take exports into account if top level root node is exporting stuff.
-	if n.Id == p.entrypoint {
+	if n.Id == p.rootId {
 		var exports *ExportsResult
-		ctx, exports, err = p.parseExports(ctx, p.entrypoint)
+		ctx, exports, err = p.parseExports(ctx, p.rootId)
 		n.AddErrors(exports.Errors...)
 		if err != nil {
 			return nil, nil, err
@@ -142,7 +131,7 @@ func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context
 }
 
 func (p *Parser) Display(n *graph.Node[Data]) string {
-	base := path.Dir(p.entrypoint)
+	base := path.Dir(p.rootId)
 	rel, err := filepath.Rel(base, n.Id)
 	if err != nil {
 		return n.Id

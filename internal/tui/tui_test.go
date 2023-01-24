@@ -12,6 +12,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/require"
 
+	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/js"
 )
 
@@ -31,7 +32,7 @@ func TestTui(t *testing.T) {
 		{
 			Name:       "react-gcode-viewer",
 			Repo:       "https://github.com/gabotechs/react-gcode-viewer",
-			Entrypoint: "src/index.ts",
+			Entrypoint: "src/GCodeViewer/GCodeModel.tsx",
 		},
 	}
 
@@ -50,8 +51,6 @@ func TestTui(t *testing.T) {
 				a.NoError(err)
 			}
 
-			parser, err := js.MakeJsParser(entrypointPath)
-			a.NoError(err)
 			screen := tcell.NewSimulationScreen("")
 
 			wait := make(chan error)
@@ -60,13 +59,16 @@ func TestTui(t *testing.T) {
 				wait <- Loop[js.Data](
 					context.Background(),
 					entrypointPath,
-					parser,
+					func(s string) (dep_tree.NodeParser[js.Data], error) {
+						return js.MakeJsParser(s)
+					},
 					screen,
 				)
 			}()
 			ticker := time.NewTicker(time.Millisecond * 100)
 			elapsed := 0
 
+			var err error
 		forLoop:
 			for {
 				select {
