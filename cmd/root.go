@@ -42,7 +42,6 @@ var Root = &cobra.Command{
 		entrypoint := args[0]
 
 		if endsWith(entrypoint, js.Extensions) {
-
 			if check {
 				cfg, err := config.ParseConfig(configPath)
 				if err != nil {
@@ -52,20 +51,16 @@ var Root = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				ctx, dt, err := dep_tree.NewDepTree[js.Data](ctx, parser)
+				_, dt, err := dep_tree.NewDepTree[js.Data](ctx, parser)
 				if err != nil {
 					return err
 				}
-				_, err = dt.Validate(ctx, cfg)
-				return err
+				return dt.Validate(cfg)
 			} else {
 				return tui.Loop[js.Data](
 					ctx,
 					entrypoint,
-					// NOTE: it should be sufficient to pass js.MakeJsParser, but go complains.
-					func(s string) (dep_tree.NodeParser[js.Data], error) {
-						return js.MakeJsParser(s)
-					},
+					js.MakeJsParser,
 					nil,
 				)
 			}

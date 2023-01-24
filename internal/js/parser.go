@@ -42,7 +42,7 @@ func findPackageJson(searchPath string) (TsConfig, string, error) {
 	}
 }
 
-func MakeJsParser(entrypoint string) (*Parser, error) {
+func MakeJsParser(entrypoint string) (dep_tree.NodeParser[Data], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return nil, err

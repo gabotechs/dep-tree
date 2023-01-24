@@ -16,8 +16,9 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 	a := require.New(t)
 	ctx := context.Background()
 	file := path.Join(importsTestFolder, "index.ts")
-	parser, err := MakeJsParser(file)
+	p, err := MakeJsParser(file)
 	a.NoError(err)
+	parser := p.(*Parser)
 
 	start := time.Now()
 	ctx, _, err = parser.parseImports(ctx, file)
@@ -59,8 +60,9 @@ func TestParser_parseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			parser, err := MakeJsParser(tt.File)
+			p, err := MakeJsParser(tt.File)
 			a.NoError(err)
+			parser := p.(*Parser)
 			_, results, err := parser.parseImports(context.Background(), tt.File)
 			a.NoError(err)
 			for expectedPath, expectedNames := range tt.Expected {

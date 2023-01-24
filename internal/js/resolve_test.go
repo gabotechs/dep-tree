@@ -15,7 +15,8 @@ const resolverTestFolder = ".resolve_test"
 func TestParser_ResolvePath_IsCached(t *testing.T) {
 	a := require.New(t)
 	ctx := context.Background()
-	parser, err := MakeJsParser(resolverTestFolder)
+	p, err := MakeJsParser(resolverTestFolder)
+	parser := p.(*Parser)
 	a.NoError(err)
 
 	start := time.Now()
@@ -93,8 +94,9 @@ func TestParser_ResolvePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			parser, err := MakeJsParser(tt.Cwd)
+			p, err := MakeJsParser(tt.Cwd)
 			a.NoError(err)
+			parser := p.(*Parser)
 			_, resolved, err := parser.ResolvePath(context.Background(), tt.Unresolved, tt.Cwd)
 			if tt.ExpectedError != "" {
 				a.ErrorContains(err, tt.ExpectedError)
