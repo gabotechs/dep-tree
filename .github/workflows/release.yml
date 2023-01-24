@@ -35,4 +35,5 @@ jobs:
           git config --global user.name  $(git --no-pager show -s --format='%an' HEAD)
           git commit -a -m "bump: version $VERSION"
           git push origin main
+          git tag "v$VERSION"
           git push --tags
