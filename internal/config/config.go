@@ -2,26 +2,35 @@ package config
 
 import (
 	"os"
+	"path"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
+	Path      string
 	WhiteList map[string][]string `yaml:"white_list"`
 	BlackList map[string][]string `yaml:"black_list"`
 }
 
-func ParseConfig(path string) (*Config, error) {
-	if path == "" {
-		path = ".dep-tree.yml"
+func ParseConfig(cfgPath string) (*Config, error) {
+	if cfgPath == "" {
+		cfgPath = ".dep-tree.yml"
 	}
 
-	content, err := os.ReadFile(path)
+	content, err := os.ReadFile(cfgPath)
+	if err != nil {
+		return nil, err
+	}
+	absCfgPath, err := filepath.Abs(cfgPath)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg := Config{}
+	cfg := Config{
+		Path: path.Dir(absCfgPath),
+	}
 
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
@@ -83,6 +92,14 @@ func (c *Config) Check(from, to string) (bool, error) {
 	return c.whiteListCheck(from, to)
 }
 
+func (c *Config) rel(p string) string {
+	relPath, err := filepath.Rel(c.Path, p)
+	if err != nil {
+		return p
+	}
+	return relPath
+}
+
 func (c *Config) validate(
 	start string,
 	destinations func(from string) []string,
@@ -97,11 +114,12 @@ func (c *Config) validate(
 	}
 
 	for _, dest := range destinations(start) {
-		pass, err := c.Check(start, dest)
+		from, to := c.rel(start), c.rel(dest)
+		pass, err := c.Check(from, to)
 		if err != nil {
 			return nil, err
 		} else if !pass {
-			errors = append(errors, start+" -> "+dest)
+			errors = append(errors, from+" -> "+to)
 		}
 		moreErrors, err := c.validate(dest, destinations, seen)
 		if err != nil {

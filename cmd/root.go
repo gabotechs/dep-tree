@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"dep-tree/internal/config"
@@ -55,7 +56,13 @@ var Root = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				return dt.Validate(cfg)
+				return dt.Validate(cfg, func(nodeId string) string {
+					processed, err := filepath.Rel(cfg.Path, nodeId)
+					if err != nil {
+						return nodeId
+					}
+					return processed
+				})
 			} else {
 				return tui.Loop[js.Data](
 					ctx,
