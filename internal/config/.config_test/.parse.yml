@@ -1,0 +1,6 @@
+white_list:
+  foo:
+    - bar
+black_list:
+  bar:
+    - baz
