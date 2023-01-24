@@ -1,8 +1,11 @@
-package graph
+package dep_tree
 
 import (
 	"context"
 	"fmt"
+	"sort"
+
+	"dep-tree/internal/graph"
 )
 
 type cacheKey string
@@ -23,8 +26,9 @@ func hashDep(a string, b string) string {
 	return a + " -> " + b
 }
 
-func (g *Graph[T]) calculateLevel(
+func calculateLevel[T any](
 	ctx context.Context,
+	g *graph.Graph[T],
 	nodeId string,
 	rootId string,
 	seen map[string]bool,
@@ -54,7 +58,7 @@ func (g *Graph[T]) calculateLevel(
 		}
 
 		var level int
-		ctx, level = g.calculateLevel(ctx, parent.Id, rootId, seen)
+		ctx, level = calculateLevel(ctx, g, parent.Id, rootId, seen)
 		if level == cyclic {
 			ctx = context.WithValue(ctx, cachedCycleKey, true)
 		} else if level > maxLevel {
@@ -66,7 +70,7 @@ func (g *Graph[T]) calculateLevel(
 	if maxLevel == unknown {
 		for _, parent := range g.Parents(nodeId) {
 			var level int
-			ctx, level = g.calculateLevel(ctx, parent.Id, rootId, seen)
+			ctx, level = calculateLevel(ctx, g, parent.Id, rootId, seen)
 			if level > maxLevel {
 				maxLevel = level
 			}
@@ -79,8 +83,13 @@ func (g *Graph[T]) calculateLevel(
 }
 
 // Level retrieves the longest path until going to "rootId" avoiding cyclical loops.
-func (g *Graph[T]) Level(ctx context.Context, nodeId string, rootId string) (context.Context, int) {
-	ctx, lvl := g.calculateLevel(ctx, nodeId, rootId, map[string]bool{})
+func level[T any](
+	ctx context.Context,
+	g *graph.Graph[T],
+	nodeId string,
+	rootId string,
+) (context.Context, int) {
+	ctx, lvl := calculateLevel(ctx, g, nodeId, rootId, map[string]bool{})
 	if lvl == unknown {
 		// TODO: there is a bug here, there are cases where this is reached.
 		msg := "This should not be reachable"
@@ -90,4 +99,30 @@ func (g *Graph[T]) Level(ctx context.Context, nodeId string, rootId string) (con
 		panic(msg)
 	}
 	return ctx, lvl
+}
+
+func GetDepTreeNodes[T any](
+	ctx context.Context,
+	g *graph.Graph[T],
+	rootId string,
+) (context.Context, []*DepTreeNode[T]) {
+	allNodes := g.Nodes()
+	result := make([]*DepTreeNode[T], len(allNodes))
+	for i, n := range allNodes {
+		var lvl int
+		ctx, lvl = level(ctx, g, n.Id, rootId)
+		result[i] = &DepTreeNode[T]{
+			Node: n,
+			Lvl:  lvl,
+		}
+	}
+
+	sort.SliceStable(result, func(i, j int) bool {
+		if result[i].Lvl == result[j].Lvl {
+			return result[i].Node.Id < result[j].Node.Id
+		} else {
+			return result[i].Lvl < result[j].Lvl
+		}
+	})
+	return ctx, result
 }

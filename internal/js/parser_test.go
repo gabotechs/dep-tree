@@ -20,7 +20,7 @@ func TestParser_Entrypoint(t *testing.T) {
 
 	parser, err := MakeJsParser(id)
 	a.NoError(err)
-	node, err := parser.Entrypoint(id)
+	node, err := parser.Entrypoint()
 	a.NoError(err)
 	a.Equal(absPath, node.Id)
 	a.Equal(absPath, node.Data.filePath)
@@ -69,7 +69,7 @@ func TestParser_Deps(t *testing.T) {
 
 			parser, err := MakeJsParser(id)
 			a.NoError(err)
-			node, err := parser.Entrypoint(id)
+			node, err := parser.Entrypoint()
 			a.NoError(err)
 			_, deps, err := parser.Deps(context.Background(), node)
 			a.NoError(err)

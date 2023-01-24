@@ -5,8 +5,8 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
+	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/ecs"
-	"dep-tree/internal/graph"
 	"dep-tree/internal/tui/systems"
 	"dep-tree/internal/utils"
 )
@@ -15,10 +15,26 @@ var style = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.Col
 
 func Loop[T any](
 	ctx context.Context,
-	entrypoint string,
-	parser graph.NodeParser[T],
+	initial string,
+	parserBuilder func(string) (dep_tree.NodeParser[T], error),
 	screen tcell.Screen,
 ) error {
+	parser, err := parserBuilder(initial)
+	if err != nil {
+		return err
+	}
+	ctx, dt, err := dep_tree.NewDepTree[T](ctx, parser)
+	if err != nil {
+		return err
+	}
+	_, board, err := dt.Render(ctx, parser.Display)
+	if err != nil {
+		return err
+	}
+	cells, err := board.Cells()
+	if err != nil {
+		return err
+	}
 	if screen == nil {
 		var err error
 		screen, err = tcell.NewScreen()
@@ -26,19 +42,11 @@ func Loop[T any](
 			return err
 		}
 	}
-	err := screen.Init()
+	err = screen.Init()
 	if err != nil {
 		return err
 	}
 	screen.SetStyle(style)
-	if err != nil {
-		return err
-	}
-	_, board, err := graph.RenderGraph(ctx, entrypoint, parser)
-	if err != nil {
-		return err
-	}
-	cells, err := board.Cells()
 	if err != nil {
 		return err
 	}
@@ -75,8 +83,9 @@ func Loop[T any](
 			return nil
 		case systems.IsShouldNavigate(err):
 			_ = screen.Suspend()
-			err = Loop[T](ctx, globalState.SelectedId, parser, nil)
+			err = Loop[T](ctx, globalState.SelectedId, parserBuilder, nil)
 			if err != nil {
+				screen.Fini()
 				return err
 			}
 			_ = screen.Resume()

@@ -6,7 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 
 	"dep-tree/internal/board/graphics"
-	"dep-tree/internal/graph"
+	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/utils"
 )
 
@@ -17,7 +17,7 @@ type RenderState struct {
 func computeCursor(s *State, rs *RenderState) {
 	if s.Cursor.Y < len(rs.Cells) {
 		for j := range rs.Cells[s.Cursor.Y] {
-			if nodeId := rs.Cells[s.Cursor.Y][j].Tag(graph.NodeIdTag); nodeId != "" {
+			if nodeId := rs.Cells[s.Cursor.Y][j].Tag(dep_tree.NodeIdTag); nodeId != "" {
 				s.Cursor.X = j
 				s.SelectedId = nodeId
 				return
@@ -53,12 +53,12 @@ func forEachCell(
 			switch {
 			case s.SelectedId == "":
 				// nothing here.
-			case cell.Is(graph.NodeIdTag, s.SelectedId):
+			case cell.Is(dep_tree.NodeIdTag, s.SelectedId):
 				style = primaryStyle
-			case cell.Is(graph.ConnectorOriginNodeIdTag, s.SelectedId):
+			case cell.Is(dep_tree.ConnectorOriginNodeIdTag, s.SelectedId):
 				style = primaryStyle
-				priorityTags[graph.ConnectorOriginNodeIdTag] = s.SelectedId
-			case strings.Contains(cell.Tag(graph.NodeParentsTag), s.SelectedId):
+				priorityTags[dep_tree.ConnectorOriginNodeIdTag] = s.SelectedId
+			case strings.Contains(cell.Tag(dep_tree.NodeParentsTag), s.SelectedId):
 				style = secondaryStyle
 			}
 

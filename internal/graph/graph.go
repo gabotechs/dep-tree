@@ -6,24 +6,6 @@ import (
 	om "github.com/elliotchance/orderedmap/v2"
 )
 
-type Node[T any] struct {
-	Id     string
-	Errors []error
-	Data   T
-}
-
-func MakeNode[T any](id string, data T) *Node[T] {
-	return &Node[T]{
-		Id:     id,
-		Errors: make([]error, 0),
-		Data:   data,
-	}
-}
-
-func (n *Node[T]) AddErrors(err ...error) {
-	n.Errors = append(n.Errors, err...)
-}
-
 type Graph[T any] struct {
 	nodes       *om.OrderedMap[string, *Node[T]]
 	childEdges  *om.OrderedMap[string, *om.OrderedMap[string, bool]]
