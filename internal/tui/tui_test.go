@@ -33,6 +33,11 @@ func TestTui(t *testing.T) {
 			Repo:       "https://github.com/gabotechs/react-gcode-viewer",
 			Entrypoint: "src/GCodeViewer/GCodeModel.tsx",
 		},
+		{
+			Name:       "graphql-js",
+			Repo:       "https://github.com/graphql/graphql-js",
+			Entrypoint: "src/graphql.ts",
+		},
 	}
 
 	for _, tt := range tests {

@@ -23,6 +23,10 @@ func TestGrammar(t *testing.T) {
 			Name:    "Quoted string with inner escaped quotes",
 			Content: `'\\\\').replace(/'/g, "\\'")`,
 		},
+		{
+			Name:    "Doc with quotes",
+			Content: "/* EscapedCharacter :: one of `\"` `\\` `/` `b` `f` `n` `r` `t` \n*/\nimport { MuiThemeProvider } from \"@material-ui/core\";",
+		},
 	}
 
 	for _, tt := range tests {
