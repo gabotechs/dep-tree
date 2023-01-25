@@ -1,9 +1,10 @@
 package js
 
 import (
+	"encoding/json"
 	"os"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
+	"github.com/tailscale/hujson"
 )
 
 type CompilerOptions struct {
@@ -21,6 +22,10 @@ func ParseTsConfig(path string) (TsConfig, error) {
 	if err != nil {
 		return TsConfig{}, err
 	}
-	err = json5.Unmarshal(data, &tsConfig)
+	standard, err := hujson.Standardize(data)
+	if err != nil {
+		return TsConfig{}, err
+	}
+	err = json.Unmarshal(standard, &tsConfig)
 	return tsConfig, err
 }
