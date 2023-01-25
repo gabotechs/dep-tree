@@ -2,8 +2,9 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
+      // comment
       "@utils": ["utils"],
       "@/helpers/*": ["helpers/*"]
-    }
+    },
   }
 }

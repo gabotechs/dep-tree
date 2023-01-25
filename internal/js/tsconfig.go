@@ -1,8 +1,9 @@
 package js
 
 import (
-	"encoding/json"
 	"os"
+
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
 type CompilerOptions struct {
@@ -20,6 +21,6 @@ func ParseTsConfig(path string) (TsConfig, error) {
 	if err != nil {
 		return TsConfig{}, err
 	}
-	err = json.Unmarshal(data, &tsConfig)
+	err = json5.Unmarshal(data, &tsConfig)
 	return tsConfig, err
 }

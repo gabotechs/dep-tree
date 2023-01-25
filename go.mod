@@ -10,6 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
+	github.com/yosuke-furukawa/json5 v0.1.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
