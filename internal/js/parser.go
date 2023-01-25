@@ -79,10 +79,10 @@ func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context
 	if n.Id == p.rootId {
 		var exports *ExportsResult
 		ctx, exports, err = p.parseExports(ctx, p.rootId)
-		n.AddErrors(exports.Errors...)
 		if err != nil {
 			return nil, nil, err
 		}
+		n.AddErrors(exports.Errors...)
 		for _, exportFrom := range exports.Exports {
 			resolvedImports.Set(exportFrom, true)
 		}
@@ -94,10 +94,10 @@ func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context
 		importedNames, _ := imports.Imports.Get(importedPath)
 		var exports *ExportsResult
 		ctx, exports, err = p.parseExports(ctx, importedPath)
-		n.AddErrors(exports.Errors...)
 		if err != nil {
 			return ctx, nil, err
 		}
+		n.AddErrors(exports.Errors...)
 		for _, name := range importedNames {
 			// If all imported, then dump every path in the resolved imports.
 			if name == "*" {
