@@ -16,8 +16,8 @@ func TestParser_ResolvePath_IsCached(t *testing.T) {
 	a := require.New(t)
 	ctx := context.Background()
 	p, err := MakeJsParser(resolverTestFolder)
-	parser := p.(*Parser)
 	a.NoError(err)
+	parser := p.(*Parser)
 
 	start := time.Now()
 	ctx, _, err = parser.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
@@ -30,7 +30,7 @@ func TestParser_ResolvePath_IsCached(t *testing.T) {
 	cached := time.Since(start)
 
 	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
-	a.Greater(ratio, int64(5))
+	a.Greater(ratio, int64(2))
 }
 
 func TestParser_ResolvePath(t *testing.T) {

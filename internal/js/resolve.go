@@ -35,7 +35,7 @@ func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, er
 	absPath := ""
 
 	// 1. If import is relative.
-	if unresolved[0] == '.' {
+	if unresolved[0] == '.' && (unresolved[1] == '/' || (unresolved[1] == '.' && unresolved[2] == '/')) {
 		absPath = getFileAbsPath(path.Join(dir, unresolved))
 		if absPath == "" {
 			return absPath, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)
@@ -77,7 +77,7 @@ func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, er
 func retrieveWithExt(absPath string) string {
 	for _, ext := range Extensions {
 		if strings.HasSuffix(absPath, "."+ext) {
-			return absPath
+			absPath = absPath[0 : len(absPath)-len("."+ext)]
 		}
 	}
 	for _, ext := range Extensions {
