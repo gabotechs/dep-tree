@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -9,9 +10,10 @@ import (
 )
 
 type Config struct {
-	Path      string
-	WhiteList map[string][]string `yaml:"white_list"`
-	BlackList map[string][]string `yaml:"black_list"`
+	Path        string
+	Entrypoints []string            `yaml:"entrypoints"`
+	WhiteList   map[string][]string `yaml:"white_list"`
+	BlackList   map[string][]string `yaml:"black_list"`
 }
 
 func ParseConfig(cfgPath string) (*Config, error) {
@@ -35,6 +37,8 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
 		return nil, err
+	} else if len(cfg.Entrypoints) == 0 {
+		return nil, errors.New("config file has no entrypoints")
 	}
 
 	return &cfg, nil

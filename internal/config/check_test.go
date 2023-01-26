@@ -1,20 +1,23 @@
-package dep_tree
+package config
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/config"
+	"dep-tree/internal/dep_tree"
 )
 
-func TestValidateGraph(t *testing.T) {
+const tmpFolder = "/tmp/dep-tree-check-tests"
+
+func TestCheck(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Spec     [][]int
-		Config   config.Config
+		Config   Config
 		Failures []string
 	}{
 		{
@@ -26,7 +29,8 @@ func TestValidateGraph(t *testing.T) {
 				{4},
 				{3},
 			},
-			Config: config.Config{
+			Config: Config{
+				Entrypoints: []string{"0"},
 				WhiteList: map[string][]string{
 					"4": {},
 				},
@@ -41,26 +45,24 @@ func TestValidateGraph(t *testing.T) {
 		},
 	}
 
+	_ = os.MkdirAll(tmpFolder, os.ModePerm)
+
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			testParser := TestGraph{
-				Start: "0",
-				Spec:  tt.Spec,
-			}
-
 			ctx := context.Background()
 
-			_, dt, err := NewDepTree[[]int](ctx, &testParser)
-			a.NoError(err)
-
-			err = dt.Validate(&tt.Config, func(id string) string {
-				return id
-			})
-			if err == nil {
-				a.Equal(tt.Failures, 0)
-			} else {
-				a.Equal(tt.Failures, strings.Split(err.Error(), "\n")[1:])
+			err := Check(ctx, func(s string) (dep_tree.NodeParser[[]int], error) {
+				return &dep_tree.TestParser{
+					Start: s,
+					Spec:  tt.Spec,
+				}, nil
+			}, &tt.Config)
+			if tt.Failures != nil {
+				msg := err.Error()
+				failures := strings.Split(msg, "\n")
+				failures = failures[1 : len(failures)-1]
+				a.Equal(tt.Failures, failures)
 			}
 		})
 	}

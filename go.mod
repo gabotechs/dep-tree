@@ -8,6 +8,7 @@ require (
 	github.com/elliotchance/orderedmap/v2 v2.2.0
 	github.com/gdamore/tcell/v2 v2.5.3
 	github.com/go-git/go-git/v5 v5.5.2
+	github.com/google/uuid v1.3.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
 	github.com/tailscale/hujson v0.0.0-20221223112325-20486734a56a
