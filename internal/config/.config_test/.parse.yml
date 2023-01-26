@@ -1,3 +1,5 @@
+entrypoints:
+  - foo
 white_list:
   foo:
     - bar
