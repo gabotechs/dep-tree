@@ -6,7 +6,7 @@
 Render your project's dependency tree in the terminal and/or validate it against your rules.
 
 <p align="center">
-    <img width="400" src="docs/demo.gif" alt="Dependency tree render">
+    <img width="440" src="docs/demo.gif" alt="Dependency tree render">
 </p>
 
 ## Install
@@ -43,7 +43,7 @@ h      -> show this help section
 
 ### Dependency check
 
-Create a configuration file `.dep-tree-yml` with some rules in it:
+Create a configuration file `.dep-tree.yml` with some rules in it:
 
 ```yml
 entrypoints:
