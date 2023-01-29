@@ -13,6 +13,26 @@ func IsShouldQuit(err error) bool {
 	return ok
 }
 
+func navigate(s *State) error {
+	if s.SelectedId == "" {
+		return nil
+	}
+	err := s.Screen.Suspend()
+	if err != nil {
+		return err
+	}
+	err = s.OnNavigate(s)
+	if err != nil {
+		return err
+	}
+	err = s.Screen.Resume()
+	if err != nil {
+		return err
+	}
+	// NOTE: just to trigger an update.
+	return s.Screen.PostEvent(&tcell.EventTime{})
+}
+
 func RuntimeSystem(s *State) error {
 	switch ev := s.Event.(type) {
 	case *tcell.EventResize:
@@ -25,27 +45,7 @@ func RuntimeSystem(s *State) error {
 			s.Screen.Fini()
 			return &ShouldQuit{}
 		} else if ev.Key() == tcell.KeyEnter {
-			if s.SelectedId == "" {
-				return nil
-			}
-			err := s.Screen.Suspend()
-			if err != nil {
-				return err
-			}
-			err = s.OnNavigate(s)
-			if err != nil {
-				return err
-			}
-			err = s.Screen.Resume()
-			if err != nil {
-				return err
-			}
-			// NOTE: just to trigger an update.
-			err = s.Screen.PostEvent(&tcell.EventTime{})
-			if err != nil {
-				return err
-			}
-			return nil
+			return navigate(s)
 		}
 	}
 	return nil
