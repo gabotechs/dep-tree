@@ -40,6 +40,7 @@ func RuntimeSystem(s *State) error {
 			if err != nil {
 				return err
 			}
+			// NOTE: just to trigger an update.
 			err = s.Screen.PostEvent(&tcell.EventTime{})
 			if err != nil {
 				return err
