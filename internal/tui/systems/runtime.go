@@ -13,19 +13,10 @@ func IsShouldQuit(err error) bool {
 	return ok
 }
 
-type ShouldNavigate struct{}
-
-func (s *ShouldNavigate) Error() string {
-	return "Should Navigate"
-}
-
-func IsShouldNavigate(err error) bool {
-	_, ok := err.(*ShouldNavigate)
-	return ok
-}
-
 func RuntimeSystem(s *State) error {
 	switch ev := s.Event.(type) {
+	case *tcell.EventResize:
+		s.Screen.Sync()
 	case *tcell.EventInterrupt:
 		s.Screen.Fini()
 		return nil
@@ -37,7 +28,23 @@ func RuntimeSystem(s *State) error {
 			if s.SelectedId == "" {
 				return nil
 			}
-			return &ShouldNavigate{}
+			err := s.Screen.Suspend()
+			if err != nil {
+				return err
+			}
+			err = s.OnNavigate(s)
+			if err != nil {
+				return err
+			}
+			err = s.Screen.Resume()
+			if err != nil {
+				return err
+			}
+			err = s.Screen.PostEvent(&tcell.EventTime{})
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 	}
 	return nil

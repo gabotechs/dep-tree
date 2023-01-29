@@ -36,9 +36,7 @@ func Loop[T any](
 		return err
 	}
 	if screen == nil {
-		var err error
-		screen, err = tcell.NewScreen()
-		if err != nil {
+		if screen, err = tcell.NewScreen(); err != nil {
 			return err
 		}
 	}
@@ -64,6 +62,9 @@ func Loop[T any](
 		Screen:     screen,
 		SelectedId: "",
 		Event:      nil,
+		OnNavigate: func(s *systems.State) error {
+			return Loop[T](ctx, s.SelectedId, parserBuilder, nil)
+		},
 	}
 
 	world := ecs.NewWorld().
@@ -81,24 +82,10 @@ func Loop[T any](
 		switch {
 		case systems.IsShouldQuit(err):
 			return nil
-		case systems.IsShouldNavigate(err):
-			_ = screen.Suspend()
-			err = Loop[T](ctx, globalState.SelectedId, parserBuilder, nil)
-			if err != nil {
-				screen.Fini()
-				return err
-			}
-			_ = screen.Resume()
-			_ = world.Update()
 		case err != nil:
 			return err
 		}
 		screen.Show()
-
-		ev := screen.PollEvent()
-		if _, ok := ev.(*tcell.EventResize); ok {
-			screen.Sync()
-		}
-		globalState.Event = ev
+		globalState.Event = screen.PollEvent()
 	}
 }

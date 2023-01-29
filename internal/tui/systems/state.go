@@ -11,4 +11,5 @@ type State struct {
 	Screen     tcell.Screen
 	SelectedId string
 	Cursor     utils.Vector
+	OnNavigate func(this *State) error
 }
