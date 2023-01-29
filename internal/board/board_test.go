@@ -71,7 +71,7 @@ func TestBoard(t *testing.T) {
 			},
 		},
 		{
-			Name: "it should increase the board's size if necessary",
+			Name: "it should increase the board size if necessary",
 			Blocks: []TestBlock{
 				{name: "long", x: 0, y: 0},
 				{name: "b", x: 2, y: 1},
@@ -81,7 +81,7 @@ func TestBoard(t *testing.T) {
 			},
 		},
 		{
-			Name: "it should increase the board's size if necessary 2",
+			Name: "it should increase the board size if necessary 2",
 			Blocks: []TestBlock{
 				{name: "a", x: 1, y: 0},
 				{name: "bb", x: 0, y: 2},
@@ -91,7 +91,7 @@ func TestBoard(t *testing.T) {
 			},
 		},
 		{
-			Name: "it should increase the board's size if necessary 3",
+			Name: "it should increase the board size if necessary 3",
 			Blocks: []TestBlock{
 				{name: "a", x: 1, y: 0},
 				{name: "bb", x: 0, y: 2},
