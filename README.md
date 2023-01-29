@@ -29,6 +29,18 @@ Choose the file that will act as the root of the dependency tree and run:
 dep-tree render my-file.js
 ```
 
+You can see the controls for navigating through the graph pressing `h` at any time:
+
+```
+j      -> move one step down
+k      -> move one step up
+Ctrl d -> move half page down
+Ctrl u -> move half page up
+Enter  -> select the current node as the root node
+q      -> navigate backwards on selected nodes or quit
+h      -> show this help section
+```
+
 ### Dependency check
 
 Create a configuration file `.dep-tree-yml` with some rules in it:
