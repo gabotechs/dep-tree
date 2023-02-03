@@ -2,6 +2,7 @@ package js
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -34,8 +35,14 @@ func (p *Parser) ResolvePath(ctx context.Context, unresolved string, dir string)
 func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, error) {
 	absPath := ""
 
+	if len(unresolved) == 0 {
+		return "", errors.New("import path cannot be empty")
+	} else if len(unresolved) == 1 {
+		return "", fmt.Errorf("invalid import path %s", unresolved)
+	}
+
 	// 1. If import is relative.
-	if unresolved[0] == '.' && (unresolved[1] == '/' || (unresolved[1] == '.' && unresolved[2] == '/')) {
+	if unresolved[0] == '.' && (unresolved[1] == '/' || unresolved[1] == '.') {
 		absPath = getFileAbsPath(path.Join(dir, unresolved))
 		if absPath == "" {
 			return absPath, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)

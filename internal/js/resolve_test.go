@@ -89,6 +89,22 @@ func TestParser_ResolvePath(t *testing.T) {
 			Unresolved:    "@/helpers/bar",
 			ExpectedError: "import '@/helpers/bar' was matched to path '@/helpers/' in tscofing's paths option, but the resolved path did not match an existing file",
 		},
+		{
+			Name:          "Empty name does not panic",
+			Unresolved:    "",
+			ExpectedError: "import path cannot be empty",
+		},
+		{
+			Name:          "One dot path does not panic",
+			Unresolved:    ".",
+			ExpectedError: "invalid import path .",
+		},
+		{
+			Name:          "Two dot path works",
+			Unresolved:    "..",
+			Cwd:           resolverTestFolder,
+			ExpectedError: "could not perform relative import for '..'",
+		},
 	}
 
 	for _, tt := range tests {
