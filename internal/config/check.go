@@ -37,7 +37,7 @@ func checkEntrypoint[T any](
 	if err != nil {
 		return ctx, err
 	} else if len(failures) > 0 {
-		return ctx, errors.New("the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
+		return ctx, errors.New("Check failed for entrypoint \"" + entrypoint + "\" the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
 	}
 	return ctx, nil
 }
