@@ -11,7 +11,15 @@ Render your project's dependency tree in the terminal and/or validate it against
 
 ## Install
 
-Currently, only install through brew is supported:
+There is a node wrapper that can be installed with:
+
+```shell
+npm install @dep-tree/cli
+# or
+yarn add @dep-tree/cli
+```
+
+Installing the standalone precompiled binary can be done using [brew](https://brew.sh/index_es):
 ```shell
 brew install gabotechs/taps/dep-tree
 ```
@@ -43,7 +51,7 @@ h      -> show this help section
 
 ### Dependency check
 
-Create a configuration file `.dep-tree.yml` with some rules in it:
+Create a configuration file `.dep-tree.yml` with some rules
 
 ```yml
 entrypoints:
@@ -56,7 +64,7 @@ deny:
     - "**"  # A port cannot have any dependency
 ```
 
-and check that your project matches that rules:
+and check that your project matches those rules:
 
 ```shell
 dep-tree check
