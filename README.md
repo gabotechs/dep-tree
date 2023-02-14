@@ -48,10 +48,10 @@ Create a configuration file `.dep-tree.yml` with some rules in it:
 ```yml
 entrypoints:
   - src/index.ts
-white_list:
+allow:
   "src/utils/**/*.ts":
     - "src/utils/**/*.ts"  # The files in src/utils can only depend on other utils
-black_list:
+deny:
   "src/ports/**/*.ts":
     - "**"  # A port cannot have any dependency
 ```

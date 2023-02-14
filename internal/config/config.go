@@ -12,8 +12,8 @@ import (
 type Config struct {
 	Path        string
 	Entrypoints []string            `yaml:"entrypoints"`
-	WhiteList   map[string][]string `yaml:"white_list"`
-	BlackList   map[string][]string `yaml:"black_list"`
+	WhiteList   map[string][]string `yaml:"allow"`
+	BlackList   map[string][]string `yaml:"deny"`
 }
 
 func ParseConfig(cfgPath string) (*Config, error) {

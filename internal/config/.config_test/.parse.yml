@@ -1,8 +1,8 @@
 entrypoints:
   - foo
-white_list:
+allow:
   foo:
     - bar
-black_list:
+deny:
   bar:
     - baz
