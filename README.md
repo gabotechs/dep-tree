@@ -1,8 +1,11 @@
-# <img height="48" src="./docs/dep-tree.svg"> Dep Tree
+<p align="center">
+    <img height="64" src="./docs/dep-tree.svg"/>
+    <img height="64" src="./docs/dep-tree-name.svg"/>
+</p>
 
 <p>
-<img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main">
-<img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff">
+    <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main">
+    <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff">
 </p>
 
 Render your project's dependency tree in the terminal and/or validate it against your rules.

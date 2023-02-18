@@ -1,0 +1,8 @@
+<svg viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .font {
+      font: bold 80px sans-serif;
+    }
+  </style>
+  <text x="0" y="0" class="font">Dep Tree</text>
+</svg>
