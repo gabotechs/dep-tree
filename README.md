@@ -1,18 +1,17 @@
-<p align="center">
-    <img src="./docs/dep-tree.svg">
-    <span style="font-size: 48px; font-weight: bold">Dep Tree</span>
-</p>
-
-<p align="center">
+# <img height="48" src="./docs/dep-tree.svg"> Dep Tree
+<center>
     <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main">
     <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff">
-</p>
+</center>
+<br/>
+<center>
+    Render your project's dependency tree in the terminal and/or validate it against your rules.
+</center>
+<br/>
 
-Render your project's dependency tree in the terminal and/or validate it against your rules.
-
-<p align="center">
+<center>
     <img width="440" src="docs/demo.gif" alt="Dependency tree render">
-</p>
+</center>
 
 ## Install
 
