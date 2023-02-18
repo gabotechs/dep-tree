@@ -2,6 +2,7 @@
     width="68"
     height="18"
     xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
 >
   <text
     x="0"
@@ -9,7 +10,7 @@
     style="
       font-weight:bold;
       font-family:sans-serif;
-      fill:#fff
+      fill:currentColor
     "
   >
     Dep Tree
