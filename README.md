@@ -7,9 +7,9 @@
 
 Render your project's dependency tree in the terminal and/or validate it against your rules.
 
-<center>
+<p align="center">
     <img width="440" src="docs/demo.gif" alt="Dependency tree render">
-</center>
+</p>
 
 ## Install
 
