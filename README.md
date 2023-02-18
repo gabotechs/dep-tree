@@ -1,6 +1,6 @@
 <p align="center">
     <img height="96" src="./docs/dep-tree.svg"/>
-    <img height="64" src="./docs/dep-tree-name.svg"/>
+    <img height="74" src="./docs/dep-tree-name.svg"/>
 </p>
 
 <br/>

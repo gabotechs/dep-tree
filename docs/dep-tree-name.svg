@@ -8,8 +8,9 @@
     x="0"
     y="14"
     style="
+      font-weight:bold;
       font-family:sans-serif;
-      fill:currentColor
+      fill:#fafafa
     "
   >
     Dep Tree
