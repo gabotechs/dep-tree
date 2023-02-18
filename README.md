@@ -1,7 +1,9 @@
 <p align="center">
     <img height="64" src="./docs/dep-tree.svg"/>
-    <img height="64" src="./docs/dep-tree-name.svg"/>
+    <img height="58" src="./docs/dep-tree-name.svg"/>
 </p>
+
+<br/>
 
 <p>
     <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main">
