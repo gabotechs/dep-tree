@@ -24,12 +24,10 @@
 There is a node wrapper that can be installed with:
 
 ```shell
-npm install @dep-tree/cli
-# or
-yarn add @dep-tree/cli
+npm install --save-dev @dep-tree/cli
 ```
 
-Installing the standalone precompiled binary can be done using [brew](https://brew.sh/index_es):
+Installing the standalone binary can be done using [brew](https://brew.sh/index_es):
 ```shell
 brew install gabotechs/taps/dep-tree
 ```
@@ -41,7 +39,7 @@ that your project's dependency graph matches some user defined rules.
 
 ### Render
 
-Choose the file that will act as the root of the dependency tree and run:
+Choose the file that will act as the root of the dependency tree and run (for example `src/index.js`):
 
 ```shell
 dep-tree render my-file.js
@@ -72,6 +70,8 @@ allow:
 deny:
   "src/ports/**/*.ts":
     - "**"  # A port cannot have any dependency
+  "src/user/**":
+    - "src/products/**" # The users domain cannot be related to the products domain
 ```
 
 and check that your project matches those rules:
@@ -82,7 +82,7 @@ dep-tree check
 
 ## Supported languages
 
-- JavaScript/TypeScript
+- JavaScript/TypeScript (es6 imports/exports)
 - Python (coming soon...)
 - Rust (coming soon...)
 - Golang (coming soon...)
