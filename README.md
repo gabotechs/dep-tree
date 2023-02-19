@@ -39,7 +39,7 @@ that your project's dependency graph matches some user defined rules.
 
 ### Render
 
-Choose the file that will act as the root of the dependency (for example `src/index.js`) tree and run:
+Choose the file that will act as the root of the dependency tree (for example `src/index.js`), and run:
 
 ```shell
 dep-tree render my-file.js
