@@ -50,7 +50,11 @@ func Loop[T any](
 	}
 
 	renderState := &systems.RenderState{
-		Cells: cells,
+		Cells:  cells,
+		Errors: make(map[string][]error),
+	}
+	for _, n := range dt.Nodes {
+		renderState.Errors[n.Node.Id] = n.Node.Errors
 	}
 	spatialState := &systems.SpatialState{
 		ScreenSize: utils.Vec(screen.Size()),
