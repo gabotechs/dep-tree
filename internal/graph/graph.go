@@ -67,6 +67,14 @@ func (g *Graph[T]) Nodes() []*Node[T] {
 	return result
 }
 
+func (g *Graph[T]) Get(id string) *Node[T] {
+	if node, ok := g.nodes.Get(id); ok {
+		return node
+	} else {
+		return nil
+	}
+}
+
 func (g *Graph[T]) Children(id string) []*Node[T] {
 	if children, ok := g.childEdges.Get(id); ok {
 		result := make([]*Node[T], children.Len())

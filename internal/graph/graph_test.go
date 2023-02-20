@@ -16,6 +16,14 @@ func TestGraph_AddNode(t *testing.T) {
 	a.Equal(true, g.Has("0"))
 	a.Equal(true, g.Has("1"))
 	a.Equal(false, g.Has("2"))
+
+	a.Equal(g.Get("0"), MakeNode[int]("0", 0))
+	a.Equal(g.Get("1"), MakeNode[int]("1", 1))
+	a.Nil(g.Get("2"))
+
+	a.Equal(true, g.Has("0"))
+	a.Equal(true, g.Has("1"))
+	a.Equal(false, g.Has("2"))
 }
 
 func TestGraph_AddChild(t *testing.T) {
