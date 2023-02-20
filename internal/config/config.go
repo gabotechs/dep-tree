@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Path        string
 	Entrypoints []string            `yaml:"entrypoints"`
+	Aliases     map[string][]string `yaml:"aliases"`
 	WhiteList   map[string][]string `yaml:"allow"`
 	BlackList   map[string][]string `yaml:"deny"`
 }
@@ -40,8 +41,28 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	} else if len(cfg.Entrypoints) == 0 {
 		return nil, errors.New("config file has no entrypoints")
 	}
-
+	cfg.expandAliases()
 	return &cfg, nil
+}
+
+func (c *Config) expandAliases() {
+	lists := []map[string][]string{
+		c.WhiteList,
+		c.BlackList,
+	}
+	for _, list := range lists {
+		for k, v := range list {
+			newV := make([]string, 0)
+			for _, entry := range v {
+				if alias, ok := c.Aliases[entry]; ok {
+					newV = append(newV, alias...)
+				} else {
+					newV = append(newV, entry)
+				}
+			}
+			list[k] = newV
+		}
+	}
 }
 
 func (c *Config) whiteListCheck(from, to string) (bool, error) {
@@ -109,10 +130,10 @@ func (c *Config) validate(
 	destinations func(from string) []string,
 	seen map[string]bool,
 ) ([]string, error) {
-	errors := make([]string, 0)
+	collectedErrors := make([]string, 0)
 
 	if _, ok := seen[start]; ok {
-		return errors, nil
+		return collectedErrors, nil
 	} else {
 		seen[start] = true
 	}
@@ -123,15 +144,15 @@ func (c *Config) validate(
 		if err != nil {
 			return nil, err
 		} else if !pass {
-			errors = append(errors, from+" -> "+to)
+			collectedErrors = append(collectedErrors, from+" -> "+to)
 		}
 		moreErrors, err := c.validate(dest, destinations, seen)
 		if err != nil {
 			return nil, err
 		}
-		errors = append(errors, moreErrors...)
+		collectedErrors = append(collectedErrors, moreErrors...)
 	}
-	return errors, nil
+	return collectedErrors, nil
 }
 
 func (c *Config) Validate(start string, destinations func(from string) []string) ([]string, error) {
