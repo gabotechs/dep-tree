@@ -93,31 +93,32 @@ func renderError(
 	w := ss.ScreenSize.X
 	availableSpace := utils.Clamp(renderErrorMargin, w-renderErrorMargin, w-renderErrorMargin)
 
-	words := make([][]string, 1)
+	lines := make([][]string, 1)
 	for _, err := range rs.Errors[s.SelectedId] {
 		x := availableSpace
-		for _, word := range strings.Split(err.Error(), " ") {
+		words := append([]string{"-"}, strings.Split(err.Error(), " ")...)
+		for _, word := range words {
 			if x+len(word) >= w {
 				x = availableSpace
-				words = append(words, []string{})
+				lines = append(lines, []string{})
 			}
 			x += len(word) + 1
-			words[len(words)-1] = append(words[len(words)-1], word)
+			lines[len(lines)-1] = append(lines[len(lines)-1], word)
 		}
+		lines = append(lines, []string{})
 	}
-	for y, line := range words {
-		x := w - 1
-		for wordI := range line {
-			word := line[len(line)-1-wordI] + " "
-			for letterI := range word {
+	for y, line := range lines {
+		x := availableSpace
+		for _, word := range line {
+			for _, letter := range word + " " {
 				s.Screen.SetContent(
 					x,
 					y,
-					rune(word[len(word)-1-letterI]),
+					letter,
 					nil,
 					errorStyle,
 				)
-				x--
+				x++
 			}
 		}
 	}

@@ -1,10 +1,10 @@
-                                        this is a very long 
-                                        error that probably 
-                                            does not fit in 
-                                          just one line, so 
-                                        it will be split in 
-                                             multiple lines 
-                                                            
+                                        - this is a very    
+                                        long error that     
+                                        probably does not   
+                                        fit in just one     
+                                        line, so it will be 
+                                        split in multiple   
+                                        lines               
                                                             
                                                             
                                                             

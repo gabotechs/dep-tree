@@ -34,6 +34,14 @@ func TestRenderSystem(t *testing.T) {
 			},
 			ScreenSize: utils.Vec(60, 10),
 		},
+		{
+			Name: "Two errors",
+			Errors: []error{
+				errors.New("one error that is longer than the one below, but not that much"),
+				errors.New("another short error"),
+			},
+			ScreenSize: utils.Vec(60, 10),
+		},
 	}
 
 	_ = os.MkdirAll(renderTestFolder, os.ModePerm)
