@@ -10,17 +10,57 @@ import (
 const testFolder = ".config_test"
 
 func TestParseConfig(t *testing.T) {
-	a := require.New(t)
+	tests := []struct {
+		Name              string
+		File              string
+		ExpectedWhiteList map[string][]string
+		ExpectedBlackList map[string][]string
+	}{
+		{
+			Name: "Simple",
+			File: ".parse.yml",
+			ExpectedWhiteList: map[string][]string{
+				"foo": {"bar"},
+			},
+			ExpectedBlackList: map[string][]string{
+				"bar": {"baz"},
+			},
+		},
+		{
+			Name: "Aliased",
+			File: ".aliases.yml",
+			ExpectedWhiteList: map[string][]string{
+				"src/users/**": {
+					"src/users/**",
+					"src/@*/**",
+					"src/config.js",
+					"src/common.js",
+				},
+			},
+			ExpectedBlackList: map[string][]string{
+				"src/products/**": {
+					"src/users/**",
+					"src/@*/**",
+					"src/config.js",
+					"src/common.js",
+					"src/generated/**",
+					"generated/**",
+				},
+			},
+		},
+	}
 
-	cfg, err := ParseConfig(path.Join(testFolder, ".parse.yml"))
-	a.NoError(err)
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
 
-	a.Equal(cfg.WhiteList, map[string][]string{
-		"foo": {"bar"},
-	})
-	a.Equal(cfg.BlackList, map[string][]string{
-		"bar": {"baz"},
-	})
+			cfg, err := ParseConfig(path.Join(testFolder, tt.File))
+			a.NoError(err)
+
+			a.Equal(tt.ExpectedWhiteList, cfg.WhiteList)
+			a.Equal(tt.ExpectedBlackList, cfg.BlackList)
+		})
+	}
 }
 
 func TestConfig_WhiteCheck(t *testing.T) {
