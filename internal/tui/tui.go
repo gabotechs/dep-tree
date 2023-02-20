@@ -82,6 +82,7 @@ func Loop[T any](
 		WithSystem(systems.RuntimeSystem)
 
 	for {
+		screen.Clear()
 		err = world.Update()
 		switch {
 		case systems.IsShouldQuit(err):
