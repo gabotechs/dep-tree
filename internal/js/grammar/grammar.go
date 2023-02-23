@@ -29,7 +29,7 @@ var (
 		[]lexer.SimpleRule{
 			{"ALL", `\*`},
 			{"Punct", `[,{}()]`},
-			{"Ident", `[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*`},
+			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
 			{"String", `'(?:\\.|[^'])*'|"(?:\\.|[^"])*"`},
 			{"Comment", `//.*|/\*(.|\n)*?\*/`},
 			{"Whitespace", `\s+`},

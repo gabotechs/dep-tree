@@ -50,6 +50,10 @@ func TestExport(t *testing.T) {
 			ExpectedDeclaration: []string{"MyInterface"},
 		},
 		{
+			Name:                `export interface MyInterface<T extends object> {}`,
+			ExpectedDeclaration: []string{"MyInterface"},
+		},
+		{
 			Name: `export { name1, nameN };`,
 			ExpectedList: []AliasedName{
 				{
