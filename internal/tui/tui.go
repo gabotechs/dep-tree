@@ -27,7 +27,7 @@ func Loop[T any](
 	if err != nil {
 		return err
 	}
-	_, board, err := dt.Render(ctx, parser.Display)
+	board, err := dt.Render(parser.Display)
 	if err != nil {
 		return err
 	}
