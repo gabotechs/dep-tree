@@ -34,6 +34,23 @@ func checkEntrypoint[T any](
 			return result
 		},
 	)
+	if !cfg.AllowCircularDependencies && dt.Cycles.Len() > 0 {
+		for _, cycleId := range dt.Cycles.Keys() {
+			cycle, _ := dt.Cycles.Get(cycleId)
+			formattedCycleStack := make([]string, len(cycle.Stack))
+			for i, el := range cycle.Stack {
+				node := dt.Graph.Get(el)
+				if node == nil {
+					formattedCycleStack[i] = el
+				} else {
+					formattedCycleStack[i] = parser.Display(node)
+				}
+			}
+
+			msg := "detected circular dependency: " + strings.Join(formattedCycleStack, " -> ")
+			failures = append(failures, msg)
+		}
+	}
 	if err != nil {
 		return ctx, err
 	} else if len(failures) > 0 {
