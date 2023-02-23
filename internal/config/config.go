@@ -10,11 +10,12 @@ import (
 )
 
 type Config struct {
-	Path        string
-	Entrypoints []string            `yaml:"entrypoints"`
-	Aliases     map[string][]string `yaml:"aliases"`
-	WhiteList   map[string][]string `yaml:"allow"`
-	BlackList   map[string][]string `yaml:"deny"`
+	Path                      string
+	Entrypoints               []string            `yaml:"entrypoints"`
+	AllowCircularDependencies bool                `yaml:"allowCircularDependencies"`
+	Aliases                   map[string][]string `yaml:"aliases"`
+	WhiteList                 map[string][]string `yaml:"allow"`
+	BlackList                 map[string][]string `yaml:"deny"`
 }
 
 func ParseConfig(cfgPath string) (*Config, error) {

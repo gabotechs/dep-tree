@@ -41,6 +41,7 @@ func TestCheck(t *testing.T) {
 			Failures: []string{
 				"4 -> 3",
 				"0 -> 3",
+				"detected circular dependency: 3 -> 4 -> 3",
 			},
 		},
 	}
