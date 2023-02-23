@@ -66,9 +66,17 @@ func (lc *LevelCalculator[T]) calculateLevel(
 		var level int
 		ctx, level = lc.calculateLevel(ctx, parent.Id, stack)
 		if level == cyclic {
+			cycleStack := []string{parent.Id}
+			for _, stackElement := range stack {
+				cycleStack = append(cycleStack, stackElement)
+				if stackElement == parent.Id {
+					break
+				}
+			}
+
 			lc.Cycles.Set(dep, DepCycle{
 				Cause: dep,
-				Stack: append([]string{parent.Id}, stack...),
+				Stack: cycleStack,
 			})
 		} else if level > maxLevel {
 			maxLevel = level
