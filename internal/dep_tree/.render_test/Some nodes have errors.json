@@ -1,0 +1,27 @@
+{
+  "tree": {
+    "0": {
+      "1": {
+        "2": {
+          "3": null,
+          "4": null
+        },
+        "4": null
+      },
+      "2": {
+        "3": null,
+        "4": null
+      },
+      "3": null
+    }
+  },
+  "circularDependencies": [],
+  "errors": {
+    "1": [
+      "4275 not present in spec"
+    ],
+    "3": [
+      "1423 not present in spec"
+    ]
+  }
+}

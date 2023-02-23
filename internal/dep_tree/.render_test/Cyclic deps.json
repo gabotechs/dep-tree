@@ -1,0 +1,15 @@
+{
+  "tree": {
+    "0": {
+      "1": null
+    }
+  },
+  "circularDependencies": [
+    [
+      "1",
+      "2",
+      "1"
+    ]
+  ],
+  "errors": {}
+}

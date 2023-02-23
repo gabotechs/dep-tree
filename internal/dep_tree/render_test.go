@@ -11,7 +11,10 @@ import (
 
 const RebuildTestsEnv = "REBUILD_TESTS"
 
-const testDir = ".render_test"
+const (
+	testDir            = ".render_test"
+	RebuiltTestEnvTrue = "true"
+)
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
@@ -58,6 +61,16 @@ func TestRenderGraph(t *testing.T) {
 				{1},
 			},
 		},
+		{
+			Name: "Some nodes have errors",
+			Spec: [][]int{
+				{1, 2, 3},
+				{2, 4, 4275},
+				{3, 4},
+				{1423},
+				{},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -68,25 +81,36 @@ func TestRenderGraph(t *testing.T) {
 				Spec:  tt.Spec,
 			}
 
-			ctx := context.Background()
-
-			ctx, dt, err := NewDepTree[[]int](ctx, &testParser)
+			_, dt, err := NewDepTree[[]int](context.Background(), &testParser)
 			a.NoError(err)
 
-			_, board, err := dt.Render(ctx, testParser.Display)
+			board, err := dt.Render(testParser.Display)
 			a.NoError(err)
 			result, err := board.Render()
 			a.NoError(err)
-			print(result)
 
 			outFile := path.Join(testDir, path.Base(tt.Name+".txt"))
-			if fileExists(outFile) && os.Getenv(RebuildTestsEnv) != "true" {
+			if fileExists(outFile) && os.Getenv(RebuildTestsEnv) != RebuiltTestEnvTrue {
 				expected, err := os.ReadFile(outFile)
 				a.NoError(err)
 				a.Equal(string(expected), result)
 			} else {
 				_ = os.Mkdir(testDir, os.ModePerm)
 				err := os.WriteFile(outFile, []byte(result), os.ModePerm)
+				a.NoError(err)
+			}
+
+			rendered, err := dt.RenderStructured(testParser.Display)
+			a.NoError(err)
+
+			renderOutFile := path.Join(testDir, path.Base(tt.Name+".json"))
+			if fileExists(renderOutFile) && os.Getenv(RebuildTestsEnv) != RebuiltTestEnvTrue {
+				expected, err := os.ReadFile(renderOutFile)
+				a.NoError(err)
+				a.Equal(string(expected), string(rendered))
+			} else {
+				_ = os.Mkdir(testDir, os.ModePerm)
+				err := os.WriteFile(renderOutFile, rendered, os.ModePerm)
 				a.NoError(err)
 			}
 		})

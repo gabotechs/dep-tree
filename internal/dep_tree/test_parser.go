@@ -22,7 +22,7 @@ func (t *TestParser) getNode(id string) (*graph.Node[[]int], error) {
 	}
 	var children []int
 	if idInt >= len(t.Spec) {
-		return nil, fmt.Errorf("%s not present in spec", t.Start)
+		return nil, fmt.Errorf("%d not present in spec", idInt)
 	} else {
 		children = t.Spec[idInt]
 	}
@@ -36,8 +36,12 @@ func (t *TestParser) Entrypoint() (*graph.Node[[]int], error) {
 func (t *TestParser) Deps(ctx context.Context, n *graph.Node[[]int]) (context.Context, []*graph.Node[[]int], error) {
 	result := make([]*graph.Node[[]int], 0)
 	for _, child := range n.Data {
-		c, _ := t.getNode(strconv.Itoa(child))
-		result = append(result, c)
+		c, err := t.getNode(strconv.Itoa(child))
+		if err != nil {
+			n.Errors = append(n.Errors, err)
+		} else {
+			result = append(result, c)
+		}
 	}
 	return ctx, result, nil
 }
