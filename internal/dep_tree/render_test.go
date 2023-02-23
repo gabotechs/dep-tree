@@ -62,6 +62,16 @@ func TestRenderGraph(t *testing.T) {
 			},
 		},
 		{
+			Name: "Weird cycle combination",
+			Spec: [][]int{
+				0: {1},
+				1: {2},
+				2: {3},
+				3: {4},
+				4: {2},
+			},
+		},
+		{
 			Name: "Some nodes have errors",
 			Spec: [][]int{
 				{1, 2, 3},

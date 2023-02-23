@@ -83,6 +83,18 @@ func TestNode_Level(t *testing.T) {
 			ExpectedCycles: [][]string{{"1", "2", "3", "4", "1"}},
 		},
 		{
+			Name: "Cycle 6",
+			Children: map[int][]int{
+				0: {1},
+				1: {2},
+				2: {3},
+				3: {4},
+				4: {2},
+			},
+			ExpectedLevels: []int{0, 1, 2, 3, 1},
+			ExpectedCycles: [][]string{{"2", "3", "4", "2"}},
+		},
+		{
 			Name: "Avoid same level",
 			Children: map[int][]int{
 				0: {1, 2},
