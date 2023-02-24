@@ -8,12 +8,8 @@ var Extensions = []string{
 	"js", "ts", "tsx", "jsx", "d.ts",
 }
 
-type Data struct {
-	filePath string
-}
+type Data struct{}
 
 func MakeJsNode(absFilePath string) (*graph.Node[Data], error) {
-	return graph.MakeNode(absFilePath, Data{
-		filePath: absFilePath,
-	}), nil
+	return graph.MakeNode(absFilePath, Data{}), nil
 }

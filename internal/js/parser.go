@@ -67,7 +67,7 @@ func (p *Parser) Entrypoint() (*graph.Node[Data], error) {
 }
 
 func (p *Parser) Deps(ctx context.Context, n *graph.Node[Data]) (context.Context, []*graph.Node[Data], error) {
-	ctx, imports, err := p.parseImports(ctx, n.Data.filePath)
+	ctx, imports, err := p.parseImports(ctx, n.Id)
 	if err != nil {
 		return ctx, nil, err
 	}
