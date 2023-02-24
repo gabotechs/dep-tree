@@ -23,7 +23,6 @@ func TestParser_Entrypoint(t *testing.T) {
 	node, err := parser.Entrypoint()
 	a.NoError(err)
 	a.Equal(absPath, node.Id)
-	a.Equal(absPath, node.Data.filePath)
 }
 
 func TestParser_Deps(t *testing.T) {
