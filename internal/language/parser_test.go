@@ -26,8 +26,8 @@ func TestParser_Entrypoint(t *testing.T) {
 	a.Equal(id, entrypoint.Id)
 }
 
-func newOm(entries map[string][]string) *om.OrderedMap[string, []string] {
-	m := om.NewOrderedMap[string, []string]()
+func newOm(entries map[string]ImportEntry) *om.OrderedMap[string, ImportEntry] {
+	m := om.NewOrderedMap[string, ImportEntry]()
 	for k, v := range entries {
 		m.Set(k, v)
 	}
@@ -47,8 +47,8 @@ func TestParser_Deps(t *testing.T) {
 			Id:   "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
-					Imports: newOm(map[string][]string{
-						"2": {"*"},
+					Imports: newOm(map[string]ImportEntry{
+						"2": {All: true},
 					}),
 				},
 			},
@@ -67,8 +67,8 @@ func TestParser_Deps(t *testing.T) {
 			Id:   "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
-					Imports: newOm(map[string][]string{
-						"2": {"*"},
+					Imports: newOm(map[string]ImportEntry{
+						"2": {All: true},
 					}),
 				},
 			},

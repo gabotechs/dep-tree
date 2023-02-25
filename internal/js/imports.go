@@ -39,22 +39,23 @@ func (l *Language) uncachedParseImports(
 	}
 
 	result := &language.ImportsResult{
-		Imports: orderedmap.NewOrderedMap[string, []string](),
+		Imports: orderedmap.NewOrderedMap[string, language.ImportEntry](),
 		Errors:  make([]error, 0),
 	}
 
 	for _, stmt := range jsFile.Statements {
 		var importPath string
-		var names []string
+
+		entry := language.ImportEntry{}
 		switch {
 		case stmt == nil:
 			continue
 		case stmt.StaticImport != nil:
 			importPath = stmt.StaticImport.Path
-			names = gatherNamesFromStaticImport(stmt.StaticImport)
+			entry = gatherNamesFromStaticImport(stmt.StaticImport)
 		case stmt.DynamicImport != nil:
 			importPath = stmt.DynamicImport.Path
-			names = []string{"*"}
+			entry.All = true
 		default:
 			continue
 		}
@@ -63,29 +64,29 @@ func (l *Language) uncachedParseImports(
 		if err != nil {
 			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {
-			result.Imports.Set(resolvedPath, names)
+			result.Imports.Set(resolvedPath, entry)
 		}
 	}
 	return ctx, result, nil
 }
 
-func gatherNamesFromStaticImport(si *grammar.StaticImport) []string {
-	names := make([]string, 0)
+func gatherNamesFromStaticImport(si *grammar.StaticImport) language.ImportEntry {
+	entry := language.ImportEntry{}
 
 	if imported := si.Imported; imported != nil {
 		if imported.Default {
-			names = append(names, "default")
+			entry.Names = append(entry.Names, "default")
 		}
 		if selection := imported.SelectionImport; selection != nil {
 			if selection.AllImport != nil {
-				names = append(names, "*")
+				return language.ImportEntry{All: true}
 			}
 			if selection.Deconstruction != nil {
-				names = append(names, selection.Deconstruction.Names...)
+				entry.Names = append(entry.Names, selection.Deconstruction.Names...)
 			}
 		}
 	} else {
-		names = append(names, "*")
+		return language.ImportEntry{All: true}
 	}
-	return names
+	return entry
 }
