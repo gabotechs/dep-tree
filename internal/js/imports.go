@@ -16,23 +16,6 @@ func (l *Language) ParseImports(
 	ctx context.Context,
 	filePath string,
 ) (context.Context, *language.ImportsResult, error) {
-	cacheKey := ImportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*language.ImportsResult); ok {
-		return ctx, cached, nil
-	} else {
-		ctx, result, err := l.uncachedParseImports(ctx, filePath)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx = context.WithValue(ctx, cacheKey, result)
-		return ctx, result, err
-	}
-}
-
-func (l *Language) uncachedParseImports(
-	ctx context.Context,
-	filePath string,
-) (context.Context, *language.ImportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err

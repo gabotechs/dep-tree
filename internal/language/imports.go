@@ -1,6 +1,10 @@
 package language
 
-import "github.com/elliotchance/orderedmap/v2"
+import (
+	"context"
+
+	"github.com/elliotchance/orderedmap/v2"
+)
 
 type ImportEntry struct {
 	All   bool
@@ -13,4 +17,23 @@ type ImportsResult struct {
 	Imports *orderedmap.OrderedMap[string, ImportEntry]
 	// Errors: errors while parsing imports.
 	Errors []error
+}
+
+type ImportsCacheKey string
+
+func (p *Parser[T]) CachedParseImports(
+	ctx context.Context,
+	filePath string,
+) (context.Context, *ImportsResult, error) {
+	cacheKey := ImportsCacheKey(filePath)
+	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
+		return ctx, cached, nil
+	} else {
+		ctx, result, err := p.lang.ParseImports(ctx, filePath)
+		if err != nil {
+			return ctx, nil, err
+		}
+		ctx = context.WithValue(ctx, cacheKey, result)
+		return ctx, result, err
+	}
 }
