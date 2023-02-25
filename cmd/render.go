@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -11,27 +10,6 @@ import (
 	"dep-tree/internal/language"
 	"dep-tree/internal/tui"
 )
-
-func printStructured[T any](
-	ctx context.Context,
-	entrypoint string,
-	parserBuilder func(string) (dep_tree.NodeParser[T], error),
-) error {
-	parser, err := parserBuilder(entrypoint)
-	if err != nil {
-		return err
-	}
-	_, dt, err := dep_tree.NewDepTree(ctx, parser)
-	if err != nil {
-		return err
-	}
-	output, err := dt.RenderStructured(parser.Display)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(output))
-	return nil
-}
 
 func RenderCmd() *cobra.Command {
 	var jsonFormat bool
@@ -46,7 +24,13 @@ func RenderCmd() *cobra.Command {
 
 			if endsWith(entrypoint, js.Extensions) {
 				if jsonFormat {
-					return printStructured(ctx, entrypoint, language.ParserBuilder(js.MakeJsLanguage))
+					rendered, err := dep_tree.PrintStructured(
+						ctx,
+						entrypoint,
+						language.ParserBuilder(js.MakeJsLanguage),
+					)
+					fmt.Println(rendered)
+					return err
 				}
 
 				return tui.Loop(
