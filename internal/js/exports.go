@@ -16,23 +16,6 @@ func (l *Language) ParseExports(
 	ctx context.Context,
 	filePath string,
 ) (context.Context, *language.ExportsResult, error) {
-	cacheKey := ExportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*language.ExportsResult); ok {
-		return ctx, cached, nil
-	} else {
-		ctx, result, err := l.uncachedParseExports(ctx, filePath)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx = context.WithValue(ctx, cacheKey, result)
-		return ctx, result, err
-	}
-}
-
-func (l *Language) uncachedParseExports(
-	ctx context.Context,
-	filePath string,
-) (context.Context, *language.ExportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err

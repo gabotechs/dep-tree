@@ -47,7 +47,7 @@ func (p *Parser[T]) Entrypoint() (*graph.Node[T], error) {
 }
 
 func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context, []*graph.Node[T], error) {
-	ctx, imports, err := p.lang.ParseImports(ctx, n.Id)
+	ctx, imports, err := p.CachedParseImports(ctx, n.Id)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -58,7 +58,7 @@ func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context
 	// Take exports into account if top level root node is exporting stuff.
 	if n.Id == p.entrypoint.Id {
 		var exports *ExportsResult
-		ctx, exports, err = p.lang.ParseExports(ctx, n.Id)
+		ctx, exports, err = p.CachedParseExports(ctx, n.Id)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -73,7 +73,7 @@ func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context
 	for _, importedPath := range imports.Imports.Keys() {
 		importEntry, _ := imports.Imports.Get(importedPath)
 		var exports *ExportsResult
-		ctx, exports, err = p.lang.ParseExports(ctx, importedPath)
+		ctx, exports, err = p.CachedParseExports(ctx, importedPath)
 		if err != nil {
 			return ctx, nil, err
 		}
