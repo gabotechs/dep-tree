@@ -84,7 +84,7 @@ func TestRenderGraph(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.Name, func(t *testing.T) {
+		t.Run("Graph render: "+tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			testParser := TestParser{
 				Start: "0",
@@ -109,18 +109,28 @@ func TestRenderGraph(t *testing.T) {
 				err := os.WriteFile(outFile, []byte(result), os.ModePerm)
 				a.NoError(err)
 			}
+		})
 
-			rendered, err := dt.RenderStructured(testParser.Display)
+		t.Run("Structured render"+tt.Name, func(t *testing.T) {
+			a := require.New(t)
+
+			rendered, err := PrintStructured(
+				context.Background(),
+				"0",
+				func(entrypoint string) (NodeParser[[]int], error) {
+					return &TestParser{Start: entrypoint, Spec: tt.Spec}, nil
+				},
+			)
 			a.NoError(err)
 
 			renderOutFile := path.Join(testDir, path.Base(tt.Name+".json"))
 			if fileExists(renderOutFile) && os.Getenv(RebuildTestsEnv) != RebuiltTestEnvTrue {
 				expected, err := os.ReadFile(renderOutFile)
 				a.NoError(err)
-				a.Equal(string(expected), string(rendered))
+				a.Equal(string(expected), rendered)
 			} else {
 				_ = os.Mkdir(testDir, os.ModePerm)
-				err := os.WriteFile(renderOutFile, rendered, os.ModePerm)
+				err := os.WriteFile(renderOutFile, []byte(rendered), os.ModePerm)
 				a.NoError(err)
 			}
 		})

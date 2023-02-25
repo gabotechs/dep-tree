@@ -1,6 +1,7 @@
 package dep_tree
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -140,4 +141,24 @@ func (dt *DepTree[T]) RenderStructured(display func(node *graph.Node[T]) string)
 	}
 
 	return json.MarshalIndent(structuredTree, "", "  ")
+}
+
+func PrintStructured[T any](
+	ctx context.Context,
+	entrypoint string,
+	parserBuilder func(string) (NodeParser[T], error),
+) (string, error) {
+	parser, err := parserBuilder(entrypoint)
+	if err != nil {
+		return "", err
+	}
+	_, dt, err := NewDepTree(ctx, parser)
+	if err != nil {
+		return "", err
+	}
+	output, err := dt.RenderStructured(parser.Display)
+	if err != nil {
+		return "", err
+	}
+	return string(output), nil
 }
