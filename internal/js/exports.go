@@ -6,25 +6,21 @@ import (
 	"path"
 
 	"dep-tree/internal/js/grammar"
+	"dep-tree/internal/language"
 	"dep-tree/internal/utils"
 )
 
 type ExportsCacheKey string
 
-type ExportsResult struct {
-	Exports map[string]string
-	Errors  []error
-}
-
-func (p *Parser) parseExports(
+func (l *Language) ParseExports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *ExportsResult, error) {
+) (context.Context, *language.ExportsResult, error) {
 	cacheKey := ExportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*ExportsResult); ok {
+	if cached, ok := ctx.Value(cacheKey).(*language.ExportsResult); ok {
 		return ctx, cached, nil
 	} else {
-		ctx, result, err := p.uncachedParseExports(ctx, filePath)
+		ctx, result, err := l.uncachedParseExports(ctx, filePath)
 		if err != nil {
 			return ctx, nil, err
 		}
@@ -33,16 +29,16 @@ func (p *Parser) parseExports(
 	}
 }
 
-func (p *Parser) uncachedParseExports(
+func (l *Language) uncachedParseExports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *ExportsResult, error) {
+) (context.Context, *language.ExportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err
 	}
 
-	results := &ExportsResult{
+	results := &language.ExportsResult{
 		Exports: make(map[string]string),
 		Errors:  []error{},
 	}
@@ -58,7 +54,7 @@ func (p *Parser) uncachedParseExports(
 		case stmt.DefaultExport != nil:
 			handleDefaultExport(stmt.DefaultExport, filePath, results.Exports)
 		case stmt.ProxyExport != nil:
-			ctx, err = p.handleProxyExport(ctx, stmt.ProxyExport, filePath, results.Exports)
+			ctx, err = l.handleProxyExport(ctx, stmt.ProxyExport, filePath, results.Exports)
 		}
 		if err != nil {
 			results.Errors = append(results.Errors, err)
@@ -101,18 +97,18 @@ func handleDefaultExport(
 	}
 }
 
-func (p *Parser) handleProxyExport(
+func (l *Language) handleProxyExport(
 	ctx context.Context,
 	stmt *grammar.ProxyExport,
 	filePath string,
 	dumpOn map[string]string,
 ) (context.Context, error) {
-	ctx, exportFrom, err := p.ResolvePath(ctx, stmt.From, path.Dir(filePath))
+	ctx, exportFrom, err := l.ResolvePath(ctx, stmt.From, path.Dir(filePath))
 	if err != nil {
 		return ctx, err
 	}
 	// WARN: this call is recursive, be aware!!!
-	ctx, proxyExports, err := p.parseExports(ctx, exportFrom)
+	ctx, proxyExports, err := l.ParseExports(ctx, exportFrom)
 	switch {
 	case err != nil:
 		return ctx, err

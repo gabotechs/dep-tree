@@ -7,6 +7,7 @@ import (
 
 	"dep-tree/internal/config"
 	"dep-tree/internal/js"
+	"dep-tree/internal/language"
 )
 
 var configPath string
@@ -23,9 +24,10 @@ func CheckCmd() *cobra.Command {
 				return fmt.Errorf("could not parse config file %s: %w", configPath, err)
 			}
 			if endsWith(cfg.Entrypoints[0], js.Extensions) {
+
 				return config.Check(
 					ctx,
-					js.MakeJsParser,
+					language.ParserBuilder(js.MakeJsLanguage),
 					cfg,
 				)
 			} else {

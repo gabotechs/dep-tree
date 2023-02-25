@@ -7,24 +7,20 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 
 	"dep-tree/internal/js/grammar"
+	"dep-tree/internal/language"
 )
 
 type ImportsCacheKey string
 
-type ImportsResult struct {
-	Imports *orderedmap.OrderedMap[string, []string]
-	Errors  []error
-}
-
-func (p *Parser) parseImports(
+func (l *Language) ParseImports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *ImportsResult, error) {
+) (context.Context, *language.ImportsResult, error) {
 	cacheKey := ImportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
+	if cached, ok := ctx.Value(cacheKey).(*language.ImportsResult); ok {
 		return ctx, cached, nil
 	} else {
-		ctx, result, err := p.uncachedParseImports(ctx, filePath)
+		ctx, result, err := l.uncachedParseImports(ctx, filePath)
 		if err != nil {
 			return ctx, nil, err
 		}
@@ -33,16 +29,16 @@ func (p *Parser) parseImports(
 	}
 }
 
-func (p *Parser) uncachedParseImports(
+func (l *Language) uncachedParseImports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *ImportsResult, error) {
+) (context.Context, *language.ImportsResult, error) {
 	ctx, jsFile, err := grammar.Parse(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err
 	}
 
-	result := &ImportsResult{
+	result := &language.ImportsResult{
 		Imports: orderedmap.NewOrderedMap[string, []string](),
 		Errors:  make([]error, 0),
 	}
@@ -63,7 +59,7 @@ func (p *Parser) uncachedParseImports(
 			continue
 		}
 		var resolvedPath string
-		ctx, resolvedPath, err = p.ResolvePath(ctx, importPath, path.Dir(filePath))
+		ctx, resolvedPath, err = l.ResolvePath(ctx, importPath, path.Dir(filePath))
 		if err != nil {
 			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {

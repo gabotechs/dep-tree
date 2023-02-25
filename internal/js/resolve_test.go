@@ -15,17 +15,17 @@ const resolverTestFolder = ".resolve_test"
 func TestParser_ResolvePath_IsCached(t *testing.T) {
 	a := require.New(t)
 	ctx := context.Background()
-	p, err := MakeJsParser(resolverTestFolder)
+	_lang, err := MakeJsLanguage(resolverTestFolder)
 	a.NoError(err)
-	parser := p.(*Parser)
+	lang := _lang.(*Language)
 
 	start := time.Now()
-	ctx, _, err = parser.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
+	ctx, _, err = lang.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
+	_, _, err = lang.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
 	a.NoError(err)
 	cached := time.Since(start)
 
@@ -110,10 +110,10 @@ func TestParser_ResolvePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			p, err := MakeJsParser(tt.Cwd)
+			_lang, err := MakeJsLanguage(tt.Cwd)
 			a.NoError(err)
-			parser := p.(*Parser)
-			_, resolved, err := parser.ResolvePath(context.Background(), tt.Unresolved, tt.Cwd)
+			lang := _lang.(*Language)
+			_, resolved, err := lang.ResolvePath(context.Background(), tt.Unresolved, tt.Cwd)
 			if tt.ExpectedError != "" {
 				a.ErrorContains(err, tt.ExpectedError)
 			} else {

@@ -1,0 +1,25 @@
+GCodeModel.tsx                                                                  
+│                                                                               
+├▷GCodeLines.tsx                                                                
+├▷│SceneElements/Camera.tsx                                                     
+├▷│SceneElements/Floor.tsx                                                      
+├▷│SceneElements/OrbitControls.tsx                                              
+├▷│gcode/GCode.ts                                                               
+│ ││                                                                            
+│ │├▷gcode/parser.ts                                                            
+│ ││ │                                                                          
+└─────▷gcode/types.ts                                                           
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
