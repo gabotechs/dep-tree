@@ -14,33 +14,29 @@ type ExportsCacheKey string
 
 func (l *Language) ParseExports(
 	ctx context.Context,
-	filePath string,
+	file *grammar.File,
 ) (context.Context, *language.ExportsResult, error) {
-	ctx, jsFile, err := grammar.Parse(ctx, filePath)
-	if err != nil {
-		return ctx, nil, err
-	}
-
 	results := &language.ExportsResult{
 		Exports: make(map[string]string),
 		Errors:  []error{},
 	}
 
-	for _, stmt := range jsFile.Statements {
+	for _, stmt := range file.Statements {
 		switch {
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.DeclarationExport != nil:
-			handleDeclarationExport(stmt.DeclarationExport, filePath, results.Exports)
+			handleDeclarationExport(stmt.DeclarationExport, file.Path, results.Exports)
 		case stmt.ListExport != nil:
-			handleListExport(stmt.ListExport, filePath, results.Exports)
+			handleListExport(stmt.ListExport, file.Path, results.Exports)
 		case stmt.DefaultExport != nil:
-			handleDefaultExport(stmt.DefaultExport, filePath, results.Exports)
+			handleDefaultExport(stmt.DefaultExport, file.Path, results.Exports)
 		case stmt.ProxyExport != nil:
-			ctx, err = l.handleProxyExport(ctx, stmt.ProxyExport, filePath, results.Exports)
-		}
-		if err != nil {
-			results.Errors = append(results.Errors, err)
+			var err error
+			ctx, err = l.handleProxyExport(ctx, stmt.ProxyExport, file.Path, results.Exports)
+			if err != nil {
+				results.Errors = append(results.Errors, err)
+			}
 		}
 	}
 	return ctx, results, nil
@@ -90,8 +86,13 @@ func (l *Language) handleProxyExport(
 	if err != nil {
 		return ctx, err
 	}
+	// TODO: this should go away.
+	parsed, err := l.ParseFile(exportFrom)
+	if err != nil {
+		return ctx, err
+	}
 	// WARN: this call is recursive, be aware!!!
-	ctx, proxyExports, err := l.ParseExports(ctx, exportFrom)
+	ctx, proxyExports, err := l.ParseExports(ctx, parsed)
 	switch {
 	case err != nil:
 		return ctx, err

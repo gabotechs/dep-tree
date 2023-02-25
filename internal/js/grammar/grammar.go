@@ -2,7 +2,6 @@
 package grammar
 
 import (
-	"context"
 	"os"
 
 	"github.com/alecthomas/participle/v2"
@@ -22,6 +21,7 @@ type Statement struct {
 
 type File struct {
 	Statements []*Statement `(@@ | ANY | ALL | Punct | Ident | String)*`
+	Path       string
 }
 
 var (
@@ -44,21 +44,12 @@ var (
 	)
 )
 
-type CacheKey string
-
-func Parse(ctx context.Context, filePath string) (context.Context, *File, error) {
-	if cached, ok := ctx.Value(CacheKey(filePath)).(*File); ok {
-		return ctx, cached, nil
-	} else {
-		content, err := os.ReadFile(filePath)
-		if err != nil {
-			return ctx, nil, err
-		}
-		file, err := parser.ParseBytes(filePath, content)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx = context.WithValue(ctx, CacheKey(filePath), file)
-		return ctx, file, nil
+func Parse(filePath string) (*File, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
 	}
+	file, err := parser.ParseBytes(filePath, content)
+	file.Path = filePath
+	return file, err
 }

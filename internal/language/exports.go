@@ -12,7 +12,7 @@ type ExportsResult struct {
 
 type ExportsCacheKey string
 
-func (p *Parser[T]) CachedParseExports(
+func (p *Parser[T, F]) CachedParseExports(
 	ctx context.Context,
 	filePath string,
 ) (context.Context, *ExportsResult, error) {
@@ -20,7 +20,11 @@ func (p *Parser[T]) CachedParseExports(
 	if cached, ok := ctx.Value(cacheKey).(*ExportsResult); ok {
 		return ctx, cached, nil
 	} else {
-		ctx, result, err := p.lang.ParseExports(ctx, filePath)
+		ctx, file, err := p.CachedParseFile(ctx, filePath)
+		if err != nil {
+			return ctx, nil, err
+		}
+		ctx, result, err := p.lang.ParseExports(ctx, file)
 		if err != nil {
 			return ctx, nil, err
 		}

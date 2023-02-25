@@ -15,7 +15,7 @@ func TestParser_Entrypoint(t *testing.T) {
 	a := require.New(t)
 	id := path.Join(testFolder, t.Name()+".js")
 
-	parser, err := ParserBuilder(func(s string) (Language[TestLanguageData], error) {
+	parser, err := ParserBuilder(func(s string) (Language[TestLanguageData, TestFile], error) {
 		return &TestLanguage{}, nil
 	})(id)
 	a.NoError(err)
@@ -91,7 +91,7 @@ func TestParser_Deps(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			parser, err := ParserBuilder(func(entrypoint string) (Language[TestLanguageData], error) {
+			parser, err := ParserBuilder(func(entrypoint string) (Language[TestLanguageData, TestFile], error) {
 				return &TestLanguage{
 					imports: tt.Imports,
 					exports: tt.Exports,

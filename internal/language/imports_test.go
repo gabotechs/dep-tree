@@ -20,7 +20,7 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 			},
 		},
 	}
-	parser, err := makeParser("1", func(_ string) (Language[TestLanguageData], error) {
+	parser, err := makeParser("1", func(_ string) (Language[TestLanguageData, TestFile], error) {
 		return &lang, nil
 	})
 	a.NoError(err)

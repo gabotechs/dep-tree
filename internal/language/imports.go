@@ -21,7 +21,7 @@ type ImportsResult struct {
 
 type ImportsCacheKey string
 
-func (p *Parser[T]) CachedParseImports(
+func (p *Parser[T, F]) CachedParseImports(
 	ctx context.Context,
 	filePath string,
 ) (context.Context, *ImportsResult, error) {
@@ -29,7 +29,11 @@ func (p *Parser[T]) CachedParseImports(
 	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
 		return ctx, cached, nil
 	} else {
-		ctx, result, err := p.lang.ParseImports(ctx, filePath)
+		ctx, file, err := p.CachedParseFile(ctx, filePath)
+		if err != nil {
+			return ctx, nil, err
+		}
+		ctx, result, err := p.lang.ParseImports(ctx, file)
 		if err != nil {
 			return ctx, nil, err
 		}
