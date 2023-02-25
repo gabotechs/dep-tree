@@ -24,7 +24,6 @@ func CheckCmd() *cobra.Command {
 				return fmt.Errorf("could not parse config file %s: %w", configPath, err)
 			}
 			if endsWith(cfg.Entrypoints[0], js.Extensions) {
-
 				return config.Check(
 					ctx,
 					language.ParserBuilder(js.MakeJsLanguage),
