@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/language"
 )
 
 const importsTestFolder = ".imports_test"
@@ -39,16 +41,16 @@ func TestParser_parseImports(t *testing.T) {
 	tests := []struct {
 		Name           string
 		File           string
-		Expected       map[string][]string
+		Expected       map[string]language.ImportEntry
 		ExpectedErrors []string
 	}{
 		{
 			Name: "test 1",
 			File: path.Join(importsTestFolder, "index.ts"),
-			Expected: map[string][]string{
-				path.Join(wd, importsTestFolder, "2", "2.ts"):      {"a", "b"},
-				path.Join(wd, importsTestFolder, "2", "index.ts"):  {"*"},
-				path.Join(wd, importsTestFolder, "1", "a", "a.ts"): {"*"},
+			Expected: map[string]language.ImportEntry{
+				path.Join(wd, importsTestFolder, "2", "2.ts"):      {Names: []string{"a", "b"}},
+				path.Join(wd, importsTestFolder, "2", "index.ts"):  {All: true},
+				path.Join(wd, importsTestFolder, "1", "a", "a.ts"): {All: true},
 			},
 			ExpectedErrors: []string{
 				"could not perform relative import for './unexisting'",

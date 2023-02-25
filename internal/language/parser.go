@@ -71,30 +71,29 @@ func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context
 	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
 	for _, importedPath := range imports.Imports.Keys() {
-		importedNames, _ := imports.Imports.Get(importedPath)
+		importEntry, _ := imports.Imports.Get(importedPath)
 		var exports *ExportsResult
 		ctx, exports, err = p.lang.ParseExports(ctx, importedPath)
 		if err != nil {
 			return ctx, nil, err
 		}
 		n.AddErrors(exports.Errors...)
-		for _, name := range importedNames {
+		if importEntry.All {
 			// If all imported, then dump every path in the resolved imports.
-			if name == "*" {
-				for _, fromPath := range exports.Exports {
-					if _, ok := resolvedImports.Get(fromPath); ok {
-						continue
-					}
-					resolvedImports.Set(fromPath, true)
-				}
-				break
-			}
-
-			if resolvedImport, ok := exports.Exports[name]; ok {
-				if _, ok := resolvedImports.Get(resolvedImport); ok {
+			for _, fromPath := range exports.Exports {
+				if _, ok := resolvedImports.Get(fromPath); ok {
 					continue
 				}
-				resolvedImports.Set(resolvedImport, true)
+				resolvedImports.Set(fromPath, true)
+			}
+		} else {
+			for _, name := range importEntry.Names {
+				if resolvedImport, ok := exports.Exports[name]; ok {
+					if _, ok := resolvedImports.Get(resolvedImport); ok {
+						continue
+					}
+					resolvedImports.Set(resolvedImport, true)
+				}
 			}
 		}
 	}
