@@ -92,11 +92,21 @@ func renderError(
 ) {
 	w := ss.ScreenSize.X
 	availableSpace := utils.Clamp(renderErrorMargin, w-renderErrorMargin, w-renderErrorMargin)
+	maxWordLength := availableSpace - 1
 
 	lines := make([][]string, 1)
 	for _, err := range rs.Errors[s.SelectedId] {
 		x := availableSpace
-		words := append([]string{"-"}, strings.Split(err.Error(), " ")...)
+		words := []string{"-"}
+		for _, word := range strings.Split(err.Error(), " ") {
+			for len(word) > maxWordLength {
+				brokenWord := word[:maxWordLength]
+				word = word[maxWordLength:]
+				words = append(words, brokenWord)
+			}
+			words = append(words, word)
+		}
+
 		for _, word := range words {
 			if x+len(word) >= w {
 				x = availableSpace
