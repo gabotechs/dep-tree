@@ -14,19 +14,14 @@ type ImportsCacheKey string
 
 func (l *Language) ParseImports(
 	ctx context.Context,
-	filePath string,
+	file *grammar.File,
 ) (context.Context, *language.ImportsResult, error) {
-	ctx, jsFile, err := grammar.Parse(ctx, filePath)
-	if err != nil {
-		return ctx, nil, err
-	}
-
 	result := &language.ImportsResult{
 		Imports: orderedmap.NewOrderedMap[string, language.ImportEntry](),
 		Errors:  make([]error, 0),
 	}
 
-	for _, stmt := range jsFile.Statements {
+	for _, stmt := range file.Statements {
 		var importPath string
 
 		entry := language.ImportEntry{}
@@ -43,7 +38,8 @@ func (l *Language) ParseImports(
 			continue
 		}
 		var resolvedPath string
-		ctx, resolvedPath, err = l.ResolvePath(ctx, importPath, path.Dir(filePath))
+		var err error
+		ctx, resolvedPath, err = l.ResolvePath(ctx, importPath, path.Dir(file.Path))
 		if err != nil {
 			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {

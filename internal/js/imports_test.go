@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -13,27 +12,6 @@ import (
 )
 
 const importsTestFolder = ".imports_test"
-
-func TestParser_parseImports_IsCached(t *testing.T) {
-	a := require.New(t)
-	ctx := context.Background()
-	file := path.Join(importsTestFolder, "index.ts")
-	lang, err := MakeJsLanguage(file)
-	a.NoError(err)
-
-	start := time.Now()
-	ctx, _, err = lang.ParseImports(ctx, file)
-	a.NoError(err)
-	nonCached := time.Since(start)
-
-	start = time.Now()
-	_, _, err = lang.ParseImports(ctx, file)
-	a.NoError(err)
-	cached := time.Since(start)
-
-	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
-	a.Greater(ratio, int64(3))
-}
 
 func TestParser_parseImports(t *testing.T) {
 	wd, _ := os.Getwd()
@@ -64,7 +42,10 @@ func TestParser_parseImports(t *testing.T) {
 			lang, err := MakeJsLanguage(tt.File)
 			a.NoError(err)
 
-			_, results, err := lang.ParseImports(context.Background(), tt.File)
+			parsed, err := lang.ParseFile(tt.File)
+			a.NoError(err)
+
+			_, results, err := lang.ParseImports(context.Background(), parsed)
 			a.NoError(err)
 			for expectedPath, expectedNames := range tt.Expected {
 				resultNames, ok := results.Imports.Get(expectedPath)

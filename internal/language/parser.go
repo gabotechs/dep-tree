@@ -11,42 +11,43 @@ import (
 	"dep-tree/internal/graph"
 )
 
-type Language[T any] interface {
+type Language[T any, F any] interface {
+	ParseFile(id string) (*F, error)
 	MakeNode(id string) (*graph.Node[T], error)
-	ParseImports(ctx context.Context, id string) (context.Context, *ImportsResult, error)
-	ParseExports(ctx context.Context, id string) (context.Context, *ExportsResult, error)
+	ParseImports(ctx context.Context, file *F) (context.Context, *ImportsResult, error)
+	ParseExports(ctx context.Context, file *F) (context.Context, *ExportsResult, error)
 }
 
-type Parser[T any] struct {
+type Parser[T any, F any] struct {
 	entrypoint *graph.Node[T]
-	lang       Language[T]
+	lang       Language[T, F]
 }
 
-var _ dep_tree.NodeParser[any] = &Parser[any]{}
+var _ dep_tree.NodeParser[any] = &Parser[any, any]{}
 
-func makeParser[T any](entrypoint string, languageBuilder func(string) (Language[T], error)) (*Parser[T], error) {
+func makeParser[T any, F any](entrypoint string, languageBuilder func(string) (Language[T, F], error)) (*Parser[T, F], error) {
 	lang, err := languageBuilder(entrypoint)
 	if err != nil {
 		return nil, err
 	}
 	entrypointNode, err := lang.MakeNode(entrypoint)
-	return &Parser[T]{
+	return &Parser[T, F]{
 		entrypoint: entrypointNode,
 		lang:       lang,
 	}, err
 }
 
-func ParserBuilder[T any](languageBuilder func(string) (Language[T], error)) func(string) (dep_tree.NodeParser[T], error) {
+func ParserBuilder[T any, F any](languageBuilder func(string) (Language[T, F], error)) func(string) (dep_tree.NodeParser[T], error) {
 	return func(entrypoint string) (dep_tree.NodeParser[T], error) {
-		return makeParser[T](entrypoint, languageBuilder)
+		return makeParser[T, F](entrypoint, languageBuilder)
 	}
 }
 
-func (p *Parser[T]) Entrypoint() (*graph.Node[T], error) {
+func (p *Parser[T, F]) Entrypoint() (*graph.Node[T], error) {
 	return p.entrypoint, nil
 }
 
-func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context, []*graph.Node[T], error) {
+func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context, []*graph.Node[T], error) {
 	ctx, imports, err := p.CachedParseImports(ctx, n.Id)
 	if err != nil {
 		return ctx, nil, err
@@ -109,7 +110,7 @@ func (p *Parser[T]) Deps(ctx context.Context, n *graph.Node[T]) (context.Context
 	return ctx, deps, nil
 }
 
-func (p *Parser[T]) Display(n *graph.Node[T]) string {
+func (p *Parser[T, F]) Display(n *graph.Node[T]) string {
 	base := path.Dir(p.entrypoint.Id)
 	rel, err := filepath.Rel(base, n.Id)
 	if err != nil {
