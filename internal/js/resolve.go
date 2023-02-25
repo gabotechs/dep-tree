@@ -17,12 +17,12 @@ func makeResolveCacheKey(unresolved string, dir string) ResolveCacheKey {
 	return ResolveCacheKey(unresolved + dir)
 }
 
-func (p *Parser) ResolvePath(ctx context.Context, unresolved string, dir string) (context.Context, string, error) {
+func (l *Language) ResolvePath(ctx context.Context, unresolved string, dir string) (context.Context, string, error) {
 	cacheKey := makeResolveCacheKey(unresolved, dir)
 	if cached, ok := ctx.Value(cacheKey).(string); ok {
 		return ctx, cached, nil
 	} else {
-		resolved, err := p._uncachedResolvePath(unresolved, dir)
+		resolved, err := l._uncachedResolvePath(unresolved, dir)
 		if err != nil {
 			return ctx, "", err
 		}
@@ -32,7 +32,7 @@ func (p *Parser) ResolvePath(ctx context.Context, unresolved string, dir string)
 }
 
 // ResolvePath resolves an unresolved import based on the dir where the import was executed.
-func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, error) {
+func (l *Language) _uncachedResolvePath(unresolved string, dir string) (string, error) {
 	absPath := ""
 
 	if len(unresolved) == 0 {
@@ -51,15 +51,15 @@ func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, er
 	}
 
 	// 2. If is imported from baseUrl.
-	baseUrl := p.TsConfig.CompilerOptions.BaseUrl
-	importFromBaseUrl := path.Join(p.ProjectRoot, baseUrl, unresolved)
+	baseUrl := l.TsConfig.CompilerOptions.BaseUrl
+	importFromBaseUrl := path.Join(l.ProjectRoot, baseUrl, unresolved)
 	absPath = getFileAbsPath(importFromBaseUrl)
 	if absPath != "" {
 		return absPath, nil
 	}
 
 	// 3. If imported from a path override.
-	pathOverrides := p.TsConfig.CompilerOptions.Paths
+	pathOverrides := l.TsConfig.CompilerOptions.Paths
 	if pathOverrides == nil {
 		return absPath, nil
 	}
@@ -69,7 +69,7 @@ func (p *Parser) _uncachedResolvePath(unresolved string, dir string) (string, er
 			for _, searchPath := range searchPaths {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
 				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
-				importFromBaseUrlAndPaths := path.Join(p.ProjectRoot, baseUrl, newImportFrom)
+				importFromBaseUrlAndPaths := path.Join(l.ProjectRoot, baseUrl, newImportFrom)
 				absPath = getFileAbsPath(importFromBaseUrlAndPaths)
 				if absPath != "" {
 					return absPath, nil

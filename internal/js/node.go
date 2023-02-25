@@ -1,6 +1,8 @@
 package js
 
 import (
+	"path/filepath"
+
 	"dep-tree/internal/graph"
 )
 
@@ -10,6 +12,7 @@ var Extensions = []string{
 
 type Data struct{}
 
-func MakeJsNode(absFilePath string) (*graph.Node[Data], error) {
-	return graph.MakeNode(absFilePath, Data{}), nil
+func (l *Language) MakeNode(path string) (*graph.Node[Data], error) {
+	abs, err := filepath.Abs(path)
+	return graph.MakeNode(abs, Data{}), err
 }

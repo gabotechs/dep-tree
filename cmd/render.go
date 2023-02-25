@@ -8,6 +8,7 @@ import (
 
 	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/js"
+	"dep-tree/internal/language"
 	"dep-tree/internal/tui"
 )
 
@@ -45,13 +46,13 @@ func RenderCmd() *cobra.Command {
 
 			if endsWith(entrypoint, js.Extensions) {
 				if jsonFormat {
-					return printStructured(ctx, entrypoint, js.MakeJsParser)
+					return printStructured(ctx, entrypoint, language.ParserBuilder(js.MakeJsLanguage))
 				}
 
 				return tui.Loop(
 					ctx,
 					entrypoint,
-					js.MakeJsParser,
+					language.ParserBuilder(js.MakeJsLanguage),
 					nil,
 				)
 			} else {

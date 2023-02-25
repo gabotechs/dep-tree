@@ -16,17 +16,16 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	a := require.New(t)
 	ctx := context.Background()
 	file := path.Join(exportsTestFolder, "src", "index.js")
-	p, err := MakeJsParser(file)
+	lang, err := MakeJsLanguage(file)
 	a.NoError(err)
-	parser := p.(*Parser)
 
 	start := time.Now()
-	ctx, _, err = parser.parseExports(ctx, file)
+	ctx, _, err = lang.ParseExports(ctx, file)
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.parseExports(ctx, file)
+	_, _, err = lang.ParseExports(ctx, file)
 	a.NoError(err)
 	cached := time.Since(start)
 
@@ -63,10 +62,9 @@ func TestParser_parseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			p, err := MakeJsParser(tt.File)
+			lang, err := MakeJsLanguage(tt.File)
 			a.NoError(err)
-			parser := p.(*Parser)
-			_, exports, err := parser.parseExports(context.Background(), tt.File)
+			_, exports, err := lang.ParseExports(context.Background(), tt.File)
 			a.NoError(err)
 			a.Equal(tt.Expected, exports.Exports)
 
