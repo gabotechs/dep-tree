@@ -30,42 +30,34 @@ func (l *Language) ParseImports(
 			continue
 		case stmt.StaticImport != nil:
 			importPath = stmt.StaticImport.Path
-			entry = gatherNamesFromStaticImport(stmt.StaticImport)
+			if imported := stmt.StaticImport.Imported; imported != nil {
+				if imported.Default {
+					entry.Names = append(entry.Names, "default")
+				}
+				if selection := imported.SelectionImport; selection != nil {
+					if selection.AllImport != nil {
+						entry.All = true
+					}
+					if selection.Deconstruction != nil {
+						entry.Names = append(entry.Names, selection.Deconstruction.Names...)
+					}
+				}
+			} else {
+				entry.All = true
+			}
 		case stmt.DynamicImport != nil:
 			importPath = stmt.DynamicImport.Path
 			entry.All = true
 		default:
 			continue
 		}
-		var resolvedPath string
-		var err error
-		ctx, resolvedPath, err = l.ResolvePath(ctx, importPath, path.Dir(file.Path))
+		newCtx, resolvedPath, err := l.ResolvePath(ctx, importPath, path.Dir(file.Path))
 		if err != nil {
 			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {
 			result.Imports.Set(resolvedPath, entry)
 		}
+		ctx = newCtx
 	}
 	return ctx, result, nil
-}
-
-func gatherNamesFromStaticImport(si *grammar.StaticImport) language.ImportEntry {
-	entry := language.ImportEntry{}
-
-	if imported := si.Imported; imported != nil {
-		if imported.Default {
-			entry.Names = append(entry.Names, "default")
-		}
-		if selection := imported.SelectionImport; selection != nil {
-			if selection.AllImport != nil {
-				return language.ImportEntry{All: true}
-			}
-			if selection.Deconstruction != nil {
-				entry.Names = append(entry.Names, selection.Deconstruction.Names...)
-			}
-		}
-	} else {
-		return language.ImportEntry{All: true}
-	}
-	return entry
 }
