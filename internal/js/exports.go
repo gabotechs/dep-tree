@@ -26,11 +26,21 @@ func (l *Language) ParseExports(
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.DeclarationExport != nil:
-			handleDeclarationExport(stmt.DeclarationExport, file.Path, results.Exports)
+			results.Exports[stmt.DeclarationExport.Name] = file.Path
 		case stmt.ListExport != nil:
-			handleListExport(stmt.ListExport, file.Path, results.Exports)
+			if stmt.ListExport.ExportDeconstruction != nil {
+				for _, name := range stmt.ListExport.ExportDeconstruction.Names {
+					exportedName := name.Alias
+					if exportedName == "" {
+						exportedName = name.Original
+					}
+					results.Exports[exportedName] = file.Path
+				}
+			}
 		case stmt.DefaultExport != nil:
-			handleDefaultExport(stmt.DefaultExport, file.Path, results.Exports)
+			if stmt.DefaultExport.Default {
+				results.Exports["default"] = file.Path
+			}
 		case stmt.ProxyExport != nil:
 			var err error
 			ctx, err = l.handleProxyExport(ctx, stmt.ProxyExport, file.Path, results.Exports)
@@ -40,40 +50,6 @@ func (l *Language) ParseExports(
 		}
 	}
 	return ctx, results, nil
-}
-
-func handleDeclarationExport(
-	stmt *grammar.DeclarationExport,
-	filePath string,
-	dumpOn map[string]string,
-) {
-	dumpOn[stmt.Name] = filePath
-}
-
-func handleListExport(
-	stmt *grammar.ListExport,
-	filePath string,
-	dumpOn map[string]string,
-) {
-	if stmt.ExportDeconstruction != nil {
-		for _, name := range stmt.ExportDeconstruction.Names {
-			exportedName := name.Alias
-			if exportedName == "" {
-				exportedName = name.Original
-			}
-			dumpOn[exportedName] = filePath
-		}
-	}
-}
-
-func handleDefaultExport(
-	stmt *grammar.DefaultExport,
-	filePath string,
-	dumpOn map[string]string,
-) {
-	if stmt.Default {
-		dumpOn["default"] = filePath
-	}
 }
 
 func (l *Language) handleProxyExport(
