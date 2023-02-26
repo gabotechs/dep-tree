@@ -6,13 +6,6 @@ type AliasedName struct {
 	Alias    string `("as" @Ident)?`
 }
 
-func (a *AliasedName) AliasOrOriginal() string {
-	if a.Alias == "" {
-		return a.Original
-	}
-	return a.Alias
-}
-
 type ExportDeconstruction struct {
 	Names []AliasedName `"{" @@ ("," @@)* "}"`
 }
