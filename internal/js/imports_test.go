@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"os"
 	"path"
 	"testing"
@@ -45,7 +44,7 @@ func TestParser_parseImports(t *testing.T) {
 			parsed, err := lang.ParseFile(tt.File)
 			a.NoError(err)
 
-			_, results, err := lang.ParseImports(context.Background(), parsed)
+			results, err := lang.ParseImports(parsed)
 			a.NoError(err)
 			for expectedPath, expectedNames := range tt.Expected {
 				resultNames, ok := results.Imports.Get(expectedPath)

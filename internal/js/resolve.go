@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"path"
@@ -11,28 +10,8 @@ import (
 	"dep-tree/internal/utils"
 )
 
-type ResolveCacheKey string
-
-func makeResolveCacheKey(unresolved string, dir string) ResolveCacheKey {
-	return ResolveCacheKey(unresolved + dir)
-}
-
-func (l *Language) ResolvePath(ctx context.Context, unresolved string, dir string) (context.Context, string, error) {
-	cacheKey := makeResolveCacheKey(unresolved, dir)
-	if cached, ok := ctx.Value(cacheKey).(string); ok {
-		return ctx, cached, nil
-	} else {
-		resolved, err := l._uncachedResolvePath(unresolved, dir)
-		if err != nil {
-			return ctx, "", err
-		}
-		ctx = context.WithValue(ctx, cacheKey, resolved)
-		return ctx, resolved, nil
-	}
-}
-
 // ResolvePath resolves an unresolved import based on the dir where the import was executed.
-func (l *Language) _uncachedResolvePath(unresolved string, dir string) (string, error) {
+func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	absPath := ""
 
 	if len(unresolved) == 0 {

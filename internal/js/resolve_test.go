@@ -1,37 +1,14 @@
 package js
 
 import (
-	"context"
 	"path"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 const resolverTestFolder = ".resolve_test"
-
-func TestParser_ResolvePath_IsCached(t *testing.T) {
-	a := require.New(t)
-	ctx := context.Background()
-	_lang, err := MakeJsLanguage(resolverTestFolder)
-	a.NoError(err)
-	lang := _lang.(*Language)
-
-	start := time.Now()
-	ctx, _, err = lang.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
-	a.NoError(err)
-	nonCached := time.Since(start)
-
-	start = time.Now()
-	_, _, err = lang.ResolvePath(ctx, path.Join(resolverTestFolder, "src", "foo.ts"), resolverTestFolder)
-	a.NoError(err)
-	cached := time.Since(start)
-
-	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
-	a.Greater(ratio, int64(2))
-}
 
 func TestParser_ResolvePath(t *testing.T) {
 	absPath, _ := filepath.Abs(resolverTestFolder)
@@ -113,7 +90,7 @@ func TestParser_ResolvePath(t *testing.T) {
 			_lang, err := MakeJsLanguage(tt.Cwd)
 			a.NoError(err)
 			lang := _lang.(*Language)
-			_, resolved, err := lang.ResolvePath(context.Background(), tt.Unresolved, tt.Cwd)
+			resolved, err := lang.ResolvePath(tt.Unresolved, tt.Cwd)
 			if tt.ExpectedError != "" {
 				a.ErrorContains(err, tt.ExpectedError)
 			} else {

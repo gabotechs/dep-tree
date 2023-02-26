@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"os"
 	"path"
 	"testing"
@@ -54,7 +53,7 @@ func TestParser_parseExports(t *testing.T) {
 			parsed, err := lang.ParseFile(tt.File)
 			a.NoError(err)
 
-			_, exports, err := lang.ParseExports(context.Background(), parsed)
+			exports, err := lang.ParseExports(parsed)
 			a.NoError(err)
 			a.Equal(tt.Expected, exports.Exports)
 
