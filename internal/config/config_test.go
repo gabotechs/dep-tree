@@ -63,7 +63,40 @@ func TestParseConfig(t *testing.T) {
 	}
 }
 
-func TestConfig_WhiteCheck(t *testing.T) {
+func TestConfig_ErrorHandling(t *testing.T) {
+	tests := []struct {
+		Name     string
+		File     string
+		Expected string
+	}{
+		{
+			Name:     "No config file",
+			File:     ".unexisting.yml",
+			Expected: "no such file or directory",
+		},
+		{
+			Name:     "No entrypoints",
+			File:     ".no-entrypoints.yml",
+			Expected: "has no entrypoints",
+		},
+		{
+			Name:     "Invalid yml",
+			File:     ".invalid.yml",
+			Expected: "not a valid yml file",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+
+			_, err := ParseConfig(path.Join(testFolder, tt.File))
+			a.Contains(err.Error(), tt.Expected)
+		})
+	}
+}
+
+func TestConfig_Check(t *testing.T) {
 	a := require.New(t)
 
 	tests := []struct {

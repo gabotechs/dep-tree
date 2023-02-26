@@ -1,0 +1,3 @@
+for _, i := range var {
+  println("hello world")
+}
