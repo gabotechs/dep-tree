@@ -23,13 +23,13 @@ type ImportsCacheKey string
 
 func (p *Parser[T, F]) CachedParseImports(
 	ctx context.Context,
-	filePath string,
+	id string,
 ) (context.Context, *ImportsResult, error) {
-	cacheKey := ImportsCacheKey(filePath)
+	cacheKey := ImportsCacheKey(id)
 	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
 		return ctx, cached, nil
 	} else {
-		ctx, file, err := p.CachedParseFile(ctx, filePath)
+		ctx, file, err := p.CachedParseFile(ctx, id)
 		if err != nil {
 			return ctx, nil, err
 		}

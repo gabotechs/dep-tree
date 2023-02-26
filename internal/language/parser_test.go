@@ -55,7 +55,34 @@ func TestParser_Deps(t *testing.T) {
 			Exports: map[string]*ExportsResult{
 				"1": {},
 				"2": {
-					Exports: map[string]string{"Exported": "2"},
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Id:    "2",
+					}},
+				},
+			},
+			Expected: []string{
+				"2",
+			},
+		},
+		{
+			Name: "Index only has exports",
+			Id:   "1",
+			Imports: map[string]*ImportsResult{
+				"1": {Imports: newOm(map[string]ImportEntry{})},
+			},
+			Exports: map[string]*ExportsResult{
+				"1": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Id:    "2",
+					}},
+				},
+				"2": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Id:    "2",
+					}},
 				},
 			},
 			Expected: []string{
@@ -75,10 +102,16 @@ func TestParser_Deps(t *testing.T) {
 			Exports: map[string]*ExportsResult{
 				"1": {},
 				"2": {
-					Exports: map[string]string{"Exported": "3"},
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Id:    "3",
+					}},
 				},
 				"3": {
-					Exports: map[string]string{"Another-one": "3"},
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
+						Id:    "3",
+					}},
 				},
 			},
 			Expected: []string{
@@ -105,6 +138,7 @@ func TestParser_Deps(t *testing.T) {
 			a.NoError(err)
 			result := make([]string, len(deps))
 			for i, dep := range deps {
+				a.Equal(0, len(dep.Errors))
 				result[i] = dep.Id
 			}
 
