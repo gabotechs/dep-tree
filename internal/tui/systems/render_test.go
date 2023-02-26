@@ -82,7 +82,7 @@ func TestRenderSystem(t *testing.T) {
 				gather = append(gather, byte('\n'))
 			}
 			resultFile := path.Join(renderTestFolder, tt.Name+".txt")
-			if _, err := os.Stat(resultFile); err == nil {
+			if utils.FileExists(resultFile) {
 				expected, err := os.ReadFile(resultFile)
 				a.NoError(err)
 				a.Equal(string(expected), string(gather))
