@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -38,9 +38,9 @@ func ParseConfig(cfgPath string) (*Config, error) {
 
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(`config file "%s" is not a valid yml file`, cfgPath)
 	} else if len(cfg.Entrypoints) == 0 {
-		return nil, errors.New("config file has no entrypoints")
+		return nil, fmt.Errorf(`config file "%s" has no entrypoints`, cfgPath)
 	}
 	cfg.expandAliases()
 	return &cfg, nil
