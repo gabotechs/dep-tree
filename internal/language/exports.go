@@ -44,18 +44,17 @@ func (p *Parser[T, F]) CachedParseExports(
 	cacheKey := ExportsCacheKey(filePath)
 	if cached, ok := ctx.Value(cacheKey).(*ExportsResult); ok {
 		return ctx, cached, nil
-	} else {
-		ctx, file, err := p.CachedParseFile(ctx, filePath)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx, result, err := p.lang.ParseExports(ctx, file)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx = context.WithValue(ctx, cacheKey, result)
-		return ctx, result, err
 	}
+	ctx, file, err := p.CachedParseFile(ctx, filePath)
+	if err != nil {
+		return ctx, nil, err
+	}
+	result, err := p.lang.ParseExports(file)
+	if err != nil {
+		return ctx, nil, err
+	}
+	ctx = context.WithValue(ctx, cacheKey, result)
+	return ctx, result, err
 }
 
 type UnwrappedExportsResult struct {
@@ -65,10 +64,16 @@ type UnwrappedExportsResult struct {
 	Errors []error
 }
 
+type UnwrappedExportsCacheKey string
+
 func (p *Parser[T, F]) CachedUnwrappedParseExports(
 	ctx context.Context,
 	id string,
 ) (context.Context, *UnwrappedExportsResult, error) {
+	unwrappedCacheKey := UnwrappedExportsCacheKey(id)
+	if cached, ok := ctx.Value(unwrappedCacheKey).(*UnwrappedExportsResult); ok {
+		return ctx, cached, nil
+	}
 	ctx, wrapped, err := p.CachedParseExports(ctx, id)
 	if err != nil {
 		return ctx, nil, err

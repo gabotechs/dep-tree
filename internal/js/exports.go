@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"path"
 
 	"dep-tree/internal/js/grammar"
@@ -10,10 +9,7 @@ import (
 
 type ExportsCacheKey string
 
-func (l *Language) ParseExports(
-	ctx context.Context,
-	file *grammar.File,
-) (context.Context, *language.ExportsResult, error) {
+func (l *Language) ParseExports(file *grammar.File) (*language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -56,8 +52,7 @@ func (l *Language) ParseExports(
 				})
 			}
 		case stmt.ProxyExport != nil:
-			newCtx, exportFrom, err := l.ResolvePath(ctx, stmt.ProxyExport.From, path.Dir(file.Path))
-			ctx = newCtx
+			exportFrom, err := l.ResolvePath(stmt.ProxyExport.From, path.Dir(file.Path))
 			if err != nil {
 				errors = append(errors, err)
 				continue
@@ -96,7 +91,7 @@ func (l *Language) ParseExports(
 			}
 		}
 	}
-	return ctx, &language.ExportsResult{
+	return &language.ExportsResult{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

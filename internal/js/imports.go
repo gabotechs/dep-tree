@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"path"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -10,12 +9,7 @@ import (
 	"dep-tree/internal/language"
 )
 
-type ImportsCacheKey string
-
-func (l *Language) ParseImports(
-	ctx context.Context,
-	file *grammar.File,
-) (context.Context, *language.ImportsResult, error) {
+func (l *Language) ParseImports(file *grammar.File) (*language.ImportsResult, error) {
 	result := &language.ImportsResult{
 		Imports: orderedmap.NewOrderedMap[string, language.ImportEntry](),
 		Errors:  make([]error, 0),
@@ -51,13 +45,12 @@ func (l *Language) ParseImports(
 		default:
 			continue
 		}
-		newCtx, resolvedPath, err := l.ResolvePath(ctx, importPath, path.Dir(file.Path))
+		resolvedPath, err := l.ResolvePath(importPath, path.Dir(file.Path))
 		if err != nil {
 			result.Errors = append(result.Errors, err)
 		} else if resolvedPath != "" {
 			result.Imports.Set(resolvedPath, entry)
 		}
-		ctx = newCtx
 	}
-	return ctx, result, nil
+	return result, nil
 }

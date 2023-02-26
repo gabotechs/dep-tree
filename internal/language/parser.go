@@ -14,8 +14,8 @@ import (
 type Language[T any, F any] interface {
 	ParseFile(id string) (*F, error)
 	MakeNode(id string) (*graph.Node[T], error)
-	ParseImports(ctx context.Context, file *F) (context.Context, *ImportsResult, error)
-	ParseExports(ctx context.Context, file *F) (context.Context, *ExportsResult, error)
+	ParseImports(file *F) (*ImportsResult, error)
+	ParseExports(file *F) (*ExportsResult, error)
 }
 
 type Parser[T any, F any] struct {
