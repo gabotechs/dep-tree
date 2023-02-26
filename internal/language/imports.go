@@ -2,19 +2,21 @@ package language
 
 import (
 	"context"
-
-	"github.com/elliotchance/orderedmap/v2"
 )
 
 type ImportEntry struct {
-	All   bool
+	// All: if all the names from Id are imported.
+	All bool
+	// Names: what specific names form Id are imported.
 	Names []string
+	// Id: from where are the names imported.
+	Id string
 }
 
 type ImportsResult struct {
 	// Imports: ordered map from absolute imported path to the array of names that where imported.
 	//  if one of the names is *, then all the names are imported
-	Imports *orderedmap.OrderedMap[string, ImportEntry]
+	Imports []ImportEntry
 	// Errors: errors while parsing imports.
 	Errors []error
 }

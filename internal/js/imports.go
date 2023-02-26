@@ -3,22 +3,18 @@ package js
 import (
 	"path"
 
-	"github.com/elliotchance/orderedmap/v2"
-
 	"dep-tree/internal/js/grammar"
 	"dep-tree/internal/language"
 )
 
 func (l *Language) ParseImports(file *grammar.File) (*language.ImportsResult, error) {
-	result := &language.ImportsResult{
-		Imports: orderedmap.NewOrderedMap[string, language.ImportEntry](),
-		Errors:  make([]error, 0),
-	}
+	imports := make([]language.ImportEntry, 0)
+	var errors []error
 
 	for _, stmt := range file.Statements {
-		var importPath string
-
+		importPath := ""
 		entry := language.ImportEntry{}
+
 		switch {
 		case stmt == nil:
 			continue
@@ -45,12 +41,16 @@ func (l *Language) ParseImports(file *grammar.File) (*language.ImportsResult, er
 		default:
 			continue
 		}
-		resolvedPath, err := l.ResolvePath(importPath, path.Dir(file.Path))
+		var err error
+		entry.Id, err = l.ResolvePath(importPath, path.Dir(file.Path))
 		if err != nil {
-			result.Errors = append(result.Errors, err)
-		} else if resolvedPath != "" {
-			result.Imports.Set(resolvedPath, entry)
+			errors = append(errors, err)
+		} else if entry.Id != "" {
+			imports = append(imports, entry)
 		}
 	}
-	return result, nil
+	return &language.ImportsResult{
+		Imports: imports,
+		Errors:  errors,
+	}, nil
 }
