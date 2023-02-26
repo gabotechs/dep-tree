@@ -16,6 +16,7 @@ import (
 
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/utils"
 )
 
 const tmp = "/tmp/dep-tree-tests"
@@ -120,7 +121,7 @@ func TestTui(t *testing.T) {
 			a.NoError(err)
 
 			expectedPath := path.Join(testPath, tt.Name+".txt")
-			if _, err := os.Stat(expectedPath); err == nil {
+			if utils.FileExists(expectedPath) {
 				expected, err := os.ReadFile(expectedPath)
 				a.NoError(err)
 				a.Equal(string(expected), result)
