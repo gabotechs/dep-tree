@@ -58,8 +58,8 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 
 	// Take exports into account if top level root node is exporting stuff.
 	if n.Id == p.entrypoint.Id {
-		var exports *ExportsResult
-		ctx, exports, err = p.CachedParseExports(ctx, n.Id)
+		var exports *UnwrappedExportsResult
+		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, n.Id)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -73,8 +73,8 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
 	for _, importedPath := range imports.Imports.Keys() {
 		importEntry, _ := imports.Imports.Get(importedPath)
-		var exports *ExportsResult
-		ctx, exports, err = p.CachedParseExports(ctx, importedPath)
+		var exports *UnwrappedExportsResult
+		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importedPath)
 		if err != nil {
 			return ctx, nil, err
 		}

@@ -14,7 +14,10 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	lang := TestLanguage{
 		exports: map[string]*ExportsResult{
 			"1": {
-				Exports: map[string]string{"a": "1"},
+				Exports: []ExportEntry{{
+					Names: []ExportName{{Original: "A"}},
+					Id:    "1",
+				}},
 			},
 		},
 	}
@@ -36,4 +39,150 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 
 	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
 	a.Greater(ratio, int64(10))
+}
+
+func TestParser_CachedUnwrappedParseExports(t *testing.T) {
+	tests := []struct {
+		Name     string
+		Id       string
+		Exports  map[string]*ExportsResult
+		Expected map[string]string
+	}{
+		{
+			Name: "direct export",
+			Id:   "1",
+			Exports: map[string]*ExportsResult{
+				"1": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "1",
+					},
+				}},
+			},
+			Expected: map[string]string{
+				"A": "1",
+			},
+		},
+		{
+			Name: "one proxy",
+			Id:   "1",
+			Exports: map[string]*ExportsResult{
+				"1": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "2",
+					},
+				}},
+				"2": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "2",
+					},
+				}},
+			},
+			Expected: map[string]string{
+				"A": "2",
+			},
+		},
+		{
+			Name: "double proxy",
+			Id:   "1",
+			Exports: map[string]*ExportsResult{
+				"1": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "2",
+					},
+				}},
+				"2": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "3",
+					},
+				}},
+				"3": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "3",
+					},
+				}},
+			},
+			Expected: map[string]string{
+				"A": "3",
+			},
+		},
+		{
+			Name: "double proxy with alias",
+			Id:   "1",
+			Exports: map[string]*ExportsResult{
+				"1": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "2",
+					},
+				}},
+				"2": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "B", Alias: "A"}},
+						Id:    "3",
+					},
+				}},
+				"3": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "C", Alias: "B"}},
+						Id:    "3",
+					},
+				}},
+			},
+			Expected: map[string]string{
+				"A": "3",
+			},
+		},
+		{
+			Name: "double proxy with all export",
+			Id:   "1",
+			Exports: map[string]*ExportsResult{
+				"1": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "A"}},
+						Id:    "2",
+					},
+				}},
+				"2": {Exports: []ExportEntry{
+					{
+						All: true,
+						Id:  "3",
+					},
+				}},
+				"3": {Exports: []ExportEntry{
+					{
+						Names: []ExportName{{Original: "C", Alias: "A"}},
+						Id:    "3",
+					},
+				}},
+			},
+			Expected: map[string]string{
+				"A": "3",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+
+			parser, err := makeParser(tt.Id, func(_ string) (Language[TestLanguageData, TestFile], error) {
+				return &TestLanguage{
+					exports: tt.Exports,
+				}, nil
+			})
+			a.NoError(err)
+
+			_, exports, err := parser.CachedUnwrappedParseExports(context.Background(), "1")
+			a.NoError(err)
+
+			a.Equal(tt.Expected, exports.Exports)
+			a.Nil(exports.Errors)
+		})
+	}
 }

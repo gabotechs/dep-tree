@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"dep-tree/internal/language"
 )
 
 const exportsTestFolder = ".exports_test"
@@ -17,21 +19,27 @@ func TestParser_parseExports(t *testing.T) {
 	tests := []struct {
 		Name           string
 		File           string
-		Expected       map[string]string
+		Expected       []language.ExportEntry
 		ExpectedErrors []string
 	}{
 		{
 			Name: "test",
 			File: path.Join(exportsTestFolder, "src", "index.js"),
-			Expected: map[string]string{
-				"Sorter":   path.Join(cwd, exportsTestFolder, "src", "utils", "sort.js"),
-				"UnSorter": path.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
-				"equals":   path.Join(cwd, exportsTestFolder, "src", "utils", "math", "equals.js"),
-				"abs":      path.Join(cwd, exportsTestFolder, "src", "utils", "math", "index.js"),
-				"sum":      path.Join(cwd, exportsTestFolder, "src", "utils", "math", "sum.js"),
+			Expected: []language.ExportEntry{
+				{
+					All: true,
+					Id:  path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+				},
+				{
+					Names: []language.ExportName{{Original: "Unexisting"}, {Original: "UnSorter", Alias: "UnSorterAlias"}},
+					Id:    path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+				},
+				{
+					Names: []language.ExportName{{Original: "aliased"}},
+					Id:    path.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
+				},
 			},
 			ExpectedErrors: []string{
-				"cannot import \"Unexisting\" from ",
 				"could not perform relative import for './unexisting'",
 			},
 		},

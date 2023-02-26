@@ -182,6 +182,20 @@ func TestExport(t *testing.T) {
 				From: "module-name",
 			}},
 		},
+		{
+			Name: `export { default as Alias } from 'module-name'`,
+			ExpectedProxy: []*ProxyExport{{
+				ExportDeconstruction: &ExportDeconstruction{
+					Names: []AliasedName{
+						{
+							Original: "default",
+							Alias:    "Alias",
+						},
+					},
+				},
+				From: "module-name",
+			}},
+		},
 	}
 
 	for _, tt := range tests {
