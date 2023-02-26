@@ -3,11 +3,11 @@ package js
 import (
 	"path"
 
-	"dep-tree/internal/js/grammar"
+	"dep-tree/internal/js/js_grammar"
 	"dep-tree/internal/language"
 )
 
-func (l *Language) ParseImports(file *grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 

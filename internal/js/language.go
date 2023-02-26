@@ -5,7 +5,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"dep-tree/internal/js/grammar"
+	"dep-tree/internal/js/js_grammar"
 	"dep-tree/internal/language"
 	"dep-tree/internal/utils"
 )
@@ -16,7 +16,7 @@ type Language struct {
 	TsConfig        TsConfig
 }
 
-var _ language.Language[Data, grammar.File] = &Language{}
+var _ language.Language[Data, js_grammar.File] = &Language{}
 
 func findPackageJson(searchPath string) (TsConfig, string, error) {
 	if len(searchPath) < 2 {
@@ -39,7 +39,7 @@ func findPackageJson(searchPath string) (TsConfig, string, error) {
 	}
 }
 
-func MakeJsLanguage(entrypoint string) (language.Language[Data, grammar.File], error) {
+func MakeJsLanguage(entrypoint string) (language.Language[Data, js_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return nil, err
@@ -59,6 +59,6 @@ func MakeJsLanguage(entrypoint string) (language.Language[Data, grammar.File], e
 	}, nil
 }
 
-func (l *Language) ParseFile(id string) (*grammar.File, error) {
-	return grammar.Parse(id)
+func (l *Language) ParseFile(id string) (*js_grammar.File, error) {
+	return js_grammar.Parse(id)
 }

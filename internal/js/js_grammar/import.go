@@ -1,5 +1,5 @@
 //nolint:govet
-package grammar
+package js_grammar
 
 type ImportDeconstruction struct {
 	Names []string `"{" @Ident ("as" Ident)? ("," (@Ident ("as" Ident)?)?)* "}"`

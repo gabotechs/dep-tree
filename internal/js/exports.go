@@ -3,13 +3,13 @@ package js
 import (
 	"path"
 
-	"dep-tree/internal/js/grammar"
+	"dep-tree/internal/js/js_grammar"
 	"dep-tree/internal/language"
 )
 
 type ExportsCacheKey string
 
-func (l *Language) ParseExports(file *grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 

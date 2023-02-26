@@ -1,5 +1,5 @@
 //nolint:govet
-package grammar
+package js_grammar
 
 import (
 	"os"
