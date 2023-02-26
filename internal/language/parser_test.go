@@ -5,7 +5,6 @@ import (
 	"path"
 	"testing"
 
-	om "github.com/elliotchance/orderedmap/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,14 +25,6 @@ func TestParser_Entrypoint(t *testing.T) {
 	a.Equal(id, entrypoint.Id)
 }
 
-func newOm(entries map[string]ImportEntry) *om.OrderedMap[string, ImportEntry] {
-	m := om.NewOrderedMap[string, ImportEntry]()
-	for k, v := range entries {
-		m.Set(k, v)
-	}
-	return m
-}
-
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
 		Name     string
@@ -47,9 +38,9 @@ func TestParser_Deps(t *testing.T) {
 			Id:   "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
-					Imports: newOm(map[string]ImportEntry{
-						"2": {All: true},
-					}),
+					Imports: []ImportEntry{
+						{All: true, Id: "2"},
+					},
 				},
 			},
 			Exports: map[string]*ExportsResult{
@@ -69,7 +60,7 @@ func TestParser_Deps(t *testing.T) {
 			Name: "Index only has exports",
 			Id:   "1",
 			Imports: map[string]*ImportsResult{
-				"1": {Imports: newOm(map[string]ImportEntry{})},
+				"1": {Imports: []ImportEntry{}},
 			},
 			Exports: map[string]*ExportsResult{
 				"1": {
@@ -94,9 +85,9 @@ func TestParser_Deps(t *testing.T) {
 			Id:   "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
-					Imports: newOm(map[string]ImportEntry{
-						"2": {All: true},
-					}),
+					Imports: []ImportEntry{
+						{All: true, Id: "2"},
+					},
 				},
 			},
 			Exports: map[string]*ExportsResult{

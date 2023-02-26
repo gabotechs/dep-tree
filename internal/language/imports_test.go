@@ -14,9 +14,9 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 	lang := TestLanguage{
 		imports: map[string]*ImportsResult{
 			"1": {
-				Imports: newOm(map[string]ImportEntry{
-					"2": {All: true},
-				}),
+				Imports: []ImportEntry{
+					{All: true, Id: "2"},
+				},
 			},
 		},
 	}

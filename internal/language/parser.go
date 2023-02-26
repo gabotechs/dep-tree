@@ -71,10 +71,9 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 
 	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
-	for _, importedPath := range imports.Imports.Keys() {
-		importEntry, _ := imports.Imports.Get(importedPath)
+	for _, importEntry := range imports.Imports {
 		var exports *UnwrappedExportsResult
-		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importedPath)
+		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importEntry.Id)
 		if err != nil {
 			return ctx, nil, err
 		}
