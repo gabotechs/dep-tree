@@ -1,5 +1,5 @@
 mod sum;
-mod div;
+pub mod div;
 mod avg;
 mod abs;
 mod avg_2;

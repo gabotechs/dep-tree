@@ -22,6 +22,10 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Name: "lib.rs",
 			Expected: []language.ExportEntry{
 				{
+					Names: []language.ExportName{{Original: "div"}},
+					Id:    path.Join(absTestFolder, "src", "lib.rs"),
+				},
+				{
 					Names: []language.ExportName{{Original: "abs"}},
 					Id:    path.Join(absTestFolder, "src", "abs", "abs.rs"),
 				},
