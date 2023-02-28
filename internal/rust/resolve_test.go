@@ -92,6 +92,11 @@ func TestResolve(t *testing.T) {
 			FilePath: path.Join(testFolder, "src", "lib.rs"),
 			Expected: path.Join(testFolder, "src", "div", "div.rs"),
 		},
+		{
+			Name:     "un_existing",
+			FilePath: path.Join(testFolder, "src", "lib.rs"),
+			Expected: "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -108,10 +113,43 @@ func TestResolve(t *testing.T) {
 			resolved, err := lang.resolve(strings.Split(tt.Name, " "), abs)
 			a.NoError(err)
 
-			expectedAbs, err := filepath.Abs(tt.Expected)
-			a.NoError(err)
+			var expectedAbs string
+			if tt.Expected != "" {
+				expectedAbs, err = filepath.Abs(tt.Expected)
+				a.NoError(err)
+			}
 
 			a.Equal(expectedAbs, resolved)
+		})
+	}
+}
+
+func TestResolveErrors(t *testing.T) {
+	tests := []struct {
+		Name     string
+		FilePath string
+		Expected string
+	}{
+		{
+			Name:     "crate un_existing",
+			FilePath: path.Join(testFolder, "src", "lib.rs"),
+			Expected: "could not find mod",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"))
+			a.NoError(err)
+
+			lang := _lang.(*Language)
+
+			abs, err := filepath.Abs(tt.FilePath)
+			a.NoError(err)
+
+			_, err = lang.resolve(strings.Split(tt.Name, " "), abs)
+			a.ErrorContains(err, tt.Expected)
 		})
 	}
 }
