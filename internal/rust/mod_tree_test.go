@@ -95,3 +95,28 @@ func TestMakeModTree(t *testing.T) {
 		})
 	}
 }
+
+func TestModTree_Errors(t *testing.T) {
+	tests := []struct {
+		Name     string
+		Path     string
+		Expected string
+	}{
+		{
+			Name:     "invalid path",
+			Path:     path.Join(testFolder, "src", "_bad.rs"),
+			Expected: "no such file or directory",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			absPath, err := filepath.Abs(tt.Path)
+			a.NoError(err)
+
+			_, err = MakeModTree(absPath, "crate", nil)
+			a.ErrorContains(err, tt.Expected)
+		})
+	}
+}

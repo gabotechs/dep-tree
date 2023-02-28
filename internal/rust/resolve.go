@@ -33,7 +33,7 @@ func (l *Language) filePathToModChain(dir string) ([]string, error) {
 			filteredSlices = append(filteredSlices, slice)
 		}
 	}
-	return filteredSlices, err
+	return filteredSlices, nil
 }
 
 func (l *Language) resolve(pathSlices []string, filePath string) (string, error) {
@@ -57,7 +57,7 @@ func (l *Language) resolve(pathSlices []string, filePath string) (string, error)
 
 	mod := l.ModTree.Search(modSearch)
 	switch {
-	case mod == nil && (first == self || first == super):
+	case mod == nil && (first == self || first == super || first == crate):
 		return "", fmt.Errorf("could not find mod chain %s in the projects mod tree", strings.Join(modSearch, " -> "))
 	case mod == nil:
 		return "", nil
