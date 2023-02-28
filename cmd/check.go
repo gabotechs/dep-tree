@@ -8,6 +8,7 @@ import (
 	"dep-tree/internal/config"
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/rust"
 )
 
 var configPath string
@@ -23,13 +24,20 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("could not parse config file %s: %w", configPath, err)
 			}
-			if endsWith(cfg.Entrypoints[0], js.Extensions) {
+			switch {
+			case endsWith(cfg.Entrypoints[0], js.Extensions):
 				return config.Check(
 					ctx,
 					language.ParserBuilder(js.MakeJsLanguage),
 					cfg,
 				)
-			} else {
+			case endsWith(cfg.Entrypoints[0], rust.Extensions):
+				return config.Check(
+					ctx,
+					language.ParserBuilder(rust.MakeRustLanguage),
+					cfg,
+				)
+			default:
 				return fmt.Errorf("file \"%s\" not supported", cfg.Entrypoints[0])
 			}
 		},

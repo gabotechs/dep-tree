@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -8,12 +9,35 @@ import (
 	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/rust"
 	"dep-tree/internal/tui"
 )
 
-func RenderCmd() *cobra.Command {
-	var jsonFormat bool
+var jsonFormat bool
 
+func run[T any, F any](
+	ctx context.Context,
+	entrypoint string,
+	languageBuilder language.Builder[T, F],
+) error {
+	if jsonFormat {
+		rendered, err := dep_tree.PrintStructured(
+			ctx,
+			entrypoint,
+			language.ParserBuilder(languageBuilder),
+		)
+		fmt.Println(rendered)
+		return err
+	}
+	return tui.Loop(
+		ctx,
+		entrypoint,
+		language.ParserBuilder(languageBuilder),
+		nil,
+	)
+}
+
+func RenderCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "render <path/to/entrypoint.ext>",
 		Short: "Render the dependency tree starting from the provided entrypoint",
@@ -22,24 +46,12 @@ func RenderCmd() *cobra.Command {
 			ctx := cmd.Context()
 			entrypoint := args[0]
 
-			if endsWith(entrypoint, js.Extensions) {
-				if jsonFormat {
-					rendered, err := dep_tree.PrintStructured(
-						ctx,
-						entrypoint,
-						language.ParserBuilder(js.MakeJsLanguage),
-					)
-					fmt.Println(rendered)
-					return err
-				}
-
-				return tui.Loop(
-					ctx,
-					entrypoint,
-					language.ParserBuilder(js.MakeJsLanguage),
-					nil,
-				)
-			} else {
+			switch {
+			case endsWith(entrypoint, js.Extensions):
+				return run(ctx, entrypoint, js.MakeJsLanguage)
+			case endsWith(entrypoint, rust.Extensions):
+				return run(ctx, entrypoint, rust.MakeRustLanguage)
+			default:
 				return fmt.Errorf("file \"%s\" not supported", entrypoint)
 			}
 		},

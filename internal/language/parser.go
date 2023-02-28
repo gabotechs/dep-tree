@@ -37,7 +37,9 @@ func makeParser[T any, F any](entrypoint string, languageBuilder func(string) (L
 	}, err
 }
 
-func ParserBuilder[T any, F any](languageBuilder func(string) (Language[T, F], error)) func(string) (dep_tree.NodeParser[T], error) {
+type Builder[T any, F any] func(string) (Language[T, F], error)
+
+func ParserBuilder[T any, F any](languageBuilder Builder[T, F]) func(string) (dep_tree.NodeParser[T], error) {
 	return func(entrypoint string) (dep_tree.NodeParser[T], error) {
 		return makeParser[T, F](entrypoint, languageBuilder)
 	}
