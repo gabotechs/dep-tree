@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -38,7 +37,7 @@ func (l *Language) filePathToModChain(dir string) ([]string, error) {
 
 func (l *Language) resolve(pathSlices []string, filePath string) (string, error) {
 	if len(pathSlices) == 0 {
-		return "", errors.New("path slices cannot be 0")
+		return filePath, nil
 	}
 
 	first := pathSlices[0]
