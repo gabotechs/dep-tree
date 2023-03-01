@@ -63,9 +63,8 @@ func TestLanguage_ParseImports(t *testing.T) {
 					Id:    path.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
-					All:   true,
-					Names: []string{},
-					Id:    path.Join(absTestFolder, "src", "sum.rs"),
+					All: true,
+					Id:  path.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					Names: []string{"run"},

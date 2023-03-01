@@ -15,24 +15,27 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 
 	for _, stmt := range file.Statements {
 		if stmt.Use != nil {
-			names := make([]string, len(stmt.Use.Names))
-			for i, name := range stmt.Use.Names {
-				names[i] = name.Original
-			}
+			for _, use := range stmt.Use.Flatten() {
+				id, err := l.resolve(use.PathSlices, file.Path)
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				} else if id == "" {
+					continue
+				}
 
-			id, err := l.resolve(stmt.Use.PathSlices, file.Path)
-			if err != nil {
-				errors = append(errors, err)
-				continue
-			} else if id == "" {
-				continue
+				if use.All {
+					imports = append(imports, language.ImportEntry{
+						All: use.All,
+						Id:  id,
+					})
+				} else {
+					imports = append(imports, language.ImportEntry{
+						Names: []string{use.Name.Original},
+						Id:    id,
+					})
+				}
 			}
-
-			imports = append(imports, language.ImportEntry{
-				All:   stmt.Use.All,
-				Names: names,
-				Id:    id,
-			})
 		} else if stmt.Mod != nil && !stmt.Mod.Local {
 			names := []string{stmt.Mod.Name}
 
