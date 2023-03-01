@@ -1,6 +1,8 @@
 package rust
 
 import (
+	"fmt"
+
 	"dep-tree/internal/language"
 	"dep-tree/internal/rust/rust_grammar"
 )
@@ -15,7 +17,7 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResul
 			for _, use := range stmt.Use.Flatten() {
 				id, err := l.resolve(use.PathSlices, file.Path)
 				if err != nil {
-					errors = append(errors, err)
+					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue
 				} else if id == "" {
 					continue
