@@ -18,6 +18,12 @@ func TestPub(t *testing.T) {
 			}},
 		},
 		{
+			Name: "pub unsafe fn my_function",
+			ExpectedPub: []Pub{{
+				Name: "my_function",
+			}},
+		},
+		{
 			Name: "pub trait my_trait",
 			ExpectedPub: []Pub{{
 				Name: "my_trait",
