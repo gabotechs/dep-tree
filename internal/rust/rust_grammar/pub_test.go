@@ -30,6 +30,12 @@ func TestPub(t *testing.T) {
 			}},
 		},
 		{
+			Name: "pub enum my_enum",
+			ExpectedPub: []Pub{{
+				Name: "my_enum",
+			}},
+		},
+		{
 			Name: "pub(crate) fn my_function and a lot of shit after",
 			ExpectedPub: []Pub{{
 				Name: "my_function",
