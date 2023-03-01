@@ -9,80 +9,112 @@ import (
 func TestUse(t *testing.T) {
 	tests := []struct {
 		Name        string
-		ExpectedUse []Use
+		ExpectedUse []FlattenUse
 	}{
 		{
 			Name: "use something::something;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "something"}},
+				Name:       Name{Original: "something"},
 			}},
 		},
 		{
 			Name: "use something::something as another;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "something", Alias: "another"}},
+				Name:       Name{Original: "something", Alias: "another"},
 			}},
 		},
 		{
 			Name: "pub use something::something;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				Pub:        true,
 				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "something"}},
+				Name:       Name{Original: "something"},
 			}},
 		},
 		{
 			Name: "pub (   crate) use something  ::something  ;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				Pub:        true,
 				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "something"}},
+				Name:       Name{Original: "something"},
 			}},
 		},
 		{
 			Name: "use something::{something};",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "something"}},
+				Name:       Name{Original: "something"},
 			}},
 		},
 		{
 			Name: "use something::{one, OrAnother};",
-			ExpectedUse: []Use{{
-				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "one"}, {Original: "OrAnother"}},
-			}},
+			ExpectedUse: []FlattenUse{
+				{
+					PathSlices: []string{"something"},
+					Name:       Name{Original: "one"},
+				},
+				{
+					PathSlices: []string{"something"},
+					Name:       Name{Original: "OrAnother"},
+				},
+			},
 		},
 		{
 			Name: "use something::{one as two, OrAnother};",
-			ExpectedUse: []Use{{
-				PathSlices: []string{"something"},
-				Names:      []Name{{Original: "one", Alias: "two"}, {Original: "OrAnother"}},
-			}},
+			ExpectedUse: []FlattenUse{
+				{
+					PathSlices: []string{"something"},
+					Name:       Name{Original: "one", Alias: "two"},
+				},
+				{
+					PathSlices: []string{"something"},
+					Name:       Name{Original: "OrAnother"},
+				},
+			},
 		},
 		{
 			Name: "use one::very_long::veeery_long::path::something;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"one", "very_long", "veeery_long", "path"},
-				Names:      []Name{{Original: "something"}},
+				Name:       Name{Original: "something"},
 			}},
 		},
 		{
 			Name: "use one::very_long::veeery_long::path::*;",
-			ExpectedUse: []Use{{
+			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"one", "very_long", "veeery_long", "path"},
 				All:        true,
 			}},
 		},
 		{
 			Name: "pub use crate::ast::{Node, Operator};\n",
-			ExpectedUse: []Use{{
-				Pub:        true,
-				PathSlices: []string{"crate", "ast"},
-				Names:      []Name{{Original: "Node"}, {Original: "Operator"}},
-			}},
+			ExpectedUse: []FlattenUse{
+				{
+					Pub:        true,
+					PathSlices: []string{"crate", "ast"},
+					Name:       Name{Original: "Node"},
+				},
+				{
+					Pub:        true,
+					PathSlices: []string{"crate", "ast"},
+					Name:       Name{Original: "Operator"},
+				},
+			},
+		},
+		{
+			Name: "use crate::{one::One, another::*};",
+			ExpectedUse: []FlattenUse{
+				{
+					PathSlices: []string{"crate", "one"},
+					Name:       Name{Original: "One"},
+				},
+				{
+					PathSlices: []string{"crate", "another"},
+					All:        true,
+				},
+			},
 		},
 	}
 
@@ -94,10 +126,10 @@ func TestUse(t *testing.T) {
 			parsed, err := parser.ParseBytes("", content)
 			a.NoError(err)
 
-			var uses []Use
+			var uses []FlattenUse
 			for _, stmt := range parsed.Statements {
 				if stmt.Use != nil {
-					uses = append(uses, *stmt.Use)
+					uses = append(uses, stmt.Use.Flatten()...)
 				}
 			}
 

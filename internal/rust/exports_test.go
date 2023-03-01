@@ -42,9 +42,8 @@ func TestLanguage_ParseExports(t *testing.T) {
 					Id:    path.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
-					All:   true,
-					Names: []language.ExportName{},
-					Id:    path.Join(absTestFolder, "src", "sum.rs"),
+					All: true,
+					Id:  path.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "run"}},

@@ -12,23 +12,27 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResul
 	for _, stmt := range file.Statements {
 		switch {
 		case stmt.Use != nil && stmt.Use.Pub:
-			names := make([]language.ExportName, len(stmt.Use.Names))
-			for i, name := range stmt.Use.Names {
-				names[i] = language.ExportName{Original: name.Original, Alias: name.Alias}
-			}
+			for _, use := range stmt.Use.Flatten() {
+				id, err := l.resolve(use.PathSlices, file.Path)
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				} else if id == "" {
+					continue
+				}
 
-			id, err := l.resolve(stmt.Use.PathSlices, file.Path)
-			if err != nil {
-				errors = append(errors, err)
-				continue
-			} else if id == "" {
-				continue
+				if use.All {
+					exports = append(exports, language.ExportEntry{
+						All: use.All,
+						Id:  id,
+					})
+				} else {
+					exports = append(exports, language.ExportEntry{
+						Names: []language.ExportName{{Original: use.Name.Original, Alias: use.Name.Alias}},
+						Id:    id,
+					})
+				}
 			}
-			exports = append(exports, language.ExportEntry{
-				All:   stmt.Use.All,
-				Names: names,
-				Id:    id,
-			})
 		case stmt.Pub != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.Pub.Name}},
