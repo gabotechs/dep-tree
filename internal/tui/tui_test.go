@@ -2,12 +2,10 @@ package tui
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-git/go-git/v5"
@@ -16,6 +14,7 @@ import (
 
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/rust"
 	"dep-tree/internal/utils"
 )
 
@@ -42,24 +41,32 @@ func TestTui(t *testing.T) {
 		Repo       string
 		Tag        string
 		Entrypoint string
+		W          int
+		H          int
 	}{
 		{
 			Name:       "react-stl-viewer",
 			Repo:       "https://github.com/gabotechs/react-stl-viewer",
 			Tag:        "2.2.4",
 			Entrypoint: "src/index.ts",
+			W:          40,
+			H:          15,
 		},
 		{
 			Name:       "react-gcode-viewer",
 			Repo:       "https://github.com/gabotechs/react-gcode-viewer",
 			Tag:        "2.2.4",
 			Entrypoint: "src/GCodeViewer/GCodeModel.tsx",
+			W:          40,
+			H:          12,
 		},
 		{
 			Name:       "graphql-js",
 			Repo:       "https://github.com/graphql/graphql-js",
 			Tag:        "v17.0.0-alpha.2",
 			Entrypoint: "src/graphql.ts",
+			W:          200,
+			H:          130,
 		},
 	}
 
@@ -84,42 +91,32 @@ func TestTui(t *testing.T) {
 			}
 
 			screen := tcell.NewSimulationScreen("")
-
-			wait := make(chan error)
-
-			go func() {
-				wait <- Loop[js.Data](
+			err := screen.Init()
+			a.NoError(err)
+			screen.SetSize(tt.W, tt.H)
+			testOverrides := &LoopTestOverrides{
+				Screen:     screen,
+				ManualPump: true,
+			}
+			if utils.EndsWith(entrypointPath, js.Extensions) {
+				err := Loop[js.Data](
 					context.Background(),
 					entrypointPath,
 					language.ParserBuilder(js.MakeJsLanguage),
-					screen,
+					testOverrides,
 				)
-			}()
-			ticker := time.NewTicker(time.Millisecond * 300)
-			elapsed := 0
-
-			result := ""
-
-			var err error
-		forLoop:
-			for {
-				select {
-				case result := <-wait:
-					err = result
-					break forLoop
-				case <-ticker.C:
-					if elapsed > 100 {
-						err = errors.New("timeout")
-						break forLoop
-					}
-					result = printScreen(screen)
-					screen.InjectKey(tcell.Key(int16('q')), 'q', tcell.ModMask(0))
-					elapsed++
-				}
+				a.NoError(err)
+			} else if utils.EndsWith(entrypointPath, rust.Extensions) {
+				err := Loop[rust.Data](
+					context.Background(),
+					entrypointPath,
+					language.ParserBuilder(rust.MakeRustLanguage),
+					testOverrides,
+				)
+				a.NoError(err)
 			}
 
-			a.NoError(err)
-
+			result := printScreen(screen)
 			expectedPath := path.Join(testPath, tt.Name+".txt")
 			if utils.FileExists(expectedPath) {
 				expected, err := os.ReadFile(expectedPath)

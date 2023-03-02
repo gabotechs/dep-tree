@@ -1,19 +1,8 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/spf13/cobra"
 )
-
-func endsWith(string string, substrings []string) bool {
-	for _, substring := range substrings {
-		if strings.HasSuffix(string, substring) {
-			return true
-		}
-	}
-	return false
-}
 
 var Root = &cobra.Command{
 	Use:          "dep-tree",

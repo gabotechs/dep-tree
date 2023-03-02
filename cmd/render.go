@@ -11,6 +11,7 @@ import (
 	"dep-tree/internal/language"
 	"dep-tree/internal/rust"
 	"dep-tree/internal/tui"
+	"dep-tree/internal/utils"
 )
 
 var jsonFormat bool
@@ -47,9 +48,9 @@ func RenderCmd() *cobra.Command {
 			entrypoint := args[0]
 
 			switch {
-			case endsWith(entrypoint, js.Extensions):
+			case utils.EndsWith(entrypoint, js.Extensions):
 				return run(ctx, entrypoint, js.MakeJsLanguage)
-			case endsWith(entrypoint, rust.Extensions):
+			case utils.EndsWith(entrypoint, rust.Extensions):
 				return run(ctx, entrypoint, rust.MakeRustLanguage)
 			default:
 				return fmt.Errorf("file \"%s\" not supported", entrypoint)

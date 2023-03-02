@@ -9,6 +9,7 @@ import (
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
 	"dep-tree/internal/rust"
+	"dep-tree/internal/utils"
 )
 
 var configPath string
@@ -25,13 +26,13 @@ func CheckCmd() *cobra.Command {
 				return fmt.Errorf("could not parse config file %s: %w", configPath, err)
 			}
 			switch {
-			case endsWith(cfg.Entrypoints[0], js.Extensions):
+			case utils.EndsWith(cfg.Entrypoints[0], js.Extensions):
 				return config.Check(
 					ctx,
 					language.ParserBuilder(js.MakeJsLanguage),
 					cfg,
 				)
-			case endsWith(cfg.Entrypoints[0], rust.Extensions):
+			case utils.EndsWith(cfg.Entrypoints[0], rust.Extensions):
 				return config.Check(
 					ctx,
 					language.ParserBuilder(rust.MakeRustLanguage),

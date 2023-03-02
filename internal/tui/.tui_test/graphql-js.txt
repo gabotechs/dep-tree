@@ -1,25 +1,130 @@
-graphql.ts                                                                      
-│                                                                               
-├▷execution/execute.ts                                                          
-├▷│language/parser.ts                                                           
-├▷││validation/validate.ts                                                      
-│ │││                                                                           
-│ ├││▷error/locatedError.ts                                                     
-│ ├││▷│execution/flattenAsyncIterable.ts                                        
-│ ├││▷│execution/mapAsyncIterable.ts                                            
-│ ├││▷││jsutils/isAsyncIterable.ts                                              
-│ ├││▷││jsutils/memoize3.ts                                                     
-│ ├││▷││jsutils/promiseForObject.ts                                             
-│ ├││▷│││jsutils/promiseReduce.ts                                               
-│ │├│▷││││language/lexer.ts                                                     
-├────▷│││││type/validate.ts                                                     
-│ ││├▷││││││validation/specifiedRules.ts                                        
-│ │││ │││││││                                                                   
-│ │├│─││││┼││▷error/syntaxError.ts                                              
-│ │││ │││││├│▷│jsutils/capitalize.ts                                            
-├────────────▷│jsutils/isPromise.ts                                             
-│ │││ ├││││││▷│jsutils/toError.ts                                               
-│ │││ ││││││├▷││validation/rules/DeferStreamDirectiveLabelRule.ts               
-│ │││ ││││││├▷│││validation/rules/DeferStreamDirectiveOnRootFieldRule.ts        
-│ │││ ││││││├▷││││validation/rules/ExecutableDefinitionsRule.ts                 
-│ │││ ││││││├▷│││││validation/rules/FieldsOnCorrectTypeRule.ts                  
+graphql.ts                                                                                                                                                                                              
+│                                                                                                                                                                                                       
+├▷execution/execute.ts                                                                                                                                                                                  
+├▷│language/parser.ts                                                                                                                                                                                   
+├▷││validation/validate.ts                                                                                                                                                                              
+│ │││                                                                                                                                                                                                   
+│ ├││▷error/locatedError.ts                                                                                                                                                                             
+│ ├││▷│execution/flattenAsyncIterable.ts                                                                                                                                                                
+│ ├││▷│execution/mapAsyncIterable.ts                                                                                                                                                                    
+│ ├││▷││jsutils/isAsyncIterable.ts                                                                                                                                                                      
+│ ├││▷││jsutils/memoize3.ts                                                                                                                                                                             
+│ ├││▷││jsutils/promiseForObject.ts                                                                                                                                                                     
+│ ├││▷│││jsutils/promiseReduce.ts                                                                                                                                                                       
+│ │├│▷││││language/lexer.ts                                                                                                                                                                             
+├────▷│││││type/validate.ts                                                                                                                                                                             
+│ ││├▷││││││validation/specifiedRules.ts                                                                                                                                                                
+│ │││ │││││││                                                                                                                                                                                           
+│ │├│─││││┼││▷error/syntaxError.ts                                                                                                                                                                      
+│ │││ │││││├│▷│jsutils/capitalize.ts                                                                                                                                                                    
+├────────────▷│jsutils/isPromise.ts                                                                                                                                                                     
+│ │││ ├││││││▷│jsutils/toError.ts                                                                                                                                                                       
+│ │││ ││││││├▷││validation/rules/DeferStreamDirectiveLabelRule.ts                                                                                                                                       
+│ │││ ││││││├▷│││validation/rules/DeferStreamDirectiveOnRootFieldRule.ts                                                                                                                                
+│ │││ ││││││├▷││││validation/rules/ExecutableDefinitionsRule.ts                                                                                                                                         
+│ │││ ││││││├▷│││││validation/rules/FieldsOnCorrectTypeRule.ts                                                                                                                                          
+│ │││ ││││││├▷││││││validation/rules/FragmentsOnCompositeTypesRule.ts                                                                                                                                   
+│ │││ ││││││├▷│││││││validation/rules/KnownArgumentNamesRule.ts                                                                                                                                         
+│ │││ ││││││├▷││││││││validation/rules/KnownDirectivesRule.ts                                                                                                                                           
+│ │││ ││││││├▷│││││││││validation/rules/KnownFragmentNamesRule.ts                                                                                                                                       
+│ │││ ││││││├▷││││││││││validation/rules/KnownTypeNamesRule.ts                                                                                                                                          
+│ │││ ││││││├▷│││││││││││validation/rules/LoneAnonymousOperationRule.ts                                                                                                                                 
+│ │││ ││││││├▷││││││││││││validation/rules/LoneSchemaDefinitionRule.ts                                                                                                                                  
+│ │││ ││││││├▷│││││││││││││validation/rules/NoFragmentCyclesRule.ts                                                                                                                                     
+│ │││ ││││││├▷││││││││││││││validation/rules/NoUndefinedVariablesRule.ts                                                                                                                                
+│ │││ ││││││├▷│││││││││││││││validation/rules/NoUnusedFragmentsRule.ts                                                                                                                                  
+│ │││ ││││││├▷││││││││││││││││validation/rules/NoUnusedVariablesRule.ts                                                                                                                                 
+│ │││ ││││││├▷│││││││││││││││││validation/rules/OverlappingFieldsCanBeMergedRule.ts                                                                                                                     
+│ │││ ││││││├▷││││││││││││││││││validation/rules/PossibleFragmentSpreadsRule.ts                                                                                                                         
+│ │││ ││││││├▷│││││││││││││││││││validation/rules/PossibleTypeExtensionsRule.ts                                                                                                                         
+│ │││ ││││││├▷││││││││││││││││││││validation/rules/ProvidedRequiredArgumentsRule.ts                                                                                                                     
+│ │││ ││││││├▷│││││││││││││││││││││validation/rules/ScalarLeafsRule.ts                                                                                                                                  
+│ │││ ││││││├▷││││││││││││││││││││││validation/rules/SingleFieldSubscriptionsRule.ts                                                                                                                    
+│ │││ ││││││├▷│││││││││││││││││││││││validation/rules/StreamDirectiveOnListFieldRule.ts                                                                                                                 
+│ │││ ││││││├▷││││││││││││││││││││││││validation/rules/UniqueArgumentDefinitionNamesRule.ts                                                                                                             
+│ │││ ││││││├▷│││││││││││││││││││││││││validation/rules/UniqueArgumentNamesRule.ts                                                                                                                      
+│ │││ ││││││├▷││││││││││││││││││││││││││validation/rules/UniqueDirectiveNamesRule.ts                                                                                                                    
+│ │││ ││││││├▷│││││││││││││││││││││││││││validation/rules/UniqueDirectivesPerLocationRule.ts                                                                                                            
+│ │││ ││││││├▷││││││││││││││││││││││││││││validation/rules/UniqueEnumValueNamesRule.ts                                                                                                                  
+│ │││ ││││││├▷│││││││││││││││││││││││││││││validation/rules/UniqueFieldDefinitionNamesRule.ts                                                                                                           
+│ │││ ││││││├▷││││││││││││││││││││││││││││││validation/rules/UniqueFragmentNamesRule.ts                                                                                                                 
+│ │││ ││││││├▷│││││││││││││││││││││││││││││││validation/rules/UniqueInputFieldNamesRule.ts                                                                                                              
+│ │││ ││││││├▷││││││││││││││││││││││││││││││││validation/rules/UniqueOperationNamesRule.ts                                                                                                              
+│ │││ ││││││├▷│││││││││││││││││││││││││││││││││validation/rules/UniqueOperationTypesRule.ts                                                                                                             
+│ │││ ││││││├▷││││││││││││││││││││││││││││││││││validation/rules/UniqueTypeNamesRule.ts                                                                                                                 
+│ │││ ││││││├▷│││││││││││││││││││││││││││││││││││validation/rules/UniqueVariableNamesRule.ts                                                                                                            
+│ │││ ││││││├▷││││││││││││││││││││││││││││││││││││validation/rules/ValuesOfCorrectTypeRule.ts                                                                                                           
+│ │││ ││││││├▷│││││││││││││││││││││││││││││││││││││validation/rules/VariablesAreInputTypesRule.ts                                                                                                       
+│ │││ ││││││├▷││││││││││││││││││││││││││││││││││││││validation/rules/VariablesInAllowedPositionRule.ts                                                                                                  
+│ │││ │││││││ │││││││││││││││││││││││││││││││││││││││                                                                                                                                                   
+│ ├││─│││││││─││││││││││││││││││││││├││││││││││││││││▷execution/collectFields.ts                                                                                                                        
+│ │││ │││││││ ││││││││││││││││││││││││├┼│││││││││┼│││▷│jsutils/groupBy.ts                                                                                                                               
+│ │││ │││││││ ││││├│││││├││││││││├│││││││├│││││││││││▷││language/predicates.ts                                                                                                                          
+│ │││ │││││├│─││││││││││├││││││││││││││││││││││││││││▷│││type/introspection.ts◁──────────────────┐                                                                                                      
+│ │││ │││││││ │││││││││││││││││├│││││││││││││││││││││▷││││utilities/sortValueNode.ts             │                                                                                                      
+│ │││ │││││├│─││││││││││││││││││├│││││││││││││││││││├▷│││││utilities/typeComparators.ts          │                                                                                                      
+│ ││├─││││││┴─││├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├├▷││││││validation/ValidationContext.ts      │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │││││││                                    │                                                                                                      
+│ ├││─││││││──│││││││││││││││││││││││││││││││││││││││─├││││││▷execution/values.ts                │                                                                                                      
+│ │││ │││││├──│││││││││││││││││││││││││││││││││││││││─┼┴│││││▷│jsutils/AccumulatorMap.ts         │                                                                                                      
+│ ││├─││││││──│││││││││││││││││││││││││││││││││││││││─│─││││├▷│utilities/TypeInfo.ts             │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │├│││▷││utilities/astFromValue.ts        │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ │││                                │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ ├││▷utilities/coerceInputValue.ts  │                                                                                                      
+│ │││ ││││││  ││││││├││││││││││├├││││││││││││││││││├├─├─│││││─├├│▷│utilities/typeFromAST.ts      │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ ├││▷││utilities/valueFromAST.ts    │                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ │││ │││                            │                                                                                                      
+│ ├││─││││││──│││││││││││││││││││││││││││││││││││││││─│─│││││─││├─├││▷jsutils/isIterableObject.ts│                                                                                                      
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ ├││─├││▷jsutils/printPathArray.ts  │                                                                                                      
+├────────────────────────────────────────────────────────────────────▷type/schema.ts◁────────────┴─────┐                                                                                                
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ │││ │││ │                                │                                                                                                
+│ ├││─│││││├──││├├│││├├│││││││││││├││├│││├│││││││││││─├─│├││├─├├│─│││─├▷type/directives.ts             │                                                                                                
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ │││ │││ │ │                              │                                                                                                
+│ │├│─││││││──││││││││├││││││││││││││││││││││││││││││─│─│├│││─│││─│││─│─├▷language/directiveLocation.ts│                                                                                                
+│ │││ ││││││  ││││││││││├││││││││││││││││││││││││││││─│─│├│││─││├─│││─│─├▷type/scalars.ts              │                                                                                                
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││││ │││ │││ │ │ │                            │                                                                                                
+├──────────────────────────────────────────────────────────────────────────▷type/definition.ts─────────┘                                                                                                
+│ │││ ││││││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ │                                                                                                                           
+│ ├││─││││││──│││││││││││││││││││││││││││││││││││││││─│─│││─│─│││─├││─│─│─│─├▷jsutils/Path.ts                                                                                                           
+├────────────────────────────────────────────────────────────────────────────▷│jsutils/PromiseOrValue.ts                                                                                                
+│ │││ │ │ ││  │││││├│┼││┼││││││││┼││││││││││││││││┼││─│─│││─│─│││─┼││─│─│─│─├▷│jsutils/didYouMean.ts                                                                                                    
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ ├▷││jsutils/identityFunc.ts                                                                                                 
+│ │││ │ │ ││  ││││││││││││││││││││├│││││││││││││││├││─│─│││─│─├││─││├─│─│─│─├▷││jsutils/keyMap.ts                                                                                                       
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ ├▷│││jsutils/mapValue.ts                                                                                                    
+│ │││ │ │ ││  │││││├│┼││┼││││││││├││││││││││││││││├││─│─│││─│─│││─├││─│─│─│─├▷││││jsutils/suggestionList.ts                                                                                             
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ ├─├─│─├▷│││││jsutils/toObjMap.ts                                                                                                  
+│ │││ │ │ ││  ││││││├││││││││││├││├│││││││││││││││├├│─│─│├│─│─├││─│││─│─│─├─├▷││││││language/printer.ts                                                                                                 
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ ├─│─├▷│││││││type/assertName.ts                                                                                                 
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ ├▷││││││││utilities/valueFromASTUntyped.ts                                                                                  
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ │ │││││││││                                                                                                                 
+│ ├├├─├─│─│├──├│┼┼┼├┼┼├┼┼┼┼├┼┼┼├├├├├├┼┼┼┼┼┼┼┼├┼┼┼┼├┼├─│─│││─├─├││─├││─├─│─├─├─│││││││┼│▷error/GraphQLError.ts                                                                                           
+│ │││ │ │ │├──│││││││││││││││││││││││││││││││││││││││─│─│││─│─│││─│││─│─│─│─│─│┴│││││││▷│jsutils/formatList.ts                                                                                          
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ ├─│─││││││┼▷││jsutils/keyValMap.ts                                                                                          
+│ │││ │ │ ││  │││││├│││││││││││││││││││││││││││││││││─│─││┼─│─│││─│││─│─│─│─│─│─││┴││││▷│││jsutils/naturalCompare.ts                                                                                    
+│ │││ │ │ ├│──│││││││││││││││││││││││││││││││││││││││─│─│││─│─│││─│││─│─│─│─│─│─││─│├││▷│││language/blockString.ts                                                                                      
+│ │││ │ │ ││  │││││││││││││││││││││││││││││││││││││││ │ │││ │ │││ │││ │ │ │ │ │ ││ │├││▷││││language/printString.ts                                                                                     
+│ ││├─│─│─││──││├┴├├┴├├┴├├┴├┴├┴├├├├├├├├├┴├├├┴├┴├├┴├├├─│─│││─├─│├│─│││─│─│─│─│─│─││─│├││▷││││language/visitor.ts                                                                                         
+│ │││ │ │ ││  │││ ││ ││ ││ │ │ │││││││││ │││ │ ││ │││ │ │││ │ │││ │││ │ │ │ │ │ ││ ││││ │││││                                                                                                           
+├────────────────────────────────────────────────────────────────────────────────────────────▷jsutils/Maybe.ts                                                                                          
+│ ├││─│─┴─││──│││─││─││─││─┼─│─├│├├│┼│││─│││─├─││─│││─┼─│││─┼─├││─││├─├─│─│─├───┴┴─┴││┼─││┴││▷jsutils/ObjMap.ts                                                                                         
+│ ├││─│───││──│││─││─││─││─│─│─│││││││││─│││─│─││─│││─│─│││─│─││├─├││─│─│─├─│───────│││─┼│─││▷jsutils/isObjectLike.ts                                                                                   
+│ │││ │   ├│──│││─││─││─││─│─│─│││││││││─│││─│─││─│││─│─│││─│─│││─│││─│─│─│─│───────│┴│─││─┴│▷language/characterClasses.ts                                                                              
+│ │││ │   ││  │││ ││ ││ ││ │ │ │││││││││ │││ │ ││ │││ │ │││ │ │││ │││ │ │ │ │       │ │ ├│──│▷language/printLocation.ts                                                                                 
+│ │││ │   ││  │││ ││ ││ ││ │ │ │││││││││ │││ │ ││ │││ │ │││ │ │││ │││ │ │ │ │       │ │ ││  │ │                                                                                                         
+│ ├┼┴─┴───┼├──│││─│┴─│├─┴│─┴─┴─├│├├├┼┴┴┴─│┴┴─├─┴┴─├┴├─┼─┼│┼─┼─├┼├─│┼├─├─├─│─├───────┴─┼─┼│──├─┼▷language/ast.ts                                                                                         
+│ ││      ││  │││ │  ││  │     ││││││    │   │    │ │ │ │││ │ │││ │││ │ │ │ │         │ ├│──│─┼▷│language/location.ts                                                                                   
+│ ││      ││  │││ │  ││  │     ││││││    │   │    │ │ │ │││ │ │││ │││ │ │ │ │         │ ││  │ │ ││                                                                                                      
+│ ├│──────││──│││─│──│├──│─────││├│││────│───┴────│─│─│─│├│─│─││├─├│├─│─│─│─│─────────│─│┴──│─│─│┼▷jsutils/invariant.ts                                                                                 
+│ ├┼──────││──││┴─┴──┴├──┴─────├│├├│┴────┴────────│─├─┴─┴│┴─┴─├┴├─│┴├─│─│─├─├─────────┴─│───├─│─┼│▷language/kinds.ts                                                                                    
+└─────────────────────────────────────────────────────────────────────────────────────────────────▷language/source.ts                                                                                   
+  │└──────┴│───│──────│────────│││││──────────────│─│────│────│─│─│─│─│─│─│─│───────────────│───┴─▷│language/tokenKind.ts                                                                               
+  │        │   │      │        │││││              │ │    │    │ │ │ │ │ │ │ │               │      │                                                                                                    
+  │        │   │      │        │││││              │ │    │    │ │ │ │ │ │ │ ├───────────────┼──────┼─▷jsutils/devAssert.ts                                                                              
+  │        │   │      │        │││││              │ │    │    │ │ │ │ ├─├─│─├───────────────│──────┴─▷jsutils/instanceOf.ts                                                                             
+  │        │   │      │        │││││              │ │    │    │ │ │ │ │ │ │ │               │         │                                                                                                 
+  └────────┴───┴──────┴────────┴┴┴┴┴──────────────┴─┴────┴────┴─┴─┴─┴─┴─┴─┴─┴───────────────┴─────────┴▷jsutils/inspect.ts                                                                              
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
+                                                                                                                                                                                                        
