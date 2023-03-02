@@ -68,6 +68,14 @@ func TestTui(t *testing.T) {
 			W:          200,
 			H:          130,
 		},
+		{
+			Name:       "warp",
+			Repo:       "https://github.com/seanmonstar/warp",
+			Tag:        "v0.3.3",
+			Entrypoint: "src/lib.rs",
+			W:          100,
+			H:          60,
+		},
 	}
 
 	_ = os.MkdirAll(testPath, os.ModePerm)
