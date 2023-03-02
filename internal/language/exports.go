@@ -3,6 +3,8 @@ package language
 import (
 	"context"
 	"fmt"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
 type ExportName struct {
@@ -59,7 +61,7 @@ func (p *Parser[T, F]) CachedParseExports(
 
 type UnwrappedExportsResult struct {
 	// Exports: map from exported name to exported path.
-	Exports map[string]string
+	Exports *orderedmap.OrderedMap[string, string]
 	// Errors: errors gathered while resolving exports.
 	Errors []error
 }
@@ -78,13 +80,13 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 	if err != nil {
 		return ctx, nil, err
 	}
-	exports := make(map[string]string)
+	exports := orderedmap.NewOrderedMap[string, string]()
 	var errors []error
 
 	for _, export := range wrapped.Exports {
 		if export.Id == id {
 			for _, name := range export.Names {
-				exports[name.name()] = export.Id
+				exports.Set(name.name(), export.Id)
 			}
 			continue
 		}
@@ -97,15 +99,13 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 		}
 
 		if export.All {
-			for exportedName, exportId := range unwrapped.Exports {
-				exports[exportedName] = exportId
-			}
+			exports = unwrapped.Exports
 			continue
 		}
 
 		for _, name := range export.Names {
-			if exportId, ok := unwrapped.Exports[name.Original]; ok {
-				exports[name.name()] = exportId
+			if exportId, ok := unwrapped.Exports.Get(name.Original); ok {
+				exports.Set(name.name(), exportId)
 			} else {
 				errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id))
 			}
