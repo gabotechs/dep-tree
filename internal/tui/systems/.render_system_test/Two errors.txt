@@ -1,7 +1,7 @@
-                                        - one error that is 
-                                        longer than the one 
-                                        below, but not that 
-                                        much                
+                                        - one error that    
+                                        is longer than the  
+                                        one below, but not  
+                                        that much           
                                         - another short     
                                         error               
                                                             
