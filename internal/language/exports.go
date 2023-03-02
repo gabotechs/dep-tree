@@ -107,7 +107,7 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 			if exportId, ok := unwrapped.Exports[name.Original]; ok {
 				exports[name.name()] = exportId
 			} else {
-				errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name, id, export.Id))
+				errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id))
 			}
 		}
 	}
