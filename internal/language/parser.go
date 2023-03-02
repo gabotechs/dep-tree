@@ -66,7 +66,8 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 			return nil, nil, err
 		}
 		n.AddErrors(exports.Errors...)
-		for _, exportFrom := range exports.Exports {
+		for _, k := range exports.Exports.Keys() {
+			exportFrom, _ := exports.Exports.Get(k)
 			resolvedImports.Set(exportFrom, true)
 		}
 	}
@@ -82,7 +83,8 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 		n.AddErrors(exports.Errors...)
 		if importEntry.All {
 			// If all imported, then dump every path in the resolved imports.
-			for _, fromPath := range exports.Exports {
+			for _, k := range exports.Exports.Keys() {
+				fromPath, _ := exports.Exports.Get(k)
 				if _, ok := resolvedImports.Get(fromPath); ok {
 					continue
 				}
@@ -90,7 +92,7 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 			}
 		} else {
 			for _, name := range importEntry.Names {
-				if resolvedImport, ok := exports.Exports[name]; ok {
+				if resolvedImport, ok := exports.Exports.Get(name); ok {
 					if _, ok := resolvedImports.Get(resolvedImport); ok {
 						continue
 					}

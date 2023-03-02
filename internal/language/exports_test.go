@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,12 +42,20 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	a.Greater(ratio, int64(10))
 }
 
+func makeStringOm(args ...string) *orderedmap.OrderedMap[string, string] {
+	om := orderedmap.NewOrderedMap[string, string]()
+	for i := 0; i < len(args); i += 2 {
+		om.Set(args[i], args[i+1])
+	}
+	return om
+}
+
 func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Id       string
 		Exports  map[string]*ExportsResult
-		Expected map[string]string
+		Expected *orderedmap.OrderedMap[string, string]
 	}{
 		{
 			Name: "direct export",
@@ -59,9 +68,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 					},
 				}},
 			},
-			Expected: map[string]string{
-				"A": "1",
-			},
+			Expected: makeStringOm(
+				"A", "1",
+			),
 		},
 		{
 			Name: "one proxy",
@@ -80,9 +89,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 					},
 				}},
 			},
-			Expected: map[string]string{
-				"A": "2",
-			},
+			Expected: makeStringOm(
+				"A", "2",
+			),
 		},
 		{
 			Name: "double proxy",
@@ -107,9 +116,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 					},
 				}},
 			},
-			Expected: map[string]string{
-				"A": "3",
-			},
+			Expected: makeStringOm(
+				"A", "3",
+			),
 		},
 		{
 			Name: "double proxy with alias",
@@ -134,9 +143,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 					},
 				}},
 			},
-			Expected: map[string]string{
-				"A": "3",
-			},
+			Expected: makeStringOm(
+				"A", "3",
+			),
 		},
 		{
 			Name: "double proxy with all export",
@@ -161,9 +170,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 					},
 				}},
 			},
-			Expected: map[string]string{
-				"A": "3",
-			},
+			Expected: makeStringOm(
+				"A", "3",
+			),
 		},
 	}
 
