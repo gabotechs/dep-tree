@@ -42,6 +42,12 @@ func TestPub(t *testing.T) {
 			}},
 		},
 		{
+			Name: "pub type my_type",
+			ExpectedPub: []Pub{{
+				Name: "my_type",
+			}},
+		},
+		{
 			Name: "pub(crate) fn my_function and a lot of shit after",
 			ExpectedPub: []Pub{{
 				Name: "my_function",
