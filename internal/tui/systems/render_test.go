@@ -42,6 +42,13 @@ func TestRenderSystem(t *testing.T) {
 			},
 			ScreenSize: utils.Vec(60, 10),
 		},
+		{
+			Name: "Very long word",
+			Errors: []error{
+				errors.New("/Users/gabriel/GolandProjects/dep-tree/internal/tui/systems/render_test.go"),
+			},
+			ScreenSize: utils.Vec(100, 10),
+		},
 	}
 
 	_ = os.MkdirAll(renderTestFolder, os.ModePerm)
@@ -54,6 +61,7 @@ func TestRenderSystem(t *testing.T) {
 			err := screen.Init()
 			a.NoError(err)
 			screen.SetStyle(defaultStyle)
+			screen.SetSize(tt.ScreenSize.X, tt.ScreenSize.Y)
 
 			s := &State{
 				SelectedId: "selected",

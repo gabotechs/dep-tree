@@ -2,9 +2,9 @@
                                         long error that     
                                         probably does not   
                                         fit in just one     
-                                        line, so it will be 
-                                        split in multiple   
-                                        lines               
+                                        line, so it will    
+                                        be split in         
+                                        multiple lines      
                                                             
                                                             
                                                             

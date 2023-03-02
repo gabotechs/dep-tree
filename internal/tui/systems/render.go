@@ -85,40 +85,50 @@ func forEachCell(
 
 const renderErrorMargin = 40
 
+func extractWords(err error, maxLength int) []string {
+	words := []string{"-"}
+	for _, word := range strings.Split(err.Error(), " ") {
+		// If the word is too long break it.
+		for len(word) > maxLength {
+			brokenWord := word[:maxLength]
+			word = word[maxLength:]
+			words = append(words, brokenWord)
+		}
+		words = append(words, word)
+	}
+	return words
+}
+
 func renderError(
 	s *State,
 	rs *RenderState,
 	ss *SpatialState,
 ) {
 	w := ss.ScreenSize.X
-	availableSpace := utils.Clamp(renderErrorMargin, w-renderErrorMargin, w-renderErrorMargin)
-	maxWordLength := availableSpace - 1
+	availableSpace := utils.Clamp(renderErrorMargin, renderErrorMargin, w-renderErrorMargin)
+	wordsStart := w - availableSpace
 
+	// first, retrieve lines.
 	lines := make([][]string, 1)
 	for _, err := range rs.Errors[s.SelectedId] {
-		x := availableSpace
-		words := []string{"-"}
-		for _, word := range strings.Split(err.Error(), " ") {
-			for len(word) > maxWordLength {
-				brokenWord := word[:maxWordLength]
-				word = word[maxWordLength:]
-				words = append(words, brokenWord)
-			}
-			words = append(words, word)
-		}
-
+		x := wordsStart
+		// get words from error message.
+		words := extractWords(err, availableSpace)
+		// make lines with those words.
 		for _, word := range words {
-			if x+len(word) >= w {
-				x = availableSpace
+			if x+len(word)+1 >= w {
+				x = wordsStart
 				lines = append(lines, []string{})
 			}
-			x += len(word) + 1
+			x += len(word) + 1 // +1 because a space is added after each word.
 			lines[len(lines)-1] = append(lines[len(lines)-1], word)
 		}
 		lines = append(lines, []string{})
 	}
+
+	// second, render each line.
 	for y, line := range lines {
-		x := availableSpace
+		x := wordsStart
 		for _, word := range line {
 			for _, letter := range word + " " {
 				s.Screen.SetContent(
