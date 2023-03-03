@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -35,9 +36,12 @@ func (l *Language) filePathToModChain(dir string) ([]string, error) {
 	return filteredSlices, nil
 }
 
-func (l *Language) resolve(pathSlices []string, filePath string) (string, error) {
-	if len(pathSlices) == 0 {
-		return filePath, nil
+func (l *Language) resolve(ctx context.Context, pathSlices []string, filePath string) (context.Context, string, error) {
+	ctx, err := l.lazyLoadModTree(ctx)
+	if err != nil {
+		return ctx, "", err
+	} else if len(pathSlices) == 0 {
+		return ctx, filePath, nil
 	}
 
 	first := pathSlices[0]
@@ -48,7 +52,7 @@ func (l *Language) resolve(pathSlices []string, filePath string) (string, error)
 	} else {
 		mods, err := l.filePathToModChain(filePath)
 		if err != nil {
-			return "", err
+			return ctx, "", err
 		}
 		mods = append(mods, pathSlices...)
 		modSearch = mods
@@ -57,10 +61,10 @@ func (l *Language) resolve(pathSlices []string, filePath string) (string, error)
 	mod := l.ModTree.Search(modSearch)
 	switch {
 	case mod == nil && (first == self || first == super || first == crate):
-		return "", fmt.Errorf("could not find mod chain %s in the projects mod tree", strings.Join(modSearch, " -> "))
+		return ctx, "", fmt.Errorf("could not find mod chain %s in the projects mod tree", strings.Join(modSearch, " -> "))
 	case mod == nil:
-		return "", nil
+		return ctx, "", nil
 	default:
-		return mod.Path, nil
+		return ctx, mod.Path, nil
 	}
 }

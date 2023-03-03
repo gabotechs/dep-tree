@@ -26,11 +26,6 @@ func TestMakeRustLanguage_Errors(t *testing.T) {
 			Entrypoint: path.Join(cwd, ".empty_project"),
 			Expected:   "could not find any of the possible entrypoint paths",
 		},
-		{
-			Name:       "cannot form ModTree",
-			Entrypoint: path.Join(cwd, ".almost_empty_project"),
-			Expected:   "coult not find mod",
-		},
 	}
 
 	for _, tt := range tests {

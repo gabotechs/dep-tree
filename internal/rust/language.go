@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -48,6 +49,15 @@ var searchPaths = []string{
 	"main.rs",
 }
 
+func (l *Language) lazyLoadModTree(ctx context.Context) (context.Context, error) {
+	if l.ModTree == nil {
+		ctx, modTree, err := MakeModTree(ctx, l.ProjectEntrypoint, "crate", nil)
+		l.ModTree = modTree
+		return ctx, err
+	}
+	return ctx, nil
+}
+
 func MakeRustLanguage(entrypoint string) (language.Language[Data, rust_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
@@ -63,14 +73,8 @@ func MakeRustLanguage(entrypoint string) (language.Language[Data, rust_grammar.F
 		return nil, fmt.Errorf("could not find any of the possible entrypoint paths %s", strings.Join(searchPaths, ", "))
 	}
 
-	modTree, err := MakeModTree(projectEntrypoint, "crate", nil)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Language{
 		CargoTomlPath:     cargoTomlPath,
 		ProjectEntrypoint: projectEntrypoint,
-		ModTree:           modTree,
 	}, nil
 }

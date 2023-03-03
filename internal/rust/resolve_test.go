@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"path"
 	"path/filepath"
 	"strings"
@@ -110,7 +111,7 @@ func TestResolve(t *testing.T) {
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			resolved, err := lang.resolve(strings.Split(tt.Name, " "), abs)
+			_, resolved, err := lang.resolve(context.Background(), strings.Split(tt.Name, " "), abs)
 			a.NoError(err)
 
 			var expectedAbs string
@@ -148,7 +149,7 @@ func TestResolveErrors(t *testing.T) {
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			_, err = lang.resolve(strings.Split(tt.Name, " "), abs)
+			_, _, err = lang.resolve(context.Background(), strings.Split(tt.Name, " "), abs)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}

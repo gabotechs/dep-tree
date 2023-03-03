@@ -1,10 +1,11 @@
 package rust
 
 import (
+	"context"
 	"fmt"
 	"path"
-	"sync"
 
+	"dep-tree/internal/language"
 	"dep-tree/internal/rust/rust_grammar"
 	"dep-tree/internal/utils"
 )
@@ -20,22 +21,24 @@ const self = "self"
 const crate = "crate"
 const super = "super"
 
-// TODO: propagating context here is very messy.
-var fileCache = make(map[string]*rust_grammar.File)
-var fileCacheMutex = sync.Mutex{}
-
-func MakeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error) {
-	var file *rust_grammar.File
-	var ok bool
-	var err error
-	if file, ok = fileCache[mainPath]; !ok {
-		file, err = rust_grammar.Parse(mainPath)
+func CachedRustFile(ctx context.Context, id string) (context.Context, *rust_grammar.File, error) {
+	cacheKey := language.FileCacheKey(id)
+	if cached, ok := ctx.Value(cacheKey).(*rust_grammar.File); ok {
+		return ctx, cached, nil
+	} else {
+		result, err := rust_grammar.Parse(id)
 		if err != nil {
-			return nil, err
+			return ctx, nil, err
 		}
-		fileCacheMutex.Lock()
-		fileCache[mainPath] = file
-		fileCacheMutex.Unlock()
+		ctx = context.WithValue(ctx, cacheKey, result)
+		return ctx, result, err
+	}
+}
+
+func MakeModTree(ctx context.Context, mainPath string, name string, parent *ModTree) (context.Context, *ModTree, error) {
+	ctx, file, err := CachedRustFile(ctx, mainPath)
+	if err != nil {
+		return ctx, nil, err
 	}
 
 	var searchPath string
@@ -66,17 +69,17 @@ func MakeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 				} else if p = path.Join(searchPath, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
 					modPath = p
 				} else {
-					return nil, fmt.Errorf(`coult not find mod "%s" in path "%s"`, stmt.Mod.Name, searchPath)
+					return ctx, nil, fmt.Errorf(`could not find mod "%s" in path "%s"`, stmt.Mod.Name, searchPath)
 				}
-				modTree.Children[stmt.Mod.Name], err = MakeModTree(modPath, stmt.Mod.Name, modTree)
+				ctx, modTree.Children[stmt.Mod.Name], err = MakeModTree(ctx, modPath, stmt.Mod.Name, modTree)
 				if err != nil {
-					return nil, err
+					return ctx, nil, err
 				}
 			}
 		}
 	}
 
-	return modTree, nil
+	return ctx, modTree, nil
 }
 
 func (m *ModTree) Search(modChain []string) *ModTree {
