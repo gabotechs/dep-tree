@@ -22,5 +22,4 @@ func GoldenTest(t *testing.T, file string, content string) {
 		err := os.WriteFile(file, []byte(content), os.ModePerm)
 		a.NoError(err)
 	}
-
 }
