@@ -21,21 +21,13 @@ func run[T any, F any](
 	entrypoint string,
 	languageBuilder language.Builder[T, F],
 ) error {
+	builder := language.ParserBuilder(languageBuilder)
 	if jsonFormat {
-		rendered, err := dep_tree.PrintStructured(
-			ctx,
-			entrypoint,
-			language.ParserBuilder(languageBuilder),
-		)
+		rendered, err := dep_tree.PrintStructured(ctx, entrypoint, builder)
 		fmt.Println(rendered)
 		return err
 	}
-	return tui.Loop(
-		ctx,
-		entrypoint,
-		language.ParserBuilder(languageBuilder),
-		nil,
-	)
+	return tui.Loop(ctx, entrypoint, builder, nil)
 }
 
 func RenderCmd() *cobra.Command {
