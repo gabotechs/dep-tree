@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
@@ -31,6 +32,7 @@ func TestTui(t *testing.T) {
 		Entrypoint string
 		W          int
 		H          int
+		Keys       string
 	}{
 		{
 			Name:       "react-stl-viewer",
@@ -64,6 +66,15 @@ func TestTui(t *testing.T) {
 			W:          100,
 			H:          60,
 		},
+		{
+			Name:       "quits",
+			Repo:       "https://github.com/seanmonstar/warp",
+			Tag:        "v0.3.3",
+			Entrypoint: "src/lib.rs",
+			W:          40,
+			H:          30,
+			Keys:       "q",
+		},
 	}
 
 	_ = os.MkdirAll(testPath, os.ModePerm)
@@ -72,7 +83,7 @@ func TestTui(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			repoPath := path.Join(tmp, path.Base(tt.Name))
+			repoPath := path.Join(tmp, path.Base(tt.Repo))
 			entrypointPath := path.Join(repoPath, tt.Entrypoint)
 			if _, err := os.Stat(entrypointPath); err != nil {
 				_ = os.RemoveAll(repoPath)
@@ -111,6 +122,12 @@ func TestTui(t *testing.T) {
 				)
 				a.NoError(err)
 			}
+			if tt.Keys != "" {
+				for _, key := range strings.Split(tt.Keys, " ") {
+					err := testOverrides.Pump(tCellKey(key))
+					a.NoError(err)
+				}
+			}
 
 			result := systems.PrintScreen(screen)
 			utils.GoldenTest(
@@ -120,4 +137,8 @@ func TestTui(t *testing.T) {
 			)
 		})
 	}
+}
+
+func tCellKey(str string) tcell.Event {
+	return tcell.NewEventKey(tcell.Key(str[0]), rune(str[0]), tcell.ModMask(0))
 }
