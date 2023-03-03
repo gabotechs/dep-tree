@@ -17,7 +17,8 @@ func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (c
 	for _, stmt := range file.Statements {
 		if stmt.Use != nil {
 			for _, use := range stmt.Use.Flatten() {
-				id, err := l.resolve(use.PathSlices, file.Path)
+				newCtx, id, err := l.resolve(ctx, use.PathSlices, file.Path)
+				ctx = newCtx
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue

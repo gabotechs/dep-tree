@@ -1,11 +1,13 @@
 package rust
 
 import (
+	"context"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -31,12 +33,38 @@ func (m *ModTree) Debug(indent int) string {
 	return msg
 }
 
+func TestMakeModTreeIsCached(t *testing.T) {
+	a := require.New(t)
+	absPath, err := filepath.Abs(path.Join(testFolder, "src", "lib.rs"))
+	a.NoError(err)
+
+	ctx := context.Background()
+
+	start := time.Now().UnixMicro()
+
+	ctx, _, err = MakeModTree(ctx, absPath, "crate", nil)
+	a.NoError(err)
+
+	first := time.Now().UnixMicro() - start
+	start = time.Now().UnixMicro()
+
+	absPath, err = filepath.Abs(path.Join(testFolder, "src", "sum.rs"))
+	a.NoError(err)
+
+	_, _, err = MakeModTree(ctx, absPath, "crate", nil)
+	a.NoError(err)
+
+	second := time.Now().UnixMicro() - start
+
+	a.Greater(first, second*10)
+}
+
 func TestMakeModTree(t *testing.T) {
 	a := require.New(t)
 	absPath, err := filepath.Abs(path.Join(testFolder, "src", "lib.rs"))
 	a.NoError(err)
 
-	modTree, err := MakeModTree(absPath, "crate", nil)
+	_, modTree, err := MakeModTree(context.Background(), absPath, "crate", nil)
 	a.NoError(err)
 
 	result := modTree.Debug(0)
@@ -115,7 +143,7 @@ func TestModTree_Errors(t *testing.T) {
 			absPath, err := filepath.Abs(tt.Path)
 			a.NoError(err)
 
-			_, err = MakeModTree(absPath, "crate", nil)
+			_, _, err = MakeModTree(context.Background(), absPath, "crate", nil)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}
