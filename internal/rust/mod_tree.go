@@ -3,6 +3,7 @@ package rust
 import (
 	"fmt"
 	"path"
+	"sync"
 
 	"dep-tree/internal/rust/rust_grammar"
 	"dep-tree/internal/utils"
@@ -19,10 +20,22 @@ const self = "self"
 const crate = "crate"
 const super = "super"
 
+// TODO: propagating context here is very messy.
+var fileCache = make(map[string]*rust_grammar.File)
+var fileCacheMutex = sync.Mutex{}
+
 func MakeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error) {
-	file, err := rust_grammar.Parse(mainPath)
-	if err != nil {
-		return nil, err
+	var file *rust_grammar.File
+	var ok bool
+	var err error
+	if file, ok = fileCache[mainPath]; !ok {
+		file, err = rust_grammar.Parse(mainPath)
+		if err != nil {
+			return nil, err
+		}
+		fileCacheMutex.Lock()
+		fileCache[mainPath] = file
+		fileCacheMutex.Unlock()
 	}
 
 	var searchPath string
