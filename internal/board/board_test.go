@@ -1,7 +1,6 @@
 package board
 
 import (
-	"os"
 	"path"
 	"testing"
 
@@ -10,14 +9,7 @@ import (
 	"dep-tree/internal/utils"
 )
 
-const RebuildTestsEnv = "REBUILD_TESTS"
-
 const testPath = ".board_test"
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
 
 type TestBlock struct {
 	name string
@@ -259,17 +251,8 @@ func TestBoard(t *testing.T) {
 			result, err := board.Render()
 			if tt.ExpectedError == "" {
 				a.NoError(err)
-				_ = os.Mkdir(testPath, os.ModePerm)
 				fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
-				print(result)
-				if fileExists(fullPath) && os.Getenv(RebuildTestsEnv) != "true" {
-					expected, err := os.ReadFile(fullPath)
-					a.NoError(err)
-					a.Equal(string(expected), result)
-				} else {
-					err := os.WriteFile(fullPath, []byte(result), os.ModePerm)
-					a.NoError(err)
-				}
+				utils.GoldenTest(t, fullPath, result)
 			} else {
 				a.ErrorContains(err, tt.ExpectedError)
 			}

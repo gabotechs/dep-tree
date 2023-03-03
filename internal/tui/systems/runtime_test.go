@@ -14,6 +14,8 @@ import (
 func TestHelpScreen(t *testing.T) {
 	a := require.New(t)
 	mockScreen := tcell.NewSimulationScreen("")
+	err := mockScreen.Init()
+	a.NoError(err)
 
 	wait := make(chan error)
 
@@ -22,11 +24,12 @@ func TestHelpScreen(t *testing.T) {
 	}()
 
 	time.Sleep(time.Millisecond * 100)
+	result := PrintScreen(mockScreen)
+
 	mockScreen.InjectKey(tcell.Key(int16('q')), 'q', tcell.ModMask(0))
 
-	result := PrintScreen(mockScreen)
 	utils.GoldenTest(t, path.Join(".runtime_system_test", "help.txt"), result)
 
-	err := <-wait
+	err = <-wait
 	a.NoError(err)
 }
