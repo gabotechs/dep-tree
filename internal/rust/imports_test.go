@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"path"
 	"path/filepath"
 	"testing"
@@ -85,7 +86,7 @@ func TestLanguage_ParseImports(t *testing.T) {
 			file, err := lang.ParseFile(path.Join(absTestFolder, "src", tt.Name))
 			a.NoError(err)
 
-			exports, err := lang.ParseImports(file)
+			_, exports, err := lang.ParseImports(context.Background(), file)
 			a.NoError(err)
 			a.Equal(tt.Expected, exports.Imports)
 			a.Equal(tt.Errors, exports.Errors)
