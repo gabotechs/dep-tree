@@ -2,7 +2,6 @@ package systems
 
 import (
 	"errors"
-	"os"
 	"path"
 	"testing"
 
@@ -11,8 +10,6 @@ import (
 
 	"dep-tree/internal/utils"
 )
-
-const renderTestFolder = ".render_system_test"
 
 func TestRenderSystem(t *testing.T) {
 	tests := []struct {
@@ -51,8 +48,6 @@ func TestRenderSystem(t *testing.T) {
 		},
 	}
 
-	_ = os.MkdirAll(renderTestFolder, os.ModePerm)
-
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
@@ -80,24 +75,13 @@ func TestRenderSystem(t *testing.T) {
 
 			renderError(s, rs, ss)
 
-			gather := make([]byte, 0)
+			gather := PrintScreen(screen)
 
-			for y := 0; y < tt.ScreenSize.Y; y++ {
-				for x := 0; x < tt.ScreenSize.X; x++ {
-					c, _, _, _ := screen.GetContent(x, y)
-					gather = append(gather, byte(c))
-				}
-				gather = append(gather, byte('\n'))
-			}
-			resultFile := path.Join(renderTestFolder, tt.Name+".txt")
-			if utils.FileExists(resultFile) {
-				expected, err := os.ReadFile(resultFile)
-				a.NoError(err)
-				a.Equal(string(expected), string(gather))
-			} else {
-				err := os.WriteFile(resultFile, gather, os.ModePerm)
-				a.NoError(err)
-			}
+			utils.GoldenTest(
+				t,
+				path.Join(".render_system_test", tt.Name+".txt"),
+				gather,
+			)
 		})
 	}
 }
