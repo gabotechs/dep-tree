@@ -27,17 +27,9 @@ func CheckCmd() *cobra.Command {
 			}
 			switch {
 			case utils.EndsWith(cfg.Entrypoints[0], js.Extensions):
-				return config.Check(
-					ctx,
-					language.ParserBuilder(js.MakeJsLanguage),
-					cfg,
-				)
+				return config.Check(ctx, language.ParserBuilder(js.MakeJsLanguage), cfg)
 			case utils.EndsWith(cfg.Entrypoints[0], rust.Extensions):
-				return config.Check(
-					ctx,
-					language.ParserBuilder(rust.MakeRustLanguage),
-					cfg,
-				)
+				return config.Check(ctx, language.ParserBuilder(rust.MakeRustLanguage), cfg)
 			default:
 				return fmt.Errorf("file \"%s\" not supported", cfg.Entrypoints[0])
 			}
