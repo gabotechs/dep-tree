@@ -1,13 +1,14 @@
 package js
 
 import (
+	"context"
 	"path"
 
 	"dep-tree/internal/js/js_grammar"
 	"dep-tree/internal/language"
 )
 
-func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(ctx context.Context, file *js_grammar.File) (context.Context, *language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
@@ -49,7 +50,7 @@ func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult,
 			imports = append(imports, entry)
 		}
 	}
-	return &language.ImportsResult{
+	return ctx, &language.ImportsResult{
 		Imports: imports,
 		Errors:  errors,
 	}, nil

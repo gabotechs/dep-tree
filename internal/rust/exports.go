@@ -1,13 +1,14 @@
 package rust
 
 import (
+	"context"
 	"fmt"
 
 	"dep-tree/internal/language"
 	"dep-tree/internal/rust/rust_grammar"
 )
 
-func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(ctx context.Context, file *rust_grammar.File) (context.Context, *language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -48,7 +49,7 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResul
 		}
 	}
 
-	return &language.ExportsResult{
+	return ctx, &language.ExportsResult{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

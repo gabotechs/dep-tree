@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"fmt"
 	"path"
 
@@ -9,7 +10,7 @@ import (
 	"dep-tree/internal/utils"
 )
 
-func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (context.Context, *language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
@@ -59,7 +60,7 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 		}
 	}
 
-	return &language.ImportsResult{
+	return ctx, &language.ImportsResult{
 		Imports: imports,
 		Errors:  errors,
 	}, nil

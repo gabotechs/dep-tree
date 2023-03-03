@@ -1,6 +1,7 @@
 package js
 
 import (
+	"context"
 	"path"
 
 	"dep-tree/internal/js/js_grammar"
@@ -9,7 +10,7 @@ import (
 
 type ExportsCacheKey string
 
-func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (context.Context, *language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -91,7 +92,7 @@ func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult,
 			}
 		}
 	}
-	return &language.ExportsResult{
+	return ctx, &language.ExportsResult{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

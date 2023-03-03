@@ -51,7 +51,7 @@ func (p *Parser[T, F]) CachedParseExports(
 	if err != nil {
 		return ctx, nil, err
 	}
-	result, err := p.lang.ParseExports(file)
+	ctx, result, err := p.lang.ParseExports(ctx, file)
 	if err != nil {
 		return ctx, nil, err
 	}

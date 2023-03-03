@@ -35,7 +35,7 @@ func (p *Parser[T, F]) CachedParseImports(
 		if err != nil {
 			return ctx, nil, err
 		}
-		result, err := p.lang.ParseImports(file)
+		ctx, result, err := p.lang.ParseImports(ctx, file)
 		if err != nil {
 			return ctx, nil, err
 		}

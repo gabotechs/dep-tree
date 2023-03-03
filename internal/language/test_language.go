@@ -1,6 +1,7 @@
 package language
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -35,20 +36,20 @@ func (t *TestLanguage) MakeNode(id string) (*graph.Node[TestLanguageData], error
 	}, nil
 }
 
-func (t *TestLanguage) ParseImports(file *TestFile) (*ImportsResult, error) {
+func (t *TestLanguage) ParseImports(ctx context.Context, file *TestFile) (context.Context, *ImportsResult, error) {
 	time.Sleep(time.Millisecond)
 	if imports, ok := t.imports[file.Name]; ok {
-		return imports, nil
+		return ctx, imports, nil
 	} else {
-		return imports, errors.New(file.Name + " not found")
+		return ctx, imports, errors.New(file.Name + " not found")
 	}
 }
 
-func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsResult, error) {
+func (t *TestLanguage) ParseExports(ctx context.Context, file *TestFile) (context.Context, *ExportsResult, error) {
 	time.Sleep(time.Millisecond)
 	if exports, ok := t.exports[file.Name]; ok {
-		return exports, nil
+		return ctx, exports, nil
 	} else {
-		return exports, errors.New(file.Name + " not found")
+		return ctx, exports, errors.New(file.Name + " not found")
 	}
 }
