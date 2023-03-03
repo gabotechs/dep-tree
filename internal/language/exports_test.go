@@ -2,6 +2,7 @@ package language
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -88,10 +89,11 @@ func makeStringOm(args ...string) *orderedmap.OrderedMap[string, string] {
 
 func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Id       string
-		Exports  map[string]*ExportsResult
-		Expected *orderedmap.OrderedMap[string, string]
+		Name           string
+		Id             string
+		Exports        map[string]*ExportsResult
+		Expected       *orderedmap.OrderedMap[string, string]
+		ExpectedErrors []string
 	}{
 		{
 			Name: "direct export",
@@ -150,6 +152,16 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				"A", "3",
 			),
 		},
+		{
+			Name: "name not found in destination",
+			Id:   "1",
+			Exports: b().
+				Entry("1", "2", "A").
+				Entry("3", "2", "B").
+				Build(),
+			Expected:       makeStringOm(),
+			ExpectedErrors: []string{"2 not found"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -167,7 +179,11 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			a.NoError(err)
 
 			a.Equal(tt.Expected, exports.Exports)
-			a.Nil(exports.Errors)
+			var expectedErrors []error
+			for _, expectedError := range tt.ExpectedErrors {
+				expectedErrors = append(expectedErrors, errors.New(expectedError))
+			}
+			a.Equal(expectedErrors, exports.Errors)
 		})
 	}
 }
