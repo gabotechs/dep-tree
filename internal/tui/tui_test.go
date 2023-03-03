@@ -15,25 +15,13 @@ import (
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
 	"dep-tree/internal/rust"
+	"dep-tree/internal/tui/systems"
 	"dep-tree/internal/utils"
 )
 
 const tmp = "/tmp/dep-tree-tests"
 
 const testPath = ".tui_test"
-
-func printScreen(s tcell.SimulationScreen) string {
-	result := ""
-	w, h := s.Size()
-	for i := 0; i < h; i++ {
-		for j := 0; j < w; j++ {
-			char, _, _, _ := s.GetContent(j, i)
-			result += string(char)
-		}
-		result += "\n"
-	}
-	return result
-}
 
 func TestTui(t *testing.T) {
 	tests := []struct {
@@ -124,16 +112,12 @@ func TestTui(t *testing.T) {
 				a.NoError(err)
 			}
 
-			result := printScreen(screen)
-			expectedPath := path.Join(testPath, tt.Name+".txt")
-			if utils.FileExists(expectedPath) {
-				expected, err := os.ReadFile(expectedPath)
-				a.NoError(err)
-				a.Equal(string(expected), result)
-			} else {
-				err := os.WriteFile(expectedPath, []byte(result), os.ModePerm)
-				a.NoError(err)
-			}
+			result := systems.PrintScreen(screen)
+			utils.GoldenTest(
+				t,
+				path.Join(".tui_test", tt.Name+".txt"),
+				result,
+			)
 		})
 	}
 }

@@ -2,24 +2,17 @@ package dep_tree
 
 import (
 	"context"
-	"os"
 	"path"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-)
 
-const RebuildTestsEnv = "REBUILD_TESTS"
+	"dep-tree/internal/utils"
+)
 
 const (
-	testDir            = ".render_test"
-	RebuiltTestEnvTrue = "true"
+	testDir = ".render_test"
 )
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
 
 func TestRenderGraph(t *testing.T) {
 	tests := []struct {
@@ -100,15 +93,7 @@ func TestRenderGraph(t *testing.T) {
 			a.NoError(err)
 
 			outFile := path.Join(testDir, path.Base(tt.Name+".txt"))
-			if fileExists(outFile) && os.Getenv(RebuildTestsEnv) != RebuiltTestEnvTrue {
-				expected, err := os.ReadFile(outFile)
-				a.NoError(err)
-				a.Equal(string(expected), result)
-			} else {
-				_ = os.Mkdir(testDir, os.ModePerm)
-				err := os.WriteFile(outFile, []byte(result), os.ModePerm)
-				a.NoError(err)
-			}
+			utils.GoldenTest(t, outFile, result)
 		})
 
 		t.Run("Structured render"+tt.Name, func(t *testing.T) {
@@ -124,15 +109,7 @@ func TestRenderGraph(t *testing.T) {
 			a.NoError(err)
 
 			renderOutFile := path.Join(testDir, path.Base(tt.Name+".json"))
-			if fileExists(renderOutFile) && os.Getenv(RebuildTestsEnv) != RebuiltTestEnvTrue {
-				expected, err := os.ReadFile(renderOutFile)
-				a.NoError(err)
-				a.Equal(string(expected), rendered)
-			} else {
-				_ = os.Mkdir(testDir, os.ModePerm)
-				err := os.WriteFile(renderOutFile, []byte(rendered), os.ModePerm)
-				a.NoError(err)
-			}
+			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}
 }
