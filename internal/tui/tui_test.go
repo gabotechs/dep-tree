@@ -86,6 +86,15 @@ func TestTui(t *testing.T) {
 			H:          130,
 		},
 		{
+			Name:       "graphql-js with ctrl displacements",
+			Repo:       "https://github.com/graphql/graphql-js",
+			Tag:        "v17.0.0-alpha.2",
+			Entrypoint: "src/graphql.ts",
+			W:          100,
+			H:          20,
+			Keys:       "down down up ctrl-d ctrl-d ctrl-u",
+		},
+		{
 			Name:       "warp",
 			Repo:       "https://github.com/seanmonstar/warp",
 			Tag:        "v0.3.3",
@@ -151,10 +160,19 @@ func TestTui(t *testing.T) {
 			if tt.Keys != "" {
 				for _, key := range strings.Split(tt.Keys, " ") {
 					var e tcell.Event
-					if key == "enter" {
+					switch key {
+					case "enter":
 						nQs++
 						e = tCellEnter()
-					} else {
+					case "down":
+						e = tCellDown()
+					case "up":
+						e = tCellUp()
+					case "ctrl-u":
+						e = tCellCtrlU()
+					case "ctrl-d":
+						e = tCellCtrlD()
+					default:
 						e = tCellKey(key)
 					}
 					err := screen.PostEvent(e)
@@ -180,6 +198,22 @@ func TestTui(t *testing.T) {
 			}
 		})
 	}
+}
+
+func tCellDown() tcell.Event {
+	return tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone)
+}
+
+func tCellUp() tcell.Event {
+	return tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone)
+}
+
+func tCellCtrlU() tcell.Event {
+	return tcell.NewEventKey(tcell.KeyCtrlU, ' ', tcell.ModNone)
+}
+
+func tCellCtrlD() tcell.Event {
+	return tcell.NewEventKey(tcell.KeyCtrlD, ' ', tcell.ModNone)
 }
 
 func tCellKey(str string) tcell.Event {
