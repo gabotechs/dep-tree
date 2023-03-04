@@ -1,0 +1,20 @@
+├▷execution/execute.ts                                                                              
+├▷│language/parser.ts                                                                               
+├▷││validation/validate.ts                                                                          
+│ │││                                                                                               
+│ ├││▷error/locatedError.ts                                                                         
+│ ├││▷│execution/flattenAsyncIterable.ts                                                            
+│ ├││▷│execution/mapAsyncIterable.ts                                                                
+│ ├││▷││jsutils/isAsyncIterable.ts                                                                  
+│ ├││▷││jsutils/memoize3.ts                                                                         
+│ ├││▷││jsutils/promiseForObject.ts                                                                 
+│ ├││▷│││jsutils/promiseReduce.ts                                                                   
+│ │├│▷││││language/lexer.ts                                                                         
+├─├│├▷│││││type/validate.ts                                                                         
+│ ││├▷││││││validation/specifiedRules.ts                                                            
+│ │││ │││││││                                                                                       
+│ │├│─││││┼││▷error/syntaxError.ts                                                                  
+│ │││ │││││├│▷│jsutils/capitalize.ts                                                                
+├─├││─│││┼│││▷│jsutils/isPromise.ts                                                                 
+│ │││ ├││││││▷│jsutils/toError.ts                                                                   
+│ │││ ││││││├▷││validation/rules/DeferStreamDirectiveLabelRule.ts                                   
