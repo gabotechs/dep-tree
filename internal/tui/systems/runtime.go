@@ -1,6 +1,7 @@
 package systems
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -75,10 +76,7 @@ func RuntimeSystem(s *State) error {
 	case *tcell.EventResize:
 		s.Screen.Sync()
 	case *tcell.EventInterrupt:
-		if s.IsRootNavigation {
-			s.Screen.Fini()
-		}
-		return &ShouldQuit{}
+		return errors.New("program interrupted")
 	case *tcell.EventKey:
 		switch {
 		case ev.Rune() == 'q':
