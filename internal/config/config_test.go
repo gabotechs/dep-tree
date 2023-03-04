@@ -71,17 +71,17 @@ func TestConfig_ErrorHandling(t *testing.T) {
 	}{
 		{
 			Name:     "No config file",
-			File:     ".unexisting.yml",
+			File:     "",
 			Expected: "no such file or directory",
 		},
 		{
 			Name:     "No entrypoints",
-			File:     ".no-entrypoints.yml",
+			File:     path.Join(testFolder, ".no-entrypoints.yml"),
 			Expected: "has no entrypoints",
 		},
 		{
 			Name:     "Invalid yml",
-			File:     ".invalid.yml",
+			File:     path.Join(testFolder, ".invalid.yml"),
 			Expected: "not a valid yml file",
 		},
 	}
@@ -89,8 +89,7 @@ func TestConfig_ErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-
-			_, err := ParseConfig(path.Join(testFolder, tt.File))
+			_, err := ParseConfig(tt.File)
 			a.Contains(err.Error(), tt.Expected)
 		})
 	}
