@@ -2,6 +2,7 @@ package dep_tree
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -36,6 +37,9 @@ func (t *TestParser) Entrypoint() (*graph.Node[[]int], error) {
 func (t *TestParser) Deps(ctx context.Context, n *graph.Node[[]int]) (context.Context, []*graph.Node[[]int], error) {
 	result := make([]*graph.Node[[]int], 0)
 	for _, child := range n.Data {
+		if child < 0 {
+			return ctx, nil, errors.New("no negative children")
+		}
 		c, err := t.getNode(strconv.Itoa(child))
 		if err != nil {
 			n.Errors = append(n.Errors, err)
