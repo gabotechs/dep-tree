@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/elliotchance/orderedmap/v2"
+
+	"dep-tree/internal/utils"
 )
 
 type ExportName struct {
@@ -83,7 +85,9 @@ func (p *Parser[T, F]) cachedUnwrappedParseExports(
 	if _, ok := seen[id]; ok {
 		return ctx, nil, fmt.Errorf("circular export starting and ending on %s", id)
 	} else {
-		seen[id] = true
+		seenCopy := utils.Merge(nil, seen)
+		seenCopy[id] = true
+		seen = seenCopy
 	}
 
 	unwrappedCacheKey := UnwrappedExportsCacheKey(id)
