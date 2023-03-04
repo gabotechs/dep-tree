@@ -61,6 +61,15 @@ func TestTui(t *testing.T) {
 			Keys:       "k k k k",
 		},
 		{
+			Name:       "jumps 5 down and navigates",
+			Repo:       "https://github.com/gabotechs/react-stl-viewer",
+			Tag:        "2.2.4",
+			Entrypoint: "src/index.ts",
+			W:          40,
+			H:          15,
+			Keys:       "j j j j j enter",
+		},
+		{
 			Name:       "react-gcode-viewer",
 			Repo:       "https://github.com/gabotechs/react-gcode-viewer",
 			Tag:        "2.2.4",
@@ -83,15 +92,6 @@ func TestTui(t *testing.T) {
 			Entrypoint: "src/lib.rs",
 			W:          100,
 			H:          60,
-		},
-		{
-			Name:       "quits",
-			Repo:       "https://github.com/seanmonstar/warp",
-			Tag:        "v0.3.3",
-			Entrypoint: "src/lib.rs",
-			W:          40,
-			H:          30,
-			Keys:       "q",
 		},
 	}
 
@@ -119,31 +119,47 @@ func TestTui(t *testing.T) {
 			err := screen.Init()
 			a.NoError(err)
 			screen.SetSize(tt.W, tt.H)
-			testOverrides := &LoopTestOverrides{
-				Screen:     screen,
-				ManualPump: true,
-			}
-			if utils.EndsWith(entrypointPath, js.Extensions) {
-				err := Loop[js.Data](
-					context.Background(),
-					entrypointPath,
-					language.ParserBuilder(js.MakeJsLanguage),
-					testOverrides,
-				)
-				a.NoError(err)
-			} else if utils.EndsWith(entrypointPath, rust.Extensions) {
-				err := Loop[rust.Data](
-					context.Background(),
-					entrypointPath,
-					language.ParserBuilder(rust.MakeRustLanguage),
-					testOverrides,
-				)
-				a.NoError(err)
-			}
+
+			update := make(chan bool)
+			finish := make(chan error)
+
+			go func() {
+				if utils.EndsWith(entrypointPath, js.Extensions) {
+					finish <- Loop[js.Data](
+						context.Background(),
+						entrypointPath,
+						language.ParserBuilder(js.MakeJsLanguage),
+						screen,
+						true,
+						update,
+					)
+				} else if utils.EndsWith(entrypointPath, rust.Extensions) {
+					finish <- Loop[rust.Data](
+						context.Background(),
+						entrypointPath,
+						language.ParserBuilder(rust.MakeRustLanguage),
+						screen,
+						true,
+						update,
+					)
+				}
+			}()
+
+			<-update
+
+			nQs := 1
 			if tt.Keys != "" {
 				for _, key := range strings.Split(tt.Keys, " ") {
-					err := testOverrides.Pump(tCellKey(key))
+					var e tcell.Event
+					if key == "enter" {
+						nQs++
+						e = tCellEnter()
+					} else {
+						e = tCellKey(key)
+					}
+					err := screen.PostEvent(e)
 					a.NoError(err)
+					<-update
 				}
 			}
 
@@ -153,10 +169,23 @@ func TestTui(t *testing.T) {
 				path.Join(".tui_test", tt.Name+".txt"),
 				result,
 			)
+			for i := 0; i < nQs; i++ {
+				err := screen.PostEvent(tCellKey("q"))
+				a.NoError(err)
+				select {
+				case <-update:
+				case err := <-finish:
+					a.NoError(err)
+				}
+			}
 		})
 	}
 }
 
 func tCellKey(str string) tcell.Event {
-	return tcell.NewEventKey(tcell.Key(str[0]), rune(str[0]), tcell.ModMask(0))
+	return tcell.NewEventKey(tcell.Key(str[0]), rune(str[0]), tcell.ModNone)
+}
+
+func tCellEnter() tcell.Event {
+	return tcell.NewEventKey(tcell.KeyEnter, ' ', tcell.ModNone)
 }
