@@ -27,7 +27,7 @@ func run[T any, F any](
 		fmt.Println(rendered)
 		return err
 	}
-	return tui.Loop(ctx, entrypoint, builder, nil)
+	return tui.Loop(ctx, entrypoint, builder, nil, true, nil)
 }
 
 func RenderCmd() *cobra.Command {

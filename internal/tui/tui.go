@@ -13,13 +13,6 @@ import (
 
 var style = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
-type LoopTestOverrides struct {
-	Screen tcell.SimulationScreen
-
-	ManualPump bool
-	Pump       func(event tcell.Event) error
-}
-
 func initScreen() (tcell.Screen, error) {
 	screen, err := tcell.NewScreen()
 	if err != nil {
@@ -37,7 +30,9 @@ func Loop[T any](
 	ctx context.Context,
 	initial string,
 	parserBuilder func(string) (dep_tree.NodeParser[T], error),
-	testOverrides *LoopTestOverrides,
+	screen tcell.Screen,
+	isRootNavigation bool,
+	tickChan chan bool,
 ) error {
 	parser, err := parserBuilder(initial)
 	if err != nil {
@@ -55,13 +50,10 @@ func Loop[T any](
 	if err != nil {
 		return err
 	}
-	var screen tcell.Screen
-	if testOverrides == nil || testOverrides.Screen == nil {
+	if screen == nil {
 		if screen, err = initScreen(); err != nil {
 			return err
 		}
-	} else {
-		screen = testOverrides.Screen
 	}
 
 	renderState := &systems.RenderState{
@@ -77,12 +69,13 @@ func Loop[T any](
 		MaxY:       len(cells) - 1,
 	}
 	globalState := &systems.State{
-		Cursor:     utils.Vec(0, 0),
-		Screen:     screen,
-		SelectedId: "",
-		Event:      nil,
+		Cursor:           utils.Vec(0, 0),
+		Screen:           screen,
+		SelectedId:       "",
+		Event:            nil,
+		IsRootNavigation: isRootNavigation,
 		OnNavigate: func(s *systems.State) error {
-			return Loop[T](ctx, s.SelectedId, parserBuilder, testOverrides)
+			return Loop[T](ctx, s.SelectedId, parserBuilder, screen, false, tickChan)
 		},
 	}
 
@@ -106,27 +99,10 @@ func Loop[T any](
 			return err
 		}
 		screen.Show()
-		if testOverrides != nil && testOverrides.ManualPump {
-			testOverrides.Pump = makeTestPump(globalState, world)
-			return nil
-		} else {
-			globalState.Event = screen.PollEvent()
-		}
-	}
-}
 
-func makeTestPump(s *systems.State, world *ecs.World) func(event tcell.Event) error {
-	return func(event tcell.Event) error {
-		s.Event = event
-		s.Screen.Clear()
-		err := world.Update()
-		switch {
-		case systems.IsShouldQuit(err):
-			return nil
-		case err != nil:
-			return err
+		if tickChan != nil {
+			tickChan <- true
 		}
-		s.Screen.Show()
-		return nil
+		globalState.Event = screen.PollEvent()
 	}
 }

@@ -39,72 +39,35 @@ func navigate(s *State) error {
 	if s.SelectedId == "" {
 		return nil
 	}
-	err := s.Screen.Suspend()
-	if err != nil {
-		return err
-	}
-	err = s.OnNavigate(s)
-	if err != nil {
-		return err
-	}
-	err = s.Screen.Resume()
-	if err != nil {
-		return err
-	}
 	// NOTE: just to trigger an update.
-	return s.Screen.PostEvent(&tcell.EventTime{})
+	defer func() { _ = s.Screen.PostEvent(&tcell.EventTime{}) }()
+	return s.OnNavigate(s)
 }
 
-func helpScreen(mockScreen tcell.Screen) error {
-	var s tcell.Screen
-	if mockScreen != nil {
-		s = mockScreen
-	} else {
-		var err error
-		s, err = tcell.NewScreen()
-		if err != nil {
-			return err
-		}
-	}
-	err := s.Init()
-	if err != nil {
-		return err
-	}
+func helpScreen(screen tcell.Screen) error {
 	lines := strings.Split(helpText, "\n")
+	screen.Clear()
 	for y, line := range lines {
 		for x := 0; x < len(line); x++ {
-			s.SetContent(x, y, rune(line[x]), nil, defaultStyle)
+			screen.SetContent(x, y, rune(line[x]), nil, defaultStyle)
 		}
 	}
-	s.Show()
+	screen.Show()
 	for {
-		switch ev := s.PollEvent().(type) {
+		switch ev := screen.PollEvent().(type) {
 		case *tcell.EventResize:
-			s.Sync()
+			screen.Sync()
 		case *tcell.EventKey:
 			if ev.Rune() == 'q' {
-				s.Fini()
 				return nil
 			}
 		}
 	}
 }
 
-func help(s *State) error {
-	err := s.Screen.Suspend()
-	if err != nil {
-		return err
-	}
-	err = helpScreen(nil)
-	if err != nil {
-		return err
-	}
-	err = s.Screen.Resume()
-	if err != nil {
-		return err
-	}
-	// NOTE: just to trigger an update.
-	return s.Screen.PostEvent(&tcell.EventTime{})
+func help(screen tcell.Screen) error {
+	defer func() { _ = screen.PostEvent(&tcell.EventTime{}) }()
+	return helpScreen(screen)
 }
 
 func RuntimeSystem(s *State) error {
@@ -112,15 +75,19 @@ func RuntimeSystem(s *State) error {
 	case *tcell.EventResize:
 		s.Screen.Sync()
 	case *tcell.EventInterrupt:
-		s.Screen.Fini()
-		return nil
+		if s.IsRootNavigation {
+			s.Screen.Fini()
+		}
+		return &ShouldQuit{}
 	case *tcell.EventKey:
 		switch {
 		case ev.Rune() == 'q':
-			s.Screen.Fini()
+			if s.IsRootNavigation {
+				s.Screen.Fini()
+			}
 			return &ShouldQuit{}
 		case ev.Rune() == 'h':
-			return help(s)
+			return help(s.Screen)
 		case ev.Key() == tcell.KeyEnter:
 			return navigate(s)
 		}

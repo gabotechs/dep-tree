@@ -1,0 +1,15 @@
+SceneSetup.tsx                          
+│                                       
+├▷SceneElements/Camera.tsx              
+├▷SceneElements/Floor.tsx               
+├▷SceneElements/Lights.tsx              
+├▷SceneElements/Model3D.tsx             
+├▷SceneElements/OrbitControls.tsx       
+└▷exporters/STLExporter.ts              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
