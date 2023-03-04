@@ -162,6 +162,23 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			Expected:       makeStringOm(),
 			ExpectedErrors: []string{"2 not found"},
 		},
+		{
+			Name: "circular export",
+			Id:   "1",
+			Exports: b().
+				Entry("1", "2", "A").
+				Entry("2", "3", "B", "as A").
+				Entry("3", "4", "C", "as B").
+				Entry("4", "1", "A", "as C").
+				Build(),
+			Expected: makeStringOm(),
+			ExpectedErrors: []string{
+				"circular export starting and ending on 1",
+				`name "C" exported in "3" from "4" cannot be found in origin file`,
+				`name "B" exported in "2" from "3" cannot be found in origin file`,
+				`name "A" exported in "1" from "2" cannot be found in origin file`,
+			},
+		},
 	}
 
 	for _, tt := range tests {
