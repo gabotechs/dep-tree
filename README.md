@@ -88,12 +88,12 @@ should not be coupled remain decoupled as the project evolves.
 These are the parameters that can be configured in the `.dep-tree.yml` file:
 
 ### `entrypoints`: 
-list of entrypoints that will act as root nodes for evaluating multiple
+List of entrypoints that will act as root nodes for evaluating multiple
 dependency trees. Some applications might expose more than one entrypoint, for that reason,
 this parameter is a list. The most typical thing is that there is only one entrypoint.
 
 ### `allow`:
-map from glob pattern to list of glob patterns that define, using a "white list"
+Map from glob pattern to list of glob patterns that define, using a "white list"
 logic, what files can depend on what other files. For example:
 ```yml
 allow:
@@ -106,7 +106,7 @@ being able to import files that lives, either in the same `src/products` folder,
 `src/common` folder.
 
 ### `deny`: 
-map from glob pattern to list of glob patterns that define, using a "black list"
+Map from glob pattern to list of glob patterns that define, using a "black list"
 logic, what dependencies are forbidden. For example:
 
 ```yml
@@ -117,8 +117,17 @@ deny:
 
 In the example above, the file `api/routes.rs` can import from anywhere but the `adapters` folder.
 
+### `allowCircularDependencies`:
+
+Boolean parameter that defines whether circular dependencies are allowed or not. By default
+they are not allowed.
+
+```yml
+allowCircularDependencies: true
+```
+
 ### `aliases`:
-map from string to glob pattern that gathers utility groups of glob patterns that
+Map from string to glob pattern that gathers utility groups of glob patterns that
 can be reused in the `deny` and `allow` fields. For example:
 
 ```yml
@@ -160,7 +169,7 @@ deny:
     - "src/products/**" # The users domain cannot be related to the products domain
 ```
 
-and check that your project matches those rules:
+And check that your project matches those rules:
 
 ```shell
 dep-tree check
