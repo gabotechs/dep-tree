@@ -72,6 +72,20 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 	ctx context.Context,
 	id string,
 ) (context.Context, *UnwrappedExportsResult, error) {
+	return p.cachedUnwrappedParseExports(ctx, id, make(map[string]bool))
+}
+
+func (p *Parser[T, F]) cachedUnwrappedParseExports(
+	ctx context.Context,
+	id string,
+	seen map[string]bool,
+) (context.Context, *UnwrappedExportsResult, error) {
+	if _, ok := seen[id]; ok {
+		return ctx, nil, fmt.Errorf("circular export starting and ending on %s", id)
+	} else {
+		seen[id] = true
+	}
+
 	unwrappedCacheKey := UnwrappedExportsCacheKey(id)
 	if cached, ok := ctx.Value(unwrappedCacheKey).(*UnwrappedExportsResult); ok {
 		return ctx, cached, nil
@@ -92,7 +106,7 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 		}
 
 		var unwrapped *UnwrappedExportsResult
-		ctx, unwrapped, err = p.CachedUnwrappedParseExports(ctx, export.Id)
+		ctx, unwrapped, err = p.cachedUnwrappedParseExports(ctx, export.Id, seen)
 		if err != nil {
 			errors = append(errors, err)
 			continue
@@ -102,6 +116,7 @@ func (p *Parser[T, F]) CachedUnwrappedParseExports(
 			exports = unwrapped.Exports
 			continue
 		}
+		errors = append(errors, unwrapped.Errors...)
 
 		for _, name := range export.Names {
 			if exportId, ok := unwrapped.Exports.Get(name.Original); ok {
