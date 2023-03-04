@@ -24,3 +24,20 @@ func TestLoadDeps_noOwnChild(t *testing.T) {
 	a.Equal(testGraph.Start, rootId)
 	a.Equal(0, len(g.Children(testGraph.Start)))
 }
+
+func TestLoadDeps_ErrorHandle(t *testing.T) {
+	a := require.New(t)
+	testGraph := &TestParser{
+		Start: "0",
+		Spec: [][]int{
+			{1},
+			{2},
+			{-3},
+		},
+	}
+
+	g := graph.NewGraph[[]int]()
+
+	_, _, err := LoadDeps[[]int](context.Background(), g, testGraph)
+	a.ErrorContains(err, "no negative children")
+}
