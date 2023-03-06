@@ -108,9 +108,15 @@ func renderError(
 	availableSpace := utils.Clamp(renderErrorMargin, renderErrorMargin, w-renderErrorMargin)
 	wordsStart := w - availableSpace
 
+	seen := make(map[string]bool)
+
 	// first, retrieve lines.
 	lines := make([][]string, 1)
 	for _, err := range rs.Errors[s.SelectedId] {
+		if _, ok := seen[err.Error()]; ok {
+			continue
+		}
+		seen[err.Error()] = true
 		x := wordsStart
 		// get words from error message.
 		words := extractWords(err, availableSpace)
