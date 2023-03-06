@@ -40,6 +40,14 @@ func TestRenderSystem(t *testing.T) {
 			ScreenSize: utils.Vec(60, 10),
 		},
 		{
+			Name: "Two equal errors",
+			Errors: []error{
+				errors.New("one error that is longer than the one below, but not that much"),
+				errors.New("one error that is longer than the one below, but not that much"),
+			},
+			ScreenSize: utils.Vec(60, 10),
+		},
+		{
 			Name: "Very long word",
 			Errors: []error{
 				errors.New("/Users/gabriel/GolandProjects/dep-tree/internal/tui/systems/render_test.go"),
