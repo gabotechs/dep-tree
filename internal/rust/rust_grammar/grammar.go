@@ -15,7 +15,7 @@ type Statement struct {
 }
 
 type File struct {
-	Statements []*Statement `(@@ | ANY | ALL | Punct | PathSep | Ident)*`
+	Statements []*Statement `(@@ | ANY | ALL | String | Punct | PathSep | Ident)*`
 	Path       string
 }
 
@@ -25,6 +25,7 @@ var (
 			{"ALL", `\*`},
 			{"PathSep", `::`},
 			{"Punct", `[,{}()]`},
+			{"String", `'(?:\\.|[^'])*'|"(?:\\.|[^"])*"`},
 			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
 			{"Comment", `//.*|/\*(.|\n)*?\*/`},
 			{"Whitespace", `\s+`},
