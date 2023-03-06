@@ -1,6 +1,8 @@
 package rust_grammar
 
 import (
+	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,6 +11,7 @@ import (
 func TestPub(t *testing.T) {
 	tests := []struct {
 		Name        string
+		File        string
 		ExpectedPub []Pub
 	}{
 		{
@@ -69,13 +72,25 @@ func TestPub(t *testing.T) {
 			Name:        "\"pub type my_type\"",
 			ExpectedPub: nil,
 		},
+		{
+			Name: "' pub struct MyStruct '",
+			ExpectedPub: []Pub{{
+				Name: "MyStruct",
+			}},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-
-			content := []byte(tt.Name)
+			var content []byte
+			if tt.File != "" {
+				var err error
+				content, err = os.ReadFile(path.Join(".test_files", tt.File))
+				a.NoError(err)
+			} else {
+				content = []byte(tt.Name)
+			}
 			parsed, err := parser.ParseBytes("", content)
 			a.NoError(err)
 
