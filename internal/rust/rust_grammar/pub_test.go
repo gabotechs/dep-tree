@@ -69,6 +69,12 @@ func TestPub(t *testing.T) {
 			}},
 		},
 		{
+			Name: "pub const VAR",
+			ExpectedPub: []Pub{{
+				Name: "VAR",
+			}},
+		},
+		{
 			Name:        "\"pub type my_type\"",
 			ExpectedPub: nil,
 		},
