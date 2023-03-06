@@ -53,6 +53,22 @@ func TestPub(t *testing.T) {
 				Name: "my_function",
 			}},
 		},
+		{
+			Name: "pub async fn my_function ",
+			ExpectedPub: []Pub{{
+				Name: "my_function",
+			}},
+		},
+		{
+			Name: "pub static VAR",
+			ExpectedPub: []Pub{{
+				Name: "VAR",
+			}},
+		},
+		{
+			Name:        "\"pub type my_type\"",
+			ExpectedPub: nil,
+		},
 	}
 
 	for _, tt := range tests {
