@@ -10,23 +10,12 @@
     <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff">
 </p>
 
-
 <p align="center">
     Render your project's dependency tree in the terminal and/or validate it against your rules.
 </p>
 
 <p align="center">
     <img width="440" src="docs/demo.gif" alt="Dependency tree render">
-</p>
-
-<p align="center">
-    Supported languages
-</p>
-
-<p align="center">
-    <img width="60" height="60" src="docs/ts-logo.png" alt="TypeScript">
-    <img width="60" height="60" src="docs/js-logo.png" alt="JavaScript">
-    <img width="60" height="60" src="docs/rust-logo.png" alt="Rust">
 </p>
 
 ## Dep Tree
@@ -36,9 +25,9 @@ check that it matches some dependency rules in CI systems.
 
 It works with files, meaning that each file is a node in the dependency tree:
 - It starts from an entrypoint, which is usually the main executable file in a
-program (like `src/main.rs`) or the file that exposes the contents of a library (`src/index.ts`).
-- It reads its import statements, or any statement that refers to another file, it makes
-a parent node out of the main file, and one child node for each imported file.
+program or the file that exposes the contents of a library (like `src/index.ts`).
+- It reads its import statements, it makes a parent node out of the main file,
+and one child node for each imported file.
 > **NOTE**: it only takes into account local files, not files imported from external libraries.
 - That process is repeated recursively with all the child files, until the file dependency
 tree is formed.
@@ -111,11 +100,11 @@ logic, what dependencies are forbidden. For example:
 
 ```yml
 deny:
-  "api/routes.rs":
+  "api/routes.ts":
     - "adapters/**"
 ```
 
-In the example above, the file `api/routes.rs` can import from anywhere but the `adapters` folder.
+In the example above, the file `api/routes.ts` can import from anywhere but the `adapters` folder.
 
 ### `allowCircularDependencies`:
 
