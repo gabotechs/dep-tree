@@ -117,7 +117,10 @@ func (p *Parser[T, F]) cachedUnwrappedParseExports(
 		}
 
 		if export.All {
-			exports = unwrapped.Exports
+			for _, k := range unwrapped.Exports.Keys() {
+				v, _ := unwrapped.Exports.Get(k)
+				exports.Set(k, v)
+			}
 			continue
 		}
 		errors = append(errors, unwrapped.Errors...)

@@ -153,6 +153,22 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			),
 		},
 		{
+			Name: "double all export and single named export",
+			Id:   "1",
+			Exports: b().
+				Entry("1", "2", "*").
+				Entry("2", "2", "D").
+				Entry("2", "3", "*").
+				Entry("3", "3", "A", "B", "C").
+				Build(),
+			Expected: makeStringOm(
+				"D", "2",
+				"A", "3",
+				"B", "3",
+				"C", "3",
+			),
+		},
+		{
 			Name: "name not found in destination",
 			Id:   "1",
 			Exports: b().
