@@ -2,12 +2,9 @@
 package js_grammar
 
 import (
-	"fmt"
-	"os"
-	"strconv"
-
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
+	"os"
 )
 
 type Statement struct {
@@ -43,31 +40,6 @@ var (
 		participle.Lexer(lex),
 		participle.Elide("Whitespace", "Comment"),
 		participle.Unquote("String"),
-		// Unquote BacktickStrings.
-		participle.Map(func(t lexer.Token) (lexer.Token, error) {
-			s := t.Value
-			quote := s[0]
-			s = s[1 : len(s)-1]
-			out := ""
-			for s != "" {
-				// The `strconv.UnquoteChar` function is able to handle escaped single quotes in a single-quoted string ('/'')
-				// and escaped double quotes in a double-quoted string ("/""), but it is not able to handle escaped backticks
-				// in a backtick string (`/``). This conditional statement handles it.
-				if len(s) >= 2 && quote == '`' && s[0] == '\\' && s[1] == '`' {
-					out += string(s[1])
-					s = s[2:]
-					continue
-				}
-				value, _, tail, err := strconv.UnquoteChar(s, quote)
-				if err != nil {
-					return t, fmt.Errorf("error while unquoting string:\n%s\n\n%w", t.Value, err)
-				}
-				s = tail
-				out += string(value)
-			}
-			t.Value = out
-			return t, nil
-		}, "BacktickString"),
 		participle.UseLookahead(1024),
 	)
 )
