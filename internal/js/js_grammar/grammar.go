@@ -50,6 +50,8 @@ func Parse(filePath string) (*File, error) {
 		return nil, err
 	}
 	file, err := parser.ParseBytes(filePath, content)
-	file.Path = filePath
+	if file != nil {
+		file.Path = filePath
+	}
 	return file, err
 }
