@@ -20,7 +20,7 @@ type Statement struct {
 }
 
 type File struct {
-	Statements []*Statement `(@@ | ANY | ALL | Punct | Ident | String)*`
+	Statements []*Statement `(@@ | ANY | ALL | Punct | Ident | String | BacktickString)*`
 	Path       string
 }
 
@@ -30,7 +30,8 @@ var (
 			{"ALL", `\*`},
 			{"Punct", `[,{}()]`},
 			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
-			{"String", `'(?:\\.|[^'])*'|"(?:\\.|[^"])*"`},
+			{"String", `'(?:\\.|[^'])*'` + "|" + `"(?:\\.|[^"])*"`},
+			{"BacktickString", "`(?:\\\\.|[^`])*`"},
 			{"Comment", `//.*|/\*(.|\n)*?\*/`},
 			{"Whitespace", `\s+`},
 			{"ANY", `.`},
