@@ -27,6 +27,10 @@ func TestGrammar(t *testing.T) {
 			Name:    "Doc with quotes",
 			Content: "/* EscapedCharacter :: one of `\"` `\\` `/` `b` `f` `n` `r` `t` \n*/\nimport { MuiThemeProvider } from \"@material-ui/core\";",
 		},
+		{
+			Name:    "More quoted strings",
+			Content: "`\"\"\" \\` \"\"\"`",
+		},
 	}
 
 	for _, tt := range tests {
