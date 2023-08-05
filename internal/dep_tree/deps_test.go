@@ -39,5 +39,11 @@ func TestLoadDeps_ErrorHandle(t *testing.T) {
 	g := graph.NewGraph[[]int]()
 
 	_, _, err := LoadDeps[[]int](context.Background(), g, testGraph)
-	a.ErrorContains(err, "no negative children")
+	a.NoError(err)
+	node0 := g.Get("0")
+	a.Equal(len(node0.Errors), 0)
+	node1 := g.Get("1")
+	a.Equal(len(node1.Errors), 0)
+	node2 := g.Get("2")
+	a.ErrorContains(node2.Errors[0], "no negative children")
 }

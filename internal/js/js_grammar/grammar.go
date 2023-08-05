@@ -2,6 +2,7 @@
 package js_grammar
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -59,7 +60,7 @@ var (
 				}
 				value, _, tail, err := strconv.UnquoteChar(s, quote)
 				if err != nil {
-					return t, err
+					return t, fmt.Errorf("error while unquoting string:\n%s\n\n%w", t.Value, err)
 				}
 				s = tail
 				out += string(value)
