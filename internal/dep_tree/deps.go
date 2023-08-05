@@ -16,12 +16,12 @@ func loadDeps[T any](
 		return ctx, nil
 	}
 
+	g.AddNode(root)
 	ctx, deps, err := parser.Deps(ctx, root)
 	if err != nil {
-		return ctx, err
+		root.AddErrors(err)
+		return ctx, nil
 	}
-
-	g.AddNode(root)
 
 	for _, dep := range deps {
 		ctx, err = loadDeps(ctx, g, dep, parser)
