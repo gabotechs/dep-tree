@@ -42,7 +42,7 @@ var (
 		participle.Lexer(lex),
 		participle.Elide("Whitespace", "Comment"),
 		participle.Unquote("String"),
-		// Unquote BacktickStrings
+		// Unquote BacktickStrings.
 		participle.Map(func(t lexer.Token) (lexer.Token, error) {
 			s := t.Value
 			quote := s[0]
