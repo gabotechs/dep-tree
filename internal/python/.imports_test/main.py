@@ -10,3 +10,4 @@ from . import src
 from . import un_existing
 from src.module import *
 from src.module import module
+from src.module import bar
