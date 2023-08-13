@@ -64,6 +64,10 @@ func TestLanguage_ParseImports(t *testing.T) {
 					All: true,
 					Id:  path.Join(importsTestFolder, "src", "module", "module.py"),
 				},
+				{
+					Names: []string{"bar"},
+					Id:    path.Join(importsTestFolder, "src", "module", "__init__.py"),
+				},
 			},
 			ExpectedErrors: []string{
 				"cannot import file src.py from directory",
