@@ -3,7 +3,6 @@ package python
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
@@ -21,120 +20,98 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.Import != nil && !stmt.Import.Indented:
-			resolved, err := l.ResolveAbsolute(stmt.Import.Path[0:])
+			resolved := l.ResolveAbsolute(stmt.Import.Path[0:])
 			switch {
-			case err != nil:
-				errors = append(errors, err)
 			case resolved == nil:
 				continue
-			case resolved.File != "":
+			case resolved.File != nil:
 				imports = append(imports, language.ImportEntry{
 					All: true,
-					Id:  resolved.File,
+					Id:  resolved.File.Path,
 				})
-			case resolved.InitModule != "":
+			case resolved.InitModule != nil:
 				imports = append(imports, language.ImportEntry{
 					All: true,
-					Id:  resolved.InitModule,
+					Id:  resolved.InitModule.Path,
 				})
-			case resolved.Directory != "":
-				entries, err := os.ReadDir(resolved.Directory)
-				if err != nil {
-					errors = append(errors, err)
-					continue
-				}
-				for _, entry := range entries {
-					if strings.HasSuffix(entry.Name(), ".py") {
-						imports = append(imports, language.ImportEntry{
-							All: true,
-							Id:  path.Join(resolved.Directory, entry.Name()),
-						})
-					}
+			case resolved.Directory != nil:
+				for _, pythonFile := range resolved.Directory.PythonFiles {
+					imports = append(imports, language.ImportEntry{
+						All: true,
+						Id:  pythonFile,
+					})
 				}
 			}
 		case stmt.FromImport != nil && !stmt.FromImport.Indented:
-			names := make([]string, len(stmt.FromImport.Names))
+			importedNames := make([]string, len(stmt.FromImport.Names))
 			for i, name := range stmt.FromImport.Names {
-				names[i] = name.Name
+				importedNames[i] = name.Name
 			}
-			if len(names) == 0 {
-				names = nil
+			if len(importedNames) == 0 {
+				importedNames = nil
 			}
 
 			var resolved *ResolveResult
-			var err error
 			if len(stmt.FromImport.Relative) > 0 {
+				var err error
 				resolved, err = ResolveRelative(stmt.FromImport.Path, path.Dir(file.Path), len(stmt.FromImport.Relative)-1)
-			} else {
-				resolved, err = l.ResolveAbsolute(stmt.FromImport.Path)
-			}
-			switch {
-			case err != nil:
-				errors = append(errors, err)
-				continue
-			case resolved == nil:
-				continue
-			case resolved.File != "":
-				imports = append(imports, language.ImportEntry{
-					Names: names,
-					All:   stmt.FromImport.All,
-					Id:    resolved.File,
-				})
-			case resolved.InitModule != "":
-				directory := path.Dir(resolved.InitModule)
-				entries, err := os.ReadDir(directory)
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
-				availableFiles := map[string]bool{}
-				for _, entry := range entries {
-					if strings.HasSuffix(entry.Name(), ".py") {
-						availableFiles[entry.Name()] = true
-					}
+			} else {
+				resolved = l.ResolveAbsolute(stmt.FromImport.Path)
+			}
+			switch {
+			case resolved == nil:
+				continue
+			case resolved.File != nil:
+				imports = append(imports, language.ImportEntry{
+					Names: importedNames,
+					All:   stmt.FromImport.All,
+					Id:    resolved.File.Path,
+				})
+			case resolved.InitModule != nil:
+				// If importing from an __init__.py, there is a chance that we are actually
+				// importing a file living in the same folder, instead of a variable that lives
+				// inside __init__.py.
+				availableFiles := map[string]string{}
+				for _, pythonFile := range resolved.InitModule.PythonFiles {
+					availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
 				}
 				var namesFromInit []string
-				for _, name := range names {
-					namePy := name + ".py"
-					if _, ok := availableFiles[namePy]; !ok {
-						// No file named that way, it should be imported from __init__.py then.
-						namesFromInit = append(namesFromInit, name)
-					} else {
+				for _, name := range importedNames {
+					if pythonFile, ok := availableFiles[name]; ok {
 						// Imported a specific file.
 						imports = append(imports, language.ImportEntry{
 							All: true,
-							Id:  path.Join(directory, namePy),
+							Id:  pythonFile,
 						})
+					} else {
+						// No file named that way, it should be imported from __init__.py then.
+						namesFromInit = append(namesFromInit, name)
 					}
 				}
 				if namesFromInit != nil || stmt.FromImport.All {
 					imports = append(imports, language.ImportEntry{
 						All:   stmt.FromImport.All,
 						Names: namesFromInit,
-						Id:    resolved.InitModule,
+						Id:    resolved.InitModule.Path,
 					})
 				}
-			case resolved.Directory != "":
-				entries, err := os.ReadDir(resolved.Directory)
-				if err != nil {
-					errors = append(errors, err)
-					continue
+			case resolved.Directory != nil:
+				availableFiles := map[string]string{}
+				for _, pythonFile := range resolved.Directory.PythonFiles {
+					availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
 				}
-				availableFiles := map[string]bool{}
-				for _, entry := range entries {
-					if strings.HasSuffix(entry.Name(), ".py") {
-						availableFiles[entry.Name()] = true
-					}
-				}
-				for _, name := range names {
-					namePy := name + ".py"
-					if _, ok := availableFiles[namePy]; !ok {
-						errors = append(errors, fmt.Errorf("cannot import file %s from directory %s", namePy, resolved.Directory))
-					} else {
+				for _, name := range importedNames {
+					if pythonFile, ok := availableFiles[name]; ok {
 						imports = append(imports, language.ImportEntry{
 							All: true,
-							Id:  path.Join(resolved.Directory, namePy),
+							Id:  pythonFile,
 						})
+					} else {
+						errors = append(errors, fmt.Errorf("cannot import file %s.py from directory %s", name, resolved.Directory))
 					}
 				}
 			}
