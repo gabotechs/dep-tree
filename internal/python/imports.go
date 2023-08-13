@@ -11,6 +11,7 @@ import (
 	"dep-tree/internal/python/python_grammar"
 )
 
+//nolint:gocyclo
 func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) (context.Context, *language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
@@ -21,22 +22,22 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 			// Is this even possible?
 		case stmt.Import != nil && !stmt.Import.Indented:
 			resolved, err := l.ResolveAbsolute(stmt.Import.Path[0:])
-			if err != nil {
+			switch {
+			case err != nil:
 				errors = append(errors, err)
-			} else if resolved == nil {
+			case resolved == nil:
 				continue
-			} else if resolved.File != "" {
+			case resolved.File != "":
 				imports = append(imports, language.ImportEntry{
 					All: true,
 					Id:  resolved.File,
 				})
-			} else if resolved.InitModule != "" {
+			case resolved.InitModule != "":
 				imports = append(imports, language.ImportEntry{
 					All: true,
 					Id:  resolved.InitModule,
 				})
-			} else if resolved.Directory != "" {
-				// if import references a dir, it is importing all the files in the dir.
+			case resolved.Directory != "":
 				entries, err := os.ReadDir(resolved.Directory)
 				if err != nil {
 					errors = append(errors, err)
@@ -67,34 +68,31 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 			} else {
 				resolved, err = l.ResolveAbsolute(stmt.FromImport.Path)
 			}
-			if err != nil {
+			switch {
+			case err != nil:
 				errors = append(errors, err)
 				continue
-			} else if resolved == nil {
+			case resolved == nil:
 				continue
-			} else if resolved.File != "" {
+			case resolved.File != "":
 				imports = append(imports, language.ImportEntry{
 					Names: names,
 					All:   stmt.FromImport.All,
 					Id:    resolved.File,
 				})
-			} else if resolved.InitModule != "" {
-				// If imported from an __init__.py, first look if there are files with that name.
-				// if there are, then it is importing that file, not something inside __init__.py.
+			case resolved.InitModule != "":
 				directory := path.Dir(resolved.InitModule)
 				entries, err := os.ReadDir(directory)
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
-
 				availableFiles := map[string]bool{}
 				for _, entry := range entries {
 					if strings.HasSuffix(entry.Name(), ".py") {
 						availableFiles[entry.Name()] = true
 					}
 				}
-
 				var namesFromInit []string
 				for _, name := range names {
 					namePy := name + ".py"
@@ -116,22 +114,18 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 						Id:    resolved.InitModule,
 					})
 				}
-			} else if resolved.Directory != "" {
-				// Imported files in that directory.
+			case resolved.Directory != "":
 				entries, err := os.ReadDir(resolved.Directory)
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
-
 				availableFiles := map[string]bool{}
 				for _, entry := range entries {
 					if strings.HasSuffix(entry.Name(), ".py") {
 						availableFiles[entry.Name()] = true
 					}
 				}
-
-				// TODO: what happens if stmt.FromImport.All == true.
 				for _, name := range names {
 					namePy := name + ".py"
 					if _, ok := availableFiles[namePy]; !ok {
