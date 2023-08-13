@@ -8,6 +8,7 @@ import (
 	"dep-tree/internal/config"
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/python"
 	"dep-tree/internal/rust"
 	"dep-tree/internal/utils"
 )
@@ -30,6 +31,8 @@ func CheckCmd() *cobra.Command {
 				return config.Check(ctx, language.ParserBuilder(js.MakeJsLanguage), cfg)
 			case utils.EndsWith(cfg.Entrypoints[0], rust.Extensions):
 				return config.Check(ctx, language.ParserBuilder(rust.MakeRustLanguage), cfg)
+			case utils.EndsWith(cfg.Entrypoints[0], python.Extensions):
+				return config.Check(ctx, language.ParserBuilder(python.MakePythonLanguage), cfg)
 			default:
 				return fmt.Errorf("file \"%s\" not supported", cfg.Entrypoints[0])
 			}

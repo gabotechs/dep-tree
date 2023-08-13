@@ -15,6 +15,7 @@ linters-settings:
     confidence: 0.8
 
 linters:
+  disable-all: true
   enable:
     - asciicheck
     - goconst
