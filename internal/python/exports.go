@@ -8,6 +8,7 @@ import (
 	"dep-tree/internal/python/python_grammar"
 )
 
+//nolint:gocyclo
 func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) (context.Context, *language.ExportsResult, error) {
 	var exports []language.ExportEntry
 	var errors []error
@@ -52,18 +53,17 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 				resolved, err = l.ResolveAbsolute(stmt.FromImport.Path)
 			}
 
-			if err != nil {
+			switch {
+			case err != nil:
 				errors = append(errors, err)
 				continue
-			} else if resolved == nil {
+			case resolved == nil:
 				continue
-			} else if resolved.File != "" {
+			case resolved.File != "":
 				entry.Id = resolved.File
-			} else if resolved.InitModule != "" {
-				// If set to `resolved.InitModule`, it will lead to potential circular exports.
+			case resolved.InitModule != "":
 				entry.Id = file.Path
-			} else if resolved.Directory != "" {
-				// we are exporting the files themselves.
+			case resolved.Directory != "":
 				entry.Id = file.Path
 			}
 			exports = append(exports, entry)

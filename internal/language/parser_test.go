@@ -172,7 +172,7 @@ func TestParser_DepsErrors(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests[1:] { // TODO: this is not retro-compatible, do it in a different PR
+	for _, tt := range tests[1:] { // TODO: this is not retro-compatible, do it in a different PR.k
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 

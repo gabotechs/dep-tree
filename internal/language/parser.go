@@ -98,8 +98,8 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 					}
 					resolvedImports.Set(resolvedImport, true)
 				} else {
-					// TODO: this is not retro-compatible, do it in a different PR
-					// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id))
+					// TODO: this is not retro-compatible, do it in a different PR.
+					// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id)).
 				}
 			}
 		}

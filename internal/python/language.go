@@ -1,13 +1,13 @@
 package python
 
 import (
-	"dep-tree/internal/utils"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"dep-tree/internal/language"
 	"dep-tree/internal/python/python_grammar"
+	"dep-tree/internal/utils"
 )
 
 type Language struct {
