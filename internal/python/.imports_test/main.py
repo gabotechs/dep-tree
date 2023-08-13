@@ -1,3 +1,6 @@
+import src
+import src.main
+import src.module
 import sys
 from src.main import main
 import asyncio
