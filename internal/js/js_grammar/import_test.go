@@ -20,6 +20,10 @@ func TestImport(t *testing.T) {
 			ExpectedStatic: []string{"file"},
 		},
 		{
+			Name:           "// comment \nimport * from 'file'",
+			ExpectedStatic: []string{"file"},
+		},
+		{
 			Name:           "useless shit, import * from 'file' dumb suffix",
 			ExpectedStatic: []string{"file"},
 		},

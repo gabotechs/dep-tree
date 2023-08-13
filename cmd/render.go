@@ -9,6 +9,7 @@ import (
 	"dep-tree/internal/dep_tree"
 	"dep-tree/internal/js"
 	"dep-tree/internal/language"
+	"dep-tree/internal/python"
 	"dep-tree/internal/rust"
 	"dep-tree/internal/tui"
 	"dep-tree/internal/utils"
@@ -44,6 +45,8 @@ func RenderCmd() *cobra.Command {
 				return run(ctx, entrypoint, js.MakeJsLanguage)
 			case utils.EndsWith(entrypoint, rust.Extensions):
 				return run(ctx, entrypoint, rust.MakeRustLanguage)
+			case utils.EndsWith(entrypoint, python.Extensions):
+				return run(ctx, entrypoint, python.MakePythonLanguage)
 			default:
 				return fmt.Errorf("file \"%s\" not supported", entrypoint)
 			}
