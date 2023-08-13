@@ -17,12 +17,10 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.Import != nil && !stmt.Import.Indented:
-			resolved, err := l.ResolveAbsolute(stmt.Import.Path)
+			resolved := l.ResolveAbsolute(stmt.Import.Path)
 			switch {
-			case err != nil:
-				errors = append(errors, err)
 			case resolved == nil:
-				// nothing here.
+				continue
 			default:
 				exports = append(exports, language.ExportEntry{
 					Names: []language.ExportName{
@@ -46,24 +44,25 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 				}
 			}
 			var resolved *ResolveResult
-			var err error
 			if len(stmt.FromImport.Relative) > 0 {
+				var err error
 				resolved, err = ResolveRelative(stmt.FromImport.Path, path.Dir(file.Path), len(stmt.FromImport.Relative)-1)
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				}
 			} else {
-				resolved, err = l.ResolveAbsolute(stmt.FromImport.Path)
+				resolved = l.ResolveAbsolute(stmt.FromImport.Path)
 			}
 
 			switch {
-			case err != nil:
-				errors = append(errors, err)
-				continue
 			case resolved == nil:
 				continue
-			case resolved.File != "":
-				entry.Id = resolved.File
-			case resolved.InitModule != "":
+			case resolved.File != nil:
+				entry.Id = resolved.File.Path
+			case resolved.InitModule != nil:
 				entry.Id = file.Path
-			case resolved.Directory != "":
+			case resolved.Directory != nil:
 				entry.Id = file.Path
 			}
 			exports = append(exports, entry)

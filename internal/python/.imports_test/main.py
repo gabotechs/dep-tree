@@ -2,6 +2,7 @@ import src
 import src.main
 import src.module
 import sys
+from sys import something
 from src.main import main
 import asyncio
 from .src import main

@@ -2,16 +2,30 @@ package python
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
 	"dep-tree/internal/utils"
 )
 
+type InitModuleResult struct {
+	Path        string
+	PythonFiles []string
+}
+
+type DirectoryResult struct {
+	PythonFiles []string
+}
+
+type FileResult struct {
+	Path string
+}
+
 type ResolveResult struct {
-	InitModule string
-	Directory  string
-	File       string
+	InitModule *InitModuleResult
+	Directory  *DirectoryResult
+	File       *FileResult
 }
 
 // resolveFromSlicesAndSearchPath returns multiple valid resolved paths.
@@ -19,21 +33,35 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 	fullFileOrDir := path.Join(append([]string{searchPath}, slices...)...)
 
 	if utils.FileExists(fullFileOrDir + ".py") {
-		return &ResolveResult{File: fullFileOrDir + ".py"}
+		return &ResolveResult{File: &FileResult{Path: fullFileOrDir + ".py"}}
 	}
 
-	if utils.DirExists(fullFileOrDir) {
+	if result, err := os.ReadDir(fullFileOrDir); err == nil {
+		var pythonFiles []string
+		for _, entry := range result {
+			if strings.HasSuffix(entry.Name(), ".py") {
+				pythonFiles = append(pythonFiles, path.Join(fullFileOrDir, entry.Name()))
+			}
+		}
 		initFile := path.Join(fullFileOrDir, "__init__.py")
 		if utils.FileExists(initFile) {
-			return &ResolveResult{InitModule: initFile}
+			return &ResolveResult{InitModule: &InitModuleResult{
+				Path:        initFile,
+				PythonFiles: pythonFiles,
+			}}
 		} else {
-			return &ResolveResult{Directory: fullFileOrDir}
+			return &ResolveResult{Directory: &DirectoryResult{
+				PythonFiles: pythonFiles,
+			}}
 		}
 	}
 	return nil
 }
 
 // ResolveRelative cannot return an empty []string, unless an error happened.
+//
+// In contrary to ResolveAbsolute, this method can return an error as a relative import is
+// always expected to be found.
 func ResolveRelative(slices []string, dir string, stepsBack int) (*ResolveResult, error) {
 	var back []string
 	for i := 0; i < stepsBack; i++ {
@@ -52,15 +80,19 @@ func ResolveRelative(slices []string, dir string, stepsBack int) (*ResolveResult
 	return result, nil
 }
 
-func (l *Language) ResolveAbsolute(slices []string) (*ResolveResult, error) {
+// ResolveAbsolute never fails, if nothing is found it just returns nil.
+//
+// This is fine because we assume that an un-resolved absolute import is pointing to
+// a library or something like that, so no need to take it into account.
+func (l *Language) ResolveAbsolute(slices []string) *ResolveResult {
 	searchPaths := l.PythonPath
 
 	for _, searchPath := range searchPaths {
 		result := resolveFromSlicesAndSearchPath(searchPath, slices)
 		if result != nil {
-			return result, nil
+			return result
 		}
 	}
 
-	return nil, nil
+	return nil
 }
