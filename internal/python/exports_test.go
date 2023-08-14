@@ -63,6 +63,18 @@ func TestLanguage_ParseExports(t *testing.T) {
 					Id:    path.Join(exportsTestFolder, "main.py"),
 				},
 				{
+					Names: []language.ExportName{{Original: "foo_1"}, {Original: "foo_2"}},
+					Id:    path.Join(exportsTestFolder, "main.py"),
+				},
+				{
+					Names: []language.ExportName{{Original: "foo_3"}, {Original: "foo_4"}},
+					Id:    path.Join(exportsTestFolder, "main.py"),
+				},
+				{
+					Names: []language.ExportName{{Original: "foo_5"}, {Original: "foo_6"}},
+					Id:    path.Join(exportsTestFolder, "main.py"),
+				},
+				{
 					Names: []language.ExportName{{Original: "func"}},
 					Id:    path.Join(exportsTestFolder, "main.py"),
 				},

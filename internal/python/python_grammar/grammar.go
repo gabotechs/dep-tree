@@ -13,9 +13,11 @@ type Statement struct {
 	FromImport *FromImport `@@ |`
 	Import     *Import     `@@ |`
 	// exports.
-	Class    *Class    `@@ |`
-	Function *Function `@@ |`
-	Variable *Variable `@@`
+	Class          *Class          `@@ |`
+	Function       *Function       `@@ |`
+	VariableTyping *VariableTyping `@@ |`
+	VariableUnpack *VariableUnpack `@@ |`
+	VariableAssign *VariableAssign `@@`
 }
 
 type File struct {

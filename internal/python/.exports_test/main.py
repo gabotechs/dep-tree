@@ -9,6 +9,16 @@ from .module import module
 
 foo = 1
 
+foo_1, foo_2 = 1, 2
+
+(
+    foo_3,
+    foo_4
+) = 1, 2
+
+foo_5 = foo_6 = 5
+
+
 def func(a, b, c):
     pass
 

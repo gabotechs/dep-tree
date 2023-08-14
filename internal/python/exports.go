@@ -36,6 +36,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.FromImport.Names)),
 				All:   stmt.FromImport.All,
+				Id:    file.Path,
 			}
 			for i, name := range stmt.FromImport.Names {
 				entry.Names[i] = language.ExportName{
@@ -54,27 +55,38 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 			} else {
 				resolved = l.ResolveAbsolute(stmt.FromImport.Path)
 			}
-
 			switch {
 			case resolved == nil:
-				continue
+			case resolved.InitModule != nil:
+			case resolved.Directory != nil:
+				// nothing.
 			case resolved.File != nil:
 				entry.Id = resolved.File.Path
-			case resolved.InitModule != nil:
-				entry.Id = file.Path
-			case resolved.Directory != nil:
-				entry.Id = file.Path
 			}
 			exports = append(exports, entry)
 
-		case stmt.Variable != nil && !stmt.Variable.Indented:
+		case stmt.VariableUnpack != nil && !stmt.VariableUnpack.Indented:
+			entry := language.ExportEntry{
+				Names: make([]language.ExportName, len(stmt.VariableUnpack.Names)),
+				Id:    file.Path,
+			}
+			for i, name := range stmt.VariableUnpack.Names {
+				entry.Names[i] = language.ExportName{Original: name}
+			}
+			exports = append(exports, entry)
+		case stmt.VariableAssign != nil && !stmt.VariableAssign.Indented:
+			entry := language.ExportEntry{
+				Names: make([]language.ExportName, len(stmt.VariableAssign.Names)),
+				Id:    file.Path,
+			}
+			for i, name := range stmt.VariableAssign.Names {
+				entry.Names[i] = language.ExportName{Original: name}
+			}
+			exports = append(exports, entry)
+		case stmt.VariableTyping != nil && !stmt.VariableTyping.Indented:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{
-					{
-						Original: stmt.Variable.Name,
-					},
-				},
-				Id: file.Path,
+				Names: []language.ExportName{{Original: stmt.VariableTyping.Name}},
+				Id:    file.Path,
 			})
 		case stmt.Function != nil && !stmt.Function.Indented:
 			exports = append(exports, language.ExportEntry{
