@@ -10,9 +10,6 @@ import (
 
 const resolverTestFolder = ".resolve_test"
 
-// TODO: what happens if you import a folder with no __init__.py
-//  ANSWER: that is valid, each file gets imported as a module.
-
 func TestResolveAbsolute(t *testing.T) {
 	absPath, _ := filepath.Abs(resolverTestFolder)
 
