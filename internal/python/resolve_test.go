@@ -71,9 +71,10 @@ func TestResolveAbsolute(t *testing.T) {
 			Slices:     []string{"baz"},
 			PythonPath: []string{absPath},
 			Expected: &ResolveResult{
-				Directory: &DirectoryResult{PythonFiles: []string{
-					path.Join(absPath, "baz", "baz.py"),
-				}},
+				Directory: &DirectoryResult{
+					PythonFiles: []string{path.Join(absPath, "baz", "baz.py")},
+					Path:        path.Join(absPath, "baz"),
+				},
 			},
 		},
 	}
@@ -173,9 +174,8 @@ func TestResolveRelative(t *testing.T) {
 			Dir:    absPath,
 			Expected: &ResolveResult{
 				Directory: &DirectoryResult{
-					PythonFiles: []string{
-						path.Join(absPath, "baz", "baz.py"),
-					},
+					PythonFiles: []string{path.Join(absPath, "baz", "baz.py")},
+					Path:        path.Join(absPath, "baz"),
 				},
 			},
 		},
