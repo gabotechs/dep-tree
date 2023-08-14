@@ -19,7 +19,7 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 		switch {
 		case stmt == nil:
 			// Is this even possible?
-		case stmt.Import != nil && !stmt.Import.Indented:
+		case stmt.Import != nil:
 			resolved := l.ResolveAbsolute(stmt.Import.Path[0:])
 			switch {
 			case resolved == nil:
@@ -42,7 +42,7 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					})
 				}
 			}
-		case stmt.FromImport != nil && !stmt.FromImport.Indented:
+		case stmt.FromImport != nil:
 			importedNames := make([]string, len(stmt.FromImport.Names))
 			for i, name := range stmt.FromImport.Names {
 				importedNames[i] = name.Name
@@ -111,7 +111,14 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 							Id:  pythonFile,
 						})
 					} else {
-						errors = append(errors, fmt.Errorf("cannot import file %s.py from directory %s", name, resolved.Directory))
+						errors = append(
+							errors,
+							fmt.Errorf(
+								"cannot import file %s.py from directory %s",
+								name,
+								resolved.Directory.Path,
+							),
+						)
 					}
 				}
 			}
