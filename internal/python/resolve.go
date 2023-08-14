@@ -15,6 +15,7 @@ type InitModuleResult struct {
 }
 
 type DirectoryResult struct {
+	Path        string
 	PythonFiles []string
 }
 
@@ -49,11 +50,11 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 				Path:        initFile,
 				PythonFiles: pythonFiles,
 			}}
-		} else {
-			return &ResolveResult{Directory: &DirectoryResult{
-				PythonFiles: pythonFiles,
-			}}
 		}
+		return &ResolveResult{Directory: &DirectoryResult{
+			PythonFiles: pythonFiles,
+			Path:        fullFileOrDir,
+		}}
 	}
 	return nil
 }
