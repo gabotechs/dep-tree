@@ -1,7 +1,17 @@
 import foo as foo_2
 import folder.foo as foo_3
-from foo import bar
-from folder.foo import baz as baz_2
+
+try:
+  import foo
+except:
+  import folder.foo as foo
+
+try:
+  from foo import bar # comment
+except:
+  from folder.foo import baz as baz_2
+
+# from .src import a
 from .src import a
 from .module import *
 from .module import module
@@ -24,3 +34,9 @@ def func(a, b, c):
 
 class Class(Other):
     pass
+
+try:
+  # This import only works on python 3.3 and above.
+  import collections.abc as collections_abc  # pylint: disable=unused-import
+except ImportError:
+  import collections as collections_abc  # pylint: disable=unused-import
