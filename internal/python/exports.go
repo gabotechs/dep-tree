@@ -15,24 +15,28 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 	for _, stmt := range file.Statements {
 		switch {
 		case stmt == nil:
-			// Is this even possible?
-		case stmt.Import != nil && !stmt.Import.Indented:
-			resolved := l.ResolveAbsolute(stmt.Import.Path)
-			switch {
-			case resolved == nil:
-				continue
-			default:
-				exports = append(exports, language.ExportEntry{
-					Names: []language.ExportName{
-						{
-							Original: stmt.Import.Path[0],
-							Alias:    stmt.Import.Alias,
-						},
+			continue
+			// NOTE: it is very typical to do something like:
+			// try:
+			//   import foo
+			// except:
+			//   import foo.compat as foo
+		case stmt.Import != nil: // && !stmt.Import.Indented:.
+			exports = append(exports, language.ExportEntry{
+				Names: []language.ExportName{
+					{
+						Original: stmt.Import.Path[0],
+						Alias:    stmt.Import.Alias,
 					},
-					Id: file.Path,
-				})
-			}
-		case stmt.FromImport != nil && !stmt.FromImport.Indented:
+				},
+				Id: file.Path,
+			})
+			// NOTE: it is very typical to do something like:
+			// try:
+			//   from foo import bar
+			// except:
+			//   from foo.compat import bar
+		case stmt.FromImport != nil: // && !stmt.FromImport.Indented:.
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.FromImport.Names)),
 				All:   stmt.FromImport.All,

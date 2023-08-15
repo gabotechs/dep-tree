@@ -21,7 +21,7 @@ type Statement struct {
 }
 
 type File struct {
-	Statements []*Statement `(@@ | ANY | ALL | Punct | Ident | Space | NewLine)*`
+	Statements []*Statement `(@@ | ANY | ALL | Ident | Space | NewLine)*`
 	Path       string
 }
 
@@ -29,11 +29,10 @@ var (
 	lex = lexer.MustSimple(
 		[]lexer.SimpleRule{
 			{"ALL", `\*`},
-			{"Punct", `[,{}()]`},
 			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
 			// https://stackoverflow.com/questions/69184441/regular-expression-for-comments-in-python-re
 			{"Comment", `#.*`},
-			{"NewLine", `\n+`},
+			{"NewLine", `\n`},
 			{"Space", `\s+`},
 			{"ANY", `.`},
 		},
