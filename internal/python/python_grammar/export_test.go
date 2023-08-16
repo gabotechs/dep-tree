@@ -82,6 +82,10 @@ func TestExport(t *testing.T) {
 			ExpectedClasses: []Class{{Name: "cls"}},
 		},
 		{
+			Name:            "class cls:\n    \"\"\" comment \"\"\"\n    pass",
+			ExpectedClasses: []Class{{Name: "cls"}},
+		},
+		{
 			Name:            " class cls:",
 			ExpectedClasses: []Class{{Name: "cls", Indented: true}},
 		},

@@ -131,6 +131,27 @@ func TestImport(t *testing.T) {
 			Name:                "from foo import (a as a_2,\n  b)",
 			ExpectedFromImports: []FromImport{{Names: []ImportedName{{Name: "a", Alias: "a_2"}, {Name: "b"}}, Path: []string{"foo"}}},
 		},
+		{
+			Name: "''' import foo '''",
+		},
+		{
+			Name:            "import foo\n''' import foo '''",
+			ExpectedImports: []Import{{Path: []string{"foo"}}},
+		},
+		{
+			Name:            "import foo\n''' import foo '''\nimport foo",
+			ExpectedImports: []Import{{Path: []string{"foo"}}, {Path: []string{"foo"}}},
+		},
+		{
+			Name:            "import foo\n''' import foo '''\nimport foo\n''' import foo '''\nimport foo",
+			ExpectedImports: []Import{{Path: []string{"foo"}}, {Path: []string{"foo"}}, {Path: []string{"foo"}}},
+		},
+		{
+			Name: "''' import foo '''",
+		},
+		{
+			Name: "''' \nimport foo\n'''",
+		},
 	}
 
 	for _, tt := range tests {

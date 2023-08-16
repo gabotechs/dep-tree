@@ -24,6 +24,12 @@ func loadDeps[T any](
 	}
 
 	for _, dep := range deps {
+		if dep.Id == "/Users/gabriel/GolandProjects/dep-tree" {
+			parents := g.Parents(dep.Id)
+			println(parents)
+			children := g.Children(dep.Id)
+			println(children)
+		}
 		ctx, err = loadDeps(ctx, g, dep, parser)
 		if err != nil {
 			return ctx, err

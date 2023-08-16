@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"dep-tree/internal/utils"
@@ -34,7 +35,8 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 	fullFileOrDir := path.Join(append([]string{searchPath}, slices...)...)
 
 	if utils.FileExists(fullFileOrDir + ".py") {
-		return &ResolveResult{File: &FileResult{Path: fullFileOrDir + ".py"}}
+		abs, _ := filepath.Abs(fullFileOrDir + ".py")
+		return &ResolveResult{File: &FileResult{Path: abs}}
 	}
 
 	if result, err := os.ReadDir(fullFileOrDir); err == nil {
@@ -46,14 +48,16 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 		}
 		initFile := path.Join(fullFileOrDir, "__init__.py")
 		if utils.FileExists(initFile) {
+			abs, _ := filepath.Abs(initFile)
 			return &ResolveResult{InitModule: &InitModuleResult{
-				Path:        initFile,
+				Path:        abs,
 				PythonFiles: pythonFiles,
 			}}
 		}
+		abs, _ := filepath.Abs(fullFileOrDir)
 		return &ResolveResult{Directory: &DirectoryResult{
 			PythonFiles: pythonFiles,
-			Path:        fullFileOrDir,
+			Path:        abs,
 		}}
 	}
 	return nil

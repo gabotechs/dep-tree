@@ -29,17 +29,26 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					All: true,
 					Id:  resolved.File.Path,
 				})
+				if resolved.File.Path == "/Users/gabriel/GolandProjects/dep-tree" {
+					println("foo")
+				}
 			case resolved.InitModule != nil:
 				imports = append(imports, language.ImportEntry{
 					All: true,
 					Id:  resolved.InitModule.Path,
 				})
+				if resolved.InitModule.Path == "/Users/gabriel/GolandProjects/dep-tree" {
+					println("foo")
+				}
 			case resolved.Directory != nil:
 				for _, pythonFile := range resolved.Directory.PythonFiles {
 					imports = append(imports, language.ImportEntry{
 						All: true,
 						Id:  pythonFile,
 					})
+					if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
+						println("foo")
+					}
 				}
 			}
 		case stmt.FromImport != nil:
@@ -71,6 +80,9 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					All:   stmt.FromImport.All,
 					Id:    resolved.File.Path,
 				})
+				if resolved.File.Path == "/Users/gabriel/GolandProjects/dep-tree" {
+					println("foo")
+				}
 			case resolved.InitModule != nil:
 				// If importing from an __init__.py, there is a chance that we are actually
 				// importing a file living in the same folder, instead of a variable that lives
@@ -87,6 +99,9 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 							All: true,
 							Id:  pythonFile,
 						})
+						if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
+							println("foo")
+						}
 					} else {
 						// No file named that way, it should be imported from __init__.py then.
 						namesFromInit = append(namesFromInit, name)
@@ -98,6 +113,9 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 						Names: namesFromInit,
 						Id:    resolved.InitModule.Path,
 					})
+					if resolved.InitModule.Path == "/Users/gabriel/GolandProjects/dep-tree" {
+						println("foo")
+					}
 				}
 			case resolved.Directory != nil:
 				availableFiles := map[string]string{}
@@ -110,6 +128,10 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 							All: true,
 							Id:  pythonFile,
 						})
+
+						if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
+							println("foo")
+						}
 					} else {
 						errors = append(
 							errors,
