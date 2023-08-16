@@ -16,12 +16,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 		switch {
 		case stmt == nil:
 			continue
-			// NOTE: it is very typical to do something like:
-			// try:
-			//   import foo
-			// except:
-			//   import foo.compat as foo
-		case stmt.Import != nil: // && !stmt.Import.Indented:.
+		case stmt.Import != nil && !stmt.Import.Indented:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
@@ -31,12 +26,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 				},
 				Id: file.Path,
 			})
-			// NOTE: it is very typical to do something like:
-			// try:
-			//   from foo import bar
-			// except:
-			//   from foo.compat import bar
-		case stmt.FromImport != nil: // && !stmt.FromImport.Indented:.
+		case stmt.FromImport != nil && !stmt.FromImport.Indented:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.FromImport.Names)),
 				All:   stmt.FromImport.All,
