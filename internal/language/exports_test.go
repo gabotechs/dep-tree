@@ -193,9 +193,6 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			),
 			ExpectedErrors: []string{
 				"circular export starting and ending on 1",
-				//`name "C" exported in "3" from "4" cannot be found in origin file`,
-				//`name "B" exported in "2" from "3" cannot be found in origin file`,
-				//`name "A" exported in "1" from "2" cannot be found in origin file`,
 			},
 		},
 	}
