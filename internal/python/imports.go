@@ -19,7 +19,7 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 		switch {
 		case stmt == nil:
 			// Is this even possible?
-		case stmt.Import != nil:
+		case stmt.Import != nil && !stmt.Import.Indented:
 			resolved := l.ResolveAbsolute(stmt.Import.Path[0:])
 			switch {
 			case resolved == nil:
@@ -29,29 +29,20 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					All: true,
 					Id:  resolved.File.Path,
 				})
-				if resolved.File.Path == "/Users/gabriel/GolandProjects/dep-tree" {
-					println("foo")
-				}
-			case resolved.InitModule != nil:
+			case resolved.InitModule != nil && !l.IgnoreModuleImports:
 				imports = append(imports, language.ImportEntry{
 					All: true,
 					Id:  resolved.InitModule.Path,
 				})
-				if resolved.InitModule.Path == "/Users/gabriel/GolandProjects/dep-tree" {
-					println("foo")
-				}
-			case resolved.Directory != nil:
+			case resolved.Directory != nil && !l.IgnoreModuleImports:
 				for _, pythonFile := range resolved.Directory.PythonFiles {
 					imports = append(imports, language.ImportEntry{
 						All: true,
 						Id:  pythonFile,
 					})
-					if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
-						println("foo")
-					}
 				}
 			}
-		case stmt.FromImport != nil:
+		case stmt.FromImport != nil && !stmt.FromImport.Indented:
 			importedNames := make([]string, len(stmt.FromImport.Names))
 			for i, name := range stmt.FromImport.Names {
 				importedNames[i] = name.Name
@@ -80,9 +71,6 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					All:   stmt.FromImport.All,
 					Id:    resolved.File.Path,
 				})
-				if resolved.File.Path == "/Users/gabriel/GolandProjects/dep-tree" {
-					println("foo")
-				}
 			case resolved.InitModule != nil:
 				// If importing from an __init__.py, there is a chance that we are actually
 				// importing a file living in the same folder, instead of a variable that lives
@@ -99,9 +87,6 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 							All: true,
 							Id:  pythonFile,
 						})
-						if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
-							println("foo")
-						}
 					} else {
 						// No file named that way, it should be imported from __init__.py then.
 						namesFromInit = append(namesFromInit, name)
@@ -113,9 +98,6 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 						Names: namesFromInit,
 						Id:    resolved.InitModule.Path,
 					})
-					if resolved.InitModule.Path == "/Users/gabriel/GolandProjects/dep-tree" {
-						println("foo")
-					}
 				}
 			case resolved.Directory != nil:
 				availableFiles := map[string]string{}
@@ -128,10 +110,6 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 							All: true,
 							Id:  pythonFile,
 						})
-
-						if pythonFile == "/Users/gabriel/GolandProjects/dep-tree" {
-							println("foo")
-						}
 					} else {
 						errors = append(
 							errors,

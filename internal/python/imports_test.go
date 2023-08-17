@@ -29,26 +29,26 @@ func TestLanguage_ParseImports(t *testing.T) {
 			File:       "main.py",
 			Entrypoint: "main.py",
 			Expected: []language.ImportEntry{
-				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "foo.py"),
-				},
-				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				},
-				{
-					Names: []string{"main"},
-					Id:    path.Join(importsTestFolder, "src", "main.py"),
-				},
+				// {
+				//	All: true,
+				//	Id:  path.Join(importsTestFolder, "src", "foo.py"),
+				// },
+				// {
+				//	All: true,
+				//	Id:  path.Join(importsTestFolder, "src", "main.py"),
+				// },
+				// {
+				//	All: true,
+				//	Id:  path.Join(importsTestFolder, "src", "main.py"),
+				// },
+				// {
+				//	All: true,
+				//	Id:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
+				// },
+				// {
+				//	Names: []string{"main"},
+				//	Id:    path.Join(importsTestFolder, "src", "main.py"),
+				// },
 				{
 					All: true,
 					Id:  path.Join(importsTestFolder, "src", "main.py"),

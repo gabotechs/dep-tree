@@ -39,19 +39,19 @@ func TestLanguage_ParseExports(t *testing.T) {
 				//{
 				//	Names: []language.ExportName{{Original: "foo"}},
 				//	Id:    path.Join(exportsTestFolder, "main.py"),
-				//},
+				// },
 				//{
 				//	Names: []language.ExportName{{Original: "folder", Alias: "foo"}},
 				//	Id:    path.Join(exportsTestFolder, "main.py"),
-				//},
+				// },
 				//{
 				//	Names: []language.ExportName{{Original: "bar"}},
 				//	Id:    path.Join(exportsTestFolder, "foo.py"),
-				//},
+				// },
 				//{
 				//	Names: []language.ExportName{{Original: "baz", Alias: "baz_2"}},
 				//	Id:    path.Join(exportsTestFolder, "folder", "foo.py"),
-				//},
+				// },
 				{
 					Names: []language.ExportName{{Original: "a"}},
 					Id:    path.Join(exportsTestFolder, "main.py"),
@@ -92,11 +92,11 @@ func TestLanguage_ParseExports(t *testing.T) {
 				//{
 				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
 				//	Id:    path.Join(exportsTestFolder, "main.py"),
-				//},
+				// },
 				//{
 				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
 				//	Id:    path.Join(exportsTestFolder, "main.py"),
-				//},
+				// },
 				{
 					Names: []language.ExportName{
 						{Original: "a"},
