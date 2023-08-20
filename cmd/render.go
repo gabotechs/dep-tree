@@ -31,26 +31,28 @@ func run[T any, F any](
 	return tui.Loop(ctx, entrypoint, builder, nil, true, nil)
 }
 
+func runRender(cmd *cobra.Command, args []string) error {
+	ctx := cmd.Context()
+	entrypoint := args[0]
+
+	switch {
+	case utils.EndsWith(entrypoint, js.Extensions):
+		return run(ctx, entrypoint, js.MakeJsLanguage)
+	case utils.EndsWith(entrypoint, rust.Extensions):
+		return run(ctx, entrypoint, rust.MakeRustLanguage)
+	case utils.EndsWith(entrypoint, python.Extensions):
+		return run(ctx, entrypoint, python.MakePythonLanguage)
+	default:
+		return fmt.Errorf("file \"%s\" not supported", entrypoint)
+	}
+}
+
 func RenderCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "render <path/to/entrypoint.ext>",
-		Short: "Render the dependency tree starting from the provided entrypoint",
+		Short: "[default] Render the dependency tree starting from the provided entrypoint",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-			entrypoint := args[0]
-
-			switch {
-			case utils.EndsWith(entrypoint, js.Extensions):
-				return run(ctx, entrypoint, js.MakeJsLanguage)
-			case utils.EndsWith(entrypoint, rust.Extensions):
-				return run(ctx, entrypoint, rust.MakeRustLanguage)
-			case utils.EndsWith(entrypoint, python.Extensions):
-				return run(ctx, entrypoint, python.MakePythonLanguage)
-			default:
-				return fmt.Errorf("file \"%s\" not supported", entrypoint)
-			}
-		},
+		RunE:  runRender,
 	}
 
 	cmd.Flags().BoolVar(&jsonFormat, "json", false, "render the dependency try in a machine readable json format")
