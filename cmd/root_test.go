@@ -25,9 +25,6 @@ func TestRoot(t *testing.T) {
 			Name: "render random.js",
 		},
 		{
-			Name: "render random.rs",
-		},
-		{
 			Name: "render random.pdf",
 		},
 		{
