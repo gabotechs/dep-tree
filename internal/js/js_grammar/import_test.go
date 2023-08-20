@@ -52,6 +52,10 @@ func TestImport(t *testing.T) {
 			ExpectedStatic: []string{"file"},
 		},
 		{
+			Name:           "import { type One, Other } from 'file'",
+			ExpectedStatic: []string{"file"},
+		},
+		{
 			Name:           "import Default, { One, Other } from 'file'",
 			ExpectedStatic: []string{"file"},
 		},

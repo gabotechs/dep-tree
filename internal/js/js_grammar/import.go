@@ -2,7 +2,7 @@
 package js_grammar
 
 type ImportDeconstruction struct {
-	Names []string `"{" @Ident ("as" Ident)? ("," (@Ident ("as" Ident)?)?)* "}"`
+	Names []string `"{" "type"? @Ident ("as" Ident)? ("," ("type"? @Ident ("as" Ident)?)?)* "}"`
 }
 
 type AllImport struct {
