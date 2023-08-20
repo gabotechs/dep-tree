@@ -63,6 +63,9 @@ func MakeRustLanguage(entrypoint string) (language.Language[Data, rust_grammar.F
 	if err != nil {
 		return nil, err
 	}
+	if !utils.FileExists(entrypoint) {
+		return nil, fmt.Errorf("file %s does not exist", entrypoint)
+	}
 	cargoTomlPath := findCargoToml(entrypointAbsPath)
 	if cargoTomlPath == "" {
 		return nil, fmt.Errorf("could not find Cargo.toml in any parent directory of %s", entrypointAbsPath)

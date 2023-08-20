@@ -44,6 +44,10 @@ func MakeJsLanguage(entrypoint string) (language.Language[Data, js_grammar.File]
 	if err != nil {
 		return nil, err
 	}
+	if !utils.FileExists(entrypoint) {
+		return nil, fmt.Errorf("file %s does not exist", entrypoint)
+	}
+
 	tsConfig, packageJsonPath, err := findPackageJson(entrypointAbsPath)
 	if err != nil {
 		return nil, err
