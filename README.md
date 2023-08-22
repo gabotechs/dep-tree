@@ -6,8 +6,9 @@
 <br/>
 
 <p align="center">
-    <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main">
-    <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff">
+    <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main"/>
+    <img src="https://goreportcard.com/badge/github.com/gabotechs/dep-tree"/>
+    <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff"/>
 </p>
 
 <p align="center">
