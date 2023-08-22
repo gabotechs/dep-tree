@@ -44,18 +44,18 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	}
 	var failedMatches []string
 	for pathOverride, searchPaths := range pathOverrides {
-		pathOverride = strings.ReplaceAll(pathOverride, "*", "")
-		if strings.HasPrefix(unresolved, pathOverride) {
+		override := strings.ReplaceAll(pathOverride, "*", "")
+		if strings.HasPrefix(unresolved, override) {
 			for _, searchPath := range searchPaths {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
-				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
+				newImportFrom := strings.ReplaceAll(unresolved, override, searchPath)
 				importFromBaseUrlAndPaths := path.Join(l.ProjectRoot, baseUrl, newImportFrom)
 				absPath = getFileAbsPath(importFromBaseUrlAndPaths)
 				if absPath != "" {
 					return absPath, nil
 				}
 			}
-			failedMatches = append(failedMatches, pathOverride)
+			failedMatches = append(failedMatches, override)
 		}
 	}
 	if failedMatches != nil {
