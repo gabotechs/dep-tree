@@ -42,6 +42,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	if pathOverrides == nil {
 		return absPath, nil
 	}
+	var failedMatches []string
 	for pathOverride, searchPaths := range pathOverrides {
 		pathOverride = strings.ReplaceAll(pathOverride, "*", "")
 		if strings.HasPrefix(unresolved, pathOverride) {
@@ -54,8 +55,11 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 					return absPath, nil
 				}
 			}
-			return absPath, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, pathOverride)
+			failedMatches = append(failedMatches, pathOverride)
 		}
+	}
+	if failedMatches != nil {
+		return absPath, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, strings.Join(failedMatches, "', '"))
 	}
 	return absPath, nil
 }
