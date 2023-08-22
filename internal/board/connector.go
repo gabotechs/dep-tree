@@ -3,8 +3,8 @@ package board
 import (
 	"fmt"
 
-	"dep-tree/internal/board/graphics"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/board/graphics"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Connector struct {

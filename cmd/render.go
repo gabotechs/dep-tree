@@ -6,13 +6,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"dep-tree/internal/dep_tree"
-	"dep-tree/internal/js"
-	"dep-tree/internal/language"
-	"dep-tree/internal/python"
-	"dep-tree/internal/rust"
-	"dep-tree/internal/tui"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/js"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/python"
+	"github.com/gabotechs/dep-tree/internal/rust"
+	"github.com/gabotechs/dep-tree/internal/tui"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 var jsonFormat bool

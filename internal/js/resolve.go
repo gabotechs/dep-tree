@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 // ResolvePath resolves an unresolved import based on the dir where the import was executed.

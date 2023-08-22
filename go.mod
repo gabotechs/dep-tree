@@ -1,4 +1,4 @@
-module dep-tree
+module github.com/gabotechs/dep-tree
 
 go 1.19
 

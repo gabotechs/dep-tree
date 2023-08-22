@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
-	"dep-tree/internal/language"
-	"dep-tree/internal/python/python_grammar"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/python/python_grammar"
 )
 
 //nolint:gocyclo

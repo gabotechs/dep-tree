@@ -4,8 +4,8 @@ import (
 	"context"
 	"path"
 
-	"dep-tree/internal/js/js_grammar"
-	"dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
+	"github.com/gabotechs/dep-tree/internal/language"
 )
 
 func (l *Language) ParseImports(ctx context.Context, file *js_grammar.File) (context.Context, *language.ImportsResult, error) {

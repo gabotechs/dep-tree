@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"dep-tree/internal/board"
-	"dep-tree/internal/graph"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/board"
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 const indent = 2

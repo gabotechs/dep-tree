@@ -3,7 +3,7 @@ package js
 import (
 	"path/filepath"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 var Extensions = []string{

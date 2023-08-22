@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestFile struct {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/elliotchance/orderedmap/v2"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type ExportName struct {

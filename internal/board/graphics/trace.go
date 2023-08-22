@@ -3,7 +3,7 @@ package graphics
 import (
 	"errors"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type LineTracer struct {

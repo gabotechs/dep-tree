@@ -3,7 +3,7 @@ package dep_tree
 import (
 	"context"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func loadDeps[T any](

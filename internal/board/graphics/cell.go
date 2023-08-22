@@ -1,6 +1,6 @@
 package graphics
 
-import "dep-tree/internal/utils"
+import "github.com/gabotechs/dep-tree/internal/utils"
 
 type Cell interface {
 	IsCell() bool

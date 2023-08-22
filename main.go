@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"dep-tree/cmd"
+	"github.com/gabotechs/dep-tree/cmd"
 )
 
 func main() {
