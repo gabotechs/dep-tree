@@ -6,8 +6,8 @@ import (
 
 	"github.com/elliotchance/orderedmap/v2"
 
-	"dep-tree/internal/board/graphics"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/board/graphics"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Board struct {

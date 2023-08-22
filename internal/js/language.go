@@ -5,9 +5,9 @@ import (
 	"path"
 	"path/filepath"
 
-	"dep-tree/internal/js/js_grammar"
-	"dep-tree/internal/language"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Language struct {

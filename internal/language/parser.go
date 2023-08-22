@@ -7,8 +7,8 @@ import (
 
 	"github.com/elliotchance/orderedmap/v2"
 
-	"dep-tree/internal/dep_tree"
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type Language[T any, F any] interface {

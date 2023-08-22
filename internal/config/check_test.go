@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 )
 
 const tmpFolder = "/tmp/dep-tree-check-tests"

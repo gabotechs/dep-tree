@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"dep-tree/internal/language"
-	"dep-tree/internal/rust/rust_grammar"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
 )
 
 func (l *Language) ParseExports(ctx context.Context, file *rust_grammar.File) (context.Context, *language.ExportsResult, error) {

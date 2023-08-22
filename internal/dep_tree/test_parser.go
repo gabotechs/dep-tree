@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestParser struct {

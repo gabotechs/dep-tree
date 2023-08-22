@@ -5,7 +5,7 @@ import (
 
 	"github.com/elliotchance/orderedmap/v2"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type NodeParser[T any] interface {

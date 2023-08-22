@@ -3,7 +3,7 @@ package graphics
 import (
 	"fmt"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Matrix struct {

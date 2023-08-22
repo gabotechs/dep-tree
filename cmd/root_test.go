@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 const testFolder = ".root_test"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/language"
 )
 
 func TestLanguage_ParseImports(t *testing.T) {

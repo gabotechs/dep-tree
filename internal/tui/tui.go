@@ -5,10 +5,10 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
-	"dep-tree/internal/dep_tree"
-	"dep-tree/internal/ecs"
-	"dep-tree/internal/tui/systems"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/ecs"
+	"github.com/gabotechs/dep-tree/internal/tui/systems"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 var style = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)

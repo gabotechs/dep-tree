@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	"dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 )
 
 func checkEntrypoint[T any](

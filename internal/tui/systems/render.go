@@ -5,9 +5,9 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
-	"dep-tree/internal/board/graphics"
-	"dep-tree/internal/dep_tree"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/board/graphics"
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type RenderState struct {

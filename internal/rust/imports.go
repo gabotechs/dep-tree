@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"dep-tree/internal/language"
-	"dep-tree/internal/rust/rust_grammar"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (context.Context, *language.ImportsResult, error) {

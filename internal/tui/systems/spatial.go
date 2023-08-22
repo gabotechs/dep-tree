@@ -3,7 +3,7 @@ package systems
 import (
 	"github.com/gdamore/tcell/v2"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 const horizontalMargin = 0.5

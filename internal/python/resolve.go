@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type InitModuleResult struct {

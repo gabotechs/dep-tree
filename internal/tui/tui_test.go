@@ -13,11 +13,11 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/js"
-	"dep-tree/internal/language"
-	"dep-tree/internal/rust"
-	"dep-tree/internal/tui/systems"
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/js"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/rust"
+	"github.com/gabotechs/dep-tree/internal/tui/systems"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 const tmp = "/tmp/dep-tree-tests"

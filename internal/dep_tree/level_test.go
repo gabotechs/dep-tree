@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func TestNode_Level(t *testing.T) {

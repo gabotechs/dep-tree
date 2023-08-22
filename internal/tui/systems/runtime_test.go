@@ -8,7 +8,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/stretchr/testify/require"
 
-	"dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 func TestHelpScreen(t *testing.T) {
