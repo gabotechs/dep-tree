@@ -3,7 +3,8 @@
     "baseUrl": "src",
     "paths": {
       // comment
-      "@utils": ["utils"],
+      "@ut": [],
+      "@utils": ["non-existing", "utils"],
       "@/helpers/*": ["helpers/*"]
     },
   }
