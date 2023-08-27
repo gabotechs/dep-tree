@@ -12,12 +12,56 @@
 </p>
 
 <p align="center">
-    Render your project's dependency tree in the terminal and/or validate it against your rules.
+    Render your project's file import tree in the terminal and/or validate it against your own rules.
 </p>
+
+
+<table align="center">
+    <thead>
+        <tr>
+            <th>
+                Install <code>dep-tree</code> in your machine
+            </th>
+            <th>
+                Run it in your project
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> 
+
+Install the dep tree CLI locally using brew:
+```bash
+brew install gabotechs/taps/dep-tree
+```
+
+or through its Python wrapper:
+```bash
+pip install python-dep-tree
+```
+
+or through its NodeJS wrapper:
+```bash
+npm install @dep-tree/cli
+```
+
+or from source directly with `go install`:
+```bash
+go install -v github.com/gabotechs/dep-tree@latest
+```
+
+</td><td>
+
+```bash
+dep-tree your/project/entrypoint[.py|.js|...]
+```
 
 <p align="center">
     <img width="440" src="docs/demo.gif" alt="Dependency tree render">
 </p>
+
+</td></tr></tbody></table>
 
 ## Dep Tree
 
