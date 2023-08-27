@@ -60,7 +60,7 @@ dep-tree your/project/entrypoint
 ```
 
 <p align="center">
-    <img width="400" src="docs/demo.gif" alt="Dependency tree render">
+    <img width="399px" src="docs/demo.gif" alt="Dependency tree render">
 </p>
 
 </td></tr></tbody></table>
