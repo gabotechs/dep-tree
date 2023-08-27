@@ -20,7 +20,7 @@
     <thead>
         <tr>
             <th>
-                Install <code>dep-tree</code> in your machine
+                Install it in your machine
             </th>
             <th>
                 Run it in your project
