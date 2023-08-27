@@ -43,7 +43,7 @@ pip install python-dep-tree
 
 or through its NodeJS wrapper:
 ```bash
-npm install @dep-tree/cli
+npm install @dep-tree/cli                
 ```
 
 <br/>
