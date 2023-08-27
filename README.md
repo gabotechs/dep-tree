@@ -48,8 +48,7 @@ npm install @dep-tree/cli
 
 or from source directly with `go install`:
 ```bash
-go install -v \
-  github.com/gabotechs/dep-tree@latest
+go install github.com/gabotechs/dep-tree@latest
 ```
 
 </td><td>
