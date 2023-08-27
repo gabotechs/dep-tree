@@ -46,6 +46,14 @@ or through its NodeJS wrapper:
 npm install @dep-tree/cli
 ```
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
 </td><td>
 
 ```bash
