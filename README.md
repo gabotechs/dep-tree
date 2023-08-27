@@ -29,7 +29,7 @@
     </thead>
     <tbody>
         <tr>
-            <td> 
+            <td width="100px"> 
 
 Install the dep tree CLI locally using brew:
 ```bash
