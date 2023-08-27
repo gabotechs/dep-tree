@@ -54,7 +54,7 @@ go install github.com/gabotechs/dep-tree@latest
 </td><td>
 
 ```bash
-dep-tree your/project/entrypoint[.py|.js|...]
+dep-tree your/project/entrypoint
 ```
 
 <p align="center">
