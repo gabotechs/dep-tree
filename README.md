@@ -46,11 +46,6 @@ or through its NodeJS wrapper:
 npm install @dep-tree/cli
 ```
 
-or from source directly with `go install`:
-```bash
-go install github.com/gabotechs/dep-tree@latest
-```
-
 </td><td>
 
 ```bash
