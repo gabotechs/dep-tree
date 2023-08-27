@@ -29,7 +29,7 @@
     </thead>
     <tbody>
         <tr>
-            <td width="100px"> 
+            <td>
 
 Install the dep tree CLI locally using brew:
 ```bash
@@ -60,7 +60,7 @@ dep-tree your/project/entrypoint
 ```
 
 <p align="center">
-    <img width="440" src="docs/demo.gif" alt="Dependency tree render">
+    <img width="400" src="docs/demo.gif" alt="Dependency tree render">
 </p>
 
 </td></tr></tbody></table>
