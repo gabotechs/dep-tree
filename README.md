@@ -12,7 +12,9 @@
 </p>
 
 <p align="center">
-    Render your project's file import tree in the terminal and/or validate it against your own rules.
+    Dep Tree is a command line tool that allows you to 
+    render an interactive graph of your project's file import tree in the terminal 
+    and/or validate it against your own rules.
 </p>
 
 
@@ -20,10 +22,10 @@
     <thead>
         <tr>
             <th>
-                Install it in your machine
+                Given your project's file strutcture...
             </th>
             <th>
-                Run it in your project
+                ...it renders an interactive file import graph
             </th>
         </tr>
     </thead>
@@ -31,36 +33,14 @@
         <tr>
             <td>
 
-Install the dep tree CLI locally using brew:
-```bash
-brew install gabotechs/taps/dep-tree
-```
-
-or through its Python wrapper:
-```bash
-pip install python-dep-tree
-```
-
-or through its NodeJS wrapper:
-```bash
-npm install @dep-tree/cli                
-```
-
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+<p align="center">
+    <img height="600px" src="docs/tree.png" alt="File structure">
+</p>
 
 </td><td>
 
-```bash
-dep-tree your/project/entrypoint
-```
-
 <p align="center">
-    <img width="399px" src="docs/demo.gif" alt="Dependency tree render">
+    <img height="600px" src="docs/demo.gif" alt="Dependency tree render">
 </p>
 
 </td></tr></tbody></table>
