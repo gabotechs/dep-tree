@@ -13,8 +13,11 @@
 
 <p align="center">
     Dep Tree is a command line tool that allows you to 
-    render an interactive graph of your project's file import tree in the terminal 
-    and/or validate it against your own rules.
+    render an interactive graph of your project's file import tree.
+</p>
+<p align="center">
+    It also allows you to declare a list of banned dependencies in order to
+    validate your dependency graph in the CI.
 </p>
 
 
@@ -22,7 +25,7 @@
     <thead>
         <tr>
             <th>
-                Given your project's file strutcture...
+                Given your project's file structure...
             </th>
             <th>
                 ...it renders an interactive file import graph
@@ -45,6 +48,21 @@
 
 </td></tr></tbody></table>
 
+## Motivation
+
+Large code bases with a lot of people working on them can get... complex. Maintaining organization
+and consistency across the project is crucial for scaling and maintaining it.
+
+Luckily, the community has come up with very useful tools for enforcing this:
+- We have **type checkers** for statically ensuring correct interaction between pieces.
+- We have **linters** for improving code quality and consistency.
+- We have **formatters** for ensuring consistent format across the code base.
+- but what about file structure and file dependency management...
+
+Dep Tree is a tool that covers that last point. It helps developers maintain the project structure
+organized and consistent in its life-cycle, ensuring that nobody breaks this "harmony" by doing
+checks in CI systems.
+
 ## Dep Tree
 
 `dep-tree` is a cli tool that allows users to render their file dependency tree in the terminal, or
@@ -52,7 +70,7 @@ check that it matches some dependency rules in CI systems.
 
 It works with files, meaning that each file is a node in the dependency tree:
 - It starts from an entrypoint, which is usually the main executable file in a
-program or the file that exposes the contents of a library (like `src/index.ts`).
+program or the file that exposes the contents of a library (like `package/main.py`).
 - It reads its import statements, it makes a parent node out of the main file,
 and one child node for each imported file.
 > **NOTE**: it only takes into account local files, not files imported from external libraries.
@@ -78,10 +96,10 @@ brew install gabotechs/taps/dep-tree
 
 ## Render
 
-Choose the file that will act as the root of the dependency tree (for example `src/index.js`), and run:
+Choose the file that will act as the root of the dependency tree (for example `package/main.py`), and run:
 
 ```shell
-dep-tree render my-file.js
+dep-tree render my-file.py
 ```
 
 You can see the controls for navigating through the graph pressing `h` at any time:
@@ -118,7 +136,7 @@ allow:
     - "src/common/**"
 ```
 In the example above, any file under the `src/products` folder has the restriction of only
-being able to import files that lives, either in the same `src/products` folder, or in the
+being able to import files that live either in the same `src/products` folder, or in the
 `src/common` folder.
 
 ### `deny`: 
@@ -127,11 +145,11 @@ logic, what dependencies are forbidden. For example:
 
 ```yml
 deny:
-  "api/routes.ts":
+  "api/routes.py":
     - "adapters/**"
 ```
 
-In the example above, the file `api/routes.ts` can import from anywhere but the `adapters` folder.
+In the example above, the file `api/routes.py` can import from anywhere but the `adapters` folder.
 
 ### `allowCircularDependencies`:
 
@@ -153,19 +171,19 @@ aliases:
     - "src/utils/**"
     - "src/helpers/**"
 allow:
-  "src/function.js":
+  "src/function.py":
     - "common-stuff"
-    - "src/class.js"
+    - "src/class.py"
 ```
 is the same as saying:
 
 ```yml
 allow:
-  "src/function.js":
+  "src/function.py":
     - "src/common/**"
     - "src/utils/**"
     - "src/helpers/**"
-    - "src/class.js"
+    - "src/class.py"
 ```
 
 
@@ -174,12 +192,12 @@ Create a configuration file `.dep-tree.yml` with some rules:
 
 ```yml
 entrypoints:
-  - src/index.ts
+  - src/main.py
 allow:
-  "src/utils/**/*.ts":
-    - "src/utils/**/*.ts"  # The files in src/utils can only depend on other utils
+  "src/utils/**/*.py":
+    - "src/utils/**/*.py"  # The files in src/utils can only depend on other utils
 deny:
-  "src/ports/**/*.ts":
+  "src/ports/**/*.py":
     - "**"  # A port cannot have any dependency
   "src/user/**":
     - "src/products/**" # The users domain cannot be related to the products domain
@@ -193,7 +211,7 @@ dep-tree check
 
 ## Supported languages
 
+- Python
 - JavaScript/TypeScript (es imports/exports)
 - Rust (beta)
-- Python (coming soon...)
 - Golang (coming soon...)
