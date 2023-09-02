@@ -12,14 +12,13 @@
 </p>
 
 <p align="center">
-    Dep Tree is a command line tool that allows you to 
-    render an interactive graph of your project's file import tree.
+    Dep Tree is a command line tool for visualizing your project's 
+    import structure with an interactive graph.
 </p>
 <p align="center">
-    It also allows you to declare a list of banned dependencies in order to
-    validate your dependency graph in the CI.
+    Furthermore, it enables the specification of prohibited dependencies,
+    ensuring your CI validates the integrity of your dependency graph.
 </p>
-
 
 <table align="center">
     <thead>
@@ -50,18 +49,23 @@
 
 ## Motivation
 
-Large code bases with a lot of people working on them can get... complex. Maintaining organization
-and consistency across the project is crucial for scaling and maintaining it.
+As codebases expand and teams grow, complexity inevitably creeps in. 
+While maintaining a cohesive and organized structure is key to 
+a project's scalability and maintainability, 
+the current developer toolbox often falls short in one critical 
+area: file structure and dependency management.
 
-Luckily, the community has come up with very useful tools for enforcing this:
-- We have **type checkers** for statically ensuring correct interaction between pieces.
-- We have **linters** for improving code quality and consistency.
-- We have **formatters** for ensuring consistent format across the code base.
-- but what about file structure and file dependency management...
+Luckily, the community has come up with very useful tools 
+for keeping our projects in check:
+- **Type checkers** ensure correct interactions between code segments.
+- **Linters** elevate code quality and maintain a consistent style.
+- **Formatters** guarantee a uniform code format throughout.
+- But what about file structure and file dependency management...
 
-Dep Tree is a tool that covers that last point. It helps developers maintain the project structure
-organized and consistent in its life-cycle, ensuring that nobody breaks this "harmony" by doing
-checks in CI systems.
+Dep Tree is a dedicated tool addressing this very challenge, 
+it aids developers in preserving a project's structural integrity 
+throughout its lifecycle. And with integration capabilities in CI systems,
+the tool ensures that this architectural "harmony" remains undisturbed.
 
 ## Dep Tree
 
@@ -83,18 +87,24 @@ match some boundaries declared in a `.dep-tree.yml` file.
 
 ## Install
 
-There is a node wrapper that can be installed with:
+On Mac and Linux, it can be installed using brew:
+```shell
+brew install gabotechs/taps/dep-tree
+```
+
+Alternatively, on any platform including Windows it can be installed with `pip`:
+```shell
+pip install python-dep-tree
+```
+
+There is also a node wrapper that can be installed with:
 
 ```shell
 npm install --save-dev @dep-tree/cli
 ```
 
-Installing the standalone binary can be done using [brew](https://brew.sh/index_es):
-```shell
-brew install gabotechs/taps/dep-tree
-```
-
-## Render
+## Usage
+### Render
 
 Choose the file that will act as the root of the dependency tree (for example `package/main.py`), and run:
 
@@ -114,7 +124,7 @@ q      -> navigate backwards on selected nodes or quit
 h      -> show this help section
 ```
 
-## Dependency linting
+### Dependency linting
 
 This is specially useful for CI systems, for ensuring that parts of an application that
 should not be coupled remain decoupled as the project evolves.
