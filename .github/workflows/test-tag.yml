@@ -42,7 +42,7 @@ jobs:
       - name: Tag
         run: |
           version=$(.github/semver.sh)
-          git config --global user.email "gabimtme@hotmail.com"
-          git config --global user.name "Automatic bumper"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git tag "$version"
           git push --tags
