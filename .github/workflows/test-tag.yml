@@ -44,5 +44,9 @@ jobs:
           version=$(.github/semver.sh)
           git config user.name github-actions
           git config user.email github-actions@github.com
+          sed -i '' "s/\"v[0-9]*\.[0-9]*\.[0-9]*\"/\"$version\"/g" cmd/root.go
+          git add cmd/root.go
+          git commit -m "tag: $version"
           git tag "$version"
+          git push
           git push --tags
