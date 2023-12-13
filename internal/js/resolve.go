@@ -11,6 +11,8 @@ import (
 )
 
 // ResolvePath resolves an unresolved import based on the dir where the import was executed.
+//
+//nolint:gocyclo
 func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	absPath := ""
 
