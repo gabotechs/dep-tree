@@ -15,18 +15,15 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 		imports: map[string]*ImportsResult{
 			"1": {
 				Imports: []ImportEntry{
-					{All: true, Id: "2"},
+					{All: true, Path: "2"},
 				},
 			},
 		},
 	}
-	parser, err := makeParser("1", func(_ string) (Language[TestLanguageData, TestFile], error) {
-		return &lang, nil
-	})
-	a.NoError(err)
+	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err = parser.CachedParseImports(ctx, "1")
+	ctx, _, err := parser.CachedParseImports(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 

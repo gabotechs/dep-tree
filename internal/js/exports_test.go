@@ -27,16 +27,16 @@ func TestParser_parseExports(t *testing.T) {
 			File: path.Join(exportsTestFolder, "src", "index.js"),
 			Expected: []language.ExportEntry{
 				{
-					All: true,
-					Id:  path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					All:  true,
+					Path: path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
 					Names: []language.ExportName{{Original: "Unexisting"}, {Original: "UnSorter", Alias: "UnSorterAlias"}},
-					Id:    path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					Path:  path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
 					Names: []language.ExportName{{Original: "aliased"}},
-					Id:    path.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
+					Path:  path.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
 				},
 			},
 			ExpectedErrors: []string{
@@ -48,13 +48,13 @@ func TestParser_parseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakeJsLanguage(tt.File)
+			_, lang, err := MakeJsLanguage(context.Background(), tt.File)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(tt.File)
 			a.NoError(err)
 
-			_, exports, err := lang.ParseExports(context.Background(), parsed)
+			exports, err := lang.ParseExports(parsed)
 			a.NoError(err)
 			a.Equal(tt.Expected, exports.Exports)
 

@@ -29,12 +29,12 @@ func initScreen() (tcell.Screen, error) {
 func Loop[T any](
 	ctx context.Context,
 	initial string,
-	parserBuilder func(string) (dep_tree.NodeParser[T], error),
+	parserBuilder func(context.Context, string) (context.Context, dep_tree.NodeParser[T], error),
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
 ) error {
-	parser, err := parserBuilder(initial)
+	ctx, parser, err := parserBuilder(ctx, initial)
 	if err != nil {
 		return err
 	}

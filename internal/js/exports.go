@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"path"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
@@ -10,7 +9,7 @@ import (
 
 type ExportsCacheKey string
 
-func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (context.Context, *language.ExportsResult, error) {
+func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -25,7 +24,7 @@ func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (con
 						Original: stmt.DeclarationExport.Name,
 					},
 				},
-				Id: file.Path,
+				Path: file.Path,
 			})
 		case stmt.ListExport != nil:
 			if stmt.ListExport.ExportDeconstruction != nil {
@@ -37,7 +36,7 @@ func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (con
 								Alias:    name.Alias,
 							},
 						},
-						Id: file.Path,
+						Path: file.Path,
 					})
 				}
 			}
@@ -49,7 +48,7 @@ func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (con
 							Original: "default",
 						},
 					},
-					Id: file.Path,
+					Path: file.Path,
 				})
 			}
 		case stmt.ProxyExport != nil:
@@ -68,12 +67,12 @@ func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (con
 								Original: stmt.ProxyExport.ExportAllAlias,
 							},
 						},
-						Id: exportFrom,
+						Path: exportFrom,
 					})
 				} else {
 					exports = append(exports, language.ExportEntry{
-						All: true,
-						Id:  exportFrom,
+						All:  true,
+						Path: exportFrom,
 					})
 				}
 			case stmt.ProxyExport.ExportDeconstruction != nil:
@@ -87,12 +86,12 @@ func (l *Language) ParseExports(ctx context.Context, file *js_grammar.File) (con
 
 				exports = append(exports, language.ExportEntry{
 					Names: names,
-					Id:    exportFrom,
+					Path:  exportFrom,
 				})
 			}
 		}
 	}
-	return ctx, &language.ExportsResult{
+	return &language.ExportsResult{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

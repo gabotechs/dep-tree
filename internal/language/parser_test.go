@@ -13,11 +13,9 @@ const testFolder = ".parser_test"
 func TestParser_Entrypoint(t *testing.T) {
 	a := require.New(t)
 	id := path.Join(testFolder, t.Name()+".js")
+	lang := &TestLanguage{}
+	parser := lang.testParser(id)
 
-	parser, err := ParserBuilder(func(s string) (Language[TestLanguageData, TestFile], error) {
-		return &TestLanguage{}, nil
-	})(id)
-	a.NoError(err)
 	entrypoint, err := parser.Entrypoint()
 	a.NoError(err)
 
@@ -28,18 +26,18 @@ func TestParser_Entrypoint(t *testing.T) {
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
 		Name     string
-		Id       string
+		Path     string
 		Imports  map[string]*ImportsResult
 		Exports  map[string]*ExportsResult
 		Expected []string
 	}{
 		{
 			Name: "Simple",
-			Id:   "1",
+			Path: "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
 					Imports: []ImportEntry{
-						{All: true, Id: "2"},
+						{All: true, Path: "2"},
 					},
 				},
 			},
@@ -48,7 +46,7 @@ func TestParser_Deps(t *testing.T) {
 				"2": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}},
-						Id:    "2",
+						Path:  "2",
 					}},
 				},
 			},
@@ -58,7 +56,7 @@ func TestParser_Deps(t *testing.T) {
 		},
 		{
 			Name: "Index only has exports",
-			Id:   "1",
+			Path: "1",
 			Imports: map[string]*ImportsResult{
 				"1": {Imports: []ImportEntry{}},
 			},
@@ -66,13 +64,13 @@ func TestParser_Deps(t *testing.T) {
 				"1": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}},
-						Id:    "2",
+						Path:  "2",
 					}},
 				},
 				"2": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}},
-						Id:    "2",
+						Path:  "2",
 					}},
 				},
 			},
@@ -82,11 +80,11 @@ func TestParser_Deps(t *testing.T) {
 		},
 		{
 			Name: "Proxy export",
-			Id:   "1",
+			Path: "1",
 			Imports: map[string]*ImportsResult{
 				"1": {
 					Imports: []ImportEntry{
-						{All: true, Id: "2"},
+						{All: true, Path: "2"},
 					},
 				},
 			},
@@ -95,13 +93,13 @@ func TestParser_Deps(t *testing.T) {
 				"2": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}},
-						Id:    "3",
+						Path:  "3",
 					}},
 				},
 				"3": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
-						Id:    "3",
+						Path:  "3",
 					}},
 				},
 			},
@@ -115,14 +113,12 @@ func TestParser_Deps(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			parser, err := ParserBuilder(func(entrypoint string) (Language[TestLanguageData, TestFile], error) {
-				return &TestLanguage{
-					imports: tt.Imports,
-					exports: tt.Exports,
-				}, nil
-			})(tt.Id)
+			lang := &TestLanguage{
+				imports: tt.Imports,
+				exports: tt.Exports,
+			}
+			parser := lang.testParser(tt.Path)
 
-			a.NoError(err)
 			node, err := parser.Entrypoint()
 			a.NoError(err)
 			_, deps, err := parser.Deps(context.Background(), node)
@@ -141,19 +137,19 @@ func TestParser_Deps(t *testing.T) {
 func TestParser_DepsErrors(t *testing.T) {
 	tests := []struct {
 		Name           string
-		Id             string
+		Path           string
 		Imports        map[string]*ImportsResult
 		Exports        map[string]*ExportsResult
 		ExpectedErrors []string
 	}{
 		{
 			Name: "Importing a name that is not exported returns an error",
-			Id:   "1",
+			Path: "1",
 			Imports: map[string]*ImportsResult{
 				"1": {Imports: []ImportEntry{
 					{
 						Names: []string{"foo"},
-						Id:    "2",
+						Path:  "2",
 					},
 				}},
 			},
@@ -162,7 +158,7 @@ func TestParser_DepsErrors(t *testing.T) {
 				"2": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "bar"}},
-						Id:    "2",
+						Path:  "2",
 					}},
 				},
 			},
@@ -176,14 +172,11 @@ func TestParser_DepsErrors(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			parser, err := ParserBuilder(func(entrypoint string) (Language[TestLanguageData, TestFile], error) {
-				return &TestLanguage{
-					imports: tt.Imports,
-					exports: tt.Exports,
-				}, nil
-			})(tt.Id)
-
-			a.NoError(err)
+			lang := &TestLanguage{
+				imports: tt.Imports,
+				exports: tt.Exports,
+			}
+			parser := lang.testParser(tt.Path)
 			node, err := parser.Entrypoint()
 			a.NoError(err)
 			_, _, err = parser.Deps(context.Background(), node)

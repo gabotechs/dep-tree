@@ -146,9 +146,9 @@ func (dt *DepTree[T]) RenderStructured(display func(node *graph.Node[T]) string)
 func PrintStructured[T any](
 	ctx context.Context,
 	entrypoint string,
-	parserBuilder func(string) (NodeParser[T], error),
+	parserBuilder func(context.Context, string) (context.Context, NodeParser[T], error),
 ) (string, error) {
-	parser, err := parserBuilder(entrypoint)
+	ctx, parser, err := parserBuilder(ctx, entrypoint)
 	if err != nil {
 		return "", err
 	}

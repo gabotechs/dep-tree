@@ -1,6 +1,7 @@
 package rust
 
 import (
+	"context"
 	"os"
 	"path"
 	"testing"
@@ -31,7 +32,7 @@ func TestMakeRustLanguage_Errors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, err := MakeRustLanguage(tt.Entrypoint)
+			_, _, err := MakeRustLanguage(context.Background(), tt.Entrypoint)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}

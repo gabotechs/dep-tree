@@ -5,12 +5,12 @@ import (
 )
 
 type ImportEntry struct {
-	// All: if all the names from Id are imported.
+	// All: if all the names from Path are imported.
 	All bool
-	// Names: what specific names form Id are imported.
+	// Names: what specific names form Path are imported.
 	Names []string
-	// Id: from where are the names imported.
-	Id string
+	// Path: from where are the names imported.
+	Path string
 }
 
 type ImportsResult struct {
@@ -35,7 +35,7 @@ func (p *Parser[T, F]) CachedParseImports(
 		if err != nil {
 			return ctx, nil, err
 		}
-		ctx, result, err := p.lang.ParseImports(ctx, file)
+		result, err := p.lang.ParseImports(file)
 		if err != nil {
 			return ctx, nil, err
 		}

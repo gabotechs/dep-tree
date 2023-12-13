@@ -53,12 +53,12 @@ func TestCheck(t *testing.T) {
 			a := require.New(t)
 			ctx := context.Background()
 
-			err := Check(ctx, func(s string) (dep_tree.NodeParser[[]int], error) {
-				return &dep_tree.TestParser{
+			err := Check(ctx, func(ctx context.Context, s string) (context.Context, dep_tree.NodeParser[[]int], error) {
+				return ctx, &dep_tree.TestParser{
 					Start: s,
 					Spec:  tt.Spec,
 				}, nil
-			}, &tt.Config)
+			}, &tt.Config) //nolint:gosec
 			if tt.Failures != nil {
 				msg := err.Error()
 				failures := strings.Split(msg, "\n")

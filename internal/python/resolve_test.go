@@ -1,11 +1,12 @@
 package python
 
 import (
-	"github.com/stretchr/testify/require"
-
+	"context"
 	"path"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const resolverTestFolder = ".resolve_test"
@@ -82,7 +83,7 @@ func TestResolveAbsolute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakePythonLanguage(path.Join(absPath, tt.Entrypoint))
+			_, _lang, err := MakePythonLanguage(context.Background(), path.Join(absPath, tt.Entrypoint))
 			a.NoError(err)
 			lang := _lang.(*Language)
 			lang.PythonPath = append(lang.PythonPath, tt.PythonPath...)

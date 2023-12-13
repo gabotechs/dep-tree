@@ -8,6 +8,8 @@ import (
 	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
+type NodeParserBuilder[T any] func(context.Context, string) (context.Context, NodeParser[T], error)
+
 type NodeParser[T any] interface {
 	Display(node *graph.Node[T]) string
 	Entrypoint() (*graph.Node[T], error)

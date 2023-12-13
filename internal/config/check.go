@@ -11,11 +11,11 @@ import (
 
 func checkEntrypoint[T any](
 	ctx context.Context,
-	parserBuilder func(string) (dep_tree.NodeParser[T], error),
+	parserBuilder dep_tree.NodeParserBuilder[T],
 	cfg *Config,
 	entrypoint string,
 ) (context.Context, error) {
-	parser, err := parserBuilder(entrypoint)
+	ctx, parser, err := parserBuilder(ctx, entrypoint)
 	if err != nil {
 		return ctx, err
 	}
@@ -72,7 +72,7 @@ func (e CheckError) Error() string {
 
 func Check[T any](
 	ctx context.Context,
-	parserBuilder func(string) (dep_tree.NodeParser[T], error),
+	parserBuilder dep_tree.NodeParserBuilder[T],
 	cfg *Config,
 ) error {
 	errorFlag := false

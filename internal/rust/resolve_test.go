@@ -41,7 +41,7 @@ func TestDirToModChain(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"))
+			_, _lang, err := MakeRustLanguage(context.Background(), path.Join(testFolder, "src", "lib.rs"))
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -103,7 +103,7 @@ func TestResolve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"))
+			_, _lang, err := MakeRustLanguage(context.Background(), path.Join(testFolder, "src", "lib.rs"))
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -111,7 +111,7 @@ func TestResolve(t *testing.T) {
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			_, resolved, err := lang.resolve(context.Background(), strings.Split(tt.Name, " "), abs)
+			resolved, err := lang.resolve(strings.Split(tt.Name, " "), abs)
 			a.NoError(err)
 
 			var expectedAbs string
@@ -141,7 +141,7 @@ func TestResolveErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"))
+			_, _lang, err := MakeRustLanguage(context.Background(), path.Join(testFolder, "src", "lib.rs"))
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -149,7 +149,7 @@ func TestResolveErrors(t *testing.T) {
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			_, _, err = lang.resolve(context.Background(), strings.Split(tt.Name, " "), abs)
+			_, err = lang.resolve(strings.Split(tt.Name, " "), abs)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}
