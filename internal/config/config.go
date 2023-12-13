@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/gabotechs/dep-tree/internal/js"
+	"github.com/gabotechs/dep-tree/internal/python"
+	"github.com/gabotechs/dep-tree/internal/rust"
 )
 
 type Config struct {
@@ -16,6 +20,9 @@ type Config struct {
 	Aliases                   map[string][]string `yaml:"aliases"`
 	WhiteList                 map[string][]string `yaml:"allow"`
 	BlackList                 map[string][]string `yaml:"deny"`
+	Js                        js.Config           `yaml:"js"`
+	Rust                      rust.Config         `yaml:"rust"`
+	Python                    python.Config       `yaml:"python"`
 }
 
 func ParseConfig(cfgPath string) (*Config, error) {
@@ -24,6 +31,9 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	}
 
 	content, err := os.ReadFile(cfgPath)
+	if os.IsNotExist(err) {
+		return &Config{}, err
+	}
 	if err != nil {
 		return nil, err
 	}

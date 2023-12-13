@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/gabotechs/dep-tree/internal/config"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -17,12 +19,13 @@ import (
 
 var jsonFormat bool
 
-func run[T any, F any](
+func run[T any, F any, C any](
 	ctx context.Context,
 	entrypoint string,
-	languageBuilder language.Builder[T, F],
+	languageBuilder language.Builder[T, F, C],
+	cfg C,
 ) error {
-	builder := language.ParserBuilder(languageBuilder)
+	builder := language.ParserBuilder(languageBuilder, cfg)
 	if jsonFormat {
 		rendered, err := dep_tree.PrintStructured(ctx, entrypoint, builder)
 		fmt.Println(rendered)
@@ -35,13 +38,17 @@ func runRender(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	entrypoint := args[0]
 
+	cfg, err := config.ParseConfig(configPath)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
 	switch {
 	case utils.EndsWith(entrypoint, js.Extensions):
-		return run(ctx, entrypoint, js.MakeJsLanguage)
+		return run(ctx, entrypoint, js.MakeJsLanguage, &cfg.Js)
 	case utils.EndsWith(entrypoint, rust.Extensions):
-		return run(ctx, entrypoint, rust.MakeRustLanguage)
+		return run(ctx, entrypoint, rust.MakeRustLanguage, &cfg.Rust)
 	case utils.EndsWith(entrypoint, python.Extensions):
-		return run(ctx, entrypoint, python.MakePythonLanguage)
+		return run(ctx, entrypoint, python.MakePythonLanguage, &cfg.Python)
 	default:
 		return fmt.Errorf("file \"%s\" not supported", entrypoint)
 	}

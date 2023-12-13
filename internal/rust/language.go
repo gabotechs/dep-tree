@@ -49,7 +49,7 @@ var searchPaths = []string{
 	"main.rs",
 }
 
-func MakeRustLanguage(ctx context.Context, entrypoint string) (context.Context, language.Language[Data, rust_grammar.File], error) {
+func MakeRustLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[Data, rust_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return ctx, nil, err

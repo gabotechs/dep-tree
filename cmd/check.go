@@ -13,8 +13,6 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-var configPath string
-
 func CheckCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check",
@@ -24,22 +22,20 @@ func CheckCmd() *cobra.Command {
 			ctx := cmd.Context()
 			cfg, err := config.ParseConfig(configPath)
 			if err != nil {
-				return fmt.Errorf("could not parse config file %s: %w", configPath, err)
+				return err
 			}
 			switch {
 			case utils.EndsWith(cfg.Entrypoints[0], js.Extensions):
-				return config.Check(ctx, language.ParserBuilder(js.MakeJsLanguage), cfg)
+				return config.Check(ctx, language.ParserBuilder(js.MakeJsLanguage, &cfg.Js), cfg)
 			case utils.EndsWith(cfg.Entrypoints[0], rust.Extensions):
-				return config.Check(ctx, language.ParserBuilder(rust.MakeRustLanguage), cfg)
+				return config.Check(ctx, language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust), cfg)
 			case utils.EndsWith(cfg.Entrypoints[0], python.Extensions):
-				return config.Check(ctx, language.ParserBuilder(python.MakePythonLanguage), cfg)
+				return config.Check(ctx, language.ParserBuilder(python.MakePythonLanguage, &cfg.Python), cfg)
 			default:
 				return fmt.Errorf("file \"%s\" not supported", cfg.Entrypoints[0])
 			}
 		},
 	}
-
-	cmd.Flags().StringVar(&configPath, "config", ".dep-tree.yml", "path to dep-tree's config file")
 
 	return cmd
 }

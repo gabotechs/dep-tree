@@ -39,7 +39,7 @@ func isRootFilePresent(dir string) bool {
 	return false
 }
 
-func MakePythonLanguage(ctx context.Context, entrypoint string) (context.Context, language.Language[Data, python_grammar.File], error) {
+func MakePythonLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[Data, python_grammar.File], error) {
 	lang := Language{
 		IgnoreModuleImports: true,
 	}

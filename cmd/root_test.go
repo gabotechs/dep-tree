@@ -48,10 +48,11 @@ func TestRoot(t *testing.T) {
 			root.SetOut(b)
 			root.SetArgs(strings.Split(tt.Name, " "))
 			err := root.Execute()
+			name := strings.ReplaceAll(tt.Name+".txt", "/", "|")
 			if err != nil {
-				utils.GoldenTest(t, path.Join(testFolder, tt.Name+".txt"), err.Error())
+				utils.GoldenTest(t, path.Join(testFolder, name), err.Error())
 			} else {
-				utils.GoldenTest(t, path.Join(testFolder, tt.Name+".txt"), b.String())
+				utils.GoldenTest(t, path.Join(testFolder, name), b.String())
 			}
 		})
 	}

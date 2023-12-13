@@ -137,7 +137,7 @@ func TestTui(t *testing.T) {
 					finish <- Loop[js.Data](
 						context.Background(),
 						entrypointPath,
-						language.ParserBuilder(js.MakeJsLanguage),
+						language.ParserBuilder(js.MakeJsLanguage, nil),
 						screen,
 						true,
 						update,
@@ -146,7 +146,7 @@ func TestTui(t *testing.T) {
 					finish <- Loop[rust.Data](
 						context.Background(),
 						entrypointPath,
-						language.ParserBuilder(rust.MakeRustLanguage),
+						language.ParserBuilder(rust.MakeRustLanguage, nil),
 						screen,
 						true,
 						update,
