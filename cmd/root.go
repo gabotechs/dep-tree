@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func rootHelper(cmd *cobra.Command, args []string) error {
-	if len(args) == 0 {
+	if len(args) == 0 || args[0] == "help" {
 		_ = cmd.Help()
 		os.Exit(0)
 	}

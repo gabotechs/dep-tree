@@ -16,6 +16,7 @@ Available Commands:
   render      [default] Render the dependency tree starting from the provided entrypoint
 
 Flags:
-  -h, --help   help for dep-tree
+  -h, --help      help for dep-tree
+  -v, --version   version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.
