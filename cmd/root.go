@@ -2,7 +2,16 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"os"
 )
+
+func rootHelper(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		_ = cmd.Help()
+		os.Exit(0)
+	}
+	return nil
+}
 
 func NewRoot() *cobra.Command {
 	root := &cobra.Command{
@@ -10,7 +19,7 @@ func NewRoot() *cobra.Command {
 		Version:      "v0.13.4",
 		Short:        "Visualize and check your project's dependency tree",
 		SilenceUsage: true,
-		Args:         cobra.ExactArgs(1),
+		Args:         rootHelper,
 		RunE:         runRender,
 		Long: `
       ____         _ __       _
