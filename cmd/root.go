@@ -14,6 +14,8 @@ func rootHelper(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+var configPath string
+
 func NewRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:          "dep-tree",
@@ -33,6 +35,8 @@ func NewRoot() *cobra.Command {
 
 	root.AddCommand(RenderCmd())
 	root.AddCommand(CheckCmd())
+
+	root.PersistentFlags().StringVarP(&configPath, "config", "c", ".dep-tree.yml", "path to dep-tree's config file")
 
 	return root
 }

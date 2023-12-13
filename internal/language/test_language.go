@@ -20,9 +20,9 @@ type TestLanguage struct {
 }
 
 func (t *TestLanguage) testParser(entrypoint string) *Parser[TestLanguageData, TestFile] {
-	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string) (context.Context, Language[TestLanguageData, TestFile], error) {
+	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string, _ *struct{}) (context.Context, Language[TestLanguageData, TestFile], error) {
 		return ctx, t, nil
-	})
+	}, nil)
 	return parser
 }
 

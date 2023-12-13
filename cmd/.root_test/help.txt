@@ -16,7 +16,8 @@ Available Commands:
   render      [default] Render the dependency tree starting from the provided entrypoint
 
 Flags:
-  -h, --help      help for dep-tree
-  -v, --version   version for dep-tree
+  -c, --config string   path to dep-tree's config file (default ".dep-tree.yml")
+  -h, --help            help for dep-tree
+  -v, --version         version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.

@@ -32,8 +32,8 @@ type Parser[T any, F any] struct {
 
 var _ dep_tree.NodeParser[any] = &Parser[any, any]{}
 
-func makeParser[T any, F any](ctx context.Context, entrypoint string, languageBuilder Builder[T, F]) (context.Context, *Parser[T, F], error) {
-	ctx, lang, err := languageBuilder(ctx, entrypoint)
+func makeParser[T any, F any, C any](ctx context.Context, entrypoint string, languageBuilder Builder[T, F, C], cfg C) (context.Context, *Parser[T, F], error) {
+	ctx, lang, err := languageBuilder(ctx, entrypoint, cfg)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -44,11 +44,11 @@ func makeParser[T any, F any](ctx context.Context, entrypoint string, languageBu
 	}, err
 }
 
-type Builder[T any, F any] func(context.Context, string) (context.Context, Language[T, F], error)
+type Builder[T any, F any, C any] func(context.Context, string, C) (context.Context, Language[T, F], error)
 
-func ParserBuilder[T any, F any](languageBuilder Builder[T, F]) dep_tree.NodeParserBuilder[T] {
+func ParserBuilder[T any, F any, C any](languageBuilder Builder[T, F, C], cfg C) dep_tree.NodeParserBuilder[T] {
 	return func(ctx context.Context, entrypoint string) (context.Context, dep_tree.NodeParser[T], error) {
-		return makeParser[T, F](ctx, entrypoint, languageBuilder)
+		return makeParser[T, F](ctx, entrypoint, languageBuilder, cfg)
 	}
 }
 

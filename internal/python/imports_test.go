@@ -80,7 +80,7 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint))
+			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint), nil)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(path.Join(importsTestFolder, tt.File))
@@ -128,7 +128,7 @@ func TestLanguage_ParseImports_Errors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, "main.py"))
+			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, "main.py"), nil)
 			a.NoError(err)
 
 			result, err := lang.ParseImports(&tt.File) //nolint:gosec

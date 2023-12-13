@@ -29,7 +29,7 @@ func initScreen() (tcell.Screen, error) {
 func Loop[T any](
 	ctx context.Context,
 	initial string,
-	parserBuilder func(context.Context, string) (context.Context, dep_tree.NodeParser[T], error),
+	parserBuilder dep_tree.NodeParserBuilder[T],
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
