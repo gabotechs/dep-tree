@@ -26,11 +26,11 @@ func TestParser_parseImports(t *testing.T) {
 			Name: "test 1",
 			File: path.Join(importsTestFolder, "index.ts"),
 			Expected: []language.ImportEntry{
-				{Names: []string{"a", "b"}, Id: path.Join(wd, importsTestFolder, "2", "2.ts")},
-				{All: true, Id: path.Join(wd, importsTestFolder, "2", "index.ts")},
-				{All: true, Id: path.Join(wd, importsTestFolder, "1", "a", "a.ts")},
-				{All: true, Id: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
-				{Names: []string{"Unexisting"}, Id: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
+				{Names: []string{"a", "b"}, Path: path.Join(wd, importsTestFolder, "2", "2.ts")},
+				{All: true, Path: path.Join(wd, importsTestFolder, "2", "index.ts")},
+				{All: true, Path: path.Join(wd, importsTestFolder, "1", "a", "a.ts")},
+				{All: true, Path: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
+				{Names: []string{"Unexisting"}, Path: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
 			},
 			ExpectedErrors: []string{
 				"could not perform relative import for './unexisting'",
@@ -41,13 +41,13 @@ func TestParser_parseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakeJsLanguage(tt.File)
+			_, lang, err := MakeJsLanguage(context.Background(), tt.File)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(tt.File)
 			a.NoError(err)
 
-			_, result, err := lang.ParseImports(context.Background(), parsed)
+			result, err := lang.ParseImports(parsed)
 			a.NoError(err)
 			a.Equal(tt.Expected, result.Imports)
 

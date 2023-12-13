@@ -24,31 +24,31 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Expected: []language.ExportEntry{
 				{
 					Names: []language.ExportName{{Original: "div"}},
-					Id:    path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  path.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "abs"}},
-					Id:    path.Join(absTestFolder, "src", "abs", "abs.rs"),
+					Path:  path.Join(absTestFolder, "src", "abs", "abs.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "div"}},
-					Id:    path.Join(absTestFolder, "src", "div", "mod.rs"),
+					Path:  path.Join(absTestFolder, "src", "div", "mod.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "avg"}},
-					Id:    path.Join(absTestFolder, "src", "avg_2.rs"),
+					Path:  path.Join(absTestFolder, "src", "avg_2.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "sum"}},
-					Id:    path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  path.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
-					All: true,
-					Id:  path.Join(absTestFolder, "src", "sum.rs"),
+					All:  true,
+					Path: path.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "run"}},
-					Id:    path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  path.Join(absTestFolder, "src", "lib.rs"),
 				},
 			},
 		},
@@ -57,7 +57,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"))
+			_, _lang, err := MakeRustLanguage(context.Background(), path.Join(testFolder, "src", "lib.rs"))
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -65,7 +65,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 			file, err := lang.ParseFile(path.Join(absTestFolder, "src", tt.Name))
 			a.NoError(err)
 
-			_, exports, err := lang.ParseExports(context.Background(), file)
+			exports, err := lang.ParseExports(file)
 			a.NoError(err)
 			a.Equal(tt.Expected, exports.Exports)
 			a.Equal(tt.Errors, exports.Errors)

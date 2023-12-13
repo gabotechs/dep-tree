@@ -12,10 +12,17 @@ import (
 )
 
 type Language[T any, F any] interface {
-	ParseFile(id string) (*F, error)
-	MakeNode(id string) (*graph.Node[T], error)
-	ParseImports(ctx context.Context, file *F) (context.Context, *ImportsResult, error)
-	ParseExports(ctx context.Context, file *F) (context.Context, *ExportsResult, error)
+	// ParseFile receives an absolute file path and returns F, where F is the specific file implementation
+	//  defined by the language. This file object F will be used as input for parsing imports and exports.
+	ParseFile(path string) (*F, error)
+	// MakeNode receives an absolute file path and returns a graph.Node implementation.
+	MakeNode(path string) (*graph.Node[T], error)
+	// ParseImports receives the file F parsed by the ParseFile method and gathers the imports that the file
+	//  F contains.
+	ParseImports(file *F) (*ImportsResult, error)
+	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
+	//  F contains.
+	ParseExports(file *F) (*ExportsResult, error)
 }
 
 type Parser[T any, F any] struct {
@@ -25,23 +32,23 @@ type Parser[T any, F any] struct {
 
 var _ dep_tree.NodeParser[any] = &Parser[any, any]{}
 
-func makeParser[T any, F any](entrypoint string, languageBuilder func(string) (Language[T, F], error)) (*Parser[T, F], error) {
-	lang, err := languageBuilder(entrypoint)
+func makeParser[T any, F any](ctx context.Context, entrypoint string, languageBuilder Builder[T, F]) (context.Context, *Parser[T, F], error) {
+	ctx, lang, err := languageBuilder(ctx, entrypoint)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 	entrypointNode, err := lang.MakeNode(entrypoint)
-	return &Parser[T, F]{
+	return ctx, &Parser[T, F]{
 		entrypoint: entrypointNode,
 		lang:       lang,
 	}, err
 }
 
-type Builder[T any, F any] func(string) (Language[T, F], error)
+type Builder[T any, F any] func(context.Context, string) (context.Context, Language[T, F], error)
 
-func ParserBuilder[T any, F any](languageBuilder Builder[T, F]) func(string) (dep_tree.NodeParser[T], error) {
-	return func(entrypoint string) (dep_tree.NodeParser[T], error) {
-		return makeParser[T, F](entrypoint, languageBuilder)
+func ParserBuilder[T any, F any](languageBuilder Builder[T, F]) dep_tree.NodeParserBuilder[T] {
+	return func(ctx context.Context, entrypoint string) (context.Context, dep_tree.NodeParser[T], error) {
+		return makeParser[T, F](ctx, entrypoint, languageBuilder)
 	}
 }
 
@@ -76,7 +83,7 @@ func (p *Parser[T, F]) Deps(ctx context.Context, n *graph.Node[T]) (context.Cont
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
 	for _, importEntry := range imports.Imports {
 		var exports *UnwrappedExportsResult
-		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importEntry.Id)
+		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importEntry.Path)
 		if err != nil {
 			return ctx, nil, err
 		}

@@ -26,8 +26,8 @@ func (e *ExportsResultBuilder) Entry(inId string, toId string, names ...string) 
 
 	if len(names) == 1 && names[0] == "*" {
 		result.Exports = append(result.Exports, ExportEntry{
-			All: true,
-			Id:  toId,
+			All:  true,
+			Path: toId,
 		})
 	} else {
 		var n []ExportName
@@ -40,7 +40,7 @@ func (e *ExportsResultBuilder) Entry(inId string, toId string, names ...string) 
 		}
 		result.Exports = append(result.Exports, ExportEntry{
 			Names: n,
-			Id:    toId,
+			Path:  toId,
 		})
 	}
 	(*e)[inId] = result
@@ -60,13 +60,10 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 			Build(),
 	}
 
-	parser, err := makeParser("1", func(_ string) (Language[TestLanguageData, TestFile], error) {
-		return &lang, nil
-	})
-	a.NoError(err)
+	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err = parser.CachedParseExports(ctx, "1")
+	ctx, _, err := parser.CachedParseExports(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 
@@ -90,14 +87,14 @@ func makeStringOm(args ...string) *orderedmap.OrderedMap[string, string] {
 func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 	tests := []struct {
 		Name           string
-		Id             string
+		Path           string
 		Exports        map[string]*ExportsResult
 		Expected       *orderedmap.OrderedMap[string, string]
 		ExpectedErrors []string
 	}{
 		{
 			Name: "direct export",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "1", "A").
 				Build(),
@@ -107,7 +104,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "one proxy",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("2", "2", "A").
@@ -118,7 +115,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "double proxy",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("2", "3", "A").
@@ -130,7 +127,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "double proxy with alias",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("2", "3", "B", "as A").
@@ -142,7 +139,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "double proxy with all export",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("2", "3", "*").
@@ -154,7 +151,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "double all export and single named export",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "*").
 				Entry("2", "2", "D").
@@ -170,7 +167,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "name not found in destination",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("3", "2", "B").
@@ -180,7 +177,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		},
 		{
 			Name: "circular export",
-			Id:   "1",
+			Path: "1",
 			Exports: b().
 				Entry("1", "2", "A").
 				Entry("2", "3", "B", "as A").
@@ -201,12 +198,10 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			parser, err := makeParser(tt.Id, func(_ string) (Language[TestLanguageData, TestFile], error) {
-				return &TestLanguage{
-					exports: tt.Exports,
-				}, nil
-			})
-			a.NoError(err)
+			lang := &TestLanguage{
+				exports: tt.Exports,
+			}
+			parser := lang.testParser(tt.Path)
 
 			_, exports, err := parser.CachedUnwrappedParseExports(context.Background(), "1")
 			a.NoError(err)

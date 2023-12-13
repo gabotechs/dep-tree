@@ -1,14 +1,13 @@
 package js
 
 import (
-	"context"
 	"path"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-func (l *Language) ParseImports(ctx context.Context, file *js_grammar.File) (context.Context, *language.ImportsResult, error) {
+func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
@@ -43,14 +42,14 @@ func (l *Language) ParseImports(ctx context.Context, file *js_grammar.File) (con
 			continue
 		}
 		var err error
-		entry.Id, err = l.ResolvePath(importPath, path.Dir(file.Path))
+		entry.Path, err = l.ResolvePath(importPath, path.Dir(file.Path))
 		if err != nil {
 			errors = append(errors, err)
-		} else if entry.Id != "" {
+		} else if entry.Path != "" {
 			imports = append(imports, entry)
 		}
 	}
-	return ctx, &language.ImportsResult{
+	return &language.ImportsResult{
 		Imports: imports,
 		Errors:  errors,
 	}, nil

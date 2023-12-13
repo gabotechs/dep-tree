@@ -13,13 +13,10 @@ func TestParser_parseFile_IsCached(t *testing.T) {
 	ctx := context.Background()
 	lang := TestLanguage{}
 
-	parser, err := makeParser("1", func(_ string) (Language[TestLanguageData, TestFile], error) {
-		return &lang, nil
-	})
-	a.NoError(err)
+	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err = parser.CachedParseFile(ctx, "1")
+	ctx, _, err := parser.CachedParseFile(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 

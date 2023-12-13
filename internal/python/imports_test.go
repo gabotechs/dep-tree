@@ -31,43 +31,43 @@ func TestLanguage_ParseImports(t *testing.T) {
 			Expected: []language.ImportEntry{
 				// {
 				//	All: true,
-				//	Id:  path.Join(importsTestFolder, "src", "foo.py"),
+				//	Path:  path.Join(importsTestFolder, "src", "foo.py"),
 				// },
 				// {
 				//	All: true,
-				//	Id:  path.Join(importsTestFolder, "src", "main.py"),
+				//	Path:  path.Join(importsTestFolder, "src", "main.py"),
 				// },
 				// {
 				//	All: true,
-				//	Id:  path.Join(importsTestFolder, "src", "main.py"),
+				//	Path:  path.Join(importsTestFolder, "src", "main.py"),
 				// },
 				// {
 				//	All: true,
-				//	Id:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
+				//	Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
 				// },
 				// {
 				//	Names: []string{"main"},
-				//	Id:    path.Join(importsTestFolder, "src", "main.py"),
+				//	Path:    path.Join(importsTestFolder, "src", "main.py"),
 				// },
 				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "main.py"),
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "main.py"),
 				},
 				{
 					Names: []string{"main"},
-					Id:    path.Join(importsTestFolder, "src", "main.py"),
+					Path:  path.Join(importsTestFolder, "src", "main.py"),
 				},
 				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "module", "__init__.py"),
 				},
 				{
-					All: true,
-					Id:  path.Join(importsTestFolder, "src", "module", "module.py"),
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "module", "module.py"),
 				},
 				{
 					Names: []string{"bar"},
-					Id:    path.Join(importsTestFolder, "src", "module", "__init__.py"),
+					Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
 				},
 			},
 			ExpectedErrors: []string{
@@ -80,13 +80,13 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(path.Join(importsTestFolder, tt.Entrypoint))
+			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint))
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(path.Join(importsTestFolder, tt.File))
 			a.NoError(err)
 
-			_, result, err := lang.ParseImports(context.Background(), parsed)
+			result, err := lang.ParseImports(parsed)
 			a.NoError(err)
 			a.Equal(tt.Expected, result.Imports)
 
@@ -128,10 +128,10 @@ func TestLanguage_ParseImports_Errors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(path.Join(importsTestFolder, "main.py"))
+			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, "main.py"))
 			a.NoError(err)
 
-			_, result, err := lang.ParseImports(context.Background(), &tt.File)
+			result, err := lang.ParseImports(&tt.File) //nolint:gosec
 			a.NoError(err)
 
 			a.Equal(len(tt.ExpectedErrors), len(result.Errors))

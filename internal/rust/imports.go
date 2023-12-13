@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"context"
 	"fmt"
 	"path"
 
@@ -10,15 +9,14 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (context.Context, *language.ImportsResult, error) {
+func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
 	for _, stmt := range file.Statements {
 		if stmt.Use != nil {
 			for _, use := range stmt.Use.Flatten() {
-				newCtx, id, err := l.resolve(ctx, use.PathSlices, file.Path)
-				ctx = newCtx
+				id, err := l.resolve(use.PathSlices, file.Path)
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue
@@ -28,13 +26,13 @@ func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (c
 
 				if use.All {
 					imports = append(imports, language.ImportEntry{
-						All: use.All,
-						Id:  id,
+						All:  use.All,
+						Path: id,
 					})
 				} else {
 					imports = append(imports, language.ImportEntry{
 						Names: []string{use.Name.Original},
-						Id:    id,
+						Path:  id,
 					})
 				}
 			}
@@ -56,12 +54,12 @@ func (l *Language) ParseImports(ctx context.Context, file *rust_grammar.File) (c
 			imports = append(imports, language.ImportEntry{
 				All:   true,
 				Names: names,
-				Id:    modPath,
+				Path:  modPath,
 			})
 		}
 	}
 
-	return ctx, &language.ImportsResult{
+	return &language.ImportsResult{
 		Imports: imports,
 		Errors:  errors,
 	}, nil

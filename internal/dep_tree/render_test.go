@@ -102,8 +102,8 @@ func TestRenderGraph(t *testing.T) {
 			rendered, err := PrintStructured(
 				context.Background(),
 				"0",
-				func(entrypoint string) (NodeParser[[]int], error) {
-					return &TestParser{Start: entrypoint, Spec: tt.Spec}, nil
+				func(ctx context.Context, s string) (context.Context, NodeParser[[]int], error) {
+					return ctx, &TestParser{Start: s, Spec: tt.Spec}, nil
 				},
 			)
 			a.NoError(err)

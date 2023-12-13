@@ -1,7 +1,6 @@
 package python
 
 import (
-	"context"
 	"fmt"
 	"path"
 	"strings"
@@ -11,7 +10,7 @@ import (
 )
 
 //nolint:gocyclo
-func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) (context.Context, *language.ImportsResult, error) {
+func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
@@ -26,19 +25,19 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 				continue
 			case resolved.File != nil:
 				imports = append(imports, language.ImportEntry{
-					All: true,
-					Id:  resolved.File.Path,
+					All:  true,
+					Path: resolved.File.Path,
 				})
 			case resolved.InitModule != nil && !l.IgnoreModuleImports:
 				imports = append(imports, language.ImportEntry{
-					All: true,
-					Id:  resolved.InitModule.Path,
+					All:  true,
+					Path: resolved.InitModule.Path,
 				})
 			case resolved.Directory != nil && !l.IgnoreModuleImports:
 				for _, pythonFile := range resolved.Directory.PythonFiles {
 					imports = append(imports, language.ImportEntry{
-						All: true,
-						Id:  pythonFile,
+						All:  true,
+						Path: pythonFile,
 					})
 				}
 			}
@@ -69,7 +68,7 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 				imports = append(imports, language.ImportEntry{
 					Names: importedNames,
 					All:   stmt.FromImport.All,
-					Id:    resolved.File.Path,
+					Path:  resolved.File.Path,
 				})
 			case resolved.InitModule != nil:
 				// If importing from an __init__.py, there is a chance that we are actually
@@ -84,8 +83,8 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					if pythonFile, ok := availableFiles[name]; ok {
 						// Imported a specific file.
 						imports = append(imports, language.ImportEntry{
-							All: true,
-							Id:  pythonFile,
+							All:  true,
+							Path: pythonFile,
 						})
 					} else {
 						// No file named that way, it should be imported from __init__.py then.
@@ -96,7 +95,7 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 					imports = append(imports, language.ImportEntry{
 						All:   stmt.FromImport.All,
 						Names: namesFromInit,
-						Id:    resolved.InitModule.Path,
+						Path:  resolved.InitModule.Path,
 					})
 				}
 			case resolved.Directory != nil:
@@ -107,8 +106,8 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 				for _, name := range importedNames {
 					if pythonFile, ok := availableFiles[name]; ok {
 						imports = append(imports, language.ImportEntry{
-							All: true,
-							Id:  pythonFile,
+							All:  true,
+							Path: pythonFile,
 						})
 					} else {
 						errors = append(
@@ -124,5 +123,5 @@ func (l *Language) ParseImports(ctx context.Context, file *python_grammar.File) 
 			}
 		}
 	}
-	return ctx, &language.ImportsResult{Imports: imports, Errors: errors}, nil
+	return &language.ImportsResult{Imports: imports, Errors: errors}, nil
 }

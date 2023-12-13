@@ -45,7 +45,7 @@ func (lc *LevelCalculator[T]) calculateLevel(
 ) (context.Context, int) {
 	var cachedLevelKey = cacheKey("level-" + lc.rootId + "-" + nodeId)
 	if nodeId == lc.rootId {
-		// 1. If it is the root node where are done.
+		// 1. If it is the root node, we are done.
 		return ctx, 0
 	} else if cachedLevel, ok := ctx.Value(cachedLevelKey).(int); ok {
 		// 2. Check first the cache, we do not like to work more than need.

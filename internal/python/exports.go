@@ -1,7 +1,6 @@
 package python
 
 import (
-	"context"
 	"path"
 
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -9,7 +8,7 @@ import (
 )
 
 //nolint:gocyclo
-func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) (context.Context, *language.ExportsResult, error) {
+func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsResult, error) {
 	var exports []language.ExportEntry
 	var errors []error
 	for _, stmt := range file.Statements {
@@ -24,13 +23,13 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 						Alias:    stmt.Import.Alias,
 					},
 				},
-				Id: file.Path,
+				Path: file.Path,
 			})
 		case stmt.FromImport != nil && !stmt.FromImport.Indented:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.FromImport.Names)),
 				All:   stmt.FromImport.All,
-				Id:    file.Path,
+				Path:  file.Path,
 			}
 			for i, name := range stmt.FromImport.Names {
 				entry.Names[i] = language.ExportName{
@@ -55,14 +54,14 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 			case resolved.Directory != nil:
 				// nothing.
 			case resolved.File != nil:
-				entry.Id = resolved.File.Path
+				entry.Path = resolved.File.Path
 			}
 			exports = append(exports, entry)
 
 		case stmt.VariableUnpack != nil && !stmt.VariableUnpack.Indented:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableUnpack.Names)),
-				Id:    file.Path,
+				Path:  file.Path,
 			}
 			for i, name := range stmt.VariableUnpack.Names {
 				entry.Names[i] = language.ExportName{Original: name}
@@ -71,7 +70,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 		case stmt.VariableAssign != nil && !stmt.VariableAssign.Indented:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableAssign.Names)),
-				Id:    file.Path,
+				Path:  file.Path,
 			}
 			for i, name := range stmt.VariableAssign.Names {
 				entry.Names[i] = language.ExportName{Original: name}
@@ -80,7 +79,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 		case stmt.VariableTyping != nil && !stmt.VariableTyping.Indented:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.VariableTyping.Name}},
-				Id:    file.Path,
+				Path:  file.Path,
 			})
 		case stmt.Function != nil && !stmt.Function.Indented:
 			exports = append(exports, language.ExportEntry{
@@ -89,7 +88,7 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 						Original: stmt.Function.Name,
 					},
 				},
-				Id: file.Path,
+				Path: file.Path,
 			})
 		case stmt.Class != nil && !stmt.Class.Indented:
 			exports = append(exports, language.ExportEntry{
@@ -98,9 +97,9 @@ func (l *Language) ParseExports(ctx context.Context, file *python_grammar.File) 
 						Original: stmt.Class.Name,
 					},
 				},
-				Id: file.Path,
+				Path: file.Path,
 			})
 		}
 	}
-	return ctx, &language.ExportsResult{Exports: exports, Errors: errors}, nil
+	return &language.ExportsResult{Exports: exports, Errors: errors}, nil
 }

@@ -49,32 +49,29 @@ var searchPaths = []string{
 	"main.rs",
 }
 
-func (l *Language) lazyLoadModTree(ctx context.Context) (context.Context, error) {
-	if l.ModTree == nil {
-		ctx, modTree, err := MakeModTree(ctx, l.ProjectEntrypoint, "crate", nil)
-		l.ModTree = modTree
-		return ctx, err
-	}
-	return ctx, nil
-}
-
-func MakeRustLanguage(entrypoint string) (language.Language[Data, rust_grammar.File], error) {
+func MakeRustLanguage(ctx context.Context, entrypoint string) (context.Context, language.Language[Data, rust_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
-		return nil, err
+		return ctx, nil, err
 	}
 	cargoTomlPath := findCargoToml(entrypointAbsPath)
 	if cargoTomlPath == "" {
-		return nil, fmt.Errorf("could not find Cargo.toml in any parent directory of %s", entrypointAbsPath)
+		return ctx, nil, fmt.Errorf("could not find Cargo.toml in any parent directory of %s", entrypointAbsPath)
 	}
 
 	projectEntrypoint := findProjectEntrypoint(path.Dir(cargoTomlPath), searchPaths)
 	if projectEntrypoint == "" {
-		return nil, fmt.Errorf("could not find any of the possible entrypoint paths %s", strings.Join(searchPaths, ", "))
+		return ctx, nil, fmt.Errorf("could not find any of the possible entrypoint paths %s", strings.Join(searchPaths, ", "))
 	}
 
-	return &Language{
+	ctx, modTree, err := MakeModTree(ctx, projectEntrypoint, "crate", nil)
+	if err != nil {
+		return ctx, nil, err
+	}
+
+	return ctx, &Language{
 		CargoTomlPath:     cargoTomlPath,
 		ProjectEntrypoint: projectEntrypoint,
+		ModTree:           modTree,
 	}, nil
 }

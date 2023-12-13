@@ -1,6 +1,7 @@
 package js
 
 import (
+	"context"
 	"path"
 	"path/filepath"
 	"testing"
@@ -87,7 +88,7 @@ func TestParser_ResolvePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeJsLanguage(path.Join(resolverTestFolder, "src", "foo.ts"))
+			_, _lang, err := MakeJsLanguage(context.Background(), path.Join(resolverTestFolder, "src", "foo.ts"))
 			a.NoError(err)
 			lang := _lang.(*Language)
 			resolved, err := lang.ResolvePath(tt.Unresolved, tt.Cwd)

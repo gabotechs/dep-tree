@@ -27,8 +27,8 @@ type ExportEntry struct {
 	All bool
 	// Names: exported specific names from Path.
 	Names []ExportName
-	// Id: absolute path from where they are exported, it might be from the same file or from another.
-	Id string
+	// Path: absolute path from where they are exported, it might be from the same file or from another.
+	Path string
 }
 
 type ExportsResult struct {
@@ -53,7 +53,7 @@ func (p *Parser[T, F]) CachedParseExports(
 	if err != nil {
 		return ctx, nil, err
 	}
-	ctx, result, err := p.lang.ParseExports(ctx, file)
+	result, err := p.lang.ParseExports(file)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -102,15 +102,15 @@ func (p *Parser[T, F]) cachedUnwrappedParseExports(
 	var errors []error
 
 	for _, export := range wrapped.Exports {
-		if export.Id == id {
+		if export.Path == id {
 			for _, name := range export.Names {
-				exports.Set(name.name(), export.Id)
+				exports.Set(name.name(), export.Path)
 			}
 			continue
 		}
 
 		var unwrapped *UnwrappedExportsResult
-		ctx, unwrapped, err = p.cachedUnwrappedParseExports(ctx, export.Id, seen)
+		ctx, unwrapped, err = p.cachedUnwrappedParseExports(ctx, export.Path, seen)
 		if err != nil {
 			errors = append(errors, err)
 			continue
@@ -126,10 +126,10 @@ func (p *Parser[T, F]) cachedUnwrappedParseExports(
 		errors = append(errors, unwrapped.Errors...)
 
 		for _, name := range export.Names {
-			if exportId, ok := unwrapped.Exports.Get(name.Original); ok {
-				exports.Set(name.name(), exportId)
+			if exportPath, ok := unwrapped.Exports.Get(name.Original); ok {
+				exports.Set(name.name(), exportPath)
 			} else {
-				exports.Set(name.name(), export.Id)
+				exports.Set(name.name(), export.Path)
 				// errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id)).
 			}
 		}

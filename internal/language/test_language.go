@@ -19,6 +19,13 @@ type TestLanguage struct {
 	exports map[string]*ExportsResult
 }
 
+func (t *TestLanguage) testParser(entrypoint string) *Parser[TestLanguageData, TestFile] {
+	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string) (context.Context, Language[TestLanguageData, TestFile], error) {
+		return ctx, t, nil
+	})
+	return parser
+}
+
 var _ Language[TestLanguageData, TestFile] = &TestLanguage{}
 
 func (t *TestLanguage) ParseFile(id string) (*TestFile, error) {
@@ -36,20 +43,20 @@ func (t *TestLanguage) MakeNode(id string) (*graph.Node[TestLanguageData], error
 	}, nil
 }
 
-func (t *TestLanguage) ParseImports(ctx context.Context, file *TestFile) (context.Context, *ImportsResult, error) {
+func (t *TestLanguage) ParseImports(file *TestFile) (*ImportsResult, error) {
 	time.Sleep(time.Millisecond)
 	if imports, ok := t.imports[file.Name]; ok {
-		return ctx, imports, nil
+		return imports, nil
 	} else {
-		return ctx, imports, errors.New(file.Name + " not found")
+		return imports, errors.New(file.Name + " not found")
 	}
 }
 
-func (t *TestLanguage) ParseExports(ctx context.Context, file *TestFile) (context.Context, *ExportsResult, error) {
+func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsResult, error) {
 	time.Sleep(time.Millisecond)
 	if exports, ok := t.exports[file.Name]; ok {
-		return ctx, exports, nil
+		return exports, nil
 	} else {
-		return ctx, exports, errors.New(file.Name + " not found")
+		return exports, errors.New(file.Name + " not found")
 	}
 }
