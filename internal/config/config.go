@@ -49,8 +49,6 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
 		return nil, fmt.Errorf(`config file "%s" is not a valid yml file`, cfgPath)
-	} else if len(cfg.Entrypoints) == 0 {
-		return nil, fmt.Errorf(`config file "%s" has no entrypoints`, cfgPath)
 	}
 	cfg.expandAliases()
 	return &cfg, nil
