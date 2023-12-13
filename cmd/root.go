@@ -17,7 +17,7 @@ func rootHelper(cmd *cobra.Command, args []string) error {
 func NewRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:          "dep-tree",
-		Version:      "v0.13.5",
+		Version:      "v0.13.6",
 		Short:        "Visualize and check your project's dependency tree",
 		SilenceUsage: true,
 		Args:         rootHelper,
