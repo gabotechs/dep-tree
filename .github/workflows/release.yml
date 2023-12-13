@@ -67,8 +67,10 @@ jobs:
           token: ${{ secrets.CI_TOKEN }}
       - run: |
           VERSION="${GITHUB_REF_NAME:1}"
-          sed -i '' "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
-          sed -i '' "s/__version__ = '.*'/__version__ = '$VERSION'/" dep_tree/main.py
+          sed "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml > _pyproject.toml
+          mv _pyproject.toml pyproject.toml
+          sed "s/__version__ = '.*'/__version__ = '$VERSION'/" dep_tree/main.py > dep_tree/_main.py
+          mv dep_tree/_main.py dep_tree/main.py
           git config --global user.email $(git --no-pager show -s --format='%ae' HEAD)
           git config --global user.name  $(git --no-pager show -s --format='%an' HEAD)
           git commit -a -m "bump: version $VERSION"
