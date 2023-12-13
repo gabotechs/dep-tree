@@ -24,6 +24,9 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if len(cfg.Entrypoints) == 0 {
+				return fmt.Errorf(`config file "%s" has no entrypoints`, configPath)
+			}
 			switch {
 			case utils.EndsWith(cfg.Entrypoints[0], js.Extensions):
 				return config.Check(ctx, language.ParserBuilder(js.MakeJsLanguage, &cfg.Js), cfg)

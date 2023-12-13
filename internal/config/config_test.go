@@ -75,11 +75,6 @@ func TestConfig_ErrorHandling(t *testing.T) {
 			Expected: "no such file or directory",
 		},
 		{
-			Name:     "No entrypoints",
-			File:     path.Join(testFolder, ".no-entrypoints.yml"),
-			Expected: "has no entrypoints",
-		},
-		{
 			Name:     "Invalid yml",
 			File:     path.Join(testFolder, ".invalid.yml"),
 			Expected: "not a valid yml file",
