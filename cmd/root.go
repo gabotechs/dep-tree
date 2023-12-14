@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"errors"
-	"github.com/spf13/pflag"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 func rootHelper(cmd *cobra.Command, args []string) error {
