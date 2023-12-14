@@ -39,14 +39,38 @@ func TestRoot(t *testing.T) {
 		{
 			Name: "check --config .root_test/.dep-tree.yml",
 		},
+		{
+			Name: "--config .root_test/.dep-tree.yml",
+		},
+		{
+			Name: "check --config .root_test/.dep-tree.yml-bad-path",
+		},
+		{
+			Name: ".root_test/main.py --json",
+		},
+		{
+			Name: "render .root_test/main.py --json --config .root_test/.dep-tree.yml",
+		},
+		{
+			Name: ".root_test/main.py --json --config .root_test/.dep-tree.yml",
+		},
+		{
+			Name: "render .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
+		},
+		{
+			Name: ".root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			root := NewRoot()
+			args := strings.Split(tt.Name, " ")
+			if tt.Name == "" {
+				args = []string{}
+			}
+			root := NewRoot(args)
 			b := bytes.NewBufferString("")
 			root.SetOut(b)
-			root.SetArgs(strings.Split(tt.Name, " "))
 			err := root.Execute()
 			name := strings.ReplaceAll(tt.Name+".txt", "/", "|")
 			if err != nil {

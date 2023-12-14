@@ -1,5 +1,5 @@
 package js
 
 type Config struct {
-	followTsConfigPaths bool `yaml:"followTsConfigPaths"`
+	FollowTsConfigPaths bool `yaml:"followTsConfigPaths"`
 }
