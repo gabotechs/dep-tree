@@ -66,7 +66,7 @@ func RenderCmd() *cobra.Command {
 		RunE:  runRender,
 	}
 
-	cmd.Flags().BoolVar(&jsonFormat, "json", false, "render the dependency try in a machine readable json format")
+	cmd.Flags().BoolVar(&jsonFormat, "json", false, "render the dependency tree in a machine readable json format")
 
 	return cmd
 }
