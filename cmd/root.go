@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+	"github.com/spf13/pflag"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -16,7 +18,10 @@ func rootHelper(cmd *cobra.Command, args []string) error {
 
 var configPath string
 
-func NewRoot() *cobra.Command {
+func NewRoot(args []string) *cobra.Command {
+	if args == nil {
+		args = os.Args[1:]
+	}
 	root := &cobra.Command{
 		Use:          "dep-tree",
 		Version:      "v0.13.7",
@@ -32,11 +37,26 @@ func NewRoot() *cobra.Command {
      |____/  \__| |_|        | \__|_|   \___| \___|
 `,
 	}
+	root.SetArgs(args)
 
 	root.AddCommand(RenderCmd())
 	root.AddCommand(CheckCmd())
 
-	root.PersistentFlags().StringVarP(&configPath, "config", "c", ".dep-tree.yml", "path to dep-tree's config file")
+	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file")
 
+	loadDefault(root, args)
 	return root
+}
+
+func loadDefault(root *cobra.Command, args []string) {
+	if len(args) > 0 {
+		if args[0] == "help" || args[0] == "completion" {
+			return
+		}
+	}
+	cmd, _, err := root.Find(args)
+	if err == nil && cmd.Use == root.Use && !errors.Is(cmd.Flags().Parse(args), pflag.ErrHelp) {
+		args := append([]string{"render"}, args...)
+		root.SetArgs(args)
+	}
 }

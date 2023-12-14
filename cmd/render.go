@@ -39,7 +39,11 @@ func runRender(cmd *cobra.Command, args []string) error {
 	entrypoint := args[0]
 
 	cfg, err := config.ParseConfig(configPath)
-	if err != nil && !os.IsNotExist(err) {
+	if os.IsNotExist(err) {
+		if configPath != "" {
+			return err
+		}
+	} else if err != nil {
 		return err
 	}
 	switch {
@@ -56,7 +60,7 @@ func runRender(cmd *cobra.Command, args []string) error {
 
 func RenderCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "render <path/to/entrypoint.ext>",
+		Use:   "render",
 		Short: "[default] Render the dependency tree starting from the provided entrypoint",
 		Args:  cobra.ExactArgs(1),
 		RunE:  runRender,

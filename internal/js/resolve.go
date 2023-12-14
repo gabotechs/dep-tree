@@ -40,7 +40,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	}
 
 	// 3. If imported from a path override.
-	if l.Cfg != nil && l.Cfg.followTsConfigPaths == false {
+	if l.Cfg != nil && l.Cfg.FollowTsConfigPaths == false {
 		return absPath, nil
 	}
 	pathOverrides := l.TsConfig.CompilerOptions.Paths
