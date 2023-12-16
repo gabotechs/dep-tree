@@ -19,21 +19,27 @@ func checkEntrypoint[T any](
 	if err != nil {
 		return ctx, err
 	}
-	ctx, dt, err := dep_tree.NewDepTree(ctx, parser)
+	dt := dep_tree.NewDepTree(parser)
+	root, err := dt.Root()
+	if err != nil {
+		return ctx, err
+	}
+	ctx, err = dt.LoadGraph(ctx)
 	if err != nil {
 		return ctx, err
 	}
 	failures, err := cfg.Validate(
-		dt.RootId,
+		root.Id,
 		func(from string) []string {
-			children := dt.Graph.Children(from)
-			result := make([]string, len(children))
-			for i, c := range children {
+			toNodes := dt.Graph.FromId(from)
+			result := make([]string, len(toNodes))
+			for i, c := range toNodes {
 				result[i] = c.Id
 			}
 			return result
 		},
 	)
+	dt.LoadCycles()
 	if !cfg.AllowCircularDependencies && dt.Cycles.Len() > 0 {
 		for _, cycleId := range dt.Cycles.Keys() {
 			cycle, _ := dt.Cycles.Get(cycleId)

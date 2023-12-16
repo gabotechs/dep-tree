@@ -15,6 +15,7 @@ import (
 
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/python"
 	"github.com/gabotechs/dep-tree/internal/rust"
 	"github.com/gabotechs/dep-tree/internal/tui/systems"
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -24,6 +25,7 @@ const tmp = "/tmp/dep-tree-tests"
 
 const testPath = ".tui_test"
 
+//nolint:gocyclo
 func TestTui(t *testing.T) {
 	tests := []struct {
 		Name       string
@@ -133,7 +135,8 @@ func TestTui(t *testing.T) {
 			finish := make(chan error)
 
 			go func() {
-				if utils.EndsWith(entrypointPath, js.Extensions) {
+				switch {
+				case utils.EndsWith(entrypointPath, js.Extensions):
 					finish <- Loop[js.Data](
 						context.Background(),
 						entrypointPath,
@@ -142,7 +145,7 @@ func TestTui(t *testing.T) {
 						true,
 						update,
 					)
-				} else if utils.EndsWith(entrypointPath, rust.Extensions) {
+				case utils.EndsWith(entrypointPath, rust.Extensions):
 					finish <- Loop[rust.Data](
 						context.Background(),
 						entrypointPath,
@@ -151,10 +154,23 @@ func TestTui(t *testing.T) {
 						true,
 						update,
 					)
+				case utils.EndsWith(entrypointPath, python.Extensions):
+					finish <- Loop[python.Data](
+						context.Background(),
+						entrypointPath,
+						language.ParserBuilder(python.MakePythonLanguage, nil),
+						screen,
+						true,
+						update,
+					)
 				}
 			}()
 
-			<-update
+			select {
+			case <-update:
+			case err = <-finish:
+			}
+			a.NoError(err)
 
 			nQs := 1
 			if tt.Keys != "" {

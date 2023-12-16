@@ -2,3 +2,6 @@
 .coverage.out
 
 dist/
+
+/.dep-tree.yml
+/dep-tree

@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"os"
 	"strings"
 	"testing"
 
@@ -10,8 +9,6 @@ import (
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 )
-
-const tmpFolder = "/tmp/dep-tree-check-tests"
 
 func TestCheck(t *testing.T) {
 	tests := []struct {
@@ -45,8 +42,6 @@ func TestCheck(t *testing.T) {
 			},
 		},
 	}
-
-	_ = os.MkdirAll(tmpFolder, os.ModePerm)
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {

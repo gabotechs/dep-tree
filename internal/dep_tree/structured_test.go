@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	renderDir = ".render_test"
+	structuredDir = ".structured_test"
 )
 
-func TestRenderGraph(t *testing.T) {
+func TestDepTree_RenderStructuredGraph(t *testing.T) {
 	tests := []struct {
 		Name string
 		Spec [][]int
@@ -65,16 +65,6 @@ func TestRenderGraph(t *testing.T) {
 			},
 		},
 		{
-			Name: "Weird cycle combination 2",
-			Spec: [][]int{
-				0: {3, 1},
-				1: {2},
-				2: {3},
-				3: {4},
-				4: {0},
-			},
-		},
-		{
 			Name: "Some nodes have errors",
 			Spec: [][]int{
 				{1, 2, 3},
@@ -89,23 +79,18 @@ func TestRenderGraph(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			testParser := TestParser{
-				Start: "0",
-				Spec:  tt.Spec,
-			}
 
-			dt := NewDepTree[[]int](&testParser)
-
-			_, err := dt.LoadDeps(context.Background())
+			rendered, err := PrintStructured(
+				context.Background(),
+				"0",
+				func(ctx context.Context, s string) (context.Context, NodeParser[[]int], error) {
+					return ctx, &TestParser{Start: s, Spec: tt.Spec}, nil
+				},
+			)
 			a.NoError(err)
 
-			board, err := dt.Render()
-			a.NoError(err)
-			result, err := board.Render()
-			a.NoError(err)
-
-			outFile := path.Join(renderDir, path.Base(tt.Name+".txt"))
-			utils.GoldenTest(t, outFile, result)
+			renderOutFile := path.Join(structuredDir, path.Base(tt.Name+".json"))
+			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}
 }

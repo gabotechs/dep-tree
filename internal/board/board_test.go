@@ -53,12 +53,36 @@ func TestBoard(t *testing.T) {
 			ExpectedError: "could not draw first vertical step on (3, 5) because there is no space",
 		},
 		{
-			Name: "ReverseDeps",
+			Name: "Reverse deps",
 			Blocks: []TestBlock{
 				{name: "a", x: 0, y: 0},
 				{name: "b", x: 2, y: 1},
 			},
 			Connections: []TestConnection{
+				{from: 1, to: []int{0}},
+			},
+		},
+		{
+			Name: "Double reverse deps",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 1, to: []int{0}},
+				{from: 2, to: []int{1}},
+			},
+		},
+		{
+			Name: "Double reverse deps (2)",
+			Blocks: []TestBlock{
+				{name: "a", x: 0, y: 0},
+				{name: "b", x: 2, y: 1},
+				{name: "c", x: 4, y: 2},
+			},
+			Connections: []TestConnection{
+				{from: 2, to: []int{1}},
 				{from: 1, to: []int{0}},
 			},
 		},
