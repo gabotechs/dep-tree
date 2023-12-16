@@ -53,6 +53,9 @@ func loadDefault(root *cobra.Command, args []string) {
 		if args[0] == "help" || args[0] == "completion" {
 			return
 		}
+	} else if len(args) == 0 {
+		root.SetArgs([]string{"help"})
+		return
 	}
 	cmd, _, err := root.Find(args)
 	if err == nil && cmd.Use == root.Use && !errors.Is(cmd.Flags().Parse(args), pflag.ErrHelp) {
