@@ -2,19 +2,12 @@ package cmd
 
 import (
 	"errors"
+	"github.com/gabotechs/dep-tree/internal/utils"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
-
-func rootHelper(cmd *cobra.Command, args []string) error {
-	if len(args) == 0 || args[0] == "help" {
-		_ = cmd.Help()
-		os.Exit(0)
-	}
-	return nil
-}
 
 var configPath string
 
@@ -27,7 +20,7 @@ func NewRoot(args []string) *cobra.Command {
 		Version:      "v0.14.2",
 		Short:        "Visualize and check your project's dependency tree",
 		SilenceUsage: true,
-		Args:         rootHelper,
+		Args:         cobra.ArbitraryArgs,
 		RunE:         runRender,
 		Long: `
       ____         _ __       _
@@ -50,7 +43,7 @@ func NewRoot(args []string) *cobra.Command {
 
 func loadDefault(root *cobra.Command, args []string) {
 	if len(args) > 0 {
-		if args[0] == "help" || args[0] == "completion" {
+		if utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}) {
 			return
 		}
 	} else if len(args) == 0 {

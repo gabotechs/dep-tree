@@ -13,8 +13,12 @@ const testFolder = ".root_test"
 
 func TestRoot(t *testing.T) {
 	tests := []struct {
-		Name string
+		Name         string
+		NoExactMatch bool
 	}{
+		{
+			Name: "",
+		},
 		{
 			Name: "help",
 		},
