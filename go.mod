@@ -6,11 +6,14 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/elliotchance/orderedmap/v2 v2.2.0
+	github.com/gammazero/deque v0.2.1
 	github.com/gdamore/tcell/v2 v2.7.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/spf13/cobra v1.8.0
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	github.com/tailscale/hujson v0.0.0-20221223112325-20486734a56a
+	gonum.org/v1/gonum v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -36,7 +39,6 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect

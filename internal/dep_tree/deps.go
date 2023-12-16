@@ -2,51 +2,102 @@ package dep_tree
 
 import (
 	"context"
+	"sort"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gammazero/deque"
 )
 
-func loadDeps[T any](
-	ctx context.Context,
-	g *graph.Graph[T],
-	root *graph.Node[T],
-	parser NodeParser[T],
-) (context.Context, error) {
-	if g.Has(root.Id) {
-		return ctx, nil
-	}
-
-	g.AddNode(root)
-	ctx, deps, err := parser.Deps(ctx, root)
+func (dt *DepTree[T]) LoadDeps(ctx context.Context) (context.Context, error) {
+	ctx, err := dt.LoadGraph(ctx)
 	if err != nil {
-		root.AddErrors(err)
-		return ctx, nil
+		return ctx, err
 	}
 
-	for _, dep := range deps {
-		ctx, err = loadDeps(ctx, g, dep, parser)
-		if err != nil {
-			return ctx, err
-		} else if root.Id == dep.Id {
+	dt.LoadCycles()
+
+	return dt.LoadNodes(ctx)
+}
+
+func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
+	dt.Graph = graph.NewGraph[T]()
+
+	root, err := dt.Root()
+	if err != nil {
+		return ctx, err
+	}
+
+	var queue deque.Deque[*graph.Node[T]]
+	queue.PushBack(root)
+	dt.Graph.AddNode(root)
+
+	visited := make(map[string]bool)
+
+	for queue.Len() > 0 {
+		node := queue.PopFront()
+		if _, ok := visited[node.Id]; ok {
 			continue
 		}
-		err = g.AddChild(root.Id, dep.Id)
+		visited[node.Id] = true
+
+		newCtx, deps, err := dt.NodeParser.Deps(ctx, node)
+		ctx = newCtx
 		if err != nil {
-			return ctx, err
+			node.AddErrors(err)
+			continue
+		}
+
+		for _, dep := range deps {
+			// No own child.
+			if dep.Id == node.Id {
+				continue
+			}
+			if !dt.Graph.Has(dep.Id) {
+				dt.Graph.AddNode(dep)
+			}
+			err = dt.Graph.AddFromToEdge(node.Id, dep.Id)
+			queue.PushBack(dep)
+			if err != nil {
+				return ctx, err
+			}
 		}
 	}
+
 	return ctx, nil
 }
 
-func LoadDeps[T any](
-	ctx context.Context,
-	g *graph.Graph[T],
-	parser NodeParser[T],
-) (context.Context, string, error) {
-	root, err := parser.Entrypoint()
-	if err != nil {
-		return ctx, "", err
+func (dt *DepTree[T]) LoadCycles() {
+	dt.Cycles = orderedmap.NewOrderedMap[[2]string, graph.Cycle]()
+
+	cycles := dt.Graph.RemoveCycles(dt.root)
+	for _, cycle := range cycles {
+		dt.Cycles.Set(cycle.Cause, cycle)
 	}
-	ctx, err = loadDeps(ctx, g, root, parser)
-	return ctx, root.Id, err
+}
+
+func (dt *DepTree[T]) LoadNodes(ctx context.Context) (context.Context, error) {
+	root, err := dt.Root()
+	if err != nil {
+		return ctx, err
+	}
+	allNodes := dt.Graph.AllNodes()
+	dt.Nodes = make([]*DepTreeNode[T], len(allNodes))
+	for i, n := range allNodes {
+		newCtx, lvl, err := longestPath(ctx, dt.Graph, root.Id, n.Id, nil)
+		ctx = newCtx
+		if err != nil {
+			return ctx, err
+		}
+		dt.Nodes[i] = &DepTreeNode[T]{n, lvl}
+	}
+
+	sort.SliceStable(dt.Nodes, func(i, j int) bool {
+		if dt.Nodes[i].Lvl == dt.Nodes[j].Lvl {
+			return dt.Nodes[i].Node.Id < dt.Nodes[j].Node.Id
+		} else {
+			return dt.Nodes[i].Lvl < dt.Nodes[j].Lvl
+		}
+	})
+	return ctx, nil
 }

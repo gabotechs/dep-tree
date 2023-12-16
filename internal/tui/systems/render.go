@@ -68,7 +68,7 @@ func forEachCell(
 			case cell.Is(dep_tree.ConnectorOriginNodeIdTag, s.SelectedId):
 				style = primaryStyle
 				priorityTags[dep_tree.ConnectorOriginNodeIdTag] = s.SelectedId
-			case strings.Contains(cell.Tag(dep_tree.NodeParentsTag), s.SelectedId):
+			case strings.Contains(cell.Tag(dep_tree.NodeFromTag), s.SelectedId):
 				style = secondaryStyle
 			}
 

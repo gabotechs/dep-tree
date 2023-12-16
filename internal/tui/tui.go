@@ -38,11 +38,12 @@ func Loop[T any](
 	if err != nil {
 		return err
 	}
-	ctx, dt, err := dep_tree.NewDepTree[T](ctx, parser)
+	dt := dep_tree.NewDepTree(parser)
+	ctx, err = dt.LoadDeps(ctx)
 	if err != nil {
 		return err
 	}
-	board, err := dt.Render(parser.Display)
+	board, err := dt.Render()
 	if err != nil {
 		return err
 	}

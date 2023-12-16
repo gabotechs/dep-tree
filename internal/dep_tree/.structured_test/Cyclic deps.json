@@ -1,7 +1,9 @@
 {
   "tree": {
     "0": {
-      "1": null
+      "1": {
+        "2": null
+      }
     }
   },
   "circularDependencies": [

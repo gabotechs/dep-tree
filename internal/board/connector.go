@@ -60,7 +60,7 @@ func (c *Connector) Render(matrix *graphics.Matrix) error {
 		cur = tracer.MoveVertical(false)
 	}
 	cell := matrix.Cell(cur)
-	if cell == nil || cell.Is(cellType, blockChar) || cell.Is(cellType, arrow) {
+	if cell == nil || cell.Is(cellType, blockChar) { // || cell.Is(cellType, arrow)
 		return fmt.Errorf("could not draw first vertical step on (%d, %d) because there is no space", cur.X, cur.Y)
 	}
 

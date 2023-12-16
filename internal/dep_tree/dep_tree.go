@@ -22,29 +22,33 @@ type DepTreeNode[T any] struct {
 }
 
 type DepTree[T any] struct {
-	Nodes  []*DepTreeNode[T]
+	// Info present on DepTree construction.
+	NodeParser[T]
+	// Info present just after node processing.
 	Graph  *graph.Graph[T]
-	RootId string
-	Cycles *orderedmap.OrderedMap[[2]string, DepCycle]
+	Nodes  []*DepTreeNode[T]
+	Cycles *orderedmap.OrderedMap[[2]string, graph.Cycle]
+	// just some internal cache.
+	root *graph.Node[T]
 }
 
-func NewDepTree[T any](
-	ctx context.Context,
-	parser NodeParser[T],
-) (context.Context, *DepTree[T], error) {
-	// 1. create graph.
-	g := graph.NewGraph[T]()
-	// 2. populate the graph.
-	ctx, rootId, err := LoadDeps(ctx, g, parser)
-	if err != nil {
-		return ctx, nil, err
+func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
+	return &DepTree[T]{
+		NodeParser: parser,
+		Nodes:      []*DepTreeNode[T]{},
+		Graph:      graph.NewGraph[T](),
+		Cycles:     orderedmap.NewOrderedMap[[2]string, graph.Cycle](),
 	}
-	// 3. get sorted by level.
-	ctx, nodes, cycles := GetDepTreeNodes(ctx, g, rootId)
-	return ctx, &DepTree[T]{
-		Nodes:  nodes,
-		Graph:  g,
-		RootId: rootId,
-		Cycles: cycles,
-	}, nil
+}
+
+func (dt *DepTree[T]) Root() (*graph.Node[T], error) {
+	if dt.root != nil {
+		return dt.root, nil
+	}
+	root, err := dt.NodeParser.Entrypoint()
+	if err != nil {
+		return nil, err
+	}
+	dt.root = root
+	return dt.root, nil
 }
