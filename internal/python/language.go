@@ -18,7 +18,7 @@ type Language struct {
 	PythonPath          []string
 }
 
-var _ language.Language[Data, python_grammar.File] = &Language{}
+var _ language.Language[python_grammar.File] = &Language{}
 
 var rootFiles = []string{
 	"pyproject.toml",
@@ -39,7 +39,7 @@ func isRootFilePresent(dir string) bool {
 	return false
 }
 
-func MakePythonLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[Data, python_grammar.File], error) {
+func MakePythonLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[python_grammar.File], error) {
 	lang := Language{
 		IgnoreModuleImports: true,
 	}

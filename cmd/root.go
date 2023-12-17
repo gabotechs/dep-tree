@@ -2,14 +2,34 @@ package cmd
 
 import (
 	"errors"
-	"github.com/gabotechs/dep-tree/internal/utils"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 var configPath string
+var jsFollowTsConfigPaths bool
+var cfg *config.Config
+
+func loadConfig() error {
+	var err error
+	cfg, err = config.ParseConfig(configPath)
+	if jsFollowTsConfigPaths {
+		cfg.Js.FollowTsConfigPaths = true
+	}
+	if os.IsNotExist(err) {
+		if configPath != "" {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+	return nil
+}
 
 func NewRoot(args []string) *cobra.Command {
 	if args == nil {
@@ -34,8 +54,10 @@ func NewRoot(args []string) *cobra.Command {
 
 	root.AddCommand(RenderCmd())
 	root.AddCommand(CheckCmd())
+	root.AddCommand(EntropyCmd())
 
 	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file")
+	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not")
 
 	loadDefault(root, args)
 	return root

@@ -41,7 +41,7 @@ type ExportsResult struct {
 
 type ExportsCacheKey string
 
-func (p *Parser[T, F]) CachedParseExports(
+func (p *Parser[F]) CachedParseExports(
 	ctx context.Context,
 	filePath string,
 ) (context.Context, *ExportsResult, error) {
@@ -70,14 +70,14 @@ type UnwrappedExportsResult struct {
 
 type UnwrappedExportsCacheKey string
 
-func (p *Parser[T, F]) CachedUnwrappedParseExports(
+func (p *Parser[F]) CachedUnwrappedParseExports(
 	ctx context.Context,
 	id string,
 ) (context.Context, *UnwrappedExportsResult, error) {
 	return p.cachedUnwrappedParseExports(ctx, id, make(map[string]bool))
 }
 
-func (p *Parser[T, F]) cachedUnwrappedParseExports(
+func (p *Parser[F]) cachedUnwrappedParseExports(
 	ctx context.Context,
 	id string,
 	seen map[string]bool,

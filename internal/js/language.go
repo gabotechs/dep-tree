@@ -18,7 +18,7 @@ type Language struct {
 	Cfg             *Config
 }
 
-var _ language.Language[Data, js_grammar.File] = &Language{}
+var _ language.Language[js_grammar.File] = &Language{}
 
 func findPackageJson(searchPath string) (TsConfig, string, error) {
 	if len(searchPath) < 2 {
@@ -41,7 +41,7 @@ func findPackageJson(searchPath string) (TsConfig, string, error) {
 	}
 }
 
-func MakeJsLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[Data, js_grammar.File], error) {
+func MakeJsLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[js_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return ctx, nil, err

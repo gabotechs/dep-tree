@@ -12,12 +12,14 @@ Usage:
 Available Commands:
   check       Checks the that the current project matches the dependency rules defined in the configuration
   completion  Generate the autocompletion script for the specified shell
+  entropy     Renders a force-directed graph in the browser
   help        Help about any command
   render      [default] Render the dependency tree starting from the provided entrypoint
 
 Flags:
-  -c, --config string   path to dep-tree's config file
-  -h, --help            help for dep-tree
-  -v, --version         version for dep-tree
+  -c, --config string               path to dep-tree's config file
+  -h, --help                        help for dep-tree
+      --js-follow-ts-config-paths   whether to follow the tsconfig.json paths while resolving imports or not
+  -v, --version                     version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.

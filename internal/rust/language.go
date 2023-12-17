@@ -22,7 +22,7 @@ func (l *Language) ParseFile(id string) (*rust_grammar.File, error) {
 	return rust_grammar.Parse(id)
 }
 
-var _ language.Language[Data, rust_grammar.File] = &Language{}
+var _ language.Language[rust_grammar.File] = &Language{}
 
 func findCargoToml(searchPath string) string {
 	if len(searchPath) < 2 {
@@ -49,7 +49,7 @@ var searchPaths = []string{
 	"main.rs",
 }
 
-func MakeRustLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[Data, rust_grammar.File], error) {
+func MakeRustLanguage(ctx context.Context, entrypoint string, _ *Config) (context.Context, language.Language[rust_grammar.File], error) {
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
 		return ctx, nil, err

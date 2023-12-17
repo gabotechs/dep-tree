@@ -13,6 +13,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/require"
 
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -135,35 +136,24 @@ func TestTui(t *testing.T) {
 			finish := make(chan error)
 
 			go func() {
+				var parserBuilder dep_tree.NodeParserBuilder[language.CodeFile]
 				switch {
 				case utils.EndsWith(entrypointPath, js.Extensions):
-					finish <- Loop[js.Data](
-						context.Background(),
-						entrypointPath,
-						language.ParserBuilder(js.MakeJsLanguage, nil),
-						screen,
-						true,
-						update,
-					)
+					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil)
 				case utils.EndsWith(entrypointPath, rust.Extensions):
-					finish <- Loop[rust.Data](
-						context.Background(),
-						entrypointPath,
-						language.ParserBuilder(rust.MakeRustLanguage, nil),
-						screen,
-						true,
-						update,
-					)
+					parserBuilder = language.ParserBuilder(rust.MakeRustLanguage, nil)
 				case utils.EndsWith(entrypointPath, python.Extensions):
-					finish <- Loop[python.Data](
-						context.Background(),
-						entrypointPath,
-						language.ParserBuilder(python.MakePythonLanguage, nil),
-						screen,
-						true,
-						update,
-					)
+					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil)
 				}
+
+				finish <- Loop[language.CodeFile](
+					context.Background(),
+					entrypointPath,
+					parserBuilder,
+					screen,
+					true,
+					update,
+				)
 			}()
 
 			select {
