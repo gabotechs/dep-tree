@@ -4,12 +4,18 @@ import (
 	"context"
 	"errors"
 	"time"
-
-	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestFile struct {
 	Name string
+}
+
+func (t TestFile) Loc() int {
+	return 0
+}
+
+func (t TestFile) Size() int {
+	return 0
 }
 
 type TestLanguage struct {
@@ -30,14 +36,6 @@ func (t *TestLanguage) ParseFile(id string) (*TestFile, error) {
 	time.Sleep(time.Millisecond)
 	return &TestFile{
 		Name: id,
-	}, nil
-}
-
-func (t *TestLanguage) MakeNode(id string) (*graph.Node[CodeFile], error) {
-	return &graph.Node[CodeFile]{
-		Id:     id,
-		Errors: make([]error, 0),
-		Data:   CodeFile{},
 	}, nil
 }
 

@@ -2,6 +2,7 @@
 package rust_grammar
 
 import (
+	"bytes"
 	"os"
 
 	"github.com/alecthomas/participle/v2"
@@ -17,6 +18,16 @@ type Statement struct {
 type File struct {
 	Statements []*Statement `(@@ | ANY | ALL | String | Punct | PathSep | Ident)*`
 	Path       string
+	loc        int
+	size       int
+}
+
+func (f File) Loc() int {
+	return f.loc
+}
+
+func (f File) Size() int {
+	return f.size
 }
 
 var (
@@ -45,6 +56,10 @@ func Parse(filePath string) (*File, error) {
 		return nil, err
 	}
 	file, err := parser.ParseBytes(filePath, content)
-	file.Path = filePath
+	if file != nil {
+		file.Path = filePath
+		file.loc = bytes.Count(content, []byte("\n"))
+		file.size = len(content)
+	}
 	return file, err
 }

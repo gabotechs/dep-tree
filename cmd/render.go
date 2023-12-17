@@ -17,7 +17,7 @@ import (
 
 var jsonFormat bool
 
-func run[F any, C any](
+func run[F language.CodeFile, C any](
 	ctx context.Context,
 	entrypoint string,
 	languageBuilder language.Builder[F, C],

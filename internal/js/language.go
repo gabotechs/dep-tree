@@ -11,6 +11,10 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+var Extensions = []string{
+	"js", "ts", "tsx", "jsx", "d.ts",
+}
+
 type Language struct {
 	PackageJsonPath string
 	ProjectRoot     string

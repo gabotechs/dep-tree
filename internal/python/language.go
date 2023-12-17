@@ -13,6 +13,10 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+var Extensions = []string{
+	"py",
+}
+
 type Language struct {
 	IgnoreModuleImports bool
 	PythonPath          []string
