@@ -2,26 +2,11 @@ package language
 
 import (
 	"context"
-	"path"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 )
-
-const testFolder = ".parser_test"
-
-func TestParser_Entrypoint(t *testing.T) {
-	a := require.New(t)
-	id := path.Join(testFolder, t.Name()+".js")
-	lang := &TestLanguage{}
-	parser := lang.testParser(id)
-
-	entrypoint, err := parser.Entrypoint()
-	a.NoError(err)
-
-	a.NoError(err)
-	a.Equal(id, entrypoint.Id)
-}
 
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
@@ -187,6 +172,33 @@ func TestParser_DepsErrors(t *testing.T) {
 				i += 1
 			}
 			a.Equal(i, len(tt.ExpectedErrors))
+		})
+	}
+}
+
+func TestParser_Display(t *testing.T) {
+	tests := []struct {
+		Name       string
+		Entrypoint string
+		NodeId     string
+		Expected   string
+	}{
+		{
+			Name:       "one dir below",
+			Entrypoint: "/a/b/c/foo.ts",
+			NodeId:     "/a/b/c/d/foo.ts",
+			Expected:   "d/foo.ts",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			parser := Parser[CodeFile]{
+				entrypoint: graph.MakeNode(tt.Entrypoint, FileInfo{}),
+			}
+			actual := parser.Display(graph.MakeNode(tt.NodeId, FileInfo{}))
+			a.Equal(tt.Expected, actual)
 		})
 	}
 }
