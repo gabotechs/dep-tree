@@ -2,10 +2,11 @@
 package js_grammar
 
 import (
+	"bytes"
+	"os"
+
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
-
-	"os"
 )
 
 type Statement struct {
@@ -22,6 +23,16 @@ type Statement struct {
 type File struct {
 	Statements []*Statement `(@@ | ANY | ALL | Punct | Ident | String | BacktickString)*`
 	Path       string
+	loc        int
+	size       int
+}
+
+func (f File) Loc() int {
+	return f.loc
+}
+
+func (f File) Size() int {
+	return f.size
 }
 
 var (
@@ -53,6 +64,8 @@ func Parse(filePath string) (*File, error) {
 	file, err := parser.ParseBytes(filePath, content)
 	if file != nil {
 		file.Path = filePath
+		file.loc = bytes.Count(content, []byte("\n"))
+		file.size = len(content)
 	}
 	return file, err
 }

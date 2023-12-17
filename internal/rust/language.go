@@ -12,6 +12,10 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+var Extensions = []string{
+	"rs",
+}
+
 type Language struct {
 	CargoTomlPath     string
 	ProjectEntrypoint string

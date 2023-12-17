@@ -136,7 +136,7 @@ func TestTui(t *testing.T) {
 			finish := make(chan error)
 
 			go func() {
-				var parserBuilder dep_tree.NodeParserBuilder[language.CodeFile]
+				var parserBuilder dep_tree.NodeParserBuilder[language.FileInfo]
 				switch {
 				case utils.EndsWith(entrypointPath, js.Extensions):
 					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil)
@@ -146,7 +146,7 @@ func TestTui(t *testing.T) {
 					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil)
 				}
 
-				finish <- Loop[language.CodeFile](
+				finish <- Loop[language.FileInfo](
 					context.Background(),
 					entrypointPath,
 					parserBuilder,
