@@ -12,6 +12,9 @@ import (
 )
 
 type Node = graph.Node[FileInfo]
+type Graph = graph.Graph[FileInfo]
+type NodeParser = dep_tree.NodeParser[FileInfo]
+type NodeParserBuilder = dep_tree.NodeParserBuilder[FileInfo]
 
 type FileInfo struct {
 	Loc  int
@@ -40,14 +43,14 @@ type Parser[F CodeFile] struct {
 	lang       Language[F]
 }
 
-var _ dep_tree.NodeParser[FileInfo] = &Parser[CodeFile]{}
+var _ NodeParser = &Parser[CodeFile]{}
 
 func makeParser[F CodeFile, C any](ctx context.Context, entrypoint string, languageBuilder Builder[F, C], cfg C) (context.Context, *Parser[F], error) {
 	ctx, lang, err := languageBuilder(ctx, entrypoint, cfg)
 	if err != nil {
 		return ctx, nil, err
 	}
-	entrypointNode := graph.MakeNode[FileInfo](entrypoint, FileInfo{})
+	entrypointNode := graph.MakeNode(entrypoint, FileInfo{})
 	return ctx, &Parser[F]{
 		entrypoint: entrypointNode,
 		lang:       lang,
@@ -56,8 +59,8 @@ func makeParser[F CodeFile, C any](ctx context.Context, entrypoint string, langu
 
 type Builder[F CodeFile, C any] func(context.Context, string, C) (context.Context, Language[F], error)
 
-func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], cfg C) dep_tree.NodeParserBuilder[FileInfo] {
-	return func(ctx context.Context, entrypoint string) (context.Context, dep_tree.NodeParser[FileInfo], error) {
+func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], cfg C) NodeParserBuilder {
+	return func(ctx context.Context, entrypoint string) (context.Context, NodeParser, error) {
 		return makeParser[F](ctx, entrypoint, languageBuilder, cfg)
 	}
 }

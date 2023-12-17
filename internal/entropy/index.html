@@ -4,6 +4,8 @@
     } </style>
 
     <script src="https://unpkg.com/3d-force-graph"></script>
+    <title>Dep Tree</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/gabotechs/dep-tree/main/docs/dep-tree.svg">
 </head>
 
 <body>
@@ -11,7 +13,7 @@
 
 <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}</script>
 <script type="module">
-    import { UnrealBloomPass } from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
     const GRAPH = {}
 
@@ -19,16 +21,28 @@
     (document.getElementById('3d-graph'))
         .graphData(GRAPH)
         .backgroundColor('#000003')
-        .linkDirectionalArrowLength(3.5)
+        .linkDirectionalArrowLength(5)
         .linkDirectionalArrowRelPos(1)
-        .nodeLabel('id')
-        .nodeAutoColorBy('group')
-        .linkCurvature(0.25);
+        .nodeResolution(16)
+        .nodeLabel(({fileName, dirName, loc}) => `<div style="display: flex; flex-direction: column">
+            <span>${fileName}</span>
+            <span>${dirName}</span>
+            <span>LOC: ${loc}</span>
+        </div>`)
+        .nodeAutoColorBy('dirName')
+        .nodeVal('size')
+        .linkSource('from')
+        .linkTarget('to');
+
+    // Graph
+    //     .d3Force('link')
+    //     .distance(link => 1000 / link.value);
 
     const bloomPass = new UnrealBloomPass();
-    bloomPass.strength = 4;
+    bloomPass.strength = 1;
     bloomPass.radius = 1;
     bloomPass.threshold = 0;
+
     Graph.postProcessingComposer().addPass(bloomPass);
 </script>
 </body>
