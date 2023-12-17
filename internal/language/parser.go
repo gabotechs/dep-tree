@@ -50,7 +50,12 @@ func makeParser[F CodeFile, C any](ctx context.Context, entrypoint string, langu
 	if err != nil {
 		return ctx, nil, err
 	}
-	entrypointNode := graph.MakeNode(entrypoint, FileInfo{})
+	absEntrypoint, err := filepath.Abs(entrypoint)
+	if err != nil {
+		return ctx, nil, err
+	}
+
+	entrypointNode := graph.MakeNode(absEntrypoint, FileInfo{})
 	return ctx, &Parser[F]{
 		entrypoint: entrypointNode,
 		lang:       lang,

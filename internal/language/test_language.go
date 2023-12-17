@@ -1,8 +1,8 @@
 package language
 
 import (
-	"context"
 	"errors"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"time"
 )
 
@@ -24,10 +24,11 @@ type TestLanguage struct {
 }
 
 func (t *TestLanguage) testParser(entrypoint string) *Parser[TestFile] {
-	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string, _ *struct{}) (context.Context, Language[TestFile], error) {
-		return ctx, t, nil
-	}, nil)
-	return parser
+	entrypointNode := graph.MakeNode(entrypoint, FileInfo{})
+	return &Parser[TestFile]{
+		entrypoint: entrypointNode,
+		lang:       t,
+	}
 }
 
 var _ Language[TestFile] = &TestLanguage{}
