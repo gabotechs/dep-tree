@@ -23,7 +23,7 @@ type ImportsResult struct {
 
 type ImportsCacheKey string
 
-func (p *Parser[T, F]) CachedParseImports(
+func (p *Parser[F]) CachedParseImports(
 	ctx context.Context,
 	id string,
 ) (context.Context, *ImportsResult, error) {

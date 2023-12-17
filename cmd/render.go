@@ -3,11 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
-	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -18,12 +16,11 @@ import (
 )
 
 var jsonFormat bool
-var jsFollowTsConfigPaths bool
 
-func run[T any, F any, C any](
+func run[F any, C any](
 	ctx context.Context,
 	entrypoint string,
-	languageBuilder language.Builder[T, F, C],
+	languageBuilder language.Builder[F, C],
 	cfg C,
 ) error {
 	builder := language.ParserBuilder(languageBuilder, cfg)
@@ -39,16 +36,8 @@ func runRender(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	entrypoint := args[0]
 
-	cfg, err := config.ParseConfig(configPath)
-	// TODO: this should not be here, when adding more flags, factor out so that it's nicer to include new config overrides
-	if jsFollowTsConfigPaths {
-		cfg.Js.FollowTsConfigPaths = true
-	}
-	if os.IsNotExist(err) {
-		if configPath != "" {
-			return err
-		}
-	} else if err != nil {
+	err := loadConfig()
+	if err != nil {
 		return err
 	}
 	switch {
@@ -72,7 +61,6 @@ func RenderCmd() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&jsonFormat, "json", false, "render the dependency tree in a machine readable json format")
-	cmd.Flags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not")
 
 	return cmd
 }

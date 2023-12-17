@@ -12,21 +12,19 @@ type TestFile struct {
 	Name string
 }
 
-type TestLanguageData struct{}
-
 type TestLanguage struct {
 	imports map[string]*ImportsResult
 	exports map[string]*ExportsResult
 }
 
-func (t *TestLanguage) testParser(entrypoint string) *Parser[TestLanguageData, TestFile] {
-	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string, _ *struct{}) (context.Context, Language[TestLanguageData, TestFile], error) {
+func (t *TestLanguage) testParser(entrypoint string) *Parser[TestFile] {
+	_, parser, _ := makeParser(context.Background(), entrypoint, func(ctx context.Context, _ string, _ *struct{}) (context.Context, Language[TestFile], error) {
 		return ctx, t, nil
 	}, nil)
 	return parser
 }
 
-var _ Language[TestLanguageData, TestFile] = &TestLanguage{}
+var _ Language[TestFile] = &TestLanguage{}
 
 func (t *TestLanguage) ParseFile(id string) (*TestFile, error) {
 	time.Sleep(time.Millisecond)
@@ -35,11 +33,11 @@ func (t *TestLanguage) ParseFile(id string) (*TestFile, error) {
 	}, nil
 }
 
-func (t *TestLanguage) MakeNode(id string) (*graph.Node[TestLanguageData], error) {
-	return &graph.Node[TestLanguageData]{
+func (t *TestLanguage) MakeNode(id string) (*graph.Node[CodeFile], error) {
+	return &graph.Node[CodeFile]{
 		Id:     id,
 		Errors: make([]error, 0),
-		Data:   TestLanguageData{},
+		Data:   CodeFile{},
 	}, nil
 }
 
