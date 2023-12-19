@@ -9,7 +9,7 @@ import (
 
 type ExportsCacheKey string
 
-func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsEntries, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -91,7 +91,7 @@ func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsResult,
 			}
 		}
 	}
-	return &language.ExportsResult{
+	return &language.ExportsEntries{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

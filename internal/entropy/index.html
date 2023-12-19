@@ -21,16 +21,17 @@
     (document.getElementById('3d-graph'))
         .graphData(GRAPH)
         .backgroundColor('#000003')
-        .linkDirectionalArrowLength(5)
+        .linkDirectionalArrowLength(4)
         .linkDirectionalArrowRelPos(1)
         .nodeResolution(16)
-        .nodeLabel(({fileName, dirName, loc}) => `<div style="display: flex; flex-direction: column">
+        .nodeLabel(({fileName, dirName, loc}) => `<div style="display: flex; flex-direction: column; background-color: #000003; padding: .5rem; border-radius: .5rem">
             <span>${fileName}</span>
             <span>${dirName}</span>
             <span>LOC: ${loc}</span>
         </div>`)
         .nodeAutoColorBy('dirName')
         .nodeVal('size')
+        .linkColor('color')
         .linkSource('from')
         .linkTarget('to');
 
@@ -39,7 +40,7 @@
     //     .distance(link => 1000 / link.value);
 
     const bloomPass = new UnrealBloomPass();
-    bloomPass.strength = 1;
+    bloomPass.strength = 2;
     bloomPass.radius = 1;
     bloomPass.threshold = 0;
 

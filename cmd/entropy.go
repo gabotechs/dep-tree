@@ -1,31 +1,10 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
-	"github.com/gabotechs/dep-tree/internal/entropy"
-
 	"github.com/spf13/cobra"
 
-	"github.com/gabotechs/dep-tree/internal/js"
-	"github.com/gabotechs/dep-tree/internal/language"
-	"github.com/gabotechs/dep-tree/internal/python"
-	"github.com/gabotechs/dep-tree/internal/rust"
-	"github.com/gabotechs/dep-tree/internal/utils"
+	"github.com/gabotechs/dep-tree/internal/entropy"
 )
-
-func makeParserBuilder(ctx context.Context, entrypoint string) (context.Context, language.NodeParser, error) {
-	switch {
-	case utils.EndsWith(entrypoint, js.Extensions):
-		return language.ParserBuilder(js.MakeJsLanguage, &cfg.Js)(ctx, entrypoint)
-	case utils.EndsWith(entrypoint, rust.Extensions):
-		return language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust)(ctx, entrypoint)
-	case utils.EndsWith(entrypoint, python.Extensions):
-		return language.ParserBuilder(python.MakePythonLanguage, &cfg.Python)(ctx, entrypoint)
-	default:
-		return ctx, nil, fmt.Errorf("file \"%s\" not supported", entrypoint)
-	}
-}
 
 func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -36,11 +15,15 @@ func EntropyCmd() *cobra.Command {
 			ctx := cmd.Context()
 			entrypoint := args[0]
 
-			err := loadConfig()
+			cfg, err := loadConfig()
 			if err != nil {
 				return err
 			}
-			ctx, parser, err := makeParserBuilder(ctx, entrypoint)
+			parserBuilder, err := makeParserBuilder(entrypoint, cfg)
+			if err != nil {
+				return err
+			}
+			ctx, parser, err := parserBuilder(ctx, entrypoint)
 			if err != nil {
 				return err
 			}

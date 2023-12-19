@@ -2,46 +2,37 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/js"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/python"
+	"github.com/gabotechs/dep-tree/internal/rust"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 var configPath string
 var jsFollowTsConfigPaths bool
-var cfg *config.Config
+var followReExports bool
 
-func loadConfig() error {
-	var err error
-	cfg, err = config.ParseConfig(configPath)
-	if jsFollowTsConfigPaths {
-		cfg.Js.FollowTsConfigPaths = true
-	}
-	if os.IsNotExist(err) {
-		if configPath != "" {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	return nil
-}
+var root *cobra.Command
 
 func NewRoot(args []string) *cobra.Command {
 	if args == nil {
 		args = os.Args[1:]
 	}
-	root := &cobra.Command{
+
+	root = &cobra.Command{
 		Use:          "dep-tree",
 		Version:      "v0.14.2",
 		Short:        "Visualize and check your project's dependency tree",
 		SilenceUsage: true,
 		Args:         cobra.ArbitraryArgs,
-		RunE:         runRender,
 		Long: `
       ____         _ __       _
      |  _ \   ___ |  _ \    _| |_  _ __  ___   ___
@@ -50,31 +41,60 @@ func NewRoot(args []string) *cobra.Command {
      |____/  \__| |_|        | \__|_|   \___| \___|
 `,
 	}
+
 	root.SetArgs(args)
 
 	root.AddCommand(RenderCmd())
 	root.AddCommand(CheckCmd())
 	root.AddCommand(EntropyCmd())
 
-	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file")
-	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not")
+	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file (default .dep-tree.yml)")
+	root.PersistentFlags().BoolVar(&followReExports, "follow-re-exports", true, "whether to follow re-exports or not while resolving imports between files")
+	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not (default false)")
 
-	loadDefault(root, args)
+	switch {
+	case len(args) > 0 && utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}):
+		// do nothing.
+	case len(args) == 0:
+		root.SetArgs([]string{"help"})
+	default:
+		cmd, _, err := root.Find(args)
+		if err == nil && cmd.Use == root.Use && !errors.Is(cmd.Flags().Parse(args), pflag.ErrHelp) {
+			root.SetArgs(append([]string{"render"}, args...))
+		}
+	}
 	return root
 }
 
-func loadDefault(root *cobra.Command, args []string) {
-	if len(args) > 0 {
-		if utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}) {
-			return
+func makeParserBuilder(entrypoint string, cfg *config.Config) (language.NodeParserBuilder, error) {
+	switch {
+	case utils.EndsWith(entrypoint, js.Extensions):
+		return language.ParserBuilder(js.MakeJsLanguage, &cfg.Js, cfg), nil
+	case utils.EndsWith(entrypoint, rust.Extensions):
+		return language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust, cfg), nil
+	case utils.EndsWith(entrypoint, python.Extensions):
+		return language.ParserBuilder(python.MakePythonLanguage, &cfg.Python, cfg), nil
+	default:
+		return nil, fmt.Errorf("file \"%s\" not supported", entrypoint)
+	}
+}
+
+func loadConfig() (*config.Config, error) {
+	cfg, err := config.ParseConfig(configPath)
+	if root.PersistentFlags().Changed("follow-re-exports") {
+		cfg.FollowReExports = &followReExports
+	}
+	if root.PersistentFlags().Changed("js-follow-ts-config-paths") {
+		cfg.Js.FollowTsConfigPaths = jsFollowTsConfigPaths
+	}
+	// Config load fails if a path was explicitly specified but the path does not exist.
+	// If a path was not specified it's fine even if the default path does not exist.
+	if os.IsNotExist(err) {
+		if configPath != "" {
+			return nil, err
 		}
-	} else if len(args) == 0 {
-		root.SetArgs([]string{"help"})
-		return
+	} else if err != nil {
+		return nil, err
 	}
-	cmd, _, err := root.Find(args)
-	if err == nil && cmd.Use == root.Use && !errors.Is(cmd.Flags().Parse(args), pflag.ErrHelp) {
-		args := append([]string{"render"}, args...)
-		root.SetArgs(args)
-	}
+	return cfg, nil
 }

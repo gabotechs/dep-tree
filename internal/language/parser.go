@@ -35,18 +35,25 @@ type Language[F CodeFile] interface {
 	ParseImports(file *F) (*ImportsResult, error)
 	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
 	//  F contains.
-	ParseExports(file *F) (*ExportsResult, error)
+	ParseExports(file *F) (*ExportsEntries, error)
 }
 
 type Parser[F CodeFile] struct {
-	entrypoint *Node
-	lang       Language[F]
+	entrypoint         *Node
+	lang               Language[F]
+	unwrapProxyExports bool
 }
 
 var _ NodeParser = &Parser[CodeFile]{}
 
-func makeParser[F CodeFile, C any](ctx context.Context, entrypoint string, languageBuilder Builder[F, C], cfg C) (context.Context, *Parser[F], error) {
-	ctx, lang, err := languageBuilder(ctx, entrypoint, cfg)
+func makeParser[F CodeFile, C any](
+	ctx context.Context,
+	entrypoint string,
+	languageBuilder Builder[F, C],
+	langCfg C,
+	generalCfg Config,
+) (context.Context, *Parser[F], error) {
+	ctx, lang, err := languageBuilder(ctx, entrypoint, langCfg)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -56,17 +63,26 @@ func makeParser[F CodeFile, C any](ctx context.Context, entrypoint string, langu
 	}
 
 	entrypointNode := graph.MakeNode(absEntrypoint, FileInfo{})
-	return ctx, &Parser[F]{
-		entrypoint: entrypointNode,
-		lang:       lang,
-	}, err
+	parser := &Parser[F]{
+		entrypoint:         entrypointNode,
+		lang:               lang,
+		unwrapProxyExports: true,
+	}
+	if generalCfg != nil {
+		parser.unwrapProxyExports = generalCfg.UnwrapProxyExports()
+	}
+	return ctx, parser, err
+}
+
+type Config interface {
+	UnwrapProxyExports() bool
 }
 
 type Builder[F CodeFile, C any] func(context.Context, string, C) (context.Context, Language[F], error)
 
-func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], cfg C) NodeParserBuilder {
+func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, generalCfg Config) NodeParserBuilder {
 	return func(ctx context.Context, entrypoint string) (context.Context, NodeParser, error) {
-		return makeParser[F](ctx, entrypoint, languageBuilder, cfg)
+		return makeParser[F](ctx, entrypoint, languageBuilder, langCfg, generalCfg)
 	}
 }
 
@@ -87,51 +103,64 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 	}
 	n.AddErrors(imports.Errors...)
 
-	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
-
-	// Take exports into account if top level root node is exporting stuff.
-	if n.Id == p.entrypoint.Id {
-		var exports *UnwrappedExportsResult
-		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, n.Id)
+	// If exports are not going to be unwrapped, then we should take an export as if it
+	// was importing names into the file. This might happen because of configured that way
+	// or because it's the root file.
+	if !p.unwrapProxyExports || n.Id == p.entrypoint.Id {
+		var exports *ExportsResult
+		// TODO: if exports are parsed as imports, they might say that that a name is being
+		//  imported from a path when it's actually not available.
+		//  ex:
+		//   index.ts -> import { foo } from 'foo.ts'
+		//   foo.ts   -> import { bar as foo } from 'bar.ts'
+		//   bar.ts   -> export { bar }
+		//  If unwrappedExports is true, this will say that `foo` is exported from `bar.ts`, which
+		//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
+		//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
+		//  Instead we never unwrap export to avoid this.
+		ctx, exports, err = p.ParseExports(ctx, n.Id, false, nil)
 		if err != nil {
 			return nil, nil, err
 		}
 		n.AddErrors(exports.Errors...)
-		for _, k := range exports.Exports.Keys() {
-			exportFrom, _ := exports.Exports.Get(k)
-			resolvedImports.Set(exportFrom, true)
+		for el := exports.Exports.Front(); el != nil; el = el.Next() {
+			imports.Imports = append(imports.Imports, ImportEntry{
+				Names: []string{el.Key},
+				Path:  el.Value,
+			})
 		}
 	}
 
+	resolvedImports := orderedmap.NewOrderedMap[string, bool]()
+
 	// Imported names might not necessarily be declared in the path that is being imported, they might be declared in
-	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts.
+	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts. If unwrapProxyExports is
+	// set to true, we must trace those exports back.
 	for _, importEntry := range imports.Imports {
-		var exports *UnwrappedExportsResult
-		ctx, exports, err = p.CachedUnwrappedParseExports(ctx, importEntry.Path)
+		if !p.unwrapProxyExports {
+			resolvedImports.Set(importEntry.Path, true)
+			continue
+		}
+
+		var exports *ExportsResult
+		ctx, exports, err = p.ParseExports(ctx, importEntry.Path, true, nil)
 		if err != nil {
 			return ctx, nil, err
 		}
 		n.AddErrors(exports.Errors...)
 		if importEntry.All {
 			// If all imported, then dump every path in the resolved imports.
-			for _, k := range exports.Exports.Keys() {
-				fromPath, _ := exports.Exports.Get(k)
-				if _, ok := resolvedImports.Get(fromPath); ok {
-					continue
-				}
-				resolvedImports.Set(fromPath, true)
+			for el := exports.Exports.Front(); el != nil; el = el.Next() {
+				resolvedImports.Set(el.Value, true)
 			}
-		} else {
-			for _, name := range importEntry.Names {
-				if resolvedImport, ok := exports.Exports.Get(name); ok {
-					if _, ok := resolvedImports.Get(resolvedImport); ok {
-						continue
-					}
-					resolvedImports.Set(resolvedImport, true)
-				} else {
-					// TODO: this is not retro-compatible, do it in a different PR.
-					// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id)).
-				}
+			continue
+		}
+		for _, name := range importEntry.Names {
+			if exportPath, ok := exports.Exports.Get(name); ok {
+				resolvedImports.Set(exportPath, true)
+			} else {
+				// TODO: this is not retro-compatible, do it in a different PR.
+				// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id)).
 			}
 		}
 	}

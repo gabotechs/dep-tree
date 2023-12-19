@@ -11,17 +11,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ExportsResultBuilder map[string]*ExportsResult
+type ExportsResultBuilder map[string]*ExportsEntries
 
-func (e *ExportsResultBuilder) Build() map[string]*ExportsResult {
+func (e *ExportsResultBuilder) Build() map[string]*ExportsEntries {
 	return *e
 }
 
 func (e *ExportsResultBuilder) Entry(inId string, toId string, names ...string) *ExportsResultBuilder {
-	var result *ExportsResult
+	var result *ExportsEntries
 	var ok bool
 	if result, ok = (*e)[inId]; !ok {
-		result = &ExportsResult{}
+		result = &ExportsEntries{}
 	}
 
 	if len(names) == 1 && names[0] == "*" {
@@ -63,12 +63,12 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err := parser.CachedParseExports(ctx, "1")
+	ctx, _, err := parser.cachedParseExports(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.CachedParseExports(ctx, "1")
+	_, _, err = parser.cachedParseExports(ctx, "1")
 	a.NoError(err)
 	cached := time.Since(start)
 
@@ -86,11 +86,12 @@ func makeStringOm(args ...string) *orderedmap.OrderedMap[string, string] {
 
 func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 	tests := []struct {
-		Name           string
-		Path           string
-		Exports        map[string]*ExportsResult
-		Expected       *orderedmap.OrderedMap[string, string]
-		ExpectedErrors []string
+		Name              string
+		Path              string
+		Exports           map[string]*ExportsEntries
+		ExpectedUnwrapped *orderedmap.OrderedMap[string, string]
+		ExpectedWrapped   *orderedmap.OrderedMap[string, string]
+		ExpectedErrors    []string
 	}{
 		{
 			Name: "direct export",
@@ -98,7 +99,10 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			Exports: b().
 				Entry("1", "1", "A").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
+				"A", "1",
+			),
+			ExpectedWrapped: makeStringOm(
 				"A", "1",
 			),
 		},
@@ -109,7 +113,10 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("1", "2", "A").
 				Entry("2", "2", "A").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
+				"A", "2",
+			),
+			ExpectedWrapped: makeStringOm(
 				"A", "2",
 			),
 		},
@@ -121,8 +128,11 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("2", "3", "A").
 				Entry("3", "3", "A").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
 				"A", "3",
+			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
 			),
 		},
 		{
@@ -133,8 +143,11 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("2", "3", "B", "as A").
 				Entry("3", "3", "C", "as B").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
 				"A", "3",
+			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
 			),
 		},
 		{
@@ -145,8 +158,11 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("2", "3", "*").
 				Entry("3", "3", "C", "as A").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
 				"A", "3",
+			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
 			),
 		},
 		{
@@ -158,11 +174,17 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("2", "3", "*").
 				Entry("3", "3", "A", "B", "C").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
 				"D", "2",
 				"A", "3",
 				"B", "3",
 				"C", "3",
+			),
+			ExpectedWrapped: makeStringOm(
+				"D", "2",
+				"A", "2",
+				"B", "2",
+				"C", "2",
 			),
 		},
 		{
@@ -172,8 +194,9 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("1", "2", "A").
 				Entry("3", "2", "B").
 				Build(),
-			Expected:       makeStringOm(),
-			ExpectedErrors: []string{"2 not found"},
+			ExpectedUnwrapped: makeStringOm(),
+			ExpectedWrapped:   makeStringOm(),
+			ExpectedErrors:    []string{"2 not found"},
 		},
 		{
 			Name: "circular export",
@@ -184,12 +207,15 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				Entry("3", "4", "C", "as B").
 				Entry("4", "1", "A", "as C").
 				Build(),
-			Expected: makeStringOm(
+			ExpectedUnwrapped: makeStringOm(
 				// TODO: I don't know if this is right...
 				"A", "4",
 			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
+			),
 			ExpectedErrors: []string{
-				"circular export starting and ending on 1",
+				"circular export: cycle detected:\n1\n2\n3\n4\n1",
 			},
 		},
 	}
@@ -203,10 +229,15 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			}
 			parser := lang.testParser(tt.Path)
 
-			_, exports, err := parser.CachedUnwrappedParseExports(context.Background(), "1")
+			_, exports, err := parser.ParseExports(context.Background(), "1", true, nil)
 			a.NoError(err)
 
-			a.Equal(tt.Expected, exports.Exports)
+			a.Equal(tt.ExpectedUnwrapped, exports.Exports)
+
+			_, exports, err = parser.ParseExports(context.Background(), "1", false, nil)
+			a.NoError(err)
+
+			a.Equal(tt.ExpectedWrapped, exports.Exports)
 			var expectedErrors []error
 			for _, expectedError := range tt.ExpectedErrors {
 				expectedErrors = append(expectedErrors, errors.New(expectedError))

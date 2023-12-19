@@ -26,7 +26,9 @@ func Render(ctx context.Context, parser language.NodeParser) (context.Context, e
 	if err != nil {
 		return ctx, err
 	}
-	marshaled, err := marshalGraph(dt.Graph, parser)
+
+	dt.LoadCycles()
+	marshaled, err := marshalGraph(dt, parser)
 	if err != nil {
 		return ctx, err
 	}
@@ -48,8 +50,9 @@ type Node struct {
 }
 
 type Link struct {
-	From string `json:"from"`
-	To   string `json:"to"`
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Color string `json:"color,omitempty"`
 }
 
 type Graph struct {
@@ -57,10 +60,10 @@ type Graph struct {
 	Links []Link `json:"links"`
 }
 
-func marshalGraph(g *language.Graph, parser language.NodeParser) ([]byte, error) {
+func marshalGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser) ([]byte, error) {
 	out := Graph{}
 
-	allNodes := g.AllNodes()
+	allNodes := dt.Graph.AllNodes()
 	maxLoc := max(utils.Max(allNodes, func(n *language.Node) int {
 		return n.Data.Loc
 	}), 1)
@@ -75,12 +78,20 @@ func marshalGraph(g *language.Graph, parser language.NodeParser) ([]byte, error)
 			Size:     10 * node.Data.Loc / maxLoc,
 		})
 
-		for _, to := range g.FromId(node.Id) {
+		for _, to := range dt.Graph.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
 				From: node.Id,
 				To:   to.Id,
 			})
 		}
+	}
+
+	for el := dt.Cycles.Front(); el != nil; el = el.Next() {
+		out.Links = append(out.Links, Link{
+			From:  el.Key[0],
+			To:    el.Key[1],
+			Color: "red",
+		})
 	}
 
 	return json.Marshal(out)

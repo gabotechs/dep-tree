@@ -2,10 +2,9 @@ package language
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/elliotchance/orderedmap/v2"
-
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -31,7 +30,7 @@ type ExportEntry struct {
 	Path string
 }
 
-type ExportsResult struct {
+type ExportsEntries struct {
 	// Exports: array of ExportEntry
 	//  NOTE: even though it could work returning a path relative to the file, it should return absolute.
 	Exports []ExportEntry
@@ -39,14 +38,92 @@ type ExportsResult struct {
 	Errors []error
 }
 
+type ExportsResult struct {
+	// Exports: map from exported name to exported path.
+	Exports *orderedmap.OrderedMap[string, string]
+	// Errors: errors gathered while resolving exports.
+	Errors []error
+}
+
+type UnwrappedExportsCacheKey string
+
+func (p *Parser[F]) ParseExports(
+	ctx context.Context,
+	id string,
+	unwrappedExports bool,
+	stack *utils.CallStack,
+) (context.Context, *ExportsResult, error) {
+	if stack == nil {
+		stack = utils.NewCallStack()
+	}
+	if err := stack.Push(id); err != nil {
+		return ctx, nil, errors.New("circular export: " + err.Error())
+	}
+
+	unwrappedCacheKey := UnwrappedExportsCacheKey(id)
+	if cached, ok := ctx.Value(unwrappedCacheKey).(*ExportsResult); ok {
+		return ctx, cached, nil
+	}
+	ctx, wrapped, err := p.cachedParseExports(ctx, id)
+	if err != nil {
+		return ctx, nil, err
+	}
+	exports := orderedmap.NewOrderedMap[string, string]()
+	var exportErrors []error
+
+	for _, export := range wrapped.Exports {
+		if export.Path == id {
+			for _, name := range export.Names {
+				exports.Set(name.name(), export.Path)
+			}
+			continue
+		}
+
+		var unwrapped *ExportsResult
+		ctx, unwrapped, err = p.ParseExports(ctx, export.Path, unwrappedExports, stack)
+		if err != nil {
+			exportErrors = append(exportErrors, err)
+			continue
+		}
+
+		if export.All {
+			for el := unwrapped.Exports.Front(); el != nil; el = el.Next() {
+				if unwrappedExports {
+					exports.Set(el.Key, el.Value)
+				} else {
+					exports.Set(el.Key, export.Path)
+				}
+			}
+			continue
+		}
+		exportErrors = append(exportErrors, unwrapped.Errors...)
+
+		for _, name := range export.Names {
+			if exportPath, ok := unwrapped.Exports.Get(name.Original); ok {
+				if unwrappedExports {
+					exports.Set(name.name(), exportPath)
+				} else {
+					exports.Set(name.name(), export.Path)
+				}
+			} else {
+				exports.Set(name.name(), export.Path)
+				// errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id)).
+			}
+		}
+	}
+
+	stack.Pop()
+	return ctx, &ExportsResult{Exports: exports, Errors: exportErrors}, nil
+}
+
 type ExportsCacheKey string
 
-func (p *Parser[F]) CachedParseExports(
+func (p *Parser[F]) cachedParseExports(
 	ctx context.Context,
 	filePath string,
-) (context.Context, *ExportsResult, error) {
+) (context.Context, *ExportsEntries, error) {
 	cacheKey := ExportsCacheKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*ExportsResult); ok {
+	if cached, ok := ctx.Value(cacheKey).(*ExportsEntries); ok {
 		return ctx, cached, nil
 	}
 	ctx, file, err := p.CachedParseFile(ctx, filePath)
@@ -59,81 +136,4 @@ func (p *Parser[F]) CachedParseExports(
 	}
 	ctx = context.WithValue(ctx, cacheKey, result)
 	return ctx, result, err
-}
-
-type UnwrappedExportsResult struct {
-	// Exports: map from exported name to exported path.
-	Exports *orderedmap.OrderedMap[string, string]
-	// Errors: errors gathered while resolving exports.
-	Errors []error
-}
-
-type UnwrappedExportsCacheKey string
-
-func (p *Parser[F]) CachedUnwrappedParseExports(
-	ctx context.Context,
-	id string,
-) (context.Context, *UnwrappedExportsResult, error) {
-	return p.cachedUnwrappedParseExports(ctx, id, make(map[string]bool))
-}
-
-func (p *Parser[F]) cachedUnwrappedParseExports(
-	ctx context.Context,
-	id string,
-	seen map[string]bool,
-) (context.Context, *UnwrappedExportsResult, error) {
-	if _, ok := seen[id]; ok {
-		return ctx, nil, fmt.Errorf("circular export starting and ending on %s", id)
-	} else {
-		seenCopy := utils.Merge(nil, seen)
-		seenCopy[id] = true
-		seen = seenCopy
-	}
-
-	unwrappedCacheKey := UnwrappedExportsCacheKey(id)
-	if cached, ok := ctx.Value(unwrappedCacheKey).(*UnwrappedExportsResult); ok {
-		return ctx, cached, nil
-	}
-	ctx, wrapped, err := p.CachedParseExports(ctx, id)
-	if err != nil {
-		return ctx, nil, err
-	}
-	exports := orderedmap.NewOrderedMap[string, string]()
-	var errors []error
-
-	for _, export := range wrapped.Exports {
-		if export.Path == id {
-			for _, name := range export.Names {
-				exports.Set(name.name(), export.Path)
-			}
-			continue
-		}
-
-		var unwrapped *UnwrappedExportsResult
-		ctx, unwrapped, err = p.cachedUnwrappedParseExports(ctx, export.Path, seen)
-		if err != nil {
-			errors = append(errors, err)
-			continue
-		}
-
-		if export.All {
-			for _, k := range unwrapped.Exports.Keys() {
-				v, _ := unwrapped.Exports.Get(k)
-				exports.Set(k, v)
-			}
-			continue
-		}
-		errors = append(errors, unwrapped.Errors...)
-
-		for _, name := range export.Names {
-			if exportPath, ok := unwrapped.Exports.Get(name.Original); ok {
-				exports.Set(name.name(), exportPath)
-			} else {
-				exports.Set(name.name(), export.Path)
-				// errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id)).
-			}
-		}
-	}
-
-	return ctx, &UnwrappedExportsResult{Exports: exports, Errors: errors}, nil
 }

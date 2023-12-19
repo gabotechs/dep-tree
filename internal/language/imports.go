@@ -30,16 +30,15 @@ func (p *Parser[F]) CachedParseImports(
 	cacheKey := ImportsCacheKey(id)
 	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
 		return ctx, cached, nil
-	} else {
-		ctx, file, err := p.CachedParseFile(ctx, id)
-		if err != nil {
-			return ctx, nil, err
-		}
-		result, err := p.lang.ParseImports(file)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ctx = context.WithValue(ctx, cacheKey, result)
-		return ctx, result, err
 	}
+	ctx, file, err := p.CachedParseFile(ctx, id)
+	if err != nil {
+		return ctx, nil, err
+	}
+	result, err := p.lang.ParseImports(file)
+	if err != nil {
+		return ctx, nil, err
+	}
+	ctx = context.WithValue(ctx, cacheKey, result)
+	return ctx, result, err
 }
