@@ -13,10 +13,13 @@ import (
 	"github.com/gabotechs/dep-tree/internal/rust"
 )
 
+const DefaultConfigPath = ".dep-tree.yml"
+
 type Config struct {
 	Path                      string
 	Entrypoints               []string            `yaml:"entrypoints"`
 	AllowCircularDependencies bool                `yaml:"allowCircularDependencies"`
+	FollowReExports           *bool               `yaml:"followReExports,omitempty"`
 	Aliases                   map[string][]string `yaml:"aliases"`
 	WhiteList                 map[string][]string `yaml:"allow"`
 	BlackList                 map[string][]string `yaml:"deny"`
@@ -25,9 +28,16 @@ type Config struct {
 	Python                    python.Config       `yaml:"python"`
 }
 
+func (c *Config) UnwrapProxyExports() bool {
+	if c.FollowReExports == nil {
+		return true
+	}
+	return *c.FollowReExports
+}
+
 func ParseConfig(cfgPath string) (*Config, error) {
 	if cfgPath == "" {
-		cfgPath = ".dep-tree.yml"
+		cfgPath = DefaultConfigPath
 	}
 
 	content, err := os.ReadFile(cfgPath)

@@ -2,8 +2,9 @@ package language
 
 import (
 	"errors"
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"time"
+
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestFile struct {
@@ -20,7 +21,7 @@ func (t TestFile) Size() int {
 
 type TestLanguage struct {
 	imports map[string]*ImportsResult
-	exports map[string]*ExportsResult
+	exports map[string]*ExportsEntries
 }
 
 func (t *TestLanguage) testParser(entrypoint string) *Parser[TestFile] {
@@ -49,7 +50,7 @@ func (t *TestLanguage) ParseImports(file *TestFile) (*ImportsResult, error) {
 	}
 }
 
-func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsResult, error) {
+func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsEntries, error) {
 	time.Sleep(time.Millisecond)
 	if exports, ok := t.exports[file.Name]; ok {
 		return exports, nil

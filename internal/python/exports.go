@@ -8,7 +8,7 @@ import (
 )
 
 //nolint:gocyclo
-func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEntries, error) {
 	var exports []language.ExportEntry
 	var errors []error
 	for _, stmt := range file.Statements {
@@ -101,5 +101,5 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsRes
 			})
 		}
 	}
-	return &language.ExportsResult{Exports: exports, Errors: errors}, nil
+	return &language.ExportsEntries{Exports: exports, Errors: errors}, nil
 }

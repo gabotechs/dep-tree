@@ -10,11 +10,12 @@ import (
 
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Path     string
-		Imports  map[string]*ImportsResult
-		Exports  map[string]*ExportsResult
-		Expected []string
+		Name              string
+		Path              string
+		Imports           map[string]*ImportsResult
+		Exports           map[string]*ExportsEntries
+		ExpectedUnwrapped []string
+		ExpectedWrapped   []string
 	}{
 		{
 			Name: "Simple",
@@ -26,7 +27,7 @@ func TestParser_Deps(t *testing.T) {
 					},
 				},
 			},
-			Exports: map[string]*ExportsResult{
+			Exports: map[string]*ExportsEntries{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{
@@ -35,7 +36,10 @@ func TestParser_Deps(t *testing.T) {
 					}},
 				},
 			},
-			Expected: []string{
+			ExpectedUnwrapped: []string{
+				"2",
+			},
+			ExpectedWrapped: []string{
 				"2",
 			},
 		},
@@ -45,7 +49,7 @@ func TestParser_Deps(t *testing.T) {
 			Imports: map[string]*ImportsResult{
 				"1": {Imports: []ImportEntry{}},
 			},
-			Exports: map[string]*ExportsResult{
+			Exports: map[string]*ExportsEntries{
 				"1": {
 					Exports: []ExportEntry{{
 						Names: []ExportName{{Original: "Exported"}},
@@ -59,7 +63,10 @@ func TestParser_Deps(t *testing.T) {
 					}},
 				},
 			},
-			Expected: []string{
+			ExpectedUnwrapped: []string{
+				"2",
+			},
+			ExpectedWrapped: []string{
 				"2",
 			},
 		},
@@ -73,7 +80,7 @@ func TestParser_Deps(t *testing.T) {
 					},
 				},
 			},
-			Exports: map[string]*ExportsResult{
+			Exports: map[string]*ExportsEntries{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{
@@ -88,7 +95,101 @@ func TestParser_Deps(t *testing.T) {
 					}},
 				},
 			},
-			Expected: []string{
+			ExpectedUnwrapped: []string{
+				"3",
+			},
+			ExpectedWrapped: []string{
+				"2",
+			},
+		},
+		{
+			Name: "Exports are treated as imports in node entry",
+			Path: "1",
+			Imports: map[string]*ImportsResult{
+				"1": {
+					Imports: []ImportEntry{},
+				},
+			},
+			Exports: map[string]*ExportsEntries{
+				"1": {
+					Exports: []ExportEntry{{
+						All:  true,
+						Path: "2",
+					}, {
+						Names: []ExportName{{Original: "Exported-3"}},
+						Path:  "3",
+					}},
+				},
+				"2": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Path:  "4",
+					}, {
+						Names: []ExportName{{Original: "Exported-2"}},
+						Path:  "2",
+					}},
+				},
+				"3": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Another-one", Alias: "Exported-3"}},
+						Path:  "4",
+					}},
+				},
+				"4": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
+						Path:  "4",
+					}},
+				},
+			},
+			ExpectedUnwrapped: []string{
+				"4", "2",
+			},
+			ExpectedWrapped: []string{
+				"2", "3",
+			},
+		},
+		{
+			Name: "Exports are treated as imports in node entry (2)",
+			Path: "1",
+			Imports: map[string]*ImportsResult{
+				"1": {
+					Imports: []ImportEntry{},
+				},
+			},
+			Exports: map[string]*ExportsEntries{
+				"1": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported-3"}},
+						Path:  "3",
+					}},
+				},
+				"2": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}},
+						Path:  "4",
+					}, {
+						Names: []ExportName{{Original: "Exported-2"}},
+						Path:  "2",
+					}},
+				},
+				"3": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Another-one", Alias: "Exported-3"}},
+						Path:  "4",
+					}},
+				},
+				"4": {
+					Exports: []ExportEntry{{
+						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
+						Path:  "4",
+					}},
+				},
+			},
+			ExpectedUnwrapped: []string{
+				"4",
+			},
+			ExpectedWrapped: []string{
 				"3",
 			},
 		},
@@ -103,6 +204,7 @@ func TestParser_Deps(t *testing.T) {
 				exports: tt.Exports,
 			}
 			parser := lang.testParser(tt.Path)
+			parser.unwrapProxyExports = true
 
 			node, err := parser.Entrypoint()
 			a.NoError(err)
@@ -113,8 +215,18 @@ func TestParser_Deps(t *testing.T) {
 				a.Equal(0, len(dep.Errors))
 				result[i] = dep.Id
 			}
+			a.Equal(tt.ExpectedUnwrapped, result)
 
-			a.Equal(tt.Expected, result)
+			parser.unwrapProxyExports = false
+
+			_, deps, err = parser.Deps(context.Background(), node)
+			a.NoError(err)
+			result = make([]string, len(deps))
+			for i, dep := range deps {
+				a.Equal(0, len(dep.Errors))
+				result[i] = dep.Id
+			}
+			a.Equal(tt.ExpectedWrapped, result)
 		})
 	}
 }
@@ -124,7 +236,7 @@ func TestParser_DepsErrors(t *testing.T) {
 		Name           string
 		Path           string
 		Imports        map[string]*ImportsResult
-		Exports        map[string]*ExportsResult
+		Exports        map[string]*ExportsEntries
 		ExpectedErrors []string
 	}{
 		{
@@ -138,7 +250,7 @@ func TestParser_DepsErrors(t *testing.T) {
 					},
 				}},
 			},
-			Exports: map[string]*ExportsResult{
+			Exports: map[string]*ExportsEntries{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{

@@ -7,7 +7,7 @@ import (
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
 )
 
-func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResult, error) {
+func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsEntries, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -48,7 +48,7 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsResul
 		}
 	}
 
-	return &language.ExportsResult{
+	return &language.ExportsEntries{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

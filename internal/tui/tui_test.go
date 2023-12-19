@@ -139,11 +139,11 @@ func TestTui(t *testing.T) {
 				var parserBuilder dep_tree.NodeParserBuilder[language.FileInfo]
 				switch {
 				case utils.EndsWith(entrypointPath, js.Extensions):
-					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil)
+					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil, nil)
 				case utils.EndsWith(entrypointPath, rust.Extensions):
-					parserBuilder = language.ParserBuilder(rust.MakeRustLanguage, nil)
+					parserBuilder = language.ParserBuilder(rust.MakeRustLanguage, nil, nil)
 				case utils.EndsWith(entrypointPath, python.Extensions):
-					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil)
+					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil, nil)
 				}
 
 				finish <- Loop[language.FileInfo](
