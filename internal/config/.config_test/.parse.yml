@@ -1,8 +1,9 @@
-entrypoints:
-  - foo
-allow:
-  foo:
-    - bar
-deny:
-  bar:
-    - baz
+check:
+  entrypoints:
+    - foo
+  allow:
+    foo:
+      - bar
+  deny:
+    bar:
+      - baz

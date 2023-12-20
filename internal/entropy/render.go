@@ -62,7 +62,10 @@ type Graph struct {
 }
 
 func marshalGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser) ([]byte, error) {
-	out := Graph{}
+	out := Graph{
+		Nodes: make([]Node, 0),
+		Links: make([]Link, 0),
+	}
 
 	allNodes := dt.Graph.AllNodes()
 	maxLoc := max(utils.Max(allNodes, func(n *language.Node) int {

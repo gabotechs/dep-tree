@@ -11,12 +11,14 @@ Usage:
 Available Commands:
   check       Checks the that the current project matches the dependency rules defined in the configuration
   completion  Generate the autocompletion script for the specified shell
+  config      Generates a sample config in case that there's not already one present
   entropy     Renders a force-directed graph in the browser
   help        Help about any command
   render      (default command) Render the dependency tree starting from the provided entrypoint
 
 Flags:
   -c, --config string               path to dep-tree's config file (default .dep-tree.yml)
+      --exclude stringArray         Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags
       --follow-re-exports           whether to follow re-exports or not while resolving imports between files (default true)
   -h, --help                        help for dep-tree
       --js-follow-ts-config-paths   whether to follow the tsconfig.json paths while resolving imports or not (default false)
