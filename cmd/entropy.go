@@ -8,6 +8,8 @@ import (
 	"github.com/gabotechs/dep-tree/internal/entropy"
 )
 
+var noBrowserOpen bool
+
 func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "entropy",
@@ -36,10 +38,14 @@ func EntropyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			ctx, err = entropy.Render(ctx, parser)
+			ctx, err = entropy.Render(ctx, parser, entropy.RenderConfig{
+				NoOpen: noBrowserOpen,
+			})
 			return err
 		},
 	}
+
+	cmd.Flags().BoolVar(&noBrowserOpen, "no-browser-open", false, "Disable the automatic browser open while rendering entropy")
 
 	return cmd
 }

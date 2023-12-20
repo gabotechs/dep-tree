@@ -5,6 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 
@@ -19,7 +20,11 @@ var index []byte
 const ToReplace = "const GRAPH = {}"
 const ReplacePrefix = "const GRAPH = "
 
-func Render(ctx context.Context, parser language.NodeParser) (context.Context, error) {
+type RenderConfig struct {
+	NoOpen bool
+}
+
+func Render(ctx context.Context, parser language.NodeParser, cfg RenderConfig) (context.Context, error) {
 	dt := dep_tree.NewDepTree(parser)
 	ctx, err := dt.LoadGraph(ctx)
 	if err != nil {
@@ -37,7 +42,12 @@ func Render(ctx context.Context, parser language.NodeParser) (context.Context, e
 	if err != nil {
 		return ctx, err
 	}
-	return ctx, openInBrowser(temp)
+	if cfg.NoOpen {
+		fmt.Println(temp)
+		return ctx, nil
+	} else {
+		return ctx, openInBrowser(temp)
+	}
 }
 
 type Node struct {
