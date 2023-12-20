@@ -1,13 +1,12 @@
 package entropy
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
 	"os"
-	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -15,7 +14,7 @@ import (
 )
 
 //go:embed index.html
-var index string
+var index []byte
 
 const ToReplace = "const GRAPH = {}"
 const ReplacePrefix = "const GRAPH = "
@@ -32,13 +31,13 @@ func Render(ctx context.Context, parser language.NodeParser) (context.Context, e
 	if err != nil {
 		return ctx, err
 	}
-	rendered := strings.ReplaceAll(index, ToReplace, ReplacePrefix+string(marshaled))
+	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
 	temp := path.Join(os.TempDir(), "index.html")
-	err = os.WriteFile(temp, []byte(rendered), os.ModePerm)
+	err = os.WriteFile(temp, rendered, os.ModePerm)
 	if err != nil {
 		return ctx, err
 	}
-	return ctx, exec.Command("open", temp).Run()
+	return ctx, openInBrowser(temp)
 }
 
 type Node struct {
@@ -47,12 +46,14 @@ type Node struct {
 	DirName  string `json:"dirName"`
 	Loc      int    `json:"loc"`
 	Size     int    `json:"size"`
+	Visible  bool   `json:"visible"`
 }
 
 type Link struct {
-	From  string `json:"from"`
-	To    string `json:"to"`
-	Color string `json:"color,omitempty"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Color   string `json:"color,omitempty"`
+	Visible bool   `json:"visible"`
 }
 
 type Graph struct {
@@ -68,21 +69,45 @@ func marshalGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeP
 		return n.Data.Loc
 	}), 1)
 
+	addedFolders := map[string]bool{}
+
+	dirTree := NewDirTree()
+
 	for _, node := range allNodes {
-		filename := parser.Display(node)
+		filepath := parser.Display(node)
+		dirName := path.Dir(filepath)
 		out.Nodes = append(out.Nodes, Node{
 			Id:       node.Id,
-			FileName: path.Base(filename),
-			DirName:  path.Dir(filename) + "/",
+			FileName: path.Base(filepath),
+			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
 			Size:     10 * node.Data.Loc / maxLoc,
+			Visible:  true,
 		})
 
 		for _, to := range dt.Graph.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
-				From: node.Id,
-				To:   to.Id,
+				From:    node.Id,
+				To:      to.Id,
+				Visible: true,
 			})
+		}
+
+		for _, parentFolder := range dirTree.AddDirs(dirName) {
+			out.Links = append(out.Links, Link{
+				From:    node.Id,
+				To:      parentFolder,
+				Visible: false,
+			})
+			if _, ok := addedFolders[parentFolder]; ok {
+				continue
+			} else {
+				addedFolders[parentFolder] = true
+				out.Nodes = append(out.Nodes, Node{
+					Id:      parentFolder,
+					Visible: false,
+				})
+			}
 		}
 	}
 
