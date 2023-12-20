@@ -1,4 +1,4 @@
-package config
+package utils
 
 import (
 	"testing"
@@ -31,7 +31,7 @@ func TestMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			pass, err := match(tt.Pattern, tt.Path)
+			pass, err := GlobstarMatch(tt.Pattern, tt.Path)
 			a.NoError(err)
 			a.Equal(tt.Expected, pass)
 		})

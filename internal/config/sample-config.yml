@@ -1,0 +1,93 @@
+# Files that should be completely ignored by dep-tree. It's fine to ignore
+# some big files that everyone depends on and that don't add
+# value to the visualization, like auto generated code.
+exclude:
+  - 'some-glob-pattern/**/*.ts'
+
+# Whether to follow re-exports to the target file or not.
+# Imagine that you have the following setup:
+#
+#  src/index.ts     -> import { foo } from './foo'
+#  src/foo/index.ts -> export { bar as foo } from './bar'
+#  src/foo/bar.ts   -> export function bar() {}
+#
+# If `followReExports` is true, a dependency will be created from
+# `src/index.ts` to `src/foo/bar.ts`, and the middle file `src/foo/index.ts`
+# will be ignored, as it's just there for re-exporting the `bar` symbol,
+# which is actually declared on `src/foo/bar.ts`
+#
+# If `followReExports` is false, re-exported symbols will not be traced back
+# to where they are declared, and instead two dependencies will be created:
+# - from `src/index.ts` to `src/foo/index.ts`
+# - from `src/foo/index.ts` to `src/foo/bar.ts`
+#
+# Entropy visualization tends to lead to better results if this is set to `false`,
+# but CLI rendering is slightly better with this set to `true`.
+followReExports: false
+
+# Check configuration for the `dep-tree check` command. Dep Tree will check for dependency
+# violation rules declared here, and fail if there is at least one unsatisfied rule.
+check:
+  # These are the entrypoints to your application. Dependencies will be checked with
+  # these files as root nodes. Typically, an application has only one entrypoint, which
+  # is the executable file (`src/index.ts`, `main.py`, `src/lib.rs`, ...), but here
+  # you can declare as many as you want.
+  entrypoints:
+    - src/index.ts
+
+  # Whether to allow circular dependencies or not. Languages typically allow
+  # having circular dependencies, but that has an impact in execution path
+  # traceability, so you might want to disallow it.
+  allowCircularDependencies: false
+
+  # map from glob pattern to array of glob patterns that determines the exclusive allowed
+  # dependencies that a file matching a key glob pattern might have. If file that
+  # matches a key glob pattern depends on another file that does not match any of
+  # the glob patterns declared in the values array, the check will fail.
+  allow:
+    # example: any file in `src/products` can only depend on files that are also
+    # in the `src/products` folder or in the `src/helpers` folder.
+    'src/products/**':
+      - 'src/products/**'
+      - 'src/helpers/**'
+
+  # map from glob pattern to array of glob patterns that determines forbidden
+  # dependencies. If a file that matches a key glob pattern depends on another
+  # file that matches at least one of the glob patterns declared in the values
+  # array, the check will fail.
+  deny:
+    # example: files inside `src/products` cannot depend on files inside `src/users`,
+    # as they are supposed to belong to different domains.
+    'src/products/**':
+      - 'src/users/**'
+
+  # typically, in a project, there is a set of files that are always good to depend
+  # on, because they are supposed to be common helpers, or parts that are actually
+  # designed to be widely depended on. This allows you to create aliases to group
+  # of files that are meant to be widely depended on, so that you can reference
+  # them afterward in the `allow` or `deny` sections.
+  aliases:
+    # example: this 'common' entry will be available in the other sections:
+    #
+    # check:
+    #   allow:
+    #     'src/products/**':
+    #       - 'common'
+    'common':
+      - 'src/helpers/**'
+      - 'src/utils/**'
+      - 'src/generated/**'
+
+# JavaScript and TypeScript specific settings.
+js:
+  # Whether to follow tsconfig.json paths or not. You will typically want to
+  # enable this, but for some monorepo setups, it might be better to leave this off.
+  followTsConfigPaths: true
+
+# Python specific settings.
+python:
+  # None available at the moment.
+
+# Rust specific settings.
+rust:
+  # None available at the moment.

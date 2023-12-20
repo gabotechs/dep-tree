@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/gabotechs/dep-tree/internal/check"
 	"github.com/gabotechs/dep-tree/internal/config"
 )
 
@@ -22,14 +23,14 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(cfg.Entrypoints) == 0 {
+			if len(cfg.Check.Entrypoints) == 0 {
 				return fmt.Errorf(`config file "%s" has no entrypoints`, configPath)
 			}
-			parserBuilder, err := makeParserBuilder(cfg.Entrypoints[0], cfg)
+			parserBuilder, err := makeParserBuilder(cfg.Check.Entrypoints[0], cfg)
 			if err != nil {
 				return err
 			}
-			return config.Check(ctx, parserBuilder, cfg)
+			return check.Check(ctx, parserBuilder, &cfg.Check)
 		},
 	}
 }

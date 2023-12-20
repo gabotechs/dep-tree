@@ -1,2 +1,3 @@
-entrypoints:
-  - main.py
+check:
+  entrypoints:
+    - main.py

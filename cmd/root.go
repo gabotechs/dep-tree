@@ -19,6 +19,7 @@ import (
 var configPath string
 var jsFollowTsConfigPaths bool
 var followReExports bool
+var exclude []string
 
 var root *cobra.Command
 
@@ -47,10 +48,12 @@ func NewRoot(args []string) *cobra.Command {
 	root.AddCommand(RenderCmd())
 	root.AddCommand(CheckCmd())
 	root.AddCommand(EntropyCmd())
+	root.AddCommand(ConfigCmd())
 
 	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file (default .dep-tree.yml)")
 	root.PersistentFlags().BoolVar(&followReExports, "follow-re-exports", true, "whether to follow re-exports or not while resolving imports between files")
 	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not (default false)")
+	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags")
 
 	switch {
 	case len(args) > 0 && utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}):
@@ -86,6 +89,12 @@ func loadConfig() (*config.Config, error) {
 	}
 	if root.PersistentFlags().Changed("js-follow-ts-config-paths") {
 		cfg.Js.FollowTsConfigPaths = jsFollowTsConfigPaths
+	}
+	cfg.Exclude = append(cfg.Exclude, exclude...)
+	for _, exclusion := range cfg.Exclude {
+		if _, err := utils.GlobstarMatch(exclusion, ""); err != nil {
+			return nil, fmt.Errorf("exclude pattern '%s' is not correctly formatted", exclusion)
+		}
 	}
 	// Config load fails if a path was explicitly specified but the path does not exist.
 	// If a path was not specified it's fine even if the default path does not exist.

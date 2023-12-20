@@ -1,19 +1,20 @@
-entrypoints:
-  - src/index.js
-aliases:
-  generated:
-    - "src/generated/**"
-    - "generated/**"
-  common:
-    - "src/@*/**"
-    - "src/config.js"
-    - "src/common.js"
-allow:
-  "src/users/**":
-    - "src/users/**"
-    - "common"
-deny:
-  "src/products/**":
-    - "src/users/**"
-    - "common"
-    - "generated"
+check:
+  entrypoints:
+    - src/index.js
+  aliases:
+    generated:
+      - "src/generated/**"
+      - "generated/**"
+    common:
+      - "src/@*/**"
+      - "src/config.js"
+      - "src/common.js"
+  allow:
+    "src/users/**":
+      - "src/users/**"
+      - "common"
+  deny:
+    "src/products/**":
+      - "src/users/**"
+      - "common"
+      - "generated"

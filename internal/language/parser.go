@@ -9,6 +9,7 @@ import (
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Node = graph.Node[FileInfo]
@@ -42,6 +43,7 @@ type Parser[F CodeFile] struct {
 	entrypoint         *Node
 	lang               Language[F]
 	unwrapProxyExports bool
+	exclude            []string
 }
 
 var _ NodeParser = &Parser[CodeFile]{}
@@ -70,12 +72,14 @@ func makeParser[F CodeFile, C any](
 	}
 	if generalCfg != nil {
 		parser.unwrapProxyExports = generalCfg.UnwrapProxyExports()
+		parser.exclude = generalCfg.IgnoreFiles()
 	}
 	return ctx, parser, err
 }
 
 type Config interface {
 	UnwrapProxyExports() bool
+	IgnoreFiles() []string
 }
 
 type Builder[F CodeFile, C any] func(context.Context, string, C) (context.Context, Language[F], error)
@@ -86,17 +90,31 @@ func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, 
 	}
 }
 
+func (p *Parser[F]) shouldExclude(path string) bool {
+	for _, exclusion := range p.exclude {
+		if ok, _ := utils.GlobstarMatch(exclusion, path); ok {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *Parser[F]) Entrypoint() (*Node, error) {
 	return p.entrypoint, nil
 }
 
-func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node, error) {
+func (p *Parser[F]) updateNodeInfo(ctx context.Context, n *Node) (context.Context, error) {
 	ctx, file, err := p.CachedParseFile(ctx, n.Id)
 	if err != nil {
-		return ctx, nil, err
+		return ctx, err
 	}
 	n.Data.Size = (*file).Size()
 	n.Data.Loc = (*file).Loc()
+	return ctx, err
+}
+
+func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node, error) {
+	ctx, _ = p.updateNodeInfo(ctx, n)
 	ctx, imports, err := p.CachedParseImports(ctx, n.Id)
 	if err != nil {
 		return ctx, nil, err
@@ -165,9 +183,12 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 		}
 	}
 
-	deps := make([]*Node, resolvedImports.Len())
-	for i, imported := range resolvedImports.Keys() {
-		deps[i] = graph.MakeNode(imported, FileInfo{})
+	deps := make([]*Node, 0)
+	for _, imported := range resolvedImports.Keys() {
+		node := graph.MakeNode(imported, FileInfo{})
+		if !p.shouldExclude(p.Display(node)) {
+			deps = append(deps, node)
+		}
 	}
 	return ctx, deps, nil
 }
