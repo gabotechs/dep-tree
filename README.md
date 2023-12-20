@@ -48,8 +48,8 @@ npm install @dep-tree/cli
 
 ## About Dep Tree
 
-`dep-tree` is a cli tool that allows users to visualize the complexity of a code base, and creating
-rules for ensuring its loosely coupling between parts.
+`dep-tree` is a cli tool that allows users to visualize the complexity of a code base, and create
+rules for ensuring its loosely coupling.
 
 It works with files, meaning that each file is a node in the dependency tree:
 - It starts from an entrypoint, which is usually the main executable file in a
