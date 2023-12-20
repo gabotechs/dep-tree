@@ -12,78 +12,22 @@
 </p>
 
 <p align="center">
-    Dep Tree is a command line tool for visualizing your project's 
-    import structure with an interactive graph.
+    Dep Tree is a tool for helping developers maintain their code bases clean and decoupled. It 
+    allows rendering the "project's entropy" using a 3D force directed graph, where each file is a
+    node, and each dependency between two files is an edge.
 </p>
 <p align="center">
-    Furthermore, it enables the specification of prohibited dependencies,
-    ensuring your CI validates the integrity of your dependency graph.
+    The more decoupled a code base is, the more spread the 3d graph will look like.
 </p>
-
-<table align="center">
-    <thead>
-        <tr>
-            <th>
-                Given your project's file structure...
-            </th>
-            <th>
-                ...it renders an interactive file import graph
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
 
 <p align="center">
-    <img height="600px" src="docs/tree.png" alt="File structure">
+    <img height="430" src="docs/demo.gif" alt="File structure">
 </p>
-
-</td><td>
 
 <p align="center">
-    <img height="600px" src="docs/demo.gif" alt="Dependency tree render">
+    Additionally, it enables the specification of prohibited dependencies,
+    ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
 </p>
-
-</td></tr></tbody></table>
-
-## Motivation
-
-As codebases expand and teams grow, complexity inevitably creeps in. 
-While maintaining a cohesive and organized structure is key to 
-a project's scalability and maintainability, 
-the current developer toolbox often falls short in one critical 
-area: file structure and dependency management.
-
-Luckily, the community has come up with very useful tools 
-for keeping our projects in check:
-- **Type checkers** ensure correct interactions between code segments.
-- **Linters** elevate code quality and maintain a consistent style.
-- **Formatters** guarantee a uniform code format throughout.
-- But what about file structure and file dependency management...
-
-Dep Tree is a dedicated tool addressing this very challenge, 
-it aids developers in preserving a project's structural integrity 
-throughout its lifecycle. And with integration capabilities in CI systems,
-the tool ensures that this architectural "harmony" remains undisturbed.
-
-## Dep Tree
-
-`dep-tree` is a cli tool that allows users to render their file dependency tree in the terminal, or
-check that it matches some dependency rules in CI systems.
-
-It works with files, meaning that each file is a node in the dependency tree:
-- It starts from an entrypoint, which is usually the main executable file in a
-program or the file that exposes the contents of a library (like `package/main.py`).
-- It reads its import statements, it makes a parent node out of the main file,
-and one child node for each imported file.
-> **NOTE**: it only takes into account local files, not files imported from external libraries.
-- That process is repeated recursively with all the child files, until the file dependency
-tree is formed.
-- If rendering the dependency tree in the terminal, the nodes will be placed in a human-readable
-way, and users can navigate through the graph using the keyboard.
-- If validating the dependency tree in a CI system, it will check that the dependencies between files
-match some boundaries declared in a `.dep-tree.yml` file.
 
 ## Install
 
@@ -98,15 +42,51 @@ pip install python-dep-tree
 ```
 
 There is also a node wrapper that can be installed with:
-
 ```shell
-npm install --save-dev @dep-tree/cli
+npm install @dep-tree/cli
 ```
 
-## Usage
-### Render
+## About Dep Tree
 
-Choose the file that will act as the root of the dependency tree (for example `package/main.py`), and run:
+`dep-tree` is a cli tool that allows users to visualize the complexity of a code base, and create
+rules for ensuring its loosely coupling.
+
+It works with files, meaning that each file is a node in the dependency tree:
+- It starts from an entrypoint, which is usually the main executable file in a
+program or the file that exposes the contents of a library (like `package/main.py`).
+- It reads its import statements, it makes a parent node out of the main file,
+and one child node for each imported file.
+> **NOTE**: it only takes into account local files, not files imported from external libraries.
+- That process is repeated recursively with all the child files, until the file dependency
+tree is formed.
+- If rendering the code base entropy, the nodes will be rendered in a 3d force directed graph
+in the browser.
+- If rendering the dependency tree in the terminal, the nodes will be placed in a human-readable
+way, and users can navigate through the graph using the keyboard.
+- If validating the dependency tree in a CI system, it will check that the dependencies between files
+match some boundaries declared in a `.dep-tree.yml` file.
+
+## Usage
+
+### Entropy visualization
+
+Choose the file that will act as the root of the dependency tree (for example `src/index.ts`), and run:
+
+```shell
+dep-tree entropy src/index.ts
+```
+
+It will open a browser window and will render your file dependency graph. You will see a lot of spheres
+and lines connecting them. Each sphere is a file in your code base, and each line indicates a dependency
+between two files.
+
+The spheres will be placed mimicking some attraction/repulsion forces, that way parts of your code
+base will tend to gravitate together if they are tightly coupled, and will tend to be separated if
+they are loosely coupled.
+
+### CLI tree visualization
+
+Choose the file that will act as the root of the dependency tree (for example `my-file.py`), and run:
 
 ```shell
 dep-tree render my-file.py
@@ -125,6 +105,12 @@ h      -> show this help section
 ```
 
 ### Dependency linting
+
+The dependency linting can be executed with:
+
+```shell
+dep-tree check
+```
 
 This is specially useful for CI systems, for ensuring that parts of an application that
 should not be coupled remain decoupled as the project evolves.
@@ -196,28 +182,126 @@ allow:
     - "src/class.py"
 ```
 
-
 ### Example configuration file
-Create a configuration file `.dep-tree.yml` with some rules:
+Dep Tree by default will read the configuration file in `.dep-tree.yml`, which is expected to be a file
+that contains the following settings:
 
 ```yml
-entrypoints:
-  - src/main.py
-allow:
-  "src/utils/**/*.py":
-    - "src/utils/**/*.py"  # The files in src/utils can only depend on other utils
-deny:
-  "src/ports/**/*.py":
-    - "**"  # A port cannot have any dependency
-  "src/user/**":
-    - "src/products/**" # The users domain cannot be related to the products domain
+# Files that should be completely ignored by dep-tree. It's fine to ignore
+# some big files that everyone depends on and that don't add
+# value to the visualization, like auto generated code.
+exclude:
+  - 'some-glob-pattern/**/*.ts'
+
+# Whether to follow re-exports to the target file or not.
+# Imagine that you have the following setup:
+#
+#  src/index.ts     -> import { foo } from './foo'
+#  src/foo/index.ts -> export { bar as foo } from './bar'
+#  src/foo/bar.ts   -> export function bar() {}
+#
+# If `followReExports` is true, a dependency will be created from
+# `src/index.ts` to `src/foo/bar.ts`, and the middle file `src/foo/index.ts`
+# will be ignored, as it's just there for re-exporting the `bar` symbol,
+# which is actually declared on `src/foo/bar.ts`
+#
+# If `followReExports` is false, re-exported symbols will not be traced back
+# to where they are declared, and instead two dependencies will be created:
+# - from `src/index.ts` to `src/foo/index.ts`
+# - from `src/foo/index.ts` to `src/foo/bar.ts`
+#
+# Entropy visualization tends to lead to better results if this is set to `false`,
+# but CLI rendering is slightly better with this set to `true`.
+followReExports: false
+
+# Check configuration for the `dep-tree check` command. Dep Tree will check for dependency
+# violation rules declared here, and fail if there is at least one unsatisfied rule.
+check:
+  # These are the entrypoints to your application. Dependencies will be checked with
+  # these files as root nodes. Typically, an application has only one entrypoint, which
+  # is the executable file (`src/index.ts`, `main.py`, `src/lib.rs`, ...), but here
+  # you can declare as many as you want.
+  entrypoints:
+    - src/index.ts
+
+  # Whether to allow circular dependencies or not. Languages typically allow
+  # having circular dependencies, but that has an impact in execution path
+  # traceability, so you might want to disallow it.
+  allowCircularDependencies: false
+
+  # map from glob pattern to array of glob patterns that determines the exclusive allowed
+  # dependencies that a file matching a key glob pattern might have. If file that
+  # matches a key glob pattern depends on another file that does not match any of
+  # the glob patterns declared in the values array, the check will fail.
+  allow:
+    # example: any file in `src/products` can only depend on files that are also
+    # in the `src/products` folder or in the `src/helpers` folder.
+    'src/products/**':
+      - 'src/products/**'
+      - 'src/helpers/**'
+
+  # map from glob pattern to array of glob patterns that determines forbidden
+  # dependencies. If a file that matches a key glob pattern depends on another
+  # file that matches at least one of the glob patterns declared in the values
+  # array, the check will fail.
+  deny:
+    # example: files inside `src/products` cannot depend on files inside `src/users`,
+    # as they are supposed to belong to different domains.
+    'src/products/**':
+      - 'src/users/**'
+
+  # typically, in a project, there is a set of files that are always good to depend
+  # on, because they are supposed to be common helpers, or parts that are actually
+  # designed to be widely depended on. This allows you to create aliases to group
+  # of files that are meant to be widely depended on, so that you can reference
+  # them afterward in the `allow` or `deny` sections.
+  aliases:
+    # example: this 'common' entry will be available in the other sections:
+    #
+    # check:
+    #   allow:
+    #     'src/products/**':
+    #       - 'common'
+    'common':
+      - 'src/helpers/**'
+      - 'src/utils/**'
+      - 'src/generated/**'
+
+# JavaScript and TypeScript specific settings.
+js:
+  # Whether to follow tsconfig.json paths or not. You will typically want to
+  # enable this, but for some monorepo setups, it might be better to leave this off.
+  followTsConfigPaths: true
+
+# Python specific settings.
+python:
+# None available at the moment.
+
+# Rust specific settings.
+rust:
+# None available at the moment.
 ```
 
-And check that your project matches those rules:
+## Motivation
 
-```shell
-dep-tree check
-```
+As codebases expand and teams grow, complexity inevitably creeps in.
+While maintaining a cohesive and organized structure is key to
+a project's scalability and maintainability,
+the current developer toolbox often falls short in one critical
+area: file structure and dependency management.
+
+Luckily, the community has come up with very useful tools
+for keeping our projects in check:
+- **Type checkers** ensure correct interactions between code segments.
+- **Linters** elevate code quality and maintain a consistent style.
+- **Formatters** guarantee a uniform code format throughout.
+- But what about file structure and file dependency management...
+
+Dep Tree is a dedicated tool addressing this very challenge,
+it aids developers in preserving a project's structural integrity
+throughout its lifecycle. And with integration capabilities in CI systems,
+the tool ensures that this architectural "harmony" remains undisturbed.
+
 
 ## Supported languages
 
