@@ -19,13 +19,14 @@
 <p align="center">
     The more decoupled a code base is, the more spread the 3d graph will look like.
 </p>
-<p align="center">
-    Additionally, it enables the specification of prohibited dependencies,
-    ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
-</p>
 
 <p align="center">
     <img height="430" src="docs/demo.gif" alt="File structure">
+</p>
+
+<p align="center">
+    Additionally, it enables the specification of prohibited dependencies,
+    ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
 </p>
 
 ## Install
@@ -45,10 +46,10 @@ There is also a node wrapper that can be installed with:
 npm install @dep-tree/cli
 ```
 
-## Dep Tree
+## About Dep Tree
 
-`dep-tree` is a cli tool that allows users to render their file dependency tree in the terminal, or
-check that it matches some dependency rules in CI systems.
+`dep-tree` is a cli tool that allows users to visualize the complexity of a code base, and creating
+rules for ensuring its loosely coupling between parts.
 
 It works with files, meaning that each file is a node in the dependency tree:
 - It starts from an entrypoint, which is usually the main executable file in a
