@@ -70,13 +70,23 @@ match some boundaries declared in a `.dep-tree.yml` file.
 
 ### Entropy visualization
 
+Choose the file that will act as the root of the dependency tree (for example `src/index.ts`), and run:
+
 ```shell
-dep-tree entropy
+dep-tree entropy src/index.ts
 ```
+
+It will open a browser window and will render your file dependency graph. You will see a lot of spheres
+and lines connecting them. Each sphere is a file in your code base, and each line indicates a dependency
+between two files.
+
+The spheres will be placed mimicking some attraction/repulsion forces, that way parts of your code
+base will tend to gravitate together if they are tightly coupled, and will tend to be separated if
+they are loosely coupled.
 
 ### CLI tree visualization
 
-Choose the file that will act as the root of the dependency tree (for example `package/main.py`), and run:
+Choose the file that will act as the root of the dependency tree (for example `my-file.py`), and run:
 
 ```shell
 dep-tree render my-file.py
