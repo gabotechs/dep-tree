@@ -84,8 +84,6 @@ func marshalGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeP
 
 	addedFolders := map[string]bool{}
 
-	dirTree := NewDirTree()
-
 	for _, node := range allNodes {
 		filepath := parser.Display(node)
 		dirName := path.Dir(filepath)
@@ -106,7 +104,7 @@ func marshalGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeP
 			})
 		}
 
-		for _, parentFolder := range dirTree.AddDirs(dirName) {
+		for _, parentFolder := range dirs(dirName) {
 			out.Links = append(out.Links, Link{
 				From:    node.Id,
 				To:      parentFolder,

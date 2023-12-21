@@ -35,14 +35,20 @@ func Test_dirs(t *testing.T) {
 			Name:     "foo/",
 			Expected: []string{"foo"},
 		},
+		{
+			Name:     "../foo",
+			Expected: []string{"../foo", ".."},
+		},
+		{
+			Name:     "../../foo",
+			Expected: []string{"../../foo", "../..", ".."},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			dirTree := NewDirTree()
-			actual := dirTree.AddDirs(tt.Name)
-			a.Equal(tt.Expected, actual)
+			a.Equal(tt.Expected, dirs(tt.Name))
 		})
 	}
 }
