@@ -9,7 +9,10 @@ type Cycle struct {
 	Stack []string
 }
 
-func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack) []Cycle {
+func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack, done map[string]bool) []Cycle {
+	if done[node.Id] {
+		return nil
+	}
 	err := callstack.Push(node.Id)
 	if err != nil {
 		last, _ := callstack.Back()
@@ -32,12 +35,13 @@ func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack) []Cyc
 	}
 	var cycles []Cycle
 	for _, toNode := range g.FromId(node.Id) {
-		cycles = append(cycles, g.removeCycles(toNode, callstack)...)
+		cycles = append(cycles, g.removeCycles(toNode, callstack, done)...)
 	}
+	done[node.Id] = true
 	callstack.Pop()
 	return cycles
 }
 
 func (g *Graph[T]) RemoveCycles(node *Node[T]) []Cycle {
-	return g.removeCycles(node, utils.NewCallStack())
+	return g.removeCycles(node, utils.NewCallStack(), map[string]bool{})
 }
