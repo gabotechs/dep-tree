@@ -7,6 +7,8 @@ import (
 
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
+
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Statement struct {
@@ -51,7 +53,7 @@ var (
 	parser = participle.MustBuild[File](
 		participle.Lexer(lex),
 		participle.Elide("Whitespace", "Comment"),
-		participle.Unquote("String"),
+		utils.UnquoteSafe("String"),
 		participle.UseLookahead(1024),
 	)
 )

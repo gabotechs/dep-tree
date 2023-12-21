@@ -31,6 +31,10 @@ func TestGrammar(t *testing.T) {
 			Name:    "More quoted strings",
 			Content: "`\"\"\" \\` \"\"\"`",
 		},
+		{
+			Name:    "Invalid quoted syntax",
+			Content: `"(\w+)"`,
+		},
 	}
 
 	for _, tt := range tests {
