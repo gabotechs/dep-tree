@@ -10,28 +10,34 @@ import (
 )
 
 const (
-	maxNodeSize       = 10
-	folderNodeGravity = .5
-	folderLinkForce   = 2
+	maxNodeSize         = 10
+	folderNodeRepulsion = 1
+	folderLinkStrength  = 2
+	cyclicDepColor      = "indianred"
 )
 
 type Node struct {
-	Id       string  `json:"id"`
-	FileName string  `json:"fileName"`
-	DirName  string  `json:"dirName"`
-	Loc      int     `json:"loc"`
-	Size     int     `json:"size"`
-	Visible  bool    `json:"visible"`
-	Gravity  float64 `json:"gravity,omitempty"`
-	Color    []int   `json:"color,omitempty"`
+	Id       string `json:"id"`
+	FileName string `json:"fileName"`
+	DirName  string `json:"dirName"`
+	Loc      int    `json:"loc"`
+	Size     int    `json:"size"`
+	Color    []int  `json:"color,omitempty"`
+	Visible  bool   `json:"visible"`
+	// Repulsion factor to multiply the default repulsion that happens between nodes.
+	Repulsion float64 `json:"repulsion,omitempty"`
 }
 
 type Link struct {
 	From    string `json:"from"`
 	To      string `json:"to"`
-	Visible bool   `json:"visible"`
 	Color   string `json:"color,omitempty"`
-	Force   int    `json:"force,omitempty"`
+	Visible bool   `json:"visible"`
+	// TODO: I don't now what Distance mean really, or how does it differ from Strength
+	// Distance factor to multiply the default distance of an edge between nodes.
+	Distance float64 `json:"distance,omitempty"`
+	// Strength factor to multiply the default strength of a link.
+	Strength int `json:"strength,omitempty"`
 }
 
 type Graph struct {
@@ -81,19 +87,19 @@ func marshal(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser
 
 		for _, parentFolder := range splitFullPaths(dirName) {
 			out.Links = append(out.Links, Link{
-				From:    node.Id,
-				To:      parentFolder,
-				Visible: false,
-				Force:   folderLinkForce,
+				From:     node.Id,
+				To:       parentFolder,
+				Visible:  false,
+				Strength: folderLinkStrength,
 			})
 			if _, ok := addedFolders[parentFolder]; ok {
 				continue
 			} else {
 				addedFolders[parentFolder] = true
 				out.Nodes = append(out.Nodes, Node{
-					Id:      parentFolder,
-					Visible: false,
-					Gravity: folderNodeGravity,
+					Id:        parentFolder,
+					Visible:   false,
+					Repulsion: folderNodeRepulsion,
 				})
 			}
 		}
@@ -103,7 +109,7 @@ func marshal(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser
 		out.Links = append(out.Links, Link{
 			From:    el.Key[0],
 			To:      el.Key[1],
-			Color:   "indianred",
+			Color:   cyclicDepColor,
 			Visible: true,
 		})
 	}
