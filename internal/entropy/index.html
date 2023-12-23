@@ -7,9 +7,9 @@
     <script src="https://unpkg.com/3d-force-graph"></script>
     <title>Dep Tree</title>
     <link
-        rel="icon"
-        type="image/x-icon"
-        href="https://raw.githubusercontent.com/gabotechs/dep-tree/main/docs/dep-tree.svg"
+            rel="icon"
+            type="image/x-icon"
+            href="https://raw.githubusercontent.com/gabotechs/dep-tree/main/docs/dep-tree.svg"
     >
 </head>
 
@@ -21,7 +21,10 @@
     import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
     const DEFAULT_DISTANCE = 400
-    const UNSELECTED_ALPHA = 0.1
+    const DEFAULT_NODE_ALPHA = 1
+    const UNSELECTED_NODE_ALPHA = 0.1
+    const DEFAULT_LINK_ALPHA = 0.3
+    const UNSELECTED_LINK_ALPHA = 0.1
     const NODE_RESOLUTION = 16
     const LINK_HIGHLIGHT_WIDTH = 2
     const DEFAULT_LINK_DISTANCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
@@ -31,7 +34,9 @@
     const GRAPH = {}
 
     const NODES = {}
-    GRAPH.nodes.forEach(node => { NODES[node.id] = node })
+    GRAPH.nodes.forEach(node => {
+        NODES[node.id] = node
+    })
 
     // cross-link node objects
     GRAPH.links.forEach(link => {
@@ -86,9 +91,16 @@
 
     function colorNode(node) {
         const [r, g, b] = node['color']
-        let alpha = 1
-        if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = UNSELECTED_ALPHA
+        let alpha = DEFAULT_NODE_ALPHA
+        if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = UNSELECTED_NODE_ALPHA
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function colorLink(link) {
+        if (link.color) return link.color
+        let alpha = DEFAULT_LINK_ALPHA
+        if (highlightLinks.size > 0 && !highlightLinks.has(link)) alpha = UNSELECTED_LINK_ALPHA
+        return `rgba(255, 255, 255, ${alpha})`;
     }
 
     const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
@@ -117,7 +129,8 @@
         // Link params
         .linkDirectionalArrowLength(4)
         .linkDirectionalArrowRelPos(1)
-        .linkColor('color')
+        .linkColor(colorLink)
+        .linkDirectionalArrowColor(colorLink)
         .linkSource('from')
         .linkTarget('to')
         .linkVisibility('visible')
@@ -129,11 +142,12 @@
 
     Graph
         .d3Force('link')
-        .distance(link => DEFAULT_LINK_DISTANCE / (link.force ?? 1))
+        .distance(link => DEFAULT_LINK_DISTANCE * (link['distance'] ?? 1))
+        .strength(link => (link['strength'] ?? 1) / Math.min(NODES[link.from].neighbors.length, NODES[link.to].neighbors.length))
 
     Graph
         .d3Force('charge')
-        .strength(node => -DEFAULT_NODE_REPULSION_FORCE * (node.gravity ?? 1))
+        .strength(node => -DEFAULT_NODE_REPULSION_FORCE * (node['repulsion'] ?? 1))
 
 
     const bloomPass = new UnrealBloomPass();
