@@ -5,6 +5,7 @@
     } </style>
 
     <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/dat.gui"></script>
     <title>Dep Tree</title>
     <link
             rel="icon"
@@ -20,26 +21,32 @@
 <script type="module">
     import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-    const DEFAULT_DISTANCE = 400
-    const DEFAULT_NODE_ALPHA = 1
-    const UNSELECTED_NODE_ALPHA = 0.1
-    const DEFAULT_LINK_ALPHA = 0.3
-    const UNSELECTED_LINK_ALPHA = 0.1
-    const NODE_RESOLUTION = 16
-    const LINK_HIGHLIGHT_WIDTH = 2
-    const DEFAULT_LINK_DISTANCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
-    const DEFAULT_NODE_REPULSION_FORCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
-    const BLOOM_PASS_STRENGTH = 1
+    const DATA = {}
 
-    const GRAPH = {}
+    const SETTINGS = {
+        DEFAULT_DISTANCE: 400,
+        NODE_RESOLUTION: 16,
+        LINK_HIGHLIGHT_WIDTH: 2,
+        BLOOM_PASS_STRENGTH: 1,
+
+        DEFAULT_NODE_ALPHA: 1,
+        UNSELECTED_NODE_ALPHA: 0.1,
+        DEFAULT_LINK_ALPHA: 0.3,
+        UNSELECTED_LINK_ALPHA: 0.1,
+
+        LINK_DISTANCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
+        NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
+        FILE_LINK_STRENGTH_FACTOR: 1,
+        DIR_LINK_STRENGTH_FACTOR: 2,
+    }
 
     const NODES = {}
-    GRAPH.nodes.forEach(node => {
+    DATA.nodes.forEach(node => {
         NODES[node.id] = node
     })
 
     // cross-link node objects
-    GRAPH.links.forEach(link => {
+    DATA.links.forEach(link => {
         const a = NODES[link.from];
         const b = NODES[link.to];
         !a.neighbors && (a.neighbors = []);
@@ -79,7 +86,7 @@
     }
 
     function centerOnNode(node) {
-        const distance = DEFAULT_DISTANCE;
+        const distance = SETTINGS.DEFAULT_DISTANCE;
         const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
 
         const newPos = node.x || node.y || node.z
@@ -91,25 +98,25 @@
 
     function colorNode(node) {
         const [r, g, b] = node['color']
-        let alpha = DEFAULT_NODE_ALPHA
-        if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = UNSELECTED_NODE_ALPHA
+        let alpha = SETTINGS.DEFAULT_NODE_ALPHA
+        if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = SETTINGS.UNSELECTED_NODE_ALPHA
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function colorLink(link) {
-        if (link.color) return link.color
-        let alpha = DEFAULT_LINK_ALPHA
-        if (highlightLinks.size > 0 && !highlightLinks.has(link)) alpha = UNSELECTED_LINK_ALPHA
+        let alpha = SETTINGS.DEFAULT_LINK_ALPHA
+        if (highlightLinks.size > 0 && !highlightLinks.has(link)) alpha = SETTINGS.UNSELECTED_LINK_ALPHA
+        if (link['isCyclic']) return `indianred`;
         return `rgba(255, 255, 255, ${alpha})`;
     }
 
     const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
         // Global params
-        .graphData(GRAPH)
+        .graphData(DATA)
         .backgroundColor('#000003')
-        .nodeResolution(NODE_RESOLUTION)
+        .nodeResolution(SETTINGS.NODE_RESOLUTION)
         .onBackgroundClick(() => {
-            Graph.zoomToFit(DEFAULT_DISTANCE)
+            Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE)
             selectNode(undefined)
         })
         // Node params
@@ -118,7 +125,7 @@
             <span>LOC: ${loc}</span>
         </div>`)
         .nodeVal('size')
-        .nodeVisibility('visible')
+        .nodeVisibility(node => !node['isDir'])
         .nodeColor(colorNode)
         .onNodeClick(node => {
             selectNode(node)
@@ -131,25 +138,42 @@
         .linkDirectionalArrowColor(colorLink)
         .linkSource('from')
         .linkTarget('to')
-        .linkVisibility('visible')
-        .linkWidth(link => highlightLinks.has(link) ? LINK_HIGHLIGHT_WIDTH : undefined)
+        .linkVisibility(link => !link['isDir'])
+        .linkWidth(link => highlightLinks.has(link) ? SETTINGS.LINK_HIGHLIGHT_WIDTH : undefined)
         .linkDirectionalParticles(link => highlightLinks.has(link) ? 2 : 0)
-        .linkDirectionalParticleWidth(LINK_HIGHLIGHT_WIDTH);
+        .linkDirectionalParticleWidth(SETTINGS.LINK_HIGHLIGHT_WIDTH);
 
-    setTimeout(() => Graph.zoomToFit(DEFAULT_DISTANCE), 1000)
+    setTimeout(() => Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE), 1000)
 
     Graph
         .d3Force('link')
-        .distance(link => DEFAULT_LINK_DISTANCE * (link['distance'] ?? 1))
-        .strength(link => (link['strength'] ?? 1) / Math.min(NODES[link.from].neighbors.length, NODES[link.to].neighbors.length))
+        .distance(_link => SETTINGS.LINK_DISTANCE)
+        .strength(link => {
+            const f = link['isDir'] ? SETTINGS.DIR_LINK_STRENGTH_FACTOR : SETTINGS.FILE_LINK_STRENGTH_FACTOR
+            return f / Math.min(NODES[link.from].neighbors.length, NODES[link.to].neighbors.length);
+        })
 
     Graph
         .d3Force('charge')
-        .strength(node => -DEFAULT_NODE_REPULSION_FORCE * (node['repulsion'] ?? 1))
+        .strength(_node => -SETTINGS.NODE_REPULSION_FORCE)
 
+    let recomputeTimeout
+    function debouncedRecompute() {
+        if (recomputeTimeout) clearTimeout(recomputeTimeout)
+        recomputeTimeout = setTimeout(() => Graph.numDimensions(3), 200)
+    }
+    debouncedRecompute()
+
+    if (DATA['enableGui']) {
+        const gui = new dat.GUI()
+        gui.width = 400
+        gui.add(SETTINGS, 'LINK_DISTANCE', 10, 100).onChange(debouncedRecompute)
+        gui.add(SETTINGS, 'FILE_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
+        gui.add(SETTINGS, 'DIR_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
+    }
 
     const bloomPass = new UnrealBloomPass();
-    bloomPass.strength = BLOOM_PASS_STRENGTH;
+    bloomPass.strength = SETTINGS.BLOOM_PASS_STRENGTH;
     bloomPass.radius = 1;
     bloomPass.threshold = 0;
     Graph.postProcessingComposer().addPass(bloomPass);
