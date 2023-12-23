@@ -1,15 +1,15 @@
 <head>
     <style> body {
         margin: 0;
-        background-color: #000003;
+        background-color: #000015;
     } </style>
 
     <script src="https://unpkg.com/3d-force-graph"></script>
     <title>Dep Tree</title>
     <link
-            rel="icon"
-            type="image/x-icon"
-            href="https://raw.githubusercontent.com/gabotechs/dep-tree/main/docs/dep-tree.svg"
+        rel="icon"
+        type="image/x-icon"
+        href="https://raw.githubusercontent.com/gabotechs/dep-tree/main/docs/dep-tree.svg"
     >
 </head>
 
@@ -21,6 +21,12 @@
     import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
     const DEFAULT_DISTANCE = 400
+    const UNSELECTED_ALPHA = 0.1
+    const NODE_RESOLUTION = 16
+    const LINK_HIGHLIGHT_WIDTH = 2
+    const DEFAULT_LINK_DISTANCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
+    const DEFAULT_NODE_REPULSION_FORCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
+    const BLOOM_PASS_STRENGTH = 1
 
     const GRAPH = {}
 
@@ -59,7 +65,12 @@
             node.neighbors.forEach(neighbor => highlightNodes.add(neighbor));
             node.links.forEach(link => highlightLinks.add(link));
         }
-        updateHighlight()
+
+        // trigger update of highlighted objects in scene
+        Graph
+            .nodeColor(Graph.nodeColor())
+            .linkWidth(Graph.linkWidth())
+            .linkDirectionalParticles(Graph.linkDirectionalParticles());
     }
 
     function centerOnNode(node) {
@@ -73,13 +84,23 @@
         Graph.cameraPosition(newPos, node, 1000)
     }
 
-    const Graph = ForceGraph3D()
-    (document.getElementById('3d-graph'))
+    function colorNode(node) {
+        const [r, g, b] = node['color']
+        let alpha = 1
+        if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = UNSELECTED_ALPHA
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
+        // Global params
         .graphData(GRAPH)
         .backgroundColor('#000003')
-        .linkDirectionalArrowLength(4)
-        .linkDirectionalArrowRelPos(1)
-        .nodeResolution(16)
+        .nodeResolution(NODE_RESOLUTION)
+        .onBackgroundClick(() => {
+            Graph.zoomToFit(DEFAULT_DISTANCE)
+            selectNode(undefined)
+        })
+        // Node params
         .nodeLabel(({fileName, dirName, loc}) => `<div class="nodeLabel">
             <span>${fileName}</span>
             <span>${dirName}</span>
@@ -88,32 +109,35 @@
         .nodeAutoColorBy('dirName')
         .nodeVal('size')
         .nodeVisibility('visible')
-        .linkColor('color')
-        .linkSource('from')
-        .linkVisibility('visible')
-        .linkWidth(link => highlightLinks.has(link) ? 2 : undefined)
-        .linkDirectionalParticles(link => highlightLinks.has(link) ? 2 : 0)
-        .linkDirectionalParticleWidth(2)
+        .nodeColor(colorNode)
         .onNodeClick(node => {
             selectNode(node)
             centerOnNode(node)
         })
-        .onBackgroundClick(() => {
-            Graph.zoomToFit(DEFAULT_DISTANCE)
-            selectNode(undefined)
-        })
-        .linkTarget('to');
+        // Link params
+        .linkDirectionalArrowLength(4)
+        .linkDirectionalArrowRelPos(1)
+        .linkColor('color')
+        .linkSource('from')
+        .linkTarget('to')
+        .linkVisibility('visible')
+        .linkWidth(link => highlightLinks.has(link) ? LINK_HIGHLIGHT_WIDTH : undefined)
+        .linkDirectionalParticles(link => highlightLinks.has(link) ? 2 : 0)
+        .linkDirectionalParticleWidth(LINK_HIGHLIGHT_WIDTH);
 
-    function updateHighlight() {
-        // trigger update of highlighted objects in scene
-        Graph
-            .nodeColor(Graph.nodeColor())
-            .linkWidth(Graph.linkWidth())
-            .linkDirectionalParticles(Graph.linkDirectionalParticles());
-    }
+    setTimeout(() => Graph.zoomToFit(DEFAULT_DISTANCE), 1000)
+
+    Graph
+        .d3Force('link')
+        .distance(link => DEFAULT_LINK_DISTANCE / (link.force ?? 1))
+
+    Graph
+        .d3Force('charge')
+        .strength(node => -DEFAULT_NODE_REPULSION_FORCE * (node.gravity ?? 1))
+
 
     const bloomPass = new UnrealBloomPass();
-    bloomPass.strength = 2;
+    bloomPass.strength = BLOOM_PASS_STRENGTH;
     bloomPass.radius = 1;
     bloomPass.threshold = 0;
     Graph.postProcessingComposer().addPass(bloomPass);
