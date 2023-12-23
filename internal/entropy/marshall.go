@@ -33,7 +33,7 @@ type Link struct {
 	To      string `json:"to"`
 	Color   string `json:"color,omitempty"`
 	Visible bool   `json:"visible"`
-	// TODO: I don't now what Distance mean really, or how does it differ from Strength
+	// TODO: I don't know what Distance means really, or how does it differ from Strength
 	// Distance factor to multiply the default distance of an edge between nodes.
 	Distance float64 `json:"distance,omitempty"`
 	// Strength factor to multiply the default strength of a link.
