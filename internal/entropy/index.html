@@ -24,8 +24,8 @@
     const UNSELECTED_ALPHA = 0.1
     const NODE_RESOLUTION = 16
     const LINK_HIGHLIGHT_WIDTH = 2
-    const DEFAULT_LINK_DISTANCE = 30
-    const DEFAULT_NODE_GRAVITY = 10
+    const DEFAULT_LINK_DISTANCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
+    const DEFAULT_NODE_REPULSION_FORCE = 30 // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
     const BLOOM_PASS_STRENGTH = 1
 
     const GRAPH = {}
@@ -133,7 +133,7 @@
 
     Graph
         .d3Force('charge')
-        .strength(node => -DEFAULT_NODE_GRAVITY * (node.gravity ?? 1))
+        .strength(node => -DEFAULT_NODE_REPULSION_FORCE * (node.gravity ?? 1))
 
 
     const bloomPass = new UnrealBloomPass();

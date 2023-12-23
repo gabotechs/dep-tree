@@ -10,19 +10,20 @@ import (
 )
 
 const (
-	maxNodeSize   = 10
-	folderGravity = 4
+	maxNodeSize       = 10
+	folderNodeGravity = .5
+	folderLinkForce   = 2
 )
 
 type Node struct {
-	Id       string `json:"id"`
-	FileName string `json:"fileName"`
-	DirName  string `json:"dirName"`
-	Loc      int    `json:"loc"`
-	Size     int    `json:"size"`
-	Visible  bool   `json:"visible"`
-	Gravity  int    `json:"gravity,omitempty"`
-	Color    []int  `json:"color,omitempty"`
+	Id       string  `json:"id"`
+	FileName string  `json:"fileName"`
+	DirName  string  `json:"dirName"`
+	Loc      int     `json:"loc"`
+	Size     int     `json:"size"`
+	Visible  bool    `json:"visible"`
+	Gravity  float64 `json:"gravity,omitempty"`
+	Color    []int   `json:"color,omitempty"`
 }
 
 type Link struct {
@@ -83,6 +84,7 @@ func marshal(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser
 				From:    node.Id,
 				To:      parentFolder,
 				Visible: false,
+				Force:   folderLinkForce,
 			})
 			if _, ok := addedFolders[parentFolder]; ok {
 				continue
@@ -91,7 +93,7 @@ func marshal(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser
 				out.Nodes = append(out.Nodes, Node{
 					Id:      parentFolder,
 					Visible: false,
-					Gravity: folderGravity,
+					Gravity: folderNodeGravity,
 				})
 			}
 		}
