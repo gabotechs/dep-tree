@@ -114,11 +114,9 @@
         })
         // Node params
         .nodeLabel(({fileName, dirName, loc}) => `<div class="nodeLabel">
-            <span>${fileName}</span>
-            <span>${dirName}</span>
+            <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
             <span>LOC: ${loc}</span>
         </div>`)
-        .nodeAutoColorBy('dirName')
         .nodeVal('size')
         .nodeVisibility('visible')
         .nodeColor(colorNode)
