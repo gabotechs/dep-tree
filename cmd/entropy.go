@@ -9,6 +9,7 @@ import (
 )
 
 var noBrowserOpen bool
+var enableGui bool
 
 func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -39,13 +40,15 @@ func EntropyCmd() *cobra.Command {
 				return err
 			}
 			ctx, err = entropy.Render(ctx, parser, entropy.RenderConfig{
-				NoOpen: noBrowserOpen,
+				NoOpen:    noBrowserOpen,
+				EnableGui: enableGui,
 			})
 			return err
 		},
 	}
 
 	cmd.Flags().BoolVar(&noBrowserOpen, "no-browser-open", false, "Disable the automatic browser open while rendering entropy")
+	cmd.Flags().BoolVar(&enableGui, "enable-gui", false, "Enables a GUI for changing rendering settings")
 
 	return cmd
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -15,11 +16,12 @@ import (
 //go:embed index.html
 var index []byte
 
-const ToReplace = "const GRAPH = {}"
-const ReplacePrefix = "const GRAPH = "
+const ToReplace = "const DATA = {}"
+const ReplacePrefix = "const DATA = "
 
 type RenderConfig struct {
-	NoOpen bool
+	NoOpen    bool
+	EnableGui bool
 }
 
 func Render(ctx context.Context, parser language.NodeParser, cfg RenderConfig) (context.Context, error) {
@@ -30,7 +32,9 @@ func Render(ctx context.Context, parser language.NodeParser, cfg RenderConfig) (
 	}
 
 	dt.LoadCycles()
-	marshaled, err := marshal(dt, parser)
+	graph := makeGraph(dt, parser)
+	graph.EnableGui = cfg.EnableGui
+	marshaled, err := json.Marshal(graph)
 	if err != nil {
 		return ctx, err
 	}
