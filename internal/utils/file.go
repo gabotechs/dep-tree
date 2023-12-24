@@ -2,7 +2,7 @@ package utils
 
 import "os"
 
-func FileExists(path string) bool {
+func _FileExists(path string) bool {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -10,10 +10,14 @@ func FileExists(path string) bool {
 	return !stat.IsDir()
 }
 
-func DirExists(path string) bool {
+var FileExists = Cached(_FileExists)
+
+func _DirExists(path string) bool {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return false
 	}
 	return stat.IsDir()
 }
+
+var DirExists = Cached(_DirExists)
