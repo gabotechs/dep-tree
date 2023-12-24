@@ -18,37 +18,58 @@ func TestLanguage_ParseImports(t *testing.T) {
 	importsTestFolder, _ := filepath.Abs(importsTestFolder)
 
 	tests := []struct {
-		Name           string
-		File           string
-		Entrypoint     string
-		Expected       []language.ImportEntry
-		ExpectedErrors []string
+		Name                      string
+		File                      string
+		Entrypoint                string
+		Expected                  []language.ImportEntry
+		ExpectedErrors            []string
+		ExcludeConditionalImports bool
 	}{
 		{
 			Name:       "main.py",
 			File:       "main.py",
 			Entrypoint: "main.py",
 			Expected: []language.ImportEntry{
-				// {
-				//	All: true,
-				//	Path:  path.Join(importsTestFolder, "src", "foo.py"),
-				// },
-				// {
-				//	All: true,
-				//	Path:  path.Join(importsTestFolder, "src", "main.py"),
-				// },
-				// {
-				//	All: true,
-				//	Path:  path.Join(importsTestFolder, "src", "main.py"),
-				// },
-				// {
-				//	All: true,
-				//	Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				// },
-				// {
-				//	Names: []string{"main"},
-				//	Path:    path.Join(importsTestFolder, "src", "main.py"),
-				// },
+				{
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "main.py"),
+				},
+				{
+					Names: []string{"main"},
+					Path:  path.Join(importsTestFolder, "src", "main.py"),
+				},
+				{
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "main.py"),
+				},
+				{
+					Names: []string{"main"},
+					Path:  path.Join(importsTestFolder, "src", "main.py"),
+				},
+				{
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "module", "__init__.py"),
+				},
+				{
+					All:  true,
+					Path: path.Join(importsTestFolder, "src", "module", "module.py"),
+				},
+				{
+					Names: []string{"bar"},
+					Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
+				},
+			},
+			ExpectedErrors: []string{
+				"cannot import file src.py from directory",
+				"cannot import file un_existing.py from directory",
+			},
+		},
+		{
+			Name:                      "main.py",
+			File:                      "main.py",
+			Entrypoint:                "main.py",
+			ExcludeConditionalImports: true,
+			Expected: []language.ImportEntry{
 				{
 					All:  true,
 					Path: path.Join(importsTestFolder, "src", "main.py"),
@@ -80,7 +101,9 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint), nil)
+			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint), &Config{
+				ExcludeConditionalImports: tt.ExcludeConditionalImports,
+			})
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(path.Join(importsTestFolder, tt.File))

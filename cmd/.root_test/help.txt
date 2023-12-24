@@ -17,11 +17,12 @@ Available Commands:
   render      (default command) Render the dependency tree starting from the provided entrypoint
 
 Flags:
-  -c, --config string               path to dep-tree's config file (default .dep-tree.yml)
-      --exclude stringArray         Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags
-      --follow-re-exports           whether to follow re-exports or not while resolving imports between files (default true)
-  -h, --help                        help for dep-tree
-      --js-follow-ts-config-paths   whether to follow the tsconfig.json paths while resolving imports or not (default false)
-  -v, --version                     version for dep-tree
+  -c, --config string                        path to dep-tree's config file (default .dep-tree.yml)
+      --exclude stringArray                  Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags
+      --follow-re-exports                    whether to follow re-exports or not while resolving imports between files (default true)
+  -h, --help                                 help for dep-tree
+      --js-follow-ts-config-paths            whether to follow the tsconfig.json paths while resolving imports or not (default false)
+      --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements (default false)
+  -v, --version                              version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.
