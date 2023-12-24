@@ -30,8 +30,7 @@ func TestExport(t *testing.T) {
 			Name: "foo",
 		},
 		{
-			Name:                    " foo = 1",
-			ExpectedVariableAssigns: []VariableAssign{{Names: []string{"foo"}, Indented: true}},
+			Name: " foo = 1",
 		},
 		{
 			Name:                    "foo: int = 1",
@@ -46,8 +45,7 @@ func TestExport(t *testing.T) {
 			ExpectedVariableAssigns: []VariableAssign{{Names: []string{"foo", "bar"}}},
 		},
 		{
-			Name:                    " foo = bar = 1",
-			ExpectedVariableAssigns: []VariableAssign{{Names: []string{"foo", "bar"}, Indented: true}},
+			Name: " foo = bar = 1",
 		},
 		{
 			Name:                    "foo, bar = 1, 1",
@@ -62,8 +60,7 @@ func TestExport(t *testing.T) {
 			ExpectedVariableUnpacks: []VariableUnpack{{Names: []string{"foo", "bar"}}},
 		},
 		{
-			Name:                    " (\n  foo,\n  bar\n) = 1, 1",
-			ExpectedVariableUnpacks: []VariableUnpack{{Names: []string{"foo", "bar"}, Indented: true}},
+			Name: " (\n  foo,\n  bar\n) = 1, 1",
 		},
 		{
 			Name:              "def func():",
@@ -74,8 +71,7 @@ func TestExport(t *testing.T) {
 			ExpectedFunctions: []Function{{Name: "func"}},
 		},
 		{
-			Name:              " def func():",
-			ExpectedFunctions: []Function{{Name: "func", Indented: true}},
+			Name: " def func():",
 		},
 		{
 			Name:            "class cls:",
@@ -86,8 +82,7 @@ func TestExport(t *testing.T) {
 			ExpectedClasses: []Class{{Name: "cls"}},
 		},
 		{
-			Name:            " class cls:",
-			ExpectedClasses: []Class{{Name: "cls", Indented: true}},
+			Name: " class cls:",
 		},
 	}
 

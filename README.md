@@ -29,6 +29,11 @@
     ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
 </p>
 
+## Checkout the entropy graph of well-known libraries
+- [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
+- [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
+- [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)
+
 ## Install
 
 On Mac and Linux, it can be installed using brew:

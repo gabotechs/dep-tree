@@ -22,7 +22,7 @@ type Statement struct {
 }
 
 type File struct {
-	Statements []*Statement `(@@ | ANY | ALL | Ident | Space | NewLine | String | MultilineString)*`
+	Statements []*Statement `(@@ | SOF | ANY | ALL | Ident | Space | NewLine | String | MultilineString)*`
 	Path       string
 	loc        int
 	size       int
@@ -37,7 +37,7 @@ func (f File) Size() int {
 }
 
 var (
-	lex = lexer.MustSimple(
+	lex = LexerWithSOF(lexer.MustSimple(
 		[]lexer.SimpleRule{
 			{"ALL", `\*`},
 			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
@@ -45,15 +45,15 @@ var (
 			{"String", `'(?:\\.|[^'])*'` + "|" + `"(?:\\.|[^"])*"`},
 			// https://stackoverflow.com/questions/69184441/regular-expression-for-comments-in-python-re
 			{"Comment", `#.*`},
-			{"NewLine", `\n`},
+			{"NewLine", `[\n\r]`},
 			{"Space", `\s+`},
 			{"ANY", `.`},
 		},
-	)
+	))
 	parser = participle.MustBuild[File](
 		participle.Lexer(lex),
 		participle.Elide("Comment", "String", "MultilineString"),
-		participle.UseLookahead(1024),
+		participle.UseLookahead(64),
 	)
 )
 

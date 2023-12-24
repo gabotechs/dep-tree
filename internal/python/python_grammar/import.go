@@ -11,7 +11,7 @@ type FromImport struct {
 	Relative []bool         `"from" (Space | @".") @"."*`
 	Path     []string       `@Ident? (Space? "." Space? @Ident)* Space`
 	All      bool           `"import" Space ( @ALL |`
-	Names    []ImportedName `( (@@ (Space? "," Space? @@)*) | ( "(" (Space|NewLine)* @@ ( (Space|NewLine)* "," (Space|NewLine)* @@ )* (Space|NewLine)* ")" ) ) )`
+	Names    []ImportedName `( (@@ (Space? "," Space? @@)*) | ( "(" (Space|NewLine)* @@ ( (Space|NewLine)* "," (Space|NewLine)* @@ )* (Space|NewLine)* ","? (Space|NewLine)* ")" ) ) )`
 }
 
 type Import struct {
