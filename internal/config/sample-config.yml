@@ -86,7 +86,16 @@ js:
 
 # Python specific settings.
 python:
-  # None available at the moment.
+  # Whether to take into account conditional imports as dependencies between files or not.
+  # A conditional import is an `import` statement that is wrapped inside an `if` block or
+  # a function, for example:
+  #
+  # if SHOULD_IMPORT:
+  #     from foo import *
+  #
+  # by default these statements introduce a dependency between importing and imported file,
+  # but depending on your use case you might want to disable it.
+  excludeConditionalImports: false
 
 # Rust specific settings.
 rust:

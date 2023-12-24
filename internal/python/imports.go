@@ -18,7 +18,10 @@ func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsRes
 		switch {
 		case stmt == nil:
 			// Is this even possible?
-		case stmt.Import != nil && !stmt.Import.Indented:
+		case stmt.Import != nil:
+			if l.cfg.ExcludeConditionalImports && stmt.Import.Indented {
+				continue
+			}
 			resolved := l.ResolveAbsolute(stmt.Import.Path[0:])
 			switch {
 			case resolved == nil:
@@ -41,7 +44,10 @@ func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsRes
 					})
 				}
 			}
-		case stmt.FromImport != nil && !stmt.FromImport.Indented:
+		case stmt.FromImport != nil:
+			if l.cfg.ExcludeConditionalImports && stmt.FromImport.Indented {
+				continue
+			}
 			importedNames := make([]string, len(stmt.FromImport.Names))
 			for i, name := range stmt.FromImport.Names {
 				importedNames[i] = name.Name
