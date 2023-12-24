@@ -30,37 +30,50 @@ type ResolveResult struct {
 	File       *FileResult
 }
 
+func _pythonFilesInDir(dir string) []string {
+	result, _ := os.ReadDir(dir)
+	var pythonFiles []string
+	for _, entry := range result {
+		if strings.HasSuffix(entry.Name(), ".py") {
+			pythonFiles = append(pythonFiles, path.Join(dir, entry.Name()))
+		}
+	}
+	return pythonFiles
+}
+
+var pythonFilesInDir = utils.Cached(_pythonFilesInDir)
+
 // resolveFromSlicesAndSearchPath returns multiple valid resolved paths.
 func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *ResolveResult {
 	fullFileOrDir := path.Join(append([]string{searchPath}, slices...)...)
 
+	// If there is a Python file, we are done.
 	if utils.FileExists(fullFileOrDir + ".py") {
 		abs, _ := filepath.Abs(fullFileOrDir + ".py")
 		return &ResolveResult{File: &FileResult{Path: abs}}
 	}
 
-	if result, err := os.ReadDir(fullFileOrDir); err == nil {
-		var pythonFiles []string
-		for _, entry := range result {
-			if strings.HasSuffix(entry.Name(), ".py") {
-				pythonFiles = append(pythonFiles, path.Join(fullFileOrDir, entry.Name()))
-			}
-		}
-		initFile := path.Join(fullFileOrDir, "__init__.py")
-		if utils.FileExists(initFile) {
-			abs, _ := filepath.Abs(initFile)
-			return &ResolveResult{InitModule: &InitModuleResult{
-				Path:        abs,
-				PythonFiles: pythonFiles,
-			}}
-		}
-		abs, _ := filepath.Abs(fullFileOrDir)
-		return &ResolveResult{Directory: &DirectoryResult{
-			PythonFiles: pythonFiles,
+	// If there was not a Python file, it should be a dir.
+	if !utils.DirExists(fullFileOrDir) {
+		return nil
+	}
+
+	pythonFiles := pythonFilesInDir(fullFileOrDir)
+	// If there is an __init__.py file, we must be referring to that one.
+	initFile := path.Join(fullFileOrDir, "__init__.py")
+	if utils.FileExists(initFile) {
+		abs, _ := filepath.Abs(initFile)
+		return &ResolveResult{InitModule: &InitModuleResult{
 			Path:        abs,
+			PythonFiles: pythonFiles,
 		}}
 	}
-	return nil
+	// Otherwise, the whole folder is being imported.
+	abs, _ := filepath.Abs(fullFileOrDir)
+	return &ResolveResult{Directory: &DirectoryResult{
+		PythonFiles: pythonFiles,
+		Path:        abs,
+	}}
 }
 
 // ResolveRelative cannot return an empty []string, unless an error happened.
