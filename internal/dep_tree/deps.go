@@ -5,8 +5,9 @@ import (
 	"sort"
 
 	"github.com/elliotchance/orderedmap/v2"
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gammazero/deque"
+
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func (dt *DepTree[T]) LoadDeps(ctx context.Context) (context.Context, error) {
@@ -33,12 +34,14 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 	dt.Graph.AddNode(root)
 
 	visited := make(map[string]bool)
+	dt.onStartLoading()
 
 	for queue.Len() > 0 {
 		node := queue.PopFront()
 		if _, ok := visited[node.Id]; ok {
 			continue
 		}
+		dt.onNodeLoad(node)
 		visited[node.Id] = true
 
 		newCtx, deps, err := dt.NodeParser.Deps(ctx, node)
@@ -63,6 +66,7 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 			}
 		}
 	}
+	dt.onFinishLoad()
 
 	return ctx, nil
 }

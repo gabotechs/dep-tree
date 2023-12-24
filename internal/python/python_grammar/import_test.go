@@ -76,6 +76,10 @@ func TestImport(t *testing.T) {
 			ExpectedFromImports: []FromImport{{Names: []ImportedName{{Name: "a"}, {Name: "b"}}, Path: []string{"foo"}}},
 		},
 		{
+			Name:                "from foo import (\n    a,\n    b,\n)",
+			ExpectedFromImports: []FromImport{{Names: []ImportedName{{Name: "a"}, {Name: "b"}}, Path: []string{"foo"}}},
+		},
+		{
 			Name:                "from foo.bar import (a)",
 			ExpectedFromImports: []FromImport{{Names: []ImportedName{{Name: "a"}}, Path: []string{"foo", "bar"}}},
 		},

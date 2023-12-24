@@ -58,7 +58,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 			}
 			exports = append(exports, entry)
 
-		case stmt.VariableUnpack != nil && !stmt.VariableUnpack.Indented:
+		case stmt.VariableUnpack != nil:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableUnpack.Names)),
 				Path:  file.Path,
@@ -67,7 +67,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 				entry.Names[i] = language.ExportName{Original: name}
 			}
 			exports = append(exports, entry)
-		case stmt.VariableAssign != nil && !stmt.VariableAssign.Indented:
+		case stmt.VariableAssign != nil:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableAssign.Names)),
 				Path:  file.Path,
@@ -76,12 +76,12 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 				entry.Names[i] = language.ExportName{Original: name}
 			}
 			exports = append(exports, entry)
-		case stmt.VariableTyping != nil && !stmt.VariableTyping.Indented:
+		case stmt.VariableTyping != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.VariableTyping.Name}},
 				Path:  file.Path,
 			})
-		case stmt.Function != nil && !stmt.Function.Indented:
+		case stmt.Function != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
@@ -90,7 +90,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 				},
 				Path: file.Path,
 			})
-		case stmt.Class != nil && !stmt.Class.Indented:
+		case stmt.Class != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
