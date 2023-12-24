@@ -41,7 +41,7 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 		if _, ok := visited[node.Id]; ok {
 			continue
 		}
-		dt.onNodeLoad(node)
+		dt.onNodeStartLoad(node)
 		visited[node.Id] = true
 
 		newCtx, deps, err := dt.NodeParser.Deps(ctx, node)
@@ -50,6 +50,7 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 			node.AddErrors(err)
 			continue
 		}
+		dt.onNodeFinishLoad(deps)
 
 		for _, dep := range deps {
 			// No own child.

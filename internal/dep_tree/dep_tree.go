@@ -3,6 +3,8 @@ package dep_tree
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/schollz/progressbar/v3"
@@ -33,28 +35,52 @@ type DepTree[T any] struct {
 	// just some internal cache.
 	root *graph.Node[T]
 	// callbacks
-	onStartLoading func()
-	onNodeLoad     func(*graph.Node[T])
-	onFinishLoad   func()
+	onStartLoading   func()
+	onNodeStartLoad  func(*graph.Node[T])
+	onNodeFinishLoad func([]*graph.Node[T])
+	onFinishLoad     func()
 }
 
 func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
 	return (&DepTree[T]{
-		NodeParser: parser,
-		Nodes:      []*DepTreeNode[T]{},
-		Graph:      graph.NewGraph[T](),
-		Cycles:     orderedmap.NewOrderedMap[[2]string, graph.Cycle](),
+		NodeParser:       parser,
+		Nodes:            []*DepTreeNode[T]{},
+		Graph:            graph.NewGraph[T](),
+		Cycles:           orderedmap.NewOrderedMap[[2]string, graph.Cycle](),
+		onStartLoading:   func() {},
+		onNodeStartLoad:  func(_ *graph.Node[T]) {},
+		onNodeFinishLoad: func(_ []*graph.Node[T]) {},
+		onFinishLoad:     func() {},
 	}).withLoader()
 }
 
 func (dt *DepTree[T]) withLoader() *DepTree[T] {
-	bar := progressbar.Default(-1)
+	bar := progressbar.NewOptions64(
+		-1,
+		progressbar.OptionSetDescription("Loading graph..."),
+		progressbar.OptionSetWriter(os.Stderr),
+		progressbar.OptionSetWidth(10),
+		progressbar.OptionThrottle(65*time.Millisecond),
+		progressbar.OptionShowIts(),
+		progressbar.OptionSpinnerType(14),
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetRenderBlankState(true),
+	)
+	diff := make(map[string]bool)
+	total := 0
 	dt.onStartLoading = func() {
 		bar.Reset()
 	}
-	dt.onNodeLoad = func(n *graph.Node[T]) {
-		_ = bar.Add(1)
-		bar.Describe(fmt.Sprintf("Loading %s...", dt.NodeParser.Display(n)))
+	dt.onNodeStartLoad = func(n *graph.Node[T]) {
+		total += 1
+		_ = bar.Set(total)
+		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", total, len(diff), dt.NodeParser.Display(n)))
+	}
+	dt.onNodeFinishLoad = func(ns []*graph.Node[T]) {
+		for _, n := range ns {
+			diff[n.Id] = true
+		}
+		bar.ChangeMax(len(diff))
 	}
 	dt.onFinishLoad = func() {
 		bar.Describe("Finished loading")
