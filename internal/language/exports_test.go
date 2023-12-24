@@ -63,12 +63,12 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err := parser.cachedParseExports(ctx, "1")
+	ctx, _, err := parser.gatherExportsFromFile(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.cachedParseExports(ctx, "1")
+	_, _, err = parser.gatherExportsFromFile(ctx, "1")
 	a.NoError(err)
 	cached := time.Since(start)
 
@@ -229,12 +229,12 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			}
 			parser := lang.testParser(tt.Path)
 
-			_, exports, err := parser.ParseExports(context.Background(), "1", true, nil)
+			_, exports, err := parser.ParseExports(context.Background(), "1", true)
 			a.NoError(err)
 
 			a.Equal(tt.ExpectedUnwrapped, exports.Exports)
 
-			_, exports, err = parser.ParseExports(context.Background(), "1", false, nil)
+			_, exports, err = parser.ParseExports(context.Background(), "1", false)
 			a.NoError(err)
 
 			a.Equal(tt.ExpectedWrapped, exports.Exports)
