@@ -53,22 +53,6 @@ func (p *Parser[F]) parseExports(
 	ctx context.Context,
 	id string,
 	unwrappedExports bool,
-) (context.Context, *ExportsResult, error) {
-	unwrappedCacheKey := parseExportsKey(fmt.Sprintf("%s-%t", id, unwrappedExports))
-	if cached, ok := ctx.Value(unwrappedCacheKey).(*ExportsResult); ok {
-		return ctx, cached, nil
-	}
-	ctx, result, err := p.uncachedParseExports(ctx, id, unwrappedExports, nil)
-	if err != nil {
-		return ctx, nil, err
-	}
-	return context.WithValue(ctx, unwrappedCacheKey, result), result, nil
-}
-
-func (p *Parser[F]) uncachedParseExports(
-	ctx context.Context,
-	id string,
-	unwrappedExports bool,
 	stack *utils.CallStack,
 ) (context.Context, *ExportsResult, error) {
 	if stack == nil {
@@ -76,6 +60,11 @@ func (p *Parser[F]) uncachedParseExports(
 	}
 	if err := stack.Push(id); err != nil {
 		return ctx, nil, errors.New("circular export: " + err.Error())
+	}
+	defer stack.Pop()
+	unwrappedCacheKey := parseExportsKey(fmt.Sprintf("%s-%t", stack.Hash(), unwrappedExports))
+	if cached, ok := ctx.Value(unwrappedCacheKey).(*ExportsResult); ok {
+		return ctx, cached, nil
 	}
 
 	ctx, wrapped, err := p.gatherExportsFromFile(ctx, id)
@@ -94,7 +83,7 @@ func (p *Parser[F]) uncachedParseExports(
 		}
 
 		var unwrapped *ExportsResult
-		ctx, unwrapped, err = p.uncachedParseExports(ctx, export.Path, unwrappedExports, stack)
+		ctx, unwrapped, err = p.parseExports(ctx, export.Path, unwrappedExports, stack)
 		if err != nil {
 			exportErrors = append(exportErrors, err)
 			continue
@@ -126,8 +115,8 @@ func (p *Parser[F]) uncachedParseExports(
 		}
 	}
 
-	stack.Pop()
-	return ctx, &ExportsResult{Exports: exports, Errors: exportErrors}, nil
+	result := ExportsResult{Exports: exports, Errors: exportErrors}
+	return context.WithValue(ctx, unwrappedCacheKey, &result), &result, nil
 }
 
 type gatherExportsFromFileKey string
