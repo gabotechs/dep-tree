@@ -62,7 +62,7 @@ func (p *Parser[F]) parseExports(
 		return ctx, nil, errors.New("circular export: " + err.Error())
 	}
 	defer stack.Pop()
-	unwrappedCacheKey := parseExportsKey(fmt.Sprintf("%s-%t", stack.Hash(), unwrappedExports))
+	unwrappedCacheKey := parseExportsKey(fmt.Sprintf("%s-%t", id, unwrappedExports))
 	if cached, ok := ctx.Value(unwrappedCacheKey).(*ExportsResult); ok {
 		return ctx, cached, nil
 	}
