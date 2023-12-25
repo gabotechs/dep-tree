@@ -58,7 +58,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 		filepath := parser.Display(node)
 		dirName := path.Dir(filepath)
 		out.Nodes = append(out.Nodes, Node{
-			Id:       node.Id,
+			Id:       utils.Hash(node.Id),
 			FileName: path.Base(filepath),
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
@@ -68,15 +68,15 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 
 		for _, to := range dt.Graph.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
-				From: node.Id,
-				To:   to.Id,
+				From: utils.Hash(node.Id),
+				To:   utils.Hash(to.Id),
 			})
 		}
 
 		for _, parentFolder := range splitFullPaths(dirName) {
 			out.Links = append(out.Links, Link{
-				From:  node.Id,
-				To:    parentFolder,
+				From:  utils.Hash(node.Id),
+				To:    utils.Hash(parentFolder),
 				IsDir: true,
 			})
 			if _, ok := addedFolders[parentFolder]; ok {
@@ -84,7 +84,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 			} else {
 				addedFolders[parentFolder] = true
 				out.Nodes = append(out.Nodes, Node{
-					Id:    parentFolder,
+					Id:    utils.Hash(parentFolder),
 					IsDir: true,
 				})
 			}
@@ -93,8 +93,8 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 
 	for el := dt.Cycles.Front(); el != nil; el = el.Next() {
 		out.Links = append(out.Links, Link{
-			From:     el.Key[0],
-			To:       el.Key[1],
+			From:     utils.Hash(el.Key[0]),
+			To:       utils.Hash(el.Key[1]),
 			IsCyclic: true,
 		})
 	}
