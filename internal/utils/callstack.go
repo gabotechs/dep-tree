@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/elliotchance/orderedmap/v2"
 )
@@ -49,4 +50,8 @@ func (cs *CallStack) Back() (string, bool) {
 
 func (cs *CallStack) Stack() []string {
 	return cs.m.Keys()
+}
+
+func (cs *CallStack) Hash() string {
+	return strings.Join(cs.m.Keys(), "-")
 }

@@ -218,6 +218,50 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				"circular export: cycle detected:\n1\n2\n3\n4\n1",
 			},
 		},
+		{
+			Name: "non circular export",
+			Path: "1",
+			Exports: b().
+				Entry("1", "2", "A").
+				Entry("1", "3", "A").
+				Entry("1", "4", "A").
+				Entry("2", "2", "A").
+				Entry("3", "2", "A").
+				Entry("4", "3", "A").
+				Build(),
+			ExpectedUnwrapped: makeStringOm(
+				"A", "2",
+			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
+				"A", "3",
+				"A", "4",
+			),
+			ExpectedErrors: []string{},
+		},
+		{
+			Name: "non circular export (2)",
+			Path: "1",
+			Exports: b().
+				Entry("1", "2", "A").
+				Entry("1", "2", "B").
+				Entry("1", "2", "C").
+				Entry("2", "2", "A").
+				Entry("2", "2", "B").
+				Entry("2", "2", "C").
+				Build(),
+			ExpectedUnwrapped: makeStringOm(
+				"A", "2",
+				"B", "2",
+				"C", "2",
+			),
+			ExpectedWrapped: makeStringOm(
+				"A", "2",
+				"B", "2",
+				"C", "2",
+			),
+			ExpectedErrors: []string{},
+		},
 	}
 
 	for _, tt := range tests {
@@ -228,21 +272,25 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				exports: tt.Exports,
 			}
 			parser := lang.testParser(tt.Path)
+			ctx := context.Background()
 
-			_, exports, err := parser.parseExports(context.Background(), "1", true)
-			a.NoError(err)
+			for i := 0; i < 2; i++ {
+				nCtx, exports, err := parser.parseExports(ctx, "1", true, nil)
+				ctx = nCtx
+				a.NoError(err)
 
-			a.Equal(tt.ExpectedUnwrapped, exports.Exports)
+				a.Equal(tt.ExpectedUnwrapped, exports.Exports)
 
-			_, exports, err = parser.parseExports(context.Background(), "1", false)
-			a.NoError(err)
+				ctx, exports, err = parser.parseExports(ctx, "1", false, nil)
+				a.NoError(err)
 
-			a.Equal(tt.ExpectedWrapped, exports.Exports)
-			var expectedErrors []error
-			for _, expectedError := range tt.ExpectedErrors {
-				expectedErrors = append(expectedErrors, errors.New(expectedError))
+				a.Equal(tt.ExpectedWrapped, exports.Exports)
+				var expectedErrors []error
+				for _, expectedError := range tt.ExpectedErrors {
+					expectedErrors = append(expectedErrors, errors.New(expectedError))
+				}
+				a.Equal(expectedErrors, exports.Errors)
 			}
-			a.Equal(expectedErrors, exports.Errors)
 		})
 	}
 }
