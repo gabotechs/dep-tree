@@ -104,7 +104,7 @@ func (p *Parser[F]) Entrypoint() (*Node, error) {
 }
 
 func (p *Parser[F]) updateNodeInfo(ctx context.Context, n *Node) (context.Context, error) {
-	ctx, file, err := p.CachedParseFile(ctx, n.Id)
+	ctx, file, err := p.parseFile(ctx, n.Id)
 	if err != nil {
 		return ctx, err
 	}
@@ -115,7 +115,7 @@ func (p *Parser[F]) updateNodeInfo(ctx context.Context, n *Node) (context.Contex
 
 func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node, error) {
 	ctx, _ = p.updateNodeInfo(ctx, n)
-	ctx, imports, err := p.CachedParseImports(ctx, n.Id)
+	ctx, imports, err := p.gatherImportsFromFile(ctx, n.Id)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -136,7 +136,7 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 		//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
 		//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
 		//  Instead we never unwrap export to avoid this.
-		ctx, exports, err = p.ParseExports(ctx, n.Id, false)
+		ctx, exports, err = p.parseExports(ctx, n.Id, false)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -161,7 +161,7 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 		}
 
 		var exports *ExportsResult
-		ctx, exports, err = p.ParseExports(ctx, importEntry.Path, true)
+		ctx, exports, err = p.parseExports(ctx, importEntry.Path, true)
 		if err != nil {
 			return ctx, nil, err
 		}

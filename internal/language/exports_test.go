@@ -229,12 +229,12 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			}
 			parser := lang.testParser(tt.Path)
 
-			_, exports, err := parser.ParseExports(context.Background(), "1", true)
+			_, exports, err := parser.parseExports(context.Background(), "1", true)
 			a.NoError(err)
 
 			a.Equal(tt.ExpectedUnwrapped, exports.Exports)
 
-			_, exports, err = parser.ParseExports(context.Background(), "1", false)
+			_, exports, err = parser.parseExports(context.Background(), "1", false)
 			a.NoError(err)
 
 			a.Equal(tt.ExpectedWrapped, exports.Exports)

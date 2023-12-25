@@ -49,7 +49,7 @@ type ExportsResult struct {
 
 type parseExportsKey string
 
-func (p *Parser[F]) ParseExports(
+func (p *Parser[F]) parseExports(
 	ctx context.Context,
 	id string,
 	unwrappedExports bool,
@@ -140,7 +140,7 @@ func (p *Parser[F]) gatherExportsFromFile(
 	if cached, ok := ctx.Value(cacheKey).(*ExportsEntries); ok {
 		return ctx, cached, nil
 	}
-	ctx, file, err := p.CachedParseFile(ctx, filePath)
+	ctx, file, err := p.parseFile(ctx, filePath)
 	if err != nil {
 		return ctx, nil, err
 	}
@@ -148,6 +148,5 @@ func (p *Parser[F]) gatherExportsFromFile(
 	if err != nil {
 		return ctx, nil, err
 	}
-	ctx = context.WithValue(ctx, cacheKey, result)
-	return ctx, result, err
+	return context.WithValue(ctx, cacheKey, result), result, err
 }

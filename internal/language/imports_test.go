@@ -23,12 +23,12 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err := parser.CachedParseImports(ctx, "1")
+	ctx, _, err := parser.gatherImportsFromFile(ctx, "1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.CachedParseImports(ctx, "1")
+	_, _, err = parser.gatherImportsFromFile(ctx, "1")
 	a.NoError(err)
 	cached := time.Since(start)
 
