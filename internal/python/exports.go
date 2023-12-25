@@ -83,21 +83,13 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 			})
 		case stmt.Function != nil:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{
-					{
-						Original: stmt.Function.Name,
-					},
-				},
-				Path: file.Path,
+				Names: []language.ExportName{{Original: stmt.Function.Name}},
+				Path:  file.Path,
 			})
 		case stmt.Class != nil:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{
-					{
-						Original: stmt.Class.Name,
-					},
-				},
-				Path: file.Path,
+				Names: []language.ExportName{{Original: stmt.Class.Name}},
+				Path:  file.Path,
 			})
 		}
 	}
