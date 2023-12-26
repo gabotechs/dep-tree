@@ -56,6 +56,8 @@ func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsEntries
 			if err != nil {
 				errors = append(errors, err)
 				continue
+			} else if exportFrom == "" {
+				continue
 			}
 
 			switch {
