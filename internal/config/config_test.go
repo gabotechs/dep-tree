@@ -17,6 +17,10 @@ func TestParseConfig(t *testing.T) {
 		ExpectedBlackList map[string][]string
 	}{
 		{
+			Name: "default file",
+			File: "",
+		},
+		{
 			Name: "Simple",
 			File: ".parse.yml",
 			ExpectedWhiteList: map[string][]string{
@@ -54,7 +58,10 @@ func TestParseConfig(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			cfg, err := ParseConfig(path.Join(testFolder, tt.File))
+			if tt.File != "" {
+				tt.File = path.Join(testFolder, tt.File)
+			}
+			cfg, err := ParseConfig(tt.File)
 			a.NoError(err)
 
 			a.Equal(tt.ExpectedWhiteList, cfg.Check.WhiteList)
@@ -71,7 +78,7 @@ func TestConfig_ErrorHandling(t *testing.T) {
 	}{
 		{
 			Name:     "No config file",
-			File:     "",
+			File:     ".non-existing.yml",
 			Expected: "no such file or directory",
 		},
 		{
@@ -85,7 +92,7 @@ func TestConfig_ErrorHandling(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			_, err := ParseConfig(tt.File)
-			a.Contains(err.Error(), tt.Expected)
+			a.ErrorContains(err, tt.Expected)
 		})
 	}
 }

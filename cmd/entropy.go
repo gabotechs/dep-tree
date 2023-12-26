@@ -3,8 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/gabotechs/dep-tree/internal/config"
-
 	"github.com/gabotechs/dep-tree/internal/entropy"
 )
 
@@ -23,13 +21,6 @@ func EntropyCmd() *cobra.Command {
 			cfg, err := loadConfig()
 			if err != nil {
 				return err
-			}
-			if cfg == nil {
-				cfg = &config.Config{}
-			}
-			if cfg.FollowReExports == nil {
-				v := false
-				cfg.FollowReExports = &v
 			}
 			parserBuilder, err := makeParserBuilder(entrypoint, cfg)
 			if err != nil {

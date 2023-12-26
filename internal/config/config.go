@@ -23,7 +23,7 @@ var SampleConfig string
 type Config struct {
 	Path            string
 	Exclude         []string      `yaml:"exclude"`
-	FollowReExports *bool         `yaml:"followReExports,omitempty"`
+	FollowReExports bool          `yaml:"followReExports"`
 	Check           check.Config  `yaml:"check"`
 	Js              js.Config     `yaml:"js"`
 	Rust            rust.Config   `yaml:"rust"`
@@ -31,10 +31,7 @@ type Config struct {
 }
 
 func (c *Config) UnwrapProxyExports() bool {
-	if c.FollowReExports == nil {
-		return true
-	}
-	return *c.FollowReExports
+	return c.FollowReExports
 }
 
 func (c *Config) IgnoreFiles() []string {
@@ -42,29 +39,40 @@ func (c *Config) IgnoreFiles() []string {
 }
 
 func ParseConfig(cfgPath string) (*Config, error) {
+	// Default values.
+	cfg := Config{
+		FollowReExports: false,
+		Js: js.Config{
+			FollowWorkspaces:    true,
+			FollowTsConfigPaths: true,
+		},
+		Python: python.Config{
+			ExcludeConditionalImports: false,
+		},
+		Rust: rust.Config{},
+	}
+
+	isDefault := cfgPath == ""
 	if cfgPath == "" {
 		cfgPath = DefaultConfigPath
 	}
-
 	content, err := os.ReadFile(cfgPath)
 	if os.IsNotExist(err) {
-		return &Config{}, err
-	}
-	if err != nil {
-		return nil, err
+		if !isDefault {
+			return &cfg, err
+		}
+	} else if err != nil {
+		return &cfg, err
 	}
 	absCfgPath, err := filepath.Abs(cfgPath)
 	if err != nil {
-		return nil, err
+		return &cfg, err
 	}
-
-	cfg := Config{
-		Path: path.Dir(absCfgPath),
-	}
+	cfg.Path = path.Dir(absCfgPath)
 
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
-		return nil, fmt.Errorf(`config file "%s" is not a valid yml file`, cfgPath)
+		return &cfg, fmt.Errorf(`config file "%s" is not a valid yml file`, cfgPath)
 	}
 	cfg.Check.Init(path.Dir(absCfgPath))
 	return &cfg, nil

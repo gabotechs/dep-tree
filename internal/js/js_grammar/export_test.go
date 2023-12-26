@@ -56,12 +56,15 @@ func TestExport(t *testing.T) {
 		{
 			Name: `export { name1, nameN };`,
 			ExpectedList: []AliasedName{
-				{
-					Original: "name1",
-				},
-				{
-					Original: "nameN",
-				},
+				{Original: "name1"},
+				{Original: "nameN"},
+			},
+		},
+		{
+			Name: `export { name1, nameN, };`,
+			ExpectedList: []AliasedName{
+				{Original: "name1"},
+				{Original: "nameN"},
 			},
 		},
 		{
