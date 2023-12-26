@@ -15,8 +15,8 @@ var Extensions = []string{
 }
 
 type Language struct {
-	PackageJsonPath string
-	Cfg             *Config
+	Workspaces *Workspaces
+	Cfg        *Config
 }
 
 var _ language.Language[js_grammar.File] = &Language{}
@@ -52,8 +52,15 @@ func MakeJsLanguage(ctx context.Context, entrypoint string, cfg *Config) (contex
 	if !utils.FileExists(entrypoint) {
 		return ctx, nil, fmt.Errorf("file %s does not exist", entrypoint)
 	}
+	workspaces, err := NewWorkspaces(entrypoint)
+	if err != nil {
+		return ctx, nil, err
+	}
 
-	return ctx, &Language{Cfg: cfg}, nil
+	return ctx, &Language{
+		Cfg:        cfg,
+		Workspaces: workspaces,
+	}, nil
 }
 
 func (l *Language) ParseFile(id string) (*js_grammar.File, error) {

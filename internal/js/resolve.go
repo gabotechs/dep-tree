@@ -31,47 +31,36 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 		return absPath, nil
 	}
 
-	tsConfig, rootFolder, err := findPackageJson(dir)
+	tsConfig, _, err := findPackageJson(dir)
 	if err != nil {
 		return "", err
 	}
 
-	// 2. If is imported from baseUrl.
-	baseUrl := tsConfig.CompilerOptions.BaseUrl
-	importFromBaseUrl := path.Join(rootFolder, baseUrl, unresolved)
-	absPath = getFileAbsPath(importFromBaseUrl)
+	// 2. If is imported from a workspace.
+	if l.Cfg == nil || l.Cfg.FollowWorkspaces {
+		absPath, err = l.Workspaces.ResolveFromWorkspaces(unresolved)
+		if absPath != "" || err != nil {
+			return absPath, err
+		}
+	}
+
+	// 3. If is imported from baseUrl.
+	absPath = tsConfig.ResolveFromBaseUrl(unresolved)
 	if absPath != "" {
 		return absPath, nil
 	}
 
-	// 3. If imported from a path override.
-	if l.Cfg != nil && l.Cfg.FollowTsConfigPaths == false {
-		return absPath, nil
-	}
-	pathOverrides := tsConfig.CompilerOptions.Paths
-	if pathOverrides == nil {
-		return absPath, nil
-	}
-	var failedMatches []string
-	for pathOverride, searchPaths := range pathOverrides {
-		pathOverride = strings.ReplaceAll(pathOverride, "*", "")
-		if strings.HasPrefix(unresolved, pathOverride) {
-			for _, searchPath := range searchPaths {
-				searchPath = strings.ReplaceAll(searchPath, "*", "")
-				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
-				importFromBaseUrlAndPaths := path.Join(rootFolder, baseUrl, newImportFrom)
-				absPath = getFileAbsPath(importFromBaseUrlAndPaths)
-				if absPath != "" {
-					return absPath, nil
-				}
-			}
-			failedMatches = append(failedMatches, pathOverride)
+	// 4. If imported from a path override.
+	if l.Cfg == nil || l.Cfg.FollowTsConfigPaths {
+		absPath, err = tsConfig.ResolveFromPaths(unresolved)
+		if err != nil {
+			return "", err
+		}
+		if absPath != "" {
+			return absPath, nil
 		}
 	}
-	if failedMatches != nil {
-		return absPath, fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, strings.Join(failedMatches, "', '"))
-	}
-	return absPath, nil
+	return "", nil
 }
 
 func retrieveWithExt(absPath string) string {

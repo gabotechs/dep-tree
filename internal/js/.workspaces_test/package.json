@@ -1,0 +1,11 @@
+{
+  "name": "root",
+  "workspaces": [
+    "a",
+    "b",
+    "e",
+    "foo/k",
+    "nested/*",
+    "r-nested/**/*"
+  ]
+}

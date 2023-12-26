@@ -7,7 +7,7 @@ type AliasedName struct {
 }
 
 type ExportDeconstruction struct {
-	Names []AliasedName `"{" @@ ("," @@)* "}"`
+	Names []AliasedName `"{" @@ ("," @@)* ","? "}"`
 }
 
 type DeclarationExport struct {

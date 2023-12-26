@@ -22,6 +22,7 @@ Flags:
       --follow-re-exports                    whether to follow re-exports or not while resolving imports between files (default true)
   -h, --help                                 help for dep-tree
       --js-follow-ts-config-paths            whether to follow the tsconfig.json paths while resolving imports or not (default false)
+      --js-follow-workspaces                 whether to take the workspaces attribute in the root package.json into account or not (default false)
       --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements (default false)
   -v, --version                              version for dep-tree
 
