@@ -10,7 +10,7 @@ func _FileExists(path string) bool {
 	return !stat.IsDir()
 }
 
-var FileExists = Cached(_FileExists)
+var FileExists = Cached1In1Out(_FileExists)
 
 func _DirExists(path string) bool {
 	stat, err := os.Stat(path)
@@ -20,4 +20,4 @@ func _DirExists(path string) bool {
 	return stat.IsDir()
 }
 
-var DirExists = Cached(_DirExists)
+var DirExists = Cached1In1Out(_DirExists)

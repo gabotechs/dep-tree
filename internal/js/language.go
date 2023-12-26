@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -17,14 +16,16 @@ var Extensions = []string{
 
 type Language struct {
 	PackageJsonPath string
-	ProjectRoot     string
-	TsConfig        TsConfig
 	Cfg             *Config
 }
 
 var _ language.Language[js_grammar.File] = &Language{}
 
-func findPackageJson(searchPath string) (TsConfig, string, error) {
+// findPackageJson starts from a search path and goes up dir by dir
+// until a package.json file is found. If one is found, it returns the
+// dir where it was found and a parsed TsConfig object in case that there
+// was also a tsconfig.json file.
+func _findPackageJson(searchPath string) (TsConfig, string, error) {
 	if len(searchPath) < 2 {
 		return TsConfig{}, "", nil
 	}
@@ -41,33 +42,18 @@ func findPackageJson(searchPath string) (TsConfig, string, error) {
 		}
 		return tsConfig, searchPath, err
 	} else {
-		return findPackageJson(path.Dir(searchPath))
+		return _findPackageJson(path.Dir(searchPath))
 	}
 }
 
+var findPackageJson = utils.Cached1In2OutErr(_findPackageJson)
+
 func MakeJsLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[js_grammar.File], error) {
-	entrypointAbsPath, err := filepath.Abs(entrypoint)
-	if err != nil {
-		return ctx, nil, err
-	}
 	if !utils.FileExists(entrypoint) {
 		return ctx, nil, fmt.Errorf("file %s does not exist", entrypoint)
 	}
 
-	tsConfig, packageJsonPath, err := findPackageJson(entrypointAbsPath)
-	if err != nil {
-		return ctx, nil, err
-	}
-	projectRoot := path.Dir(entrypointAbsPath)
-	if packageJsonPath != "" {
-		projectRoot = packageJsonPath
-	}
-	return ctx, &Language{
-		PackageJsonPath: packageJsonPath,
-		ProjectRoot:     projectRoot,
-		TsConfig:        tsConfig,
-		Cfg:             cfg,
-	}, nil
+	return ctx, &Language{Cfg: cfg}, nil
 }
 
 func (l *Language) ParseFile(id string) (*js_grammar.File, error) {

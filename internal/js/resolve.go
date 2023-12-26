@@ -31,9 +31,14 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 		return absPath, nil
 	}
 
+	tsConfig, rootFolder, err := findPackageJson(dir)
+	if err != nil {
+		return "", err
+	}
+
 	// 2. If is imported from baseUrl.
-	baseUrl := l.TsConfig.CompilerOptions.BaseUrl
-	importFromBaseUrl := path.Join(l.ProjectRoot, baseUrl, unresolved)
+	baseUrl := tsConfig.CompilerOptions.BaseUrl
+	importFromBaseUrl := path.Join(rootFolder, baseUrl, unresolved)
 	absPath = getFileAbsPath(importFromBaseUrl)
 	if absPath != "" {
 		return absPath, nil
@@ -43,7 +48,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	if l.Cfg != nil && l.Cfg.FollowTsConfigPaths == false {
 		return absPath, nil
 	}
-	pathOverrides := l.TsConfig.CompilerOptions.Paths
+	pathOverrides := tsConfig.CompilerOptions.Paths
 	if pathOverrides == nil {
 		return absPath, nil
 	}
@@ -54,7 +59,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 			for _, searchPath := range searchPaths {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
 				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
-				importFromBaseUrlAndPaths := path.Join(l.ProjectRoot, baseUrl, newImportFrom)
+				importFromBaseUrlAndPaths := path.Join(rootFolder, baseUrl, newImportFrom)
 				absPath = getFileAbsPath(importFromBaseUrlAndPaths)
 				if absPath != "" {
 					return absPath, nil
