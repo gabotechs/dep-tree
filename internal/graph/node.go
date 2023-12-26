@@ -3,8 +3,9 @@ package graph
 import (
 	"hash/fnv"
 
-	"github.com/gabotechs/dep-tree/internal/utils"
 	"gonum.org/v1/gonum/graph"
+
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 type Node[T any] struct {

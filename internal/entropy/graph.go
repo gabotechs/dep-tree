@@ -4,6 +4,7 @@ import (
 	"path"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
@@ -13,7 +14,7 @@ const (
 )
 
 type Node struct {
-	Id       string `json:"id"`
+	Id       int64  `json:"id"`
 	FileName string `json:"fileName"`
 	DirName  string `json:"dirName"`
 	Loc      int    `json:"loc"`
@@ -23,10 +24,10 @@ type Node struct {
 }
 
 type Link struct {
-	From     string `json:"from"`
-	To       string `json:"to"`
-	IsDir    bool   `json:"isDir"`
-	IsCyclic bool   `json:"isCyclic"`
+	From     int64 `json:"from"`
+	To       int64 `json:"to"`
+	IsDir    bool  `json:"isDir"`
+	IsCyclic bool  `json:"isCyclic"`
 }
 
 type Graph struct {
@@ -58,7 +59,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 		filepath := parser.Display(node)
 		dirName := path.Dir(filepath)
 		out.Nodes = append(out.Nodes, Node{
-			Id:       utils.Hash(node.Id),
+			Id:       node.ID(),
 			FileName: path.Base(filepath),
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
@@ -68,15 +69,16 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 
 		for _, to := range dt.Graph.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
-				From: utils.Hash(node.Id),
-				To:   utils.Hash(to.Id),
+				From: node.ID(),
+				To:   to.ID(),
 			})
 		}
 
 		for _, parentFolder := range splitFullPaths(dirName) {
+			folderNode := graph.MakeNode(parentFolder, 0)
 			out.Links = append(out.Links, Link{
-				From:  utils.Hash(node.Id),
-				To:    utils.Hash(parentFolder),
+				From:  node.ID(),
+				To:    folderNode.ID(),
 				IsDir: true,
 			})
 			if _, ok := addedFolders[parentFolder]; ok {
@@ -84,7 +86,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 			} else {
 				addedFolders[parentFolder] = true
 				out.Nodes = append(out.Nodes, Node{
-					Id:    utils.Hash(parentFolder),
+					Id:    folderNode.ID(),
 					IsDir: true,
 				})
 			}
@@ -93,8 +95,8 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 
 	for el := dt.Cycles.Front(); el != nil; el = el.Next() {
 		out.Links = append(out.Links, Link{
-			From:     utils.Hash(el.Key[0]),
-			To:       utils.Hash(el.Key[1]),
+			From:     graph.MakeNode(el.Key[0], 0).ID(),
+			To:       graph.MakeNode(el.Key[1], 0).ID(),
 			IsCyclic: true,
 		})
 	}
