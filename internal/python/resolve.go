@@ -41,7 +41,7 @@ func _pythonFilesInDir(dir string) []string {
 	return pythonFiles
 }
 
-var pythonFilesInDir = utils.Cached(_pythonFilesInDir)
+var pythonFilesInDir = utils.Cached1In1Out(_pythonFilesInDir)
 
 // resolveFromSlicesAndSearchPath returns multiple valid resolved paths.
 func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *ResolveResult {

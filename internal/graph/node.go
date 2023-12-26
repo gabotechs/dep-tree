@@ -26,7 +26,7 @@ func hash(s string) int64 {
 	return int64(h.Sum32())
 }
 
-var hashCached = utils.Cached(hash)
+var hashCached = utils.Cached1In1Out(hash)
 
 func MakeNode[T any](id string, data T) *Node[T] {
 	return &Node[T]{
