@@ -29,6 +29,7 @@
         NODE_RESOLUTION: 16,
         LINK_HIGHLIGHT_WIDTH: 2,
         BLOOM_PASS_STRENGTH: 1,
+        DOUBLE_CLICK_INTERVAL: 350,
 
         DEFAULT_NODE_ALPHA: 1,
         UNSELECTED_NODE_ALPHA: 0.1,
@@ -111,18 +112,26 @@
         return `rgba(255, 255, 255, ${alpha})`;
     }
 
+    let lastBackgroundClick = 0
+
+    function backgroundClick() {
+        if (selectedNode) {
+            selectNode(undefined)
+        } else {
+            const now = new Date().getTime()
+            if (now - lastBackgroundClick < SETTINGS.DOUBLE_CLICK_INTERVAL) {
+                Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE)
+            }
+            lastBackgroundClick = now
+        }
+    }
+
     const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
         // Global params
         .graphData(DATA)
         .backgroundColor('#000003')
         .nodeResolution(SETTINGS.NODE_RESOLUTION)
-        .onBackgroundClick(() => {
-            if (selectedNode) {
-                selectNode(undefined)
-            } else {
-                Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE)
-            }
-        })
+        .onBackgroundClick(backgroundClick)
         // Node params
         .nodeLabel(({fileName, dirName, loc}) => `<div class="nodeLabel">
             <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
