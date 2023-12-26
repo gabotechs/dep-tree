@@ -35,6 +35,7 @@
 - [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)
 - [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
 - [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
+- [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts) (ui module)
 
 ## Install
 
