@@ -21,6 +21,7 @@
 <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}</script>
 <script type="module">
     import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
 
     const DATA = {}
 
@@ -84,7 +85,8 @@
         Graph
             .nodeColor(Graph.nodeColor())
             .linkWidth(Graph.linkWidth())
-            .linkDirectionalParticles(Graph.linkDirectionalParticles());
+            .linkDirectionalParticles(Graph.linkDirectionalParticles())
+            .nodeThreeObject(Graph.nodeThreeObject());
     }
 
     function centerOnNode(node) {
@@ -126,7 +128,21 @@
         }
     }
 
-    const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
+    function nodeThreeObject(node) {
+        const nodeEl = document.getElementById(node['id']) ?? document.createElement('div');
+        nodeEl.id = node['id']
+        nodeEl.textContent = node['dirName']+node['fileName'];
+        nodeEl.style.color = colorNode(node);
+        nodeEl.style.position = 'relative'
+        nodeEl.style.top = '24px'
+        if (highlightNodes.has(node)) {
+            return new CSS2DObject(nodeEl);
+        } else {
+            return undefined
+        }
+    }
+
+    const Graph = ForceGraph3D({ extraRenderers: [new CSS2DRenderer()]})(document.getElementById('3d-graph'))
         // Global params
         .graphData(DATA)
         .backgroundColor('#000003')
@@ -137,6 +153,8 @@
             <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
             <span>LOC: ${loc}</span>
         </div>`)
+        .nodeThreeObject(nodeThreeObject)
+        .nodeThreeObjectExtend(true)
         .nodeVal('size')
         .nodeVisibility(node => !node['isDir'])
         .nodeColor(colorNode)
