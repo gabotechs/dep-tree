@@ -117,8 +117,11 @@
         .backgroundColor('#000003')
         .nodeResolution(SETTINGS.NODE_RESOLUTION)
         .onBackgroundClick(() => {
-            Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE)
-            selectNode(undefined)
+            if (selectedNode) {
+                selectNode(undefined)
+            } else {
+                Graph.zoomToFit(SETTINGS.DEFAULT_DISTANCE)
+            }
         })
         // Node params
         .nodeLabel(({fileName, dirName, loc}) => `<div class="nodeLabel">
