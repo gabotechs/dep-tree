@@ -23,7 +23,7 @@ exclude:
 #
 # Entropy visualization tends to lead to better results if this is set to `false`,
 # but CLI rendering is slightly better with this set to `true`.
-followReExports: false
+unwrapExports: false
 
 # Check configuration for the `dep-tree check` command. Dep Tree will check for dependency
 # violation rules declared here, and fail if there is at least one unsatisfied rule.
@@ -83,11 +83,11 @@ js:
   # Whether to take package.json workspaces into account while resolving paths
   # or not. You might want to disable if you only want to analyze one workspace
   # in a monorepo.
-  followWorkspaces: true
+  workspaces: true
   # Whether to follow tsconfig.json paths or not. You will typically want to
   # enable this, but for some monorepo setups, it might be better to leave this off
   # if you want to analyze only one package.
-  followTsConfigPaths: true
+  tsConfigPaths: true
 
 # Python specific settings.
 python:

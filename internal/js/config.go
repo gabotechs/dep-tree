@@ -1,6 +1,6 @@
 package js
 
 type Config struct {
-	FollowTsConfigPaths bool `yaml:"followTsConfigPaths"`
-	FollowWorkspaces    bool `yaml:"followWorkspaces"`
+	TsConfigPaths bool `yaml:"tsConfigPaths"`
+	Workspaces    bool `yaml:"workspaces"`
 }

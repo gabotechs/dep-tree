@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"os"
@@ -21,17 +22,17 @@ const DefaultConfigPath = ".dep-tree.yml"
 var SampleConfig string
 
 type Config struct {
-	Path            string
-	Exclude         []string      `yaml:"exclude"`
-	FollowReExports bool          `yaml:"followReExports"`
-	Check           check.Config  `yaml:"check"`
-	Js              js.Config     `yaml:"js"`
-	Rust            rust.Config   `yaml:"rust"`
-	Python          python.Config `yaml:"python"`
+	Path          string
+	Exclude       []string      `yaml:"exclude"`
+	UnwrapExports bool          `yaml:"unwrapExports"`
+	Check         check.Config  `yaml:"check"`
+	Js            js.Config     `yaml:"js"`
+	Rust          rust.Config   `yaml:"rust"`
+	Python        python.Config `yaml:"python"`
 }
 
 func (c *Config) UnwrapProxyExports() bool {
-	return c.FollowReExports
+	return c.UnwrapExports
 }
 
 func (c *Config) IgnoreFiles() []string {
@@ -41,10 +42,10 @@ func (c *Config) IgnoreFiles() []string {
 func ParseConfig(cfgPath string) (*Config, error) {
 	// Default values.
 	cfg := Config{
-		FollowReExports: false,
+		UnwrapExports: false,
 		Js: js.Config{
-			FollowWorkspaces:    true,
-			FollowTsConfigPaths: true,
+			Workspaces:    true,
+			TsConfigPaths: true,
 		},
 		Python: python.Config{
 			ExcludeConditionalImports: false,
@@ -60,6 +61,8 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	if os.IsNotExist(err) {
 		if !isDefault {
 			return &cfg, err
+		} else {
+			return &cfg, nil
 		}
 	} else if err != nil {
 		return &cfg, err
@@ -70,9 +73,11 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	}
 	cfg.Path = path.Dir(absCfgPath)
 
-	err = yaml.Unmarshal(content, &cfg)
+	decoder := yaml.NewDecoder(bytes.NewReader(content))
+	decoder.KnownFields(true)
+	err = decoder.Decode(&cfg)
 	if err != nil {
-		return &cfg, fmt.Errorf(`config file "%s" is not a valid yml file`, cfgPath)
+		return &cfg, fmt.Errorf(`config file "%s" is not a valid yml file: %w`, cfgPath, err)
 	}
 	cfg.Check.Init(path.Dir(absCfgPath))
 	return &cfg, nil
