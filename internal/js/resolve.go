@@ -37,7 +37,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	}
 
 	// 2. If is imported from a workspace.
-	if l.Cfg == nil || l.Cfg.FollowWorkspaces {
+	if l.Cfg == nil || l.Cfg.Workspaces {
 		absPath, err = l.Workspaces.ResolveFromWorkspaces(unresolved)
 		if absPath != "" || err != nil {
 			return absPath, err
@@ -51,7 +51,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	}
 
 	// 4. If imported from a path override.
-	if l.Cfg == nil || l.Cfg.FollowTsConfigPaths {
+	if l.Cfg == nil || l.Cfg.TsConfigPaths {
 		absPath, err = tsConfig.ResolveFromPaths(unresolved)
 		if err != nil {
 			return "", err

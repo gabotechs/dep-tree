@@ -17,10 +17,10 @@ import (
 )
 
 var configPath string
-var jsFollowTsConfigPaths bool
-var jsFollowWorkspaces bool
+var unwrapExports bool
+var jsTsConfigPaths bool
+var jsWorkspaces bool
 var pythonExcludeConditionalImports bool
-var followReExports bool
 var exclude []string
 
 var root *cobra.Command
@@ -54,11 +54,11 @@ func NewRoot(args []string) *cobra.Command {
 
 	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file (default .dep-tree.yml)")
 	// TODO: call this '--unwrap-exports'
-	root.PersistentFlags().BoolVar(&followReExports, "follow-re-exports", false, "follow re-exports while resolving imports between files")
+	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "follow re-exports while resolving imports between files")
 	// TODO: call this '--js-tsconfig-paths'
-	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", true, "follow the tsconfig.json paths while resolving imports")
+	root.PersistentFlags().BoolVar(&jsTsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports")
 	// TODO: call this '--js-workspaces'
-	root.PersistentFlags().BoolVar(&jsFollowWorkspaces, "js-follow-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths")
+	root.PersistentFlags().BoolVar(&jsWorkspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths")
 	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements")
 	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags")
 
@@ -97,14 +97,14 @@ func loadConfig() (*config.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	if root.PersistentFlags().Changed("follow-re-exports") {
-		cfg.FollowReExports = followReExports
+	if root.PersistentFlags().Changed("unwrap-exports") {
+		cfg.UnwrapExports = unwrapExports
 	}
-	if root.PersistentFlags().Changed("js-follow-ts-config-paths") {
-		cfg.Js.FollowTsConfigPaths = jsFollowTsConfigPaths
+	if root.PersistentFlags().Changed("js-tsconfig-paths") {
+		cfg.Js.TsConfigPaths = jsTsConfigPaths
 	}
-	if root.PersistentFlags().Changed("js-follow-workspaces") {
-		cfg.Js.FollowWorkspaces = jsFollowWorkspaces
+	if root.PersistentFlags().Changed("js-workspaces") {
+		cfg.Js.Workspaces = jsWorkspaces
 	}
 	if root.PersistentFlags().Changed("python-exclude-conditional-imports") {
 		cfg.Python.ExcludeConditionalImports = pythonExcludeConditionalImports
