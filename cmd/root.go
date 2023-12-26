@@ -54,12 +54,12 @@ func NewRoot(args []string) *cobra.Command {
 
 	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file (default .dep-tree.yml)")
 	// TODO: call this '--unwrap-exports'
-	root.PersistentFlags().BoolVar(&followReExports, "follow-re-exports", true, "whether to follow re-exports or not while resolving imports between files")
+	root.PersistentFlags().BoolVar(&followReExports, "follow-re-exports", false, "follow re-exports while resolving imports between files")
 	// TODO: call this '--js-tsconfig-paths'
-	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", false, "whether to follow the tsconfig.json paths while resolving imports or not (default false)")
+	root.PersistentFlags().BoolVar(&jsFollowTsConfigPaths, "js-follow-ts-config-paths", true, "follow the tsconfig.json paths while resolving imports")
 	// TODO: call this '--js-workspaces'
-	root.PersistentFlags().BoolVar(&jsFollowWorkspaces, "js-follow-workspaces", false, "whether to take the workspaces attribute in the root package.json into account or not (default false)")
-	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements (default false)")
+	root.PersistentFlags().BoolVar(&jsFollowWorkspaces, "js-follow-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths")
+	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements")
 	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags")
 
 	switch {

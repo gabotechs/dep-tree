@@ -80,8 +80,13 @@ check:
 
 # JavaScript and TypeScript specific settings.
 js:
+  # Whether to take package.json workspaces into account while resolving paths
+  # or not. You might want to disable if you only want to analyze one workspace
+  # in a monorepo.
+  followWorkspaces: true
   # Whether to follow tsconfig.json paths or not. You will typically want to
-  # enable this, but for some monorepo setups, it might be better to leave this off.
+  # enable this, but for some monorepo setups, it might be better to leave this off
+  # if you want to analyze only one package.
   followTsConfigPaths: true
 
 # Python specific settings.

@@ -19,11 +19,11 @@ Available Commands:
 Flags:
   -c, --config string                        path to dep-tree's config file (default .dep-tree.yml)
       --exclude stringArray                  Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags
-      --follow-re-exports                    whether to follow re-exports or not while resolving imports between files (default true)
+      --follow-re-exports                    follow re-exports while resolving imports between files
   -h, --help                                 help for dep-tree
-      --js-follow-ts-config-paths            whether to follow the tsconfig.json paths while resolving imports or not (default false)
-      --js-follow-workspaces                 whether to take the workspaces attribute in the root package.json into account or not (default false)
-      --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements (default false)
+      --js-follow-ts-config-paths            follow the tsconfig.json paths while resolving imports (default true)
+      --js-follow-workspaces                 take the workspaces attribute in the root package.json into account for resolving paths (default true)
+      --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements
   -v, --version                              version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.
