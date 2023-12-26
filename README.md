@@ -220,7 +220,7 @@ exclude:
 #
 # Entropy visualization tends to lead to better results if this is set to `false`,
 # but CLI rendering is slightly better with this set to `true`.
-followReExports: false
+unwrapExports: false
 
 # Check configuration for the `dep-tree check` command. Dep Tree will check for dependency
 # violation rules declared here, and fail if there is at least one unsatisfied rule.
@@ -277,13 +277,27 @@ check:
 
 # JavaScript and TypeScript specific settings.
 js:
+  # Whether to take package.json workspaces into account while resolving paths
+  # or not. You might want to disable if you only want to analyze one workspace
+  # in a monorepo.
+  workspaces: true
   # Whether to follow tsconfig.json paths or not. You will typically want to
-  # enable this, but for some monorepo setups, it might be better to leave this off.
-  followTsConfigPaths: true
+  # enable this, but for some monorepo setups, it might be better to leave this off
+  # if you want to analyze only one package.
+  tsConfigPaths: true
 
 # Python specific settings.
 python:
-# None available at the moment.
+  # Whether to take into account conditional imports as dependencies between files or not.
+  # A conditional import is an `import` statement that is wrapped inside an `if` block or
+  # a function, for example:
+  #
+  # if SHOULD_IMPORT:
+  #     from foo import *
+  #
+  # by default these statements introduce a dependency between importing and imported file,
+  # but depending on your use case you might want to disable it.
+  excludeConditionalImports: false
 
 # Rust specific settings.
 rust:
