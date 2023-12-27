@@ -61,8 +61,7 @@ func (p *partialPackageJson) workspaces() []string {
 		return castAnyArray[string](v)
 	case map[string]any:
 		if packages, ok := v["packages"]; ok {
-			switch vv := packages.(type) {
-			case []any:
+			if vv, ok := packages.([]any); ok {
 				return castAnyArray[string](vv)
 			}
 		}
