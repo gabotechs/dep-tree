@@ -13,7 +13,7 @@
 
 <p align="center">
     Dep Tree is a tool for helping developers maintain their code bases clean and decoupled. It 
-    allows rendering the "project's entropy" using a 3D force directed graph, where each file is a
+    allows rendering the "code base entropy" using a 3D force-directed graph, where each file is a
     node, and each dependency between two files is an edge.
 </p>
 <p align="center">
