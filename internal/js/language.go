@@ -11,7 +11,7 @@ import (
 )
 
 var Extensions = []string{
-	"js", "ts", "tsx", "jsx", "d.ts",
+	"js", "ts", "tsx", "jsx", "d.ts", "mjs", "cjs",
 }
 
 type Language struct {
