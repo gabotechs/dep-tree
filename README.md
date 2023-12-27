@@ -83,14 +83,14 @@ match some boundaries declared in a `.dep-tree.yml` file.
 
 ### Entropy visualization
 
-Choose the file that will act as the root of the dependency tree (for example `src/index.ts`), and run:
+Choose the file that will act as the root of the dependency graph (for example `src/index.ts`), and run:
 
 ```shell
 dep-tree entropy src/index.ts
 ```
 
 It will open a browser window and will render your file dependency graph. You will see a lot of spheres
-and lines connecting them. Each sphere is a file in your code base, and each line indicates a dependency
+and lines between them. Each sphere is a file in your code base, and each line indicates a dependency
 between two files.
 
 The spheres will be placed mimicking some attraction/repulsion forces, that way parts of your code
@@ -99,7 +99,7 @@ they are loosely coupled.
 
 ### CLI tree visualization
 
-Choose the file that will act as the root of the dependency tree (for example `my-file.py`), and run:
+Choose the file that will act as the root of the dependency graph (for example `my-file.py`), and run:
 
 ```shell
 dep-tree render my-file.py
@@ -335,4 +335,4 @@ the tool ensures that this architectural "harmony" remains undisturbed.
 - Python
 - JavaScript/TypeScript (es imports/exports)
 - Rust (beta)
-- Golang (coming soon...)
+
