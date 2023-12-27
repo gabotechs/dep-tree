@@ -29,7 +29,7 @@
     ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
 </p>
 
-## Checkout the entropy graph of well-known libraries
+## Checkout the entropy graph of well-known code bases
 - [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
 - [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
 - [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
