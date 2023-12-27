@@ -34,6 +34,16 @@ func TestNewWorkspaces(t *testing.T) {
 	}
 }
 
+func TestNewWorkspaces_parses_packages(t *testing.T) {
+	a := require.New(t)
+	result, err := NewWorkspaces(path.Join(workspacesTestDir, "other"))
+	a.NoError(err)
+	abs, _ := filepath.Abs(workspacesTestDir)
+	a.Equal(map[string]WorkspaceEntry{
+		"foo": {absPath: path.Join(abs, "other", "foo")},
+	}, result.ws)
+}
+
 func TestWorkspaces_ResolveFromWorkspaces(t *testing.T) {
 	abs, _ := filepath.Abs(workspacesTestDir)
 
