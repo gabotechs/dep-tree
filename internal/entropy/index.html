@@ -131,10 +131,9 @@
     function nodeThreeObject(node) {
         const nodeEl = document.getElementById(node['id']) ?? document.createElement('div');
         nodeEl.id = node['id']
+        nodeEl.className = 'nodeLabel nodeLabelSelected'
         nodeEl.textContent = node['dirName']+node['fileName'];
-        nodeEl.style.color = colorNode(node);
-        nodeEl.style.position = 'relative'
-        nodeEl.style.top = '24px'
+        nodeEl.style.color = colorNode(node)
         if (highlightNodes.has(node)) {
             return new CSS2DObject(nodeEl);
         } else {
@@ -149,7 +148,7 @@
         .nodeResolution(SETTINGS.NODE_RESOLUTION)
         .onBackgroundClick(backgroundClick)
         // Node params
-        .nodeLabel(({fileName, dirName, loc}) => `<div class="nodeLabel">
+        .nodeLabel(({fileName, dirName, loc}) =>  selectedNode ? undefined :`<div class="nodeLabel">
             <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
             <span>LOC: ${loc}</span>
         </div>`)
@@ -214,9 +213,18 @@
     .nodeLabel {
         display: flex;
         flex-direction: column;
-        background-color: #000003;
+        font-family: monospace;
+        color: white;
+        background-color: #000015;
         padding: .5rem;
         border-radius: .5rem
+    }
+
+    .nodeLabelSelected {
+        opacity: 0.5;
+        position: relative;
+        background-color: #00000088;
+        top: 32px;
     }
 </style>
 </body>
