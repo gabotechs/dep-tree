@@ -1,0 +1,6 @@
+{
+  "name": "other",
+  "workspaces": {
+    "packages": ["foo"]
+  }
+}

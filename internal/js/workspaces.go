@@ -42,9 +42,32 @@ type Workspaces struct {
 
 type partialPackageJson struct {
 	path       string
-	Main       string   `json:"main,omitempty"`
-	Name       string   `json:"name"`
-	Workspaces []string `json:"workspaces"`
+	Main       string      `json:"main,omitempty"`
+	Name       string      `json:"name"`
+	Workspaces interface{} `json:"workspaces"`
+}
+
+func castAnyArray[T any](arr []any) []T {
+	result := make([]T, len(arr))
+	for i, el := range arr {
+		result[i] = el.(T)
+	}
+	return result
+}
+
+func (p *partialPackageJson) workspaces() []string {
+	switch v := p.Workspaces.(type) {
+	case []any:
+		return castAnyArray[string](v)
+	case map[string]any:
+		if packages, ok := v["packages"]; ok {
+			switch vv := packages.(type) {
+			case []any:
+				return castAnyArray[string](vv)
+			}
+		}
+	}
+	return []string{}
 }
 
 func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJson, error) {
@@ -60,9 +83,9 @@ func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJso
 		}
 		err = json.Unmarshal(content, &result)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing %q: %w", packageJsonPath, err)
 		}
-		if len(result.Workspaces) > 0 {
+		if len(result.workspaces()) > 0 {
 			result.path = searchPath
 			return &result, nil
 		} else {
@@ -109,7 +132,7 @@ func NewWorkspaces(searchPath string) (*Workspaces, error) {
 	workspacesMap := map[string]WorkspaceEntry{}
 
 	for _, dir := range dirsWithAPackageJson {
-		for _, ws := range rootPackageJson.Workspaces {
+		for _, ws := range rootPackageJson.workspaces() {
 			rel, _ := filepath.Rel(rootPackageJson.path, dir)
 			match, err := utils.GlobstarMatch(ws, rel)
 			if err != nil {
