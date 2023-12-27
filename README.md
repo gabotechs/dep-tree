@@ -30,14 +30,15 @@
 </p>
 
 ## Checkout the entropy graph of well-known libraries
-- [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
 - [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
-- [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)
 - [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
 - [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
-- [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)
 - [react](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact&entrypoint=packages%2Freact-dom%2Findex.js)
 - [svelte](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fsveltejs%2Fsvelte&entrypoint=packages%2Fsvelte%2Fsrc%2Fcompiler%2Findex.js)
+- [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)
+- [angular](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fangular%2Fangular&entrypoint=packages%2Fcompiler%2Findex.ts)
+- [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)
+- [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
 
 ## Install
 
