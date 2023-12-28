@@ -36,7 +36,7 @@ func NewRoot(args []string) *cobra.Command {
 
 	root = &cobra.Command{
 		Use:               "dep-tree",
-		Version:           "v0.16.4",
+		Version:           "v0.17.0",
 		Short:             "Visualize and check your project's dependency graph",
 		SilenceUsage:      true,
 		Args:              cobra.ArbitraryArgs,
