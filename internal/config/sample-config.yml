@@ -81,7 +81,7 @@ check:
 # JavaScript and TypeScript specific settings.
 js:
   # Whether to take package.json workspaces into account while resolving paths
-  # or not. You might want to disable if you only want to analyze one workspace
+  # or not. You might want to disable it if you only want to analyze one workspace
   # in a monorepo.
   workspaces: true
   # Whether to follow tsconfig.json paths or not. You will typically want to

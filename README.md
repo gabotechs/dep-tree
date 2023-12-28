@@ -12,12 +12,7 @@
 </p>
 
 <p align="center">
-    Dep Tree is a tool for helping developers maintain their code bases clean and decoupled. It 
-    allows rendering the "code base entropy" using a 3D force-directed graph, where each file is a
-    node, and each dependency between two files is an edge.
-</p>
-<p align="center">
-    The more decoupled a code base is, the more spread the 3d graph will look like.
+    Visualize the <span style="font-weight: bold">entropy</span> of a code base with a 3d force-directed graph. 
 </p>
 
 <p align="center">
@@ -25,11 +20,10 @@
 </p>
 
 <p align="center">
-    Additionally, it enables the specification of prohibited dependencies,
-    ensuring your CI validates the integrity of your dependency graph, keeping your code base clean.
+    The more decoupled a code base is, the more spread the graph will look like.
 </p>
 
-## Checkout the entropy graph of well-known code bases
+## Checkout the entropy graph of well-known projects
 - [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
 - [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
 - [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
@@ -49,39 +43,48 @@ On Mac and Linux, it can be installed using brew:
 brew install gabotechs/taps/dep-tree
 ```
 
-Alternatively, on any platform including Windows it can be installed with `pip`:
+Alternatively, on any platform including Windows it can be installed with `pip`...
 ```shell
 pip install python-dep-tree
 ```
 
-There is also a node wrapper that can be installed with:
+...or `npm`:
 ```shell
 npm install @dep-tree/cli
 ```
 
+## Supported languages
+
+<img height="40px" src="docs/js-logo.png">
+<img height="40px" src="docs/ts-logo.png">
+<img height="40px" src="docs/python-logo.png">
+<img height="40px" src="docs/rust-logo.png">
+
 ## About Dep Tree
 
-`dep-tree` is a cli tool that allows users to visualize the complexity of a code base, and create
+`dep-tree` is a cli tool for visualizing the complexity of a code base, and creating
 rules for ensuring its loosely coupling.
 
 It works with files, meaning that each file is a node in the dependency tree:
 - It starts from an entrypoint, which is usually the main executable file in a
-program or the file that exposes the contents of a library (like `package/main.py`).
-- It reads its import statements, it makes a parent node out of the main file,
-and one child node for each imported file.
-> **NOTE**: it only takes into account local files, not files imported from external libraries.
-- That process is repeated recursively with all the child files, until the file dependency
-tree is formed.
-- If rendering the code base entropy, the nodes will be rendered in a 3d force directed graph
+program or the file that exposes the contents of a library (like `package/main.py`, `src/index.ts`, `src/lib.rs`...).
+- It makes a parent node out of the root file, and one child node for each imported file.
+
+> [!NOTE]
+> it only takes into account local files, not files imported from external libraries.
+
+- That process is repeated recursively with all the imported files, until the file dependency
+graph is formed.
+- If rendering the **code base entropy**, the nodes will be rendered using a 3d force-directed graph
 in the browser.
-- If rendering the dependency tree in the terminal, the nodes will be placed in a human-readable
+- If rendering the **dependency tree** in the terminal, the nodes will be placed in a human-readable
 way, and users can navigate through the graph using the keyboard.
-- If validating the dependency tree in a CI system, it will check that the dependencies between files
+- If validating the **dependency rules** in a CI system, it will check that the dependencies between files
 match some boundaries declared in a `.dep-tree.yml` file.
 
 ## Usage
 
-### Entropy visualization
+### Entropy
 
 Choose the file that will act as the root of the dependency graph (for example `src/index.ts`), and run:
 
@@ -89,13 +92,21 @@ Choose the file that will act as the root of the dependency graph (for example `
 dep-tree entropy src/index.ts
 ```
 
-It will open a browser window and will render your file dependency graph. You will see a lot of spheres
-and lines between them. Each sphere is a file in your code base, and each line indicates a dependency
-between two files.
+It will open a browser window and will render your file dependency graph using a 3d force-directed graph.
 
-The spheres will be placed mimicking some attraction/repulsion forces, that way parts of your code
+The spheres (files) will be placed mimicking some attraction/repulsion forces. Some parts of your code
 base will tend to gravitate together if they are tightly coupled, and will tend to be separated if
 they are loosely coupled.
+
+The 3d graph for a clean code base will have groups of nodes clustered together and clearly separated
+from other clusters:
+
+<img height="200px" src="docs/decoupled-code-base.png">
+
+The 3d graph for a tightly coupled code base will have all the nodes group together with no
+clustering and no clear separation between them:
+
+<img height="200px" src="docs/coupled-code-base.png">
 
 ### CLI tree visualization
 
@@ -283,7 +294,7 @@ check:
 # JavaScript and TypeScript specific settings.
 js:
   # Whether to take package.json workspaces into account while resolving paths
-  # or not. You might want to disable if you only want to analyze one workspace
+  # or not. You might want to disable it if you only want to analyze one workspace
   # in a monorepo.
   workspaces: true
   # Whether to follow tsconfig.json paths or not. You will typically want to
