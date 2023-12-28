@@ -11,9 +11,10 @@ import (
 
 func CheckCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "check",
-		Short: "Checks the that the current project matches the dependency rules defined in the configuration",
-		Args:  cobra.ExactArgs(0),
+		Use:     "check",
+		Short:   "Checks that the dependency rules defined in the configuration file are not broken",
+		GroupID: checkGroupId,
+		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			if configPath == "" {

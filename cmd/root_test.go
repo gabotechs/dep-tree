@@ -23,16 +23,22 @@ func TestRoot(t *testing.T) {
 			Name: "help",
 		},
 		{
-			Name: "render",
+			Name: "entropy .root_test/main.py --no-browser-open",
 		},
 		{
-			Name: "render random.js",
+			Name: ".root_test/main.py --no-browser-open",
 		},
 		{
-			Name: "render random.pdf",
+			Name: "tree",
 		},
 		{
-			Name: "render random.py",
+			Name: "tree random.js",
+		},
+		{
+			Name: "tree random.pdf",
+		},
+		{
+			Name: "tree random.py",
 		},
 		{
 			Name: "random.py",
@@ -50,19 +56,19 @@ func TestRoot(t *testing.T) {
 			Name: "check --config .root_test/.dep-tree.yml-bad-path",
 		},
 		{
-			Name: ".root_test/main.py --json",
+			Name: "tree .root_test/main.py --json",
 		},
 		{
-			Name: "render .root_test/main.py --json --config .root_test/.dep-tree.yml",
+			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml",
 		},
 		{
-			Name: ".root_test/main.py --json --config .root_test/.dep-tree.yml",
+			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml",
 		},
 		{
-			Name: "render .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
+			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
 		},
 		{
-			Name: ".root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
+			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
 		},
 	}
 
