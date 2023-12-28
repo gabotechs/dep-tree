@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-    <img height="430" src="docs/demo.gif" alt="File structure">
+    <img height="460" src="docs/demo.gif" alt="File structure">
 </p>
 
 <p align="center">
