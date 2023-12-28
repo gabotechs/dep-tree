@@ -16,6 +16,10 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+const renderGroupId = "render"
+const checkGroupId = "check"
+const defaultCommand = "entropy"
+
 var configPath string
 var unwrapExports bool
 var jsTsConfigPaths bool
@@ -31,11 +35,16 @@ func NewRoot(args []string) *cobra.Command {
 	}
 
 	root = &cobra.Command{
-		Use:          "dep-tree",
-		Version:      "v0.16.4",
-		Short:        "Visualize and check your project's dependency tree",
-		SilenceUsage: true,
-		Args:         cobra.ArbitraryArgs,
+		Use:               "dep-tree",
+		Version:           "v0.16.4",
+		Short:             "Visualize and check your project's dependency graph",
+		SilenceUsage:      true,
+		Args:              cobra.ArbitraryArgs,
+		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
+		Example: `$ dep-tree src/index.ts
+$ dep-tree entropy src/index.ts
+$ dep-tree tree package/main.py --unwrap-exports
+$ dep-tree check`,
 		Long: `
       ____         _ __       _
      |  _ \   ___ |  _ \    _| |_  _ __  ___   ___
@@ -47,20 +56,24 @@ func NewRoot(args []string) *cobra.Command {
 
 	root.SetArgs(args)
 
-	root.AddCommand(RenderCmd())
-	root.AddCommand(CheckCmd())
-	root.AddCommand(EntropyCmd())
-	root.AddCommand(ConfigCmd())
+	root.AddCommand(
+		EntropyCmd(),
+		TreeCmd(),
+		CheckCmd(),
+		ConfigCmd(),
+	)
 
-	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file (default .dep-tree.yml)")
-	// TODO: call this '--unwrap-exports'
-	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "follow re-exports while resolving imports between files")
-	// TODO: call this '--js-tsconfig-paths'
-	root.PersistentFlags().BoolVar(&jsTsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports")
-	// TODO: call this '--js-workspaces'
-	root.PersistentFlags().BoolVar(&jsWorkspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths")
-	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements")
-	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags")
+	root.AddGroup(&cobra.Group{ID: renderGroupId, Title: "Visualize your dependencies graphically"})
+	root.AddGroup(&cobra.Group{ID: checkGroupId, Title: "Check your dependencies against your own rules"})
+
+	root.Flags().SortFlags = false
+	root.PersistentFlags().SortFlags = false
+	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file. (default .dep-tree.yml)")
+	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "unwrap export statements. A file might be exporting a symbol that is declared in other file (e.g. export { foo } from './bar'). If --unwrap-exports is set to true, symbols will be traced back to the source file where they where declared. (default false)")
+	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags.")
+	root.PersistentFlags().BoolVar(&jsTsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports.")
+	root.PersistentFlags().BoolVar(&jsWorkspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths.")
+	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements. (default false)")
 
 	switch {
 	case len(args) > 0 && utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}):
@@ -73,7 +86,7 @@ func NewRoot(args []string) *cobra.Command {
 		// choose a default command.
 		cmd, _, err := root.Find(args)
 		if err == nil && cmd.Use == root.Use && !errors.Is(cmd.Flags().Parse(args), pflag.ErrHelp) {
-			root.SetArgs(append([]string{"render"}, args...))
+			root.SetArgs(append([]string{defaultCommand}, args...))
 		}
 	}
 	return root

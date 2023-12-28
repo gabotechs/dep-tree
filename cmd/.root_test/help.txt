@@ -8,22 +8,31 @@
 Usage:
   dep-tree [command]
 
-Available Commands:
-  check       Checks the that the current project matches the dependency rules defined in the configuration
-  completion  Generate the autocompletion script for the specified shell
+Examples:
+$ dep-tree src/index.ts
+$ dep-tree entropy src/index.ts
+$ dep-tree tree package/main.py --unwrap-exports
+$ dep-tree check
+
+Visualize your dependencies graphically
+  entropy     (default) Renders a 3d force-directed graph in the browser
+  tree        Render the dependency tree starting from the provided entrypoint
+
+Check your dependencies against your own rules
+  check       Checks that the dependency rules defined in the configuration file are not broken
+
+Additional Commands:
   config      Generates a sample config in case that there's not already one present
-  entropy     Renders a force-directed graph in the browser
   help        Help about any command
-  render      (default command) Render the dependency tree starting from the provided entrypoint
 
 Flags:
-  -c, --config string                        path to dep-tree's config file (default .dep-tree.yml)
-      --exclude stringArray                  Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags
+  -c, --config string                        path to dep-tree's config file. (default .dep-tree.yml)
+      --unwrap-exports                       unwrap export statements. A file might be exporting a symbol that is declared in other file (e.g. export { foo } from './bar'). If --unwrap-exports is set to true, symbols will be traced back to the source file where they where declared. (default false)
+      --exclude stringArray                  Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags.
+      --js-tsconfig-paths                    follow the tsconfig.json paths while resolving imports. (default true)
+      --js-workspaces                        take the workspaces attribute in the root package.json into account for resolving paths. (default true)
+      --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements. (default false)
   -h, --help                                 help for dep-tree
-      --js-tsconfig-paths                    follow the tsconfig.json paths while resolving imports (default true)
-      --js-workspaces                        take the workspaces attribute in the root package.json into account for resolving paths (default true)
-      --python-exclude-conditional-imports   exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements
-      --unwrap-exports                       follow re-exports while resolving imports between files
   -v, --version                              version for dep-tree
 
 Use "dep-tree [command] --help" for more information about a command.

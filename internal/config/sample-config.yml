@@ -4,19 +4,19 @@
 exclude:
   - 'some-glob-pattern/**/*.ts'
 
-# Whether to follow re-exports to the target file or not.
+# Whether to unwrap re-exports to the target file or not.
 # Imagine that you have the following setup:
 #
 #  src/index.ts     -> import { foo } from './foo'
 #  src/foo/index.ts -> export { bar as foo } from './bar'
 #  src/foo/bar.ts   -> export function bar() {}
 #
-# If `followReExports` is true, a dependency will be created from
+# If `unwrapExports` is true, a dependency will be created from
 # `src/index.ts` to `src/foo/bar.ts`, and the middle file `src/foo/index.ts`
 # will be ignored, as it's just there for re-exporting the `bar` symbol,
 # which is actually declared on `src/foo/bar.ts`
 #
-# If `followReExports` is false, re-exported symbols will not be traced back
+# If `unwrapExports` is false, re-exported symbols will not be traced back
 # to where they are declared, and instead two dependencies will be created:
 # - from `src/index.ts` to `src/foo/index.ts`
 # - from `src/foo/index.ts` to `src/foo/bar.ts`

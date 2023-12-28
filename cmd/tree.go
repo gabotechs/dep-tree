@@ -11,11 +11,12 @@ import (
 
 var jsonFormat bool
 
-func RenderCmd() *cobra.Command {
+func TreeCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "render",
-		Short: "(default command) Render the dependency tree starting from the provided entrypoint",
-		Args:  cobra.ExactArgs(1),
+		Use:     "tree",
+		Short:   "Render the dependency tree starting from the provided entrypoint",
+		Args:    cobra.ExactArgs(1),
+		GroupID: renderGroupId,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			entrypoint := args[0]

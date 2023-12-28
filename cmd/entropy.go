@@ -11,9 +11,10 @@ var enableGui bool
 
 func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "entropy",
-		Short: "Renders a force-directed graph in the browser",
-		Args:  cobra.ExactArgs(1),
+		Use:     "entropy",
+		Short:   "(default) Renders a 3d force-directed graph in the browser",
+		GroupID: renderGroupId,
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			entrypoint := args[0]
