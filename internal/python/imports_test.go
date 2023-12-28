@@ -30,34 +30,13 @@ func TestLanguage_ParseImports(t *testing.T) {
 			File:       "main.py",
 			Entrypoint: "main.py",
 			Expected: []language.ImportEntry{
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					Names: []string{"main"},
-					Path:  path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					Names: []string{"main"},
-					Path:  path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				},
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "module", "module.py"),
-				},
-				{
-					Names: []string{"bar"},
-					Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				},
+				language.AllImport(path.Join(importsTestFolder, "src", "main.py")),
+				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
+				language.AllImport(path.Join(importsTestFolder, "src", "main.py")),
+				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
+				language.AllImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.AllImport(path.Join(importsTestFolder, "src", "module", "module.py")),
+				language.NamesImport([]string{"bar"}, path.Join(importsTestFolder, "src", "module", "__init__.py")),
 			},
 			ExpectedErrors: []string{
 				"cannot import file src.py from directory",
@@ -70,26 +49,11 @@ func TestLanguage_ParseImports(t *testing.T) {
 			Entrypoint:                "main.py",
 			ExcludeConditionalImports: true,
 			Expected: []language.ImportEntry{
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					Names: []string{"main"},
-					Path:  path.Join(importsTestFolder, "src", "main.py"),
-				},
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				},
-				{
-					All:  true,
-					Path: path.Join(importsTestFolder, "src", "module", "module.py"),
-				},
-				{
-					Names: []string{"bar"},
-					Path:  path.Join(importsTestFolder, "src", "module", "__init__.py"),
-				},
+				language.AllImport(path.Join(importsTestFolder, "src", "main.py")),
+				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
+				language.AllImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.AllImport(path.Join(importsTestFolder, "src", "module", "module.py")),
+				language.NamesImport([]string{"bar"}, path.Join(importsTestFolder, "src", "module", "__init__.py")),
 			},
 			ExpectedErrors: []string{
 				"cannot import file src.py from directory",

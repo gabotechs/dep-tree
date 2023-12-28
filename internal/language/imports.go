@@ -13,6 +13,18 @@ type ImportEntry struct {
 	Path string
 }
 
+func AllImport(path string) ImportEntry {
+	return ImportEntry{All: true, Path: path}
+}
+
+func EmptyImport(path string) ImportEntry {
+	return ImportEntry{All: true, Path: path}
+}
+
+func NamesImport(names []string, path string) ImportEntry {
+	return ImportEntry{Names: names, Path: path}
+}
+
 type ImportsResult struct {
 	// Imports: ordered map from absolute imported path to the array of names that where imported.
 	//  if one of the names is *, then all the names are imported
