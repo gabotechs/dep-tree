@@ -55,10 +55,12 @@ npm install @dep-tree/cli
 
 ## Supported languages
 
-<img height="40px" src="docs/js-logo.png">
-<img height="40px" src="docs/ts-logo.png">
-<img height="40px" src="docs/python-logo.png">
-<img height="40px" src="docs/rust-logo.png">
+<div>
+    <img height="40px" src="docs/js-logo.png">
+    <img height="40px" src="docs/ts-logo.png">
+    <img height="40px" src="docs/python-logo.png">
+    <img height="40px" src="docs/rust-logo.png">
+</div>
 
 ## About Dep Tree
 
