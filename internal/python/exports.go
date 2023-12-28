@@ -19,7 +19,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
-						Original: stmt.Import.Path[0],
+						Original: stmt.Import.Path[len(stmt.Import.Path)-1],
 						Alias:    stmt.Import.Alias,
 					},
 				},
@@ -27,32 +27,26 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 			})
 		case stmt.FromImport != nil && !stmt.FromImport.Indented:
 			entry := language.ExportEntry{
-				Names: make([]language.ExportName, len(stmt.FromImport.Names)),
-				All:   stmt.FromImport.All,
-				Path:  file.Path,
+				All:  stmt.FromImport.All,
+				Path: file.Path,
 			}
-			for i, name := range stmt.FromImport.Names {
-				entry.Names[i] = language.ExportName{
+			for _, name := range stmt.FromImport.Names {
+				entry.Names = append(entry.Names, language.ExportName{
 					Original: name.Name,
 					Alias:    name.Alias,
-				}
+				})
 			}
-			var resolved *ResolveResult
-			if len(stmt.FromImport.Relative) > 0 {
-				var err error
-				resolved, err = ResolveRelative(stmt.FromImport.Path, path.Dir(file.Path), len(stmt.FromImport.Relative)-1)
-				if err != nil {
-					errors = append(errors, err)
-					continue
-				}
-			} else {
-				resolved = l.ResolveAbsolute(stmt.FromImport.Path)
+			resolved, err := l.resolveFromImportPath(stmt.FromImport, path.Dir(file.Path))
+			if err != nil {
+				errors = append(errors, err)
+				continue
 			}
 			switch {
 			case resolved == nil:
-			case resolved.InitModule != nil:
 			case resolved.Directory != nil:
 				// nothing.
+			case resolved.InitModule != nil:
+				entry.Path = resolved.InitModule.Path
 			case resolved.File != nil:
 				entry.Path = resolved.File.Path
 			}
