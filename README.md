@@ -110,12 +110,12 @@ clustering and no clear separation between them:
 
 <img height="200px" src="docs/coupled-code-base.png">
 
-### CLI tree visualization
+### Tree
 
 Choose the file that will act as the root of the dependency graph (for example `my-file.py`), and run:
 
 ```shell
-dep-tree render my-file.py
+dep-tree tree my-file.py
 ```
 
 You can see the controls for navigating through the graph pressing `h` at any time:
@@ -130,7 +130,7 @@ q      -> navigate backwards on selected nodes or quit
 h      -> show this help section
 ```
 
-### Dependency linting
+### Check
 
 The dependency linting can be executed with:
 
