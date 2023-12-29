@@ -15,6 +15,8 @@ import (
 
 var Extensions = []string{
 	"py",
+	"pyi",
+	"pyx",
 }
 
 type Language struct {
