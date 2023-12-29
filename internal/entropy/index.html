@@ -32,15 +32,16 @@
         BLOOM_PASS_STRENGTH: 1,
         DOUBLE_CLICK_INTERVAL: 350,
 
-        DEFAULT_NODE_ALPHA: 1,
+        NODE_ALPHA: 1,
         UNSELECTED_NODE_ALPHA: 0.1,
-        DEFAULT_LINK_ALPHA: 0.3,
+        LINK_ALPHA: 0.3,
         UNSELECTED_LINK_ALPHA: 0.1,
 
         LINK_DISTANCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
         NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
         FILE_LINK_STRENGTH_FACTOR: 1,
         DIR_LINK_STRENGTH_FACTOR: 2,
+        HIGHLIGHT_CYCLES: false
     }
 
     const NODES = {}
@@ -102,15 +103,15 @@
 
     function colorNode(node) {
         const [r, g, b] = node['color']
-        let alpha = SETTINGS.DEFAULT_NODE_ALPHA
+        let alpha = SETTINGS.NODE_ALPHA
         if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = SETTINGS.UNSELECTED_NODE_ALPHA
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function colorLink(link) {
-        let alpha = SETTINGS.DEFAULT_LINK_ALPHA
+        let alpha = SETTINGS.LINK_ALPHA
         if (highlightLinks.size > 0 && !highlightLinks.has(link)) alpha = SETTINGS.UNSELECTED_LINK_ALPHA
-        if (link['isCyclic']) return `indianred`;
+        if (link['isCyclic'] && SETTINGS.HIGHLIGHT_CYCLES) return `indianred`;
         return `rgba(255, 255, 255, ${alpha})`;
     }
 
@@ -196,10 +197,12 @@
 
     if (DATA['enableGui']) {
         const gui = new dat.GUI()
-        gui.width = 400
+        gui.width = 500
         gui.add(SETTINGS, 'LINK_DISTANCE', 10, 100).onChange(debouncedRecompute)
         gui.add(SETTINGS, 'FILE_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
         gui.add(SETTINGS, 'DIR_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
+        gui.add(SETTINGS, 'HIGHLIGHT_CYCLES').onChange(() => Graph.linkColor(Graph.linkColor()))
+        gui.add(SETTINGS, 'LINK_ALPHA', 0, 1).onChange(() => Graph.linkColor(Graph.linkColor()))
     }
 
     const bloomPass = new UnrealBloomPass();
