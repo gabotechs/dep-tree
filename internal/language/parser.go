@@ -113,6 +113,7 @@ func (p *Parser[F]) updateNodeInfo(ctx context.Context, n *Node) (context.Contex
 	return ctx, err
 }
 
+//nolint:gocyclo
 func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node, error) {
 	ctx, _ = p.updateNodeInfo(ctx, n)
 	ctx, imports, err := p.gatherImportsFromFile(ctx, n.Id)
@@ -172,6 +173,8 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 				resolvedImports.Set(el.Value, true)
 			}
 			continue
+		} else if len(importEntry.Names) == 0 {
+			resolvedImports.Set(importEntry.Path, true)
 		}
 		for _, name := range importEntry.Names {
 			if exportPath, ok := exports.Exports.Get(name); ok {

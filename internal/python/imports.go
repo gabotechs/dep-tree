@@ -3,7 +3,6 @@ package python
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python/python_grammar"
@@ -21,14 +20,14 @@ func (l *Language) handleImport(imp *python_grammar.Import) []language.ImportEnt
 	switch {
 	// `import my_file` -> all names from my_file.py are imported.
 	case resolved.File != nil:
-		return []language.ImportEntry{language.AllImport(resolved.File.Path)}
+		return []language.ImportEntry{language.EmptyImport(resolved.File.Path)}
 
 	// `import my_module` -> all names from my_module/__init__.py are imported.
-	case resolved.InitModule != nil && !l.IgnoreModuleImports:
-		return []language.ImportEntry{language.AllImport(resolved.InitModule.Path)}
+	case resolved.InitModule != nil:
+		return []language.ImportEntry{language.EmptyImport(resolved.InitModule.Path)}
 
 	// `import my_dir` -> all python files inside dir my_dir/*.py are imported, but no specific name.
-	case resolved.Directory != nil && !l.IgnoreModuleImports:
+	case resolved.Directory != nil && !l.IgnoreDirectoryImports:
 		imports := make([]language.ImportEntry, len(resolved.Directory.PythonFiles))
 		for i, pythonFile := range resolved.Directory.PythonFiles {
 			imports[i] = language.EmptyImport(pythonFile)
@@ -71,10 +70,7 @@ func handleFromImportNames(resolved *ResolveResult, names []string) ([]language.
 	//  what names are exported from my_module/__init__.py, so the best we can do is just first try to check
 	//  for existing Python files.
 	case resolved.InitModule != nil:
-		availableFiles := map[string]string{}
-		for _, pythonFile := range resolved.InitModule.PythonFiles {
-			availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
-		}
+		availableFiles := resolved.InitModule.fileMap()
 
 		var imports []language.ImportEntry
 		var namesFromInit []string
@@ -94,10 +90,7 @@ func handleFromImportNames(resolved *ResolveResult, names []string) ([]language.
 
 	// `from my_folder import *` -> all the files are imported.
 	case resolved.Directory != nil:
-		availableFiles := map[string]string{}
-		for _, pythonFile := range resolved.Directory.PythonFiles {
-			availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
-		}
+		availableFiles := resolved.Directory.fileMap()
 		for _, name := range names {
 			if pythonFile, ok := availableFiles[name]; ok {
 				return []language.ImportEntry{language.EmptyImport(pythonFile)}, nil
