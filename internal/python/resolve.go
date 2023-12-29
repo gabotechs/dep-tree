@@ -18,7 +18,12 @@ type InitModuleResult struct {
 func (i *InitModuleResult) fileMap() map[string]string {
 	availableFiles := map[string]string{}
 	for _, pythonFile := range i.PythonFiles {
-		availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
+		for _, ext := range Extensions {
+			fileName := path.Base(pythonFile)
+			if strings.HasSuffix(fileName, ext) {
+				availableFiles[strings.TrimSuffix(fileName, "."+ext)] = pythonFile
+			}
+		}
 	}
 	return availableFiles
 }
@@ -50,8 +55,10 @@ func _pythonFilesInDir(dir string) []string {
 	result, _ := os.ReadDir(dir)
 	var pythonFiles []string
 	for _, entry := range result {
-		if strings.HasSuffix(entry.Name(), ".py") {
-			pythonFiles = append(pythonFiles, path.Join(dir, entry.Name()))
+		for _, ext := range Extensions {
+			if strings.HasSuffix(entry.Name(), "."+ext) {
+				pythonFiles = append(pythonFiles, path.Join(dir, entry.Name()))
+			}
 		}
 	}
 	return pythonFiles
@@ -64,9 +71,11 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 	fullFileOrDir := path.Join(append([]string{searchPath}, slices...)...)
 
 	// If there is a Python file, we are done.
-	if utils.FileExists(fullFileOrDir + ".py") {
-		abs, _ := filepath.Abs(fullFileOrDir + ".py")
-		return &ResolveResult{File: &FileResult{Path: abs}}
+	for _, ext := range Extensions {
+		if utils.FileExists(fullFileOrDir + "." + ext) {
+			abs, _ := filepath.Abs(fullFileOrDir + "." + ext)
+			return &ResolveResult{File: &FileResult{Path: abs}}
+		}
 	}
 
 	// If there was not a Python file, it should be a dir.
