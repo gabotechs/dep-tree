@@ -15,9 +15,25 @@ type InitModuleResult struct {
 	PythonFiles []string
 }
 
+func (i *InitModuleResult) fileMap() map[string]string {
+	availableFiles := map[string]string{}
+	for _, pythonFile := range i.PythonFiles {
+		availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
+	}
+	return availableFiles
+}
+
 type DirectoryResult struct {
 	Path        string
 	PythonFiles []string
+}
+
+func (d *DirectoryResult) fileMap() map[string]string {
+	availableFiles := map[string]string{}
+	for _, pythonFile := range d.PythonFiles {
+		availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
+	}
+	return availableFiles
 }
 
 type FileResult struct {

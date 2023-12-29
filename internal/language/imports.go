@@ -18,7 +18,7 @@ func AllImport(path string) ImportEntry {
 }
 
 func EmptyImport(path string) ImportEntry {
-	return ImportEntry{All: true, Path: path}
+	return ImportEntry{Path: path}
 }
 
 func NamesImport(names []string, path string) ImportEntry {

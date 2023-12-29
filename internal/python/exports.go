@@ -7,6 +7,34 @@ import (
 	"github.com/gabotechs/dep-tree/internal/python/python_grammar"
 )
 
+func (l *Language) handleFromImportForExport(imp *python_grammar.FromImport, filePath string) ([]language.ExportEntry, error) {
+	resolved, err := l.resolveFromImportPath(imp, path.Dir(filePath))
+	if err != nil {
+		return nil, err
+	}
+
+	entry := language.ExportEntry{
+		All:  imp.All,
+		Path: filePath,
+	}
+	for _, name := range imp.Names {
+		entry.Names = append(entry.Names, language.ExportName{
+			Original: name.Name,
+			Alias:    name.Alias,
+		})
+	}
+	switch {
+	case resolved == nil:
+	case resolved.Directory != nil:
+	case resolved.InitModule != nil:
+		// nothing.
+	case resolved.File != nil:
+		entry.Path = resolved.File.Path
+	}
+
+	return []language.ExportEntry{entry}, nil
+}
+
 //nolint:gocyclo
 func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEntries, error) {
 	var exports []language.ExportEntry
@@ -15,7 +43,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 		switch {
 		case stmt == nil:
 			continue
-		case stmt.Import != nil && !stmt.Import.Indented:
+		case stmt.Import != nil && !stmt.Import.Indented && !l.IgnoreFromImportsAsExports:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
@@ -25,32 +53,13 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 				},
 				Path: file.Path,
 			})
-		case stmt.FromImport != nil && !stmt.FromImport.Indented:
-			entry := language.ExportEntry{
-				All:  stmt.FromImport.All,
-				Path: file.Path,
-			}
-			for _, name := range stmt.FromImport.Names {
-				entry.Names = append(entry.Names, language.ExportName{
-					Original: name.Name,
-					Alias:    name.Alias,
-				})
-			}
-			resolved, err := l.resolveFromImportPath(stmt.FromImport, path.Dir(file.Path))
+		case stmt.FromImport != nil && !stmt.FromImport.Indented && !l.IgnoreFromImportsAsExports:
+			newExports, err := l.handleFromImportForExport(stmt.FromImport, file.Path)
 			if err != nil {
 				errors = append(errors, err)
-				continue
+			} else {
+				exports = append(exports, newExports...)
 			}
-			switch {
-			case resolved == nil:
-			case resolved.Directory != nil:
-				// nothing.
-			case resolved.InitModule != nil:
-				entry.Path = resolved.InitModule.Path
-			case resolved.File != nil:
-				entry.Path = resolved.File.Path
-			}
-			exports = append(exports, entry)
 
 		case stmt.VariableUnpack != nil:
 			entry := language.ExportEntry{

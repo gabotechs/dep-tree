@@ -58,11 +58,11 @@ func TestLanguage_ParseExports(t *testing.T) {
 				},
 				{
 					All:  true,
-					Path: path.Join(exportsTestFolder, "module", "__init__.py"),
+					Path: path.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "module"}},
-					Path:  path.Join(exportsTestFolder, "module", "__init__.py"),
+					Path:  path.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo"}},
