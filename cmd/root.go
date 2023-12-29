@@ -122,6 +122,10 @@ func loadConfig() (*config.Config, error) {
 	if root.PersistentFlags().Changed("python-exclude-conditional-imports") {
 		cfg.Python.ExcludeConditionalImports = pythonExcludeConditionalImports
 	}
+	// NOTE: hard-enable this for now, as they don't produce a very good output.
+	cfg.Python.IgnoreFromImportsAsExports = true
+	cfg.Python.IgnoreDirectoryImports = true
+
 	cfg.Exclude = append(cfg.Exclude, exclude...)
 	// validate exclusion patterns.
 	for _, exclusion := range cfg.Exclude {

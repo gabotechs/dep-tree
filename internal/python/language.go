@@ -20,10 +20,8 @@ var Extensions = []string{
 }
 
 type Language struct {
-	IgnoreFromImportsAsExports bool
-	IgnoreDirectoryImports     bool
-	PythonPath                 []string
-	cfg                        *Config
+	PythonPath []string
+	cfg        *Config
 }
 
 var _ language.Language[python_grammar.File] = &Language{}
@@ -49,9 +47,7 @@ func isRootFilePresent(dir string) bool {
 
 func MakePythonLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[python_grammar.File], error) {
 	lang := Language{
-		cfg:                        cfg,
-		IgnoreFromImportsAsExports: true,
-		IgnoreDirectoryImports:     true,
+		cfg: cfg,
 	}
 	if lang.cfg == nil {
 		lang.cfg = &Config{}

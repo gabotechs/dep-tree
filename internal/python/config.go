@@ -1,5 +1,7 @@
 package python
 
 type Config struct {
-	ExcludeConditionalImports bool `yaml:"excludeConditionalImports"`
+	ExcludeConditionalImports  bool `yaml:"excludeConditionalImports"`
+	IgnoreFromImportsAsExports bool
+	IgnoreDirectoryImports     bool
 }

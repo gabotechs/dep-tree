@@ -27,7 +27,7 @@ func (l *Language) handleImport(imp *python_grammar.Import) []language.ImportEnt
 		return []language.ImportEntry{language.EmptyImport(resolved.InitModule.Path)}
 
 	// `import my_dir` -> all python files inside dir my_dir/*.py are imported, but no specific name.
-	case resolved.Directory != nil && !l.IgnoreDirectoryImports:
+	case resolved.Directory != nil && !l.cfg.IgnoreDirectoryImports:
 		imports := make([]language.ImportEntry, len(resolved.Directory.PythonFiles))
 		for i, pythonFile := range resolved.Directory.PythonFiles {
 			imports[i] = language.EmptyImport(pythonFile)
