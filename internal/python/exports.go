@@ -43,7 +43,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 		switch {
 		case stmt == nil:
 			continue
-		case stmt.Import != nil && !stmt.Import.Indented && !l.IgnoreFromImportsAsExports:
+		case stmt.Import != nil && !stmt.Import.Indented && !l.cfg.IgnoreFromImportsAsExports:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{
 					{
@@ -53,7 +53,7 @@ func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEnt
 				},
 				Path: file.Path,
 			})
-		case stmt.FromImport != nil && !stmt.FromImport.Indented && !l.IgnoreFromImportsAsExports:
+		case stmt.FromImport != nil && !stmt.FromImport.Indented && !l.cfg.IgnoreFromImportsAsExports:
 			newExports, err := l.handleFromImportForExport(stmt.FromImport, file.Path)
 			if err != nil {
 				errors = append(errors, err)
