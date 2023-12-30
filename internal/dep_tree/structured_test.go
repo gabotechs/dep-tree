@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"path"
 	"testing"
 
@@ -81,10 +80,9 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 			a := require.New(t)
 
 			rendered, err := PrintStructured(
-				context.Background(),
 				"0",
-				func(ctx context.Context, s string) (context.Context, NodeParser[[]int], error) {
-					return ctx, &TestParser{Start: s, Spec: tt.Spec}, nil
+				func(s string) (NodeParser[[]int], error) {
+					return &TestParser{Start: s, Spec: tt.Spec}, nil
 				},
 			)
 			a.NoError(err)

@@ -1,7 +1,6 @@
 package language
 
 import (
-	"context"
 	"path"
 	"path/filepath"
 
@@ -44,49 +43,49 @@ type Parser[F CodeFile] struct {
 	lang               Language[F]
 	unwrapProxyExports bool
 	exclude            []string
+	// cache
+	fileCache    map[string]*F
+	importsCache map[string]*ImportsResult
+	exportsCache map[string]*ExportsResult
 }
 
 var _ NodeParser = &Parser[CodeFile]{}
-
-func makeParser[F CodeFile, C any](
-	ctx context.Context,
-	entrypoint string,
-	languageBuilder Builder[F, C],
-	langCfg C,
-	generalCfg Config,
-) (context.Context, *Parser[F], error) {
-	ctx, lang, err := languageBuilder(ctx, entrypoint, langCfg)
-	if err != nil {
-		return ctx, nil, err
-	}
-	absEntrypoint, err := filepath.Abs(entrypoint)
-	if err != nil {
-		return ctx, nil, err
-	}
-
-	entrypointNode := graph.MakeNode(absEntrypoint, FileInfo{})
-	parser := &Parser[F]{
-		entrypoint:         entrypointNode,
-		lang:               lang,
-		unwrapProxyExports: true,
-	}
-	if generalCfg != nil {
-		parser.unwrapProxyExports = generalCfg.UnwrapProxyExports()
-		parser.exclude = generalCfg.IgnoreFiles()
-	}
-	return ctx, parser, err
-}
 
 type Config interface {
 	UnwrapProxyExports() bool
 	IgnoreFiles() []string
 }
 
-type Builder[F CodeFile, C any] func(context.Context, string, C) (context.Context, Language[F], error)
+type Builder[F CodeFile, C any] func(string, C) (Language[F], error)
 
 func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, generalCfg Config) NodeParserBuilder {
-	return func(ctx context.Context, entrypoint string) (context.Context, NodeParser, error) {
-		return makeParser[F](ctx, entrypoint, languageBuilder, langCfg, generalCfg)
+	fileCache := map[string]*F{}
+	importsCache := map[string]*ImportsResult{}
+	exportsCache := map[string]*ExportsResult{}
+	return func(entrypoint string) (NodeParser, error) {
+		lang, err := languageBuilder(entrypoint, langCfg)
+		if err != nil {
+			return nil, err
+		}
+		absEntrypoint, err := filepath.Abs(entrypoint)
+		if err != nil {
+			return nil, err
+		}
+
+		entrypointNode := graph.MakeNode(absEntrypoint, FileInfo{})
+		parser := &Parser[F]{
+			entrypoint:         entrypointNode,
+			lang:               lang,
+			unwrapProxyExports: true,
+			fileCache:          fileCache,
+			importsCache:       importsCache,
+			exportsCache:       exportsCache,
+		}
+		if generalCfg != nil {
+			parser.unwrapProxyExports = generalCfg.UnwrapProxyExports()
+			parser.exclude = generalCfg.IgnoreFiles()
+		}
+		return parser, err
 	}
 }
 
@@ -103,22 +102,22 @@ func (p *Parser[F]) Entrypoint() (*Node, error) {
 	return p.entrypoint, nil
 }
 
-func (p *Parser[F]) updateNodeInfo(ctx context.Context, n *Node) (context.Context, error) {
-	ctx, file, err := p.parseFile(ctx, n.Id)
+func (p *Parser[F]) updateNodeInfo(n *Node) error {
+	file, err := p.parseFile(n.Id)
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	n.Data.Size = (*file).Size()
 	n.Data.Loc = (*file).Loc()
-	return ctx, err
+	return nil
 }
 
 //nolint:gocyclo
-func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node, error) {
-	ctx, _ = p.updateNodeInfo(ctx, n)
-	ctx, imports, err := p.gatherImportsFromFile(ctx, n.Id)
+func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
+	_ = p.updateNodeInfo(n)
+	imports, err := p.gatherImportsFromFile(n.Id)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
 	n.AddErrors(imports.Errors...)
 
@@ -137,9 +136,9 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 		//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
 		//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
 		//  Instead we never unwrap export to avoid this.
-		ctx, exports, err = p.parseExports(ctx, n.Id, false, nil)
+		exports, err = p.parseExports(n.Id, false, nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		n.AddErrors(exports.Errors...)
 		for el := exports.Exports.Front(); el != nil; el = el.Next() {
@@ -162,9 +161,9 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 		}
 
 		var exports *ExportsResult
-		ctx, exports, err = p.parseExports(ctx, importEntry.Path, true, nil)
+		exports, err = p.parseExports(importEntry.Path, true, nil)
 		if err != nil {
-			return ctx, nil, err
+			return nil, err
 		}
 		n.AddErrors(exports.Errors...)
 		if importEntry.All {
@@ -193,7 +192,7 @@ func (p *Parser[F]) Deps(ctx context.Context, n *Node) (context.Context, []*Node
 			deps = append(deps, node)
 		}
 	}
-	return ctx, deps, nil
+	return deps, nil
 }
 
 func (p *Parser[F]) Display(n *Node) string {

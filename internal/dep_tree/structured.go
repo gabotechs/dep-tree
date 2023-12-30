@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 
@@ -83,11 +82,10 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 }
 
 func PrintStructured[T any](
-	ctx context.Context,
 	entrypoint string,
 	parserBuilder NodeParserBuilder[T],
 ) (string, error) {
-	ctx, parser, err := parserBuilder(ctx, entrypoint)
+	parser, err := parserBuilder(entrypoint)
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +93,7 @@ func PrintStructured[T any](
 	if err != nil {
 		return "", err
 	}
-	_, err = dt.LoadDeps(ctx)
+	err = dt.LoadDeps()
 	if err != nil {
 		return "", err
 	}

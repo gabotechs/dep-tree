@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -34,11 +33,11 @@ func (t *TestParser) Entrypoint() (*graph.Node[[]int], error) {
 	return t.getNode(t.Start)
 }
 
-func (t *TestParser) Deps(ctx context.Context, n *graph.Node[[]int]) (context.Context, []*graph.Node[[]int], error) {
+func (t *TestParser) Deps(n *graph.Node[[]int]) ([]*graph.Node[[]int], error) {
 	result := make([]*graph.Node[[]int], 0)
 	for _, child := range n.Data {
 		if child < 0 {
-			return ctx, nil, errors.New("no negative children")
+			return nil, errors.New("no negative children")
 		}
 		c, err := t.getNode(strconv.Itoa(child))
 		if err != nil {
@@ -47,7 +46,7 @@ func (t *TestParser) Deps(ctx context.Context, n *graph.Node[[]int]) (context.Co
 			result = append(result, c)
 		}
 	}
-	return ctx, result, nil
+	return result, nil
 }
 
 func (t *TestParser) Display(n *graph.Node[[]int]) string {

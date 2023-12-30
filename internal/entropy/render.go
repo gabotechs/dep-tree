@@ -2,7 +2,6 @@ package entropy
 
 import (
 	"bytes"
-	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -24,11 +23,11 @@ type RenderConfig struct {
 	EnableGui bool
 }
 
-func Render(ctx context.Context, parser language.NodeParser, cfg RenderConfig) (context.Context, error) {
+func Render(parser language.NodeParser, cfg RenderConfig) error {
 	dt := dep_tree.NewDepTree(parser)
-	ctx, err := dt.LoadGraph(ctx)
+	err := dt.LoadGraph()
 	if err != nil {
-		return ctx, err
+		return err
 	}
 
 	dt.LoadCycles()
@@ -36,18 +35,18 @@ func Render(ctx context.Context, parser language.NodeParser, cfg RenderConfig) (
 	graph.EnableGui = cfg.EnableGui
 	marshaled, err := json.Marshal(graph)
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
 	temp := path.Join(os.TempDir(), "index.html")
 	err = os.WriteFile(temp, rendered, os.ModePerm)
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	if cfg.NoOpen {
 		fmt.Println(temp)
-		return ctx, nil
+		return nil
 	} else {
-		return ctx, openInBrowser(temp)
+		return openInBrowser(temp)
 	}
 }

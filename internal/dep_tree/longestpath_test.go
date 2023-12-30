@@ -1,12 +1,12 @@
 package dep_tree
 
 import (
-	"context"
 	"strconv"
 	"testing"
 
-	testgraph "github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
+
+	testgraph "github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func Test_longestPath(t *testing.T) {
@@ -120,10 +120,10 @@ func Test_longestPath(t *testing.T) {
 			}
 
 			numNodes := len(tt.Children)
-			ctx := context.Background()
+			dt := DepTree[int]{longestPathCache: map[string]int{}}
 			if tt.ExpectedError != "" {
 				for i := 0; i < numNodes; i++ {
-					ctx, _, err = longestPath(ctx, g, "0", strconv.Itoa(i), nil)
+					_, err = dt.longestPath(g, "0", strconv.Itoa(i), nil)
 					if err != nil {
 						break
 					}
@@ -133,7 +133,7 @@ func Test_longestPath(t *testing.T) {
 				var lvls []int
 				for i := 0; i < numNodes; i++ {
 					var lvl int
-					ctx, lvl, err = longestPath(ctx, g, "0", strconv.Itoa(i), nil)
+					lvl, err = dt.longestPath(g, "0", strconv.Itoa(i), nil)
 					a.NoError(err)
 					lvls = append(lvls, lvl)
 				}

@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"path"
 	"testing"
 
@@ -96,7 +95,7 @@ func TestRenderGraph(t *testing.T) {
 
 			dt := NewDepTree[[]int](&testParser)
 
-			_, err := dt.LoadDeps(context.Background())
+			err := dt.LoadDeps()
 			a.NoError(err)
 
 			board, err := dt.Render()

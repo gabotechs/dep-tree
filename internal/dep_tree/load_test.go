@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,7 +15,7 @@ func TestLoadDeps_noOwnChild(t *testing.T) {
 	dt := NewDepTree[[]int](testGraph)
 	root, err := dt.Root()
 	a.NoError(err)
-	_, err = dt.LoadDeps(context.Background())
+	err = dt.LoadDeps()
 	a.NoError(err)
 
 	a.Equal(testGraph.Start, root.Id)
@@ -36,7 +35,7 @@ func TestLoadDeps_ErrorHandle(t *testing.T) {
 
 	dt := NewDepTree[[]int](testGraph)
 
-	_, err := dt.LoadDeps(context.Background())
+	err := dt.LoadDeps()
 	a.NoError(err)
 	node0 := dt.Graph.Get("0")
 	a.Equal(len(node0.Errors), 0)

@@ -11,6 +11,42 @@ func Cached1In1Out[I comparable, O any](f func(I) O) func(I) O {
 	}
 }
 
+type in2[I1 comparable, I2 comparable] struct {
+	i1 I1
+	i2 I2
+}
+
+func Cached2In1OutErr[I1 comparable, I2 comparable, O1 any](f func(I1, I2) (O1, error)) func(I1, I2) (O1, error) {
+	cache := make(map[in2[I1, I2]]O1)
+	return func(i1 I1, i2 I2) (O1, error) {
+		key := in2[I1, I2]{i1, i2}
+		if _, ok := cache[key]; !ok {
+			o1, err := f(i1, i2)
+			if err != nil {
+				return o1, err
+			}
+			cache[key] = o1
+		}
+		value, _ := cache[key]
+		return value, nil
+	}
+}
+
+func Cached1In1OutErr[I comparable, O1 any](f func(I) (O1, error)) func(I) (O1, error) {
+	cache := make(map[I]O1)
+	return func(x I) (O1, error) {
+		if _, ok := cache[x]; !ok {
+			o1, err := f(x)
+			if err != nil {
+				return o1, err
+			}
+			cache[x] = o1
+		}
+		value, _ := cache[x]
+		return value, nil
+	}
+}
+
 type out2[O1 any, O2 any] struct {
 	o1 O1
 	o2 O2

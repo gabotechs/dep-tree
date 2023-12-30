@@ -1,7 +1,6 @@
 package language
 
 import (
-	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -53,7 +52,6 @@ func b() *ExportsResultBuilder {
 
 func TestParser_parseExports_IsCached(t *testing.T) {
 	a := require.New(t)
-	ctx := context.Background()
 	lang := TestLanguage{
 		exports: b().
 			Entry("1", "1", "A").
@@ -63,12 +61,12 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err := parser.gatherExportsFromFile(ctx, "1")
+	_, err := parser.parseExports("1", false, nil)
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.gatherExportsFromFile(ctx, "1")
+	_, err = parser.parseExports("1", false, nil)
 	a.NoError(err)
 	cached := time.Since(start)
 
@@ -272,16 +270,14 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				exports: tt.Exports,
 			}
 			parser := lang.testParser(tt.Path)
-			ctx := context.Background()
 
 			for i := 0; i < 2; i++ {
-				nCtx, exports, err := parser.parseExports(ctx, "1", true, nil)
-				ctx = nCtx
+				exports, err := parser.parseExports("1", true, nil)
 				a.NoError(err)
 
 				a.Equal(tt.ExpectedUnwrapped, exports.Exports)
 
-				ctx, exports, err = parser.parseExports(ctx, "1", false, nil)
+				exports, err = parser.parseExports("1", false, nil)
 				a.NoError(err)
 
 				a.Equal(tt.ExpectedWrapped, exports.Exports)

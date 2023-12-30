@@ -27,8 +27,11 @@ type TestLanguage struct {
 func (t *TestLanguage) testParser(entrypoint string) *Parser[TestFile] {
 	entrypointNode := graph.MakeNode(entrypoint, FileInfo{})
 	return &Parser[TestFile]{
-		entrypoint: entrypointNode,
-		lang:       t,
+		entrypoint:   entrypointNode,
+		lang:         t,
+		fileCache:    map[string]*TestFile{},
+		importsCache: map[string]*ImportsResult{},
+		exportsCache: map[string]*ExportsResult{},
 	}
 }
 

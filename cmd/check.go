@@ -16,7 +16,6 @@ func CheckCmd() *cobra.Command {
 		GroupID: checkGroupId,
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
 			if configPath == "" {
 				configPath = config.DefaultConfigPath
 			}
@@ -31,7 +30,7 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return check.Check(ctx, parserBuilder, &cfg.Check)
+			return check.Check(parserBuilder, &cfg.Check)
 		},
 	}
 }

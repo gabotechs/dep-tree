@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"context"
-
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
@@ -27,19 +25,18 @@ func initScreen() (tcell.Screen, error) {
 }
 
 func Loop[T any](
-	ctx context.Context,
 	initial string,
 	parserBuilder dep_tree.NodeParserBuilder[T],
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
 ) error {
-	ctx, parser, err := parserBuilder(ctx, initial)
+	parser, err := parserBuilder(initial)
 	if err != nil {
 		return err
 	}
 	dt := dep_tree.NewDepTree(parser)
-	ctx, err = dt.LoadDeps(ctx)
+	err = dt.LoadDeps()
 	if err != nil {
 		return err
 	}
@@ -76,7 +73,7 @@ func Loop[T any](
 		Event:            nil,
 		IsRootNavigation: isRootNavigation,
 		OnNavigate: func(s *systems.State) error {
-			return Loop[T](ctx, s.SelectedId, parserBuilder, screen, false, tickChan)
+			return Loop[T](s.SelectedId, parserBuilder, screen, false, tickChan)
 		},
 	}
 

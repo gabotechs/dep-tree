@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
@@ -12,12 +11,12 @@ import (
 	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
-type NodeParserBuilder[T any] func(context.Context, string) (context.Context, NodeParser[T], error)
+type NodeParserBuilder[T any] func(string) (NodeParser[T], error)
 
 type NodeParser[T any] interface {
 	Display(node *graph.Node[T]) string
 	Entrypoint() (*graph.Node[T], error)
-	Deps(ctx context.Context, node *graph.Node[T]) (context.Context, []*graph.Node[T], error)
+	Deps(node *graph.Node[T]) ([]*graph.Node[T], error)
 }
 
 type DepTreeNode[T any] struct {
@@ -32,13 +31,15 @@ type DepTree[T any] struct {
 	Graph  *graph.Graph[T]
 	Nodes  []*DepTreeNode[T]
 	Cycles *orderedmap.OrderedMap[[2]string, graph.Cycle]
-	// just some internal cache.
+	// just some internal longestPathCache.
 	root *graph.Node[T]
 	// callbacks
 	onStartLoading   func()
 	onNodeStartLoad  func(*graph.Node[T])
 	onNodeFinishLoad func([]*graph.Node[T])
 	onFinishLoad     func()
+	// cache
+	longestPathCache map[string]int
 }
 
 func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
@@ -51,6 +52,7 @@ func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
 		onNodeStartLoad:  func(_ *graph.Node[T]) {},
 		onNodeFinishLoad: func(_ []*graph.Node[T]) {},
 		onFinishLoad:     func() {},
+		longestPathCache: map[string]int{},
 	}).withLoader()
 }
 

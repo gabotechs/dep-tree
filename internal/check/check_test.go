@@ -1,7 +1,6 @@
 package check
 
 import (
-	"context"
 	"strings"
 	"testing"
 
@@ -46,10 +45,9 @@ func TestCheck(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			ctx := context.Background()
 
-			err := Check(ctx, func(ctx context.Context, s string) (context.Context, dep_tree.NodeParser[[]int], error) {
-				return ctx, &dep_tree.TestParser{
+			err := Check(func(s string) (dep_tree.NodeParser[[]int], error) {
+				return &dep_tree.TestParser{
 					Start: s,
 					Spec:  tt.Spec,
 				}, nil

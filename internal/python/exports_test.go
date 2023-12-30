@@ -1,7 +1,6 @@
 package python
 
 import (
-	"context"
 	"path"
 	"path/filepath"
 	"testing"
@@ -111,7 +110,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(exportsTestFolder, tt.Entrypoint), nil)
+			lang, err := MakePythonLanguage(path.Join(exportsTestFolder, tt.Entrypoint), nil)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(path.Join(exportsTestFolder, tt.File))
