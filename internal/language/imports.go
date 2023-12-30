@@ -1,9 +1,5 @@
 package language
 
-import (
-	"context"
-)
-
 type ImportEntry struct {
 	// All: if all the names from Path are imported.
 	All bool
@@ -35,21 +31,18 @@ type ImportsResult struct {
 
 type ImportsCacheKey string
 
-func (p *Parser[F]) gatherImportsFromFile(
-	ctx context.Context,
-	id string,
-) (context.Context, *ImportsResult, error) {
-	cacheKey := ImportsCacheKey(id)
-	if cached, ok := ctx.Value(cacheKey).(*ImportsResult); ok {
-		return ctx, cached, nil
+func (p *Parser[F]) gatherImportsFromFile(id string) (*ImportsResult, error) {
+	if cached, ok := p.importsCache[id]; ok {
+		return cached, nil
 	}
-	ctx, file, err := p.parseFile(ctx, id)
+	file, err := p.parseFile(id)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
 	result, err := p.lang.ParseImports(file)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
-	return context.WithValue(ctx, cacheKey, result), result, err
+	p.importsCache[id] = result
+	return result, err
 }

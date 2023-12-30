@@ -1,11 +1,11 @@
 package language
 
 import (
-	"context"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func TestParser_Deps(t *testing.T) {
@@ -208,7 +208,7 @@ func TestParser_Deps(t *testing.T) {
 
 			node, err := parser.Entrypoint()
 			a.NoError(err)
-			_, deps, err := parser.Deps(context.Background(), node)
+			deps, err := parser.Deps(node)
 			a.NoError(err)
 			result := make([]string, len(deps))
 			for i, dep := range deps {
@@ -219,7 +219,7 @@ func TestParser_Deps(t *testing.T) {
 
 			parser.unwrapProxyExports = false
 
-			_, deps, err = parser.Deps(context.Background(), node)
+			deps, err = parser.Deps(node)
 			a.NoError(err)
 			result = make([]string, len(deps))
 			for i, dep := range deps {
@@ -276,7 +276,7 @@ func TestParser_DepsErrors(t *testing.T) {
 			parser := lang.testParser(tt.Path)
 			node, err := parser.Entrypoint()
 			a.NoError(err)
-			_, _, err = parser.Deps(context.Background(), node)
+			_, err = parser.Deps(node)
 			a.NoError(err)
 			i := 0
 			for _, err := range node.Errors {

@@ -1,7 +1,6 @@
 package python
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path"
@@ -45,7 +44,7 @@ func isRootFilePresent(dir string) bool {
 	return false
 }
 
-func MakePythonLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[python_grammar.File], error) {
+func MakePythonLanguage(entrypoint string, cfg *Config) (language.Language[python_grammar.File], error) {
 	lang := Language{
 		cfg: cfg,
 	}
@@ -54,7 +53,7 @@ func MakePythonLanguage(ctx context.Context, entrypoint string, cfg *Config) (co
 	}
 	entrypointAbsPath, err := filepath.Abs(entrypoint)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
 	var baseDir string
 	switch {
@@ -63,7 +62,7 @@ func MakePythonLanguage(ctx context.Context, entrypoint string, cfg *Config) (co
 	case utils.DirExists(entrypointAbsPath):
 		baseDir = entrypointAbsPath
 	default:
-		return ctx, nil, fmt.Errorf("file %s does not exist", entrypoint)
+		return nil, fmt.Errorf("file %s does not exist", entrypoint)
 	}
 	lookupDir := baseDir
 	rootFilePresent := isRootFilePresent(lookupDir)
@@ -84,7 +83,7 @@ func MakePythonLanguage(ctx context.Context, entrypoint string, cfg *Config) (co
 	if pp != "" {
 		lang.PythonPath = append(lang.PythonPath, strings.Split(pp, ":")...)
 	}
-	return ctx, &lang, nil
+	return &lang, nil
 }
 
 func (l *Language) ParseFile(id string) (*python_grammar.File, error) {

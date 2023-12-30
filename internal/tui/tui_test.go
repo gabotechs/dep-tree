@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path"
@@ -147,7 +146,6 @@ func TestTui(t *testing.T) {
 				}
 
 				finish <- Loop[language.FileInfo](
-					context.Background(),
 					entrypointPath,
 					parserBuilder,
 					screen,

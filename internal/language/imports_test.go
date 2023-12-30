@@ -1,7 +1,6 @@
 package language
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 
 func TestParser_parseImports_IsCached(t *testing.T) {
 	a := require.New(t)
-	ctx := context.Background()
 	lang := TestLanguage{
 		imports: map[string]*ImportsResult{
 			"1": {
@@ -23,12 +21,12 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 	parser := lang.testParser("1")
 
 	start := time.Now()
-	ctx, _, err := parser.gatherImportsFromFile(ctx, "1")
+	_, err := parser.gatherImportsFromFile("1")
 	a.NoError(err)
 	nonCached := time.Since(start)
 
 	start = time.Now()
-	_, _, err = parser.gatherImportsFromFile(ctx, "1")
+	_, err = parser.gatherImportsFromFile("1")
 	a.NoError(err)
 	cached := time.Since(start)
 

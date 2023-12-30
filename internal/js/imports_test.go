@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"os"
 	"path"
 	"testing"
@@ -41,7 +40,7 @@ func TestParser_parseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakeJsLanguage(context.Background(), tt.File, nil)
+			lang, err := MakeJsLanguage(tt.File, nil)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(tt.File)

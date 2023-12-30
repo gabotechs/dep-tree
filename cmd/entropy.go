@@ -16,7 +16,6 @@ func EntropyCmd() *cobra.Command {
 		GroupID: renderGroupId,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
 			entrypoint := args[0]
 
 			cfg, err := loadConfig()
@@ -27,11 +26,11 @@ func EntropyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			ctx, parser, err := parserBuilder(ctx, entrypoint)
+			parser, err := parserBuilder(entrypoint)
 			if err != nil {
 				return err
 			}
-			ctx, err = entropy.Render(ctx, parser, entropy.RenderConfig{
+			err = entropy.Render(parser, entropy.RenderConfig{
 				NoOpen:    noBrowserOpen,
 				EnableGui: enableGui,
 			})

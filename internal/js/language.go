@@ -1,7 +1,6 @@
 package js
 
 import (
-	"context"
 	"fmt"
 	"path"
 
@@ -48,16 +47,16 @@ func _findPackageJson(searchPath string) (TsConfig, string, error) {
 
 var findPackageJson = utils.Cached1In2OutErr(_findPackageJson)
 
-func MakeJsLanguage(ctx context.Context, entrypoint string, cfg *Config) (context.Context, language.Language[js_grammar.File], error) {
+func MakeJsLanguage(entrypoint string, cfg *Config) (language.Language[js_grammar.File], error) {
 	if !utils.FileExists(entrypoint) {
-		return ctx, nil, fmt.Errorf("file %s does not exist", entrypoint)
+		return nil, fmt.Errorf("file %s does not exist", entrypoint)
 	}
 	workspaces, err := NewWorkspaces(entrypoint)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
 
-	return ctx, &Language{
+	return &Language{
 		Cfg:        cfg,
 		Workspaces: workspaces,
 	}, nil

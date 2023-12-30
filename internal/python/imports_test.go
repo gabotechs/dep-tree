@@ -1,7 +1,6 @@
 package python
 
 import (
-	"context"
 	"path"
 	"path/filepath"
 	"testing"
@@ -73,7 +72,7 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, tt.Entrypoint), &Config{
+			lang, err := MakePythonLanguage(path.Join(importsTestFolder, tt.Entrypoint), &Config{
 				ExcludeConditionalImports: tt.ExcludeConditionalImports,
 			})
 			a.NoError(err)
@@ -123,7 +122,7 @@ func TestLanguage_ParseImports_Errors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, lang, err := MakePythonLanguage(context.Background(), path.Join(importsTestFolder, "main.py"), nil)
+			lang, err := MakePythonLanguage(path.Join(importsTestFolder, "main.py"), nil)
 			a.NoError(err)
 
 			result, err := lang.ParseImports(&tt.File) //nolint:gosec

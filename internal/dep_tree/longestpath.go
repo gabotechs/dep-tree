@@ -1,55 +1,50 @@
 package dep_tree
 
 import (
-	"context"
 	"errors"
 
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-type cacheKey string
-
 // longestPath finds the longest path between two nodes in a directed acyclic graph.
 //
 //	It uses the context as cache, so next calculations even with different nodes are quick.
-func longestPath[T any](
-	ctx context.Context,
+func (dt *DepTree[T]) longestPath(
 	g *graph.Graph[T],
 	rootId string,
 	nodeId string,
 	stack *utils.CallStack,
-) (context.Context, int, error) {
+) (int, error) {
 	if stack == nil {
 		stack = utils.NewCallStack()
 	}
 	if nodeId == rootId {
-		return ctx, 0, nil
+		return 0, nil
 	}
-	var cachedLevelKey = cacheKey(rootId + "-" + nodeId)
-	if cachedLevel, ok := ctx.Value(cachedLevelKey).(int); ok {
-		return ctx, cachedLevel, nil
+	var cachedLevelKey = rootId + "-" + nodeId
+	if cachedLevel, ok := dt.longestPathCache[cachedLevelKey]; ok {
+		return cachedLevel, nil
 	}
 	err := stack.Push(nodeId)
 	if err != nil {
-		return nil, 0, errors.New("cannot calculate longest path between nodes because there is at least one cycle in the graph: " + err.Error())
+		return 0, errors.New("cannot calculate longest path between nodes because there is at least one cycle in the graph: " + err.Error())
 	}
 
 	maxLongestPath := 0
 	for _, from := range g.ToId(nodeId) {
-		newCtx, length, err := longestPath(ctx, g, rootId, from.Id, stack)
-		ctx = newCtx
+		length, err := dt.longestPath(g, rootId, from.Id, stack)
 		if err != nil {
-			return ctx, 0, err
+			return 0, err
 		}
 		if length > maxLongestPath {
 			maxLongestPath = length
 		}
 	}
 	if maxLongestPath >= 0 {
-		ctx = context.WithValue(ctx, cachedLevelKey, maxLongestPath+1)
+		dt.longestPathCache[cachedLevelKey] = maxLongestPath + 1
 	}
 
 	stack.Pop()
-	return ctx, maxLongestPath + 1, nil
+	return maxLongestPath + 1, nil
 }

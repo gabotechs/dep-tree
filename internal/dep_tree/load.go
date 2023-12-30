@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"context"
 	"sort"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -10,23 +9,23 @@ import (
 	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
-func (dt *DepTree[T]) LoadDeps(ctx context.Context) (context.Context, error) {
-	ctx, err := dt.LoadGraph(ctx)
+func (dt *DepTree[T]) LoadDeps() error {
+	err := dt.LoadGraph()
 	if err != nil {
-		return ctx, err
+		return err
 	}
 
 	dt.LoadCycles()
 
-	return dt.LoadNodes(ctx)
+	return dt.LoadNodes()
 }
 
-func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
+func (dt *DepTree[T]) LoadGraph() error {
 	dt.Graph = graph.NewGraph[T]()
 
 	root, err := dt.Root()
 	if err != nil {
-		return ctx, err
+		return err
 	}
 
 	var queue deque.Deque[*graph.Node[T]]
@@ -44,8 +43,7 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 		dt.onNodeStartLoad(node)
 		visited[node.Id] = true
 
-		newCtx, deps, err := dt.NodeParser.Deps(ctx, node)
-		ctx = newCtx
+		deps, err := dt.NodeParser.Deps(node)
 		if err != nil {
 			node.AddErrors(err)
 			continue
@@ -63,13 +61,13 @@ func (dt *DepTree[T]) LoadGraph(ctx context.Context) (context.Context, error) {
 			err = dt.Graph.AddFromToEdge(node.Id, dep.Id)
 			queue.PushBack(dep)
 			if err != nil {
-				return ctx, err
+				return err
 			}
 		}
 	}
 	dt.onFinishLoad()
 
-	return ctx, nil
+	return nil
 }
 
 func (dt *DepTree[T]) LoadCycles() {
@@ -81,18 +79,17 @@ func (dt *DepTree[T]) LoadCycles() {
 	}
 }
 
-func (dt *DepTree[T]) LoadNodes(ctx context.Context) (context.Context, error) {
+func (dt *DepTree[T]) LoadNodes() error {
 	root, err := dt.Root()
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	allNodes := dt.Graph.AllNodes()
 	dt.Nodes = make([]*DepTreeNode[T], len(allNodes))
 	for i, n := range allNodes {
-		newCtx, lvl, err := longestPath(ctx, dt.Graph, root.Id, n.Id, nil)
-		ctx = newCtx
+		lvl, err := dt.longestPath(dt.Graph, root.Id, n.Id, nil)
 		if err != nil {
-			return ctx, err
+			return err
 		}
 		dt.Nodes[i] = &DepTreeNode[T]{n, lvl}
 	}
@@ -104,5 +101,5 @@ func (dt *DepTree[T]) LoadNodes(ctx context.Context) (context.Context, error) {
 			return dt.Nodes[i].Lvl < dt.Nodes[j].Lvl
 		}
 	})
-	return ctx, nil
+	return nil
 }

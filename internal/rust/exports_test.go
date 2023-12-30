@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"context"
 	"path"
 	"path/filepath"
 	"testing"
@@ -57,7 +56,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, _lang, err := MakeRustLanguage(context.Background(), path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)

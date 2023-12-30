@@ -1,7 +1,6 @@
 package language
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -47,30 +46,34 @@ type ExportsResult struct {
 	Errors []error
 }
 
-type parseExportsKey string
-
+//nolint:gocyclo
 func (p *Parser[F]) parseExports(
-	ctx context.Context,
 	id string,
 	unwrappedExports bool,
 	stack *utils.CallStack,
-) (context.Context, *ExportsResult, error) {
+) (*ExportsResult, error) {
 	if stack == nil {
 		stack = utils.NewCallStack()
 	}
 	if err := stack.Push(id); err != nil {
-		return ctx, nil, errors.New("circular export: " + err.Error())
+		return nil, errors.New("circular export: " + err.Error())
 	}
 	defer stack.Pop()
-	unwrappedCacheKey := parseExportsKey(fmt.Sprintf("%s-%t", id, unwrappedExports))
-	if cached, ok := ctx.Value(unwrappedCacheKey).(*ExportsResult); ok {
-		return ctx, cached, nil
+	cacheKey := fmt.Sprintf("%s-%t", id, unwrappedExports)
+	if cached, ok := p.exportsCache[cacheKey]; ok {
+		return cached, nil
 	}
 
-	ctx, wrapped, err := p.gatherExportsFromFile(ctx, id)
+	file, err := p.parseFile(id)
 	if err != nil {
-		return ctx, nil, err
+		return nil, err
 	}
+
+	wrapped, err := p.lang.ParseExports(file)
+	if err != nil {
+		return nil, err
+	}
+
 	exports := orderedmap.NewOrderedMap[string, string]()
 	var exportErrors []error
 
@@ -83,7 +86,7 @@ func (p *Parser[F]) parseExports(
 		}
 
 		var unwrapped *ExportsResult
-		ctx, unwrapped, err = p.parseExports(ctx, export.Path, unwrappedExports, stack)
+		unwrapped, err = p.parseExports(export.Path, unwrappedExports, stack)
 		if err != nil {
 			exportErrors = append(exportErrors, err)
 			continue
@@ -116,26 +119,6 @@ func (p *Parser[F]) parseExports(
 	}
 
 	result := ExportsResult{Exports: exports, Errors: exportErrors}
-	return context.WithValue(ctx, unwrappedCacheKey, &result), &result, nil
-}
-
-type gatherExportsFromFileKey string
-
-func (p *Parser[F]) gatherExportsFromFile(
-	ctx context.Context,
-	filePath string,
-) (context.Context, *ExportsEntries, error) {
-	cacheKey := gatherExportsFromFileKey(filePath)
-	if cached, ok := ctx.Value(cacheKey).(*ExportsEntries); ok {
-		return ctx, cached, nil
-	}
-	ctx, file, err := p.parseFile(ctx, filePath)
-	if err != nil {
-		return ctx, nil, err
-	}
-	result, err := p.lang.ParseExports(file)
-	if err != nil {
-		return ctx, nil, err
-	}
-	return context.WithValue(ctx, cacheKey, result), result, err
+	p.exportsCache[cacheKey] = &result
+	return &result, nil
 }

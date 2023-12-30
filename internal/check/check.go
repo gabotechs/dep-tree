@@ -1,7 +1,6 @@
 package check
 
 import (
-	"context"
 	"errors"
 	"path"
 	"path/filepath"
@@ -12,23 +11,22 @@ import (
 )
 
 func checkEntrypoint[T any](
-	ctx context.Context,
 	parserBuilder dep_tree.NodeParserBuilder[T],
 	cfg *Config,
 	entrypoint string,
-) (context.Context, error) {
-	ctx, parser, err := parserBuilder(ctx, entrypoint)
+) error {
+	parser, err := parserBuilder(entrypoint)
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	dt := dep_tree.NewDepTree(parser)
 	root, err := dt.Root()
 	if err != nil {
-		return ctx, err
+		return err
 	}
-	ctx, err = dt.LoadGraph(ctx)
+	err = dt.LoadGraph()
 	if err != nil {
-		return ctx, err
+		return err
 	}
 	failures, err := cfg.Validate(
 		root.Id,
@@ -60,11 +58,11 @@ func checkEntrypoint[T any](
 		}
 	}
 	if err != nil {
-		return ctx, err
+		return err
 	} else if len(failures) > 0 {
-		return ctx, errors.New("Check failed for entrypoint \"" + entrypoint + "\" the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
+		return errors.New("Check failed for entrypoint \"" + entrypoint + "\" the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
 	}
-	return ctx, nil
+	return nil
 }
 
 type Error []error
@@ -78,15 +76,11 @@ func (e Error) Error() string {
 	return msg
 }
 
-func Check[T any](
-	ctx context.Context,
-	parserBuilder dep_tree.NodeParserBuilder[T],
-	cfg *Config,
-) error {
+func Check[T any](parserBuilder dep_tree.NodeParserBuilder[T], cfg *Config) error {
 	errorFlag := false
 	errs := make([]error, len(cfg.Entrypoints))
 	for i, entrypoint := range cfg.Entrypoints {
-		ctx, errs[i] = checkEntrypoint(ctx, parserBuilder, cfg, path.Join(cfg.Path, entrypoint))
+		errs[i] = checkEntrypoint(parserBuilder, cfg, path.Join(cfg.Path, entrypoint))
 		if errs[i] != nil {
 			errorFlag = true
 		}
