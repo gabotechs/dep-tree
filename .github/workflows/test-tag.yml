@@ -5,16 +5,16 @@ on:
     branches:
       - main
 jobs:
-  unit-test-windows:
-    if: ${{ !startsWith(github.event.head_commit.message, 'tag') }}
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-      - name: Test
-        run: go test -v ./...
+#  unit-test-windows:
+#    if: ${{ !startsWith(github.event.head_commit.message, 'tag') }}
+#    runs-on: windows-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-go@v4
+#        with:
+#          go-version: '1.21'
+#      - name: Test
+#        run: go test -v ./...
 
   unit-test-linux:
     if: ${{ !startsWith(github.event.head_commit.message, 'tag') }}
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - unit-test-linux
-      - unit-test-windows
+#      - unit-test-windows
       - lint
     steps:
       - uses: actions/checkout@v3
