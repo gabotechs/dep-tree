@@ -1,7 +1,6 @@
 package python
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -29,71 +28,71 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Expected: []language.ExportEntry{
 				{
 					Names: []language.ExportName{{Original: "foo", Alias: "foo_2"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo", Alias: "foo_3"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				//{
 				//	Names: []language.ExportName{{Original: "foo"}},
-				//	Path:    path.Join(exportsTestFolder, "main.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
 				//	Names: []language.ExportName{{Original: "folder", Alias: "foo"}},
-				//	Path:    path.Join(exportsTestFolder, "main.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
 				//	Names: []language.ExportName{{Original: "bar"}},
-				//	Path:    path.Join(exportsTestFolder, "foo.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "foo.py"),
 				// },
 				//{
 				//	Names: []language.ExportName{{Original: "baz", Alias: "baz_2"}},
-				//	Path:    path.Join(exportsTestFolder, "folder", "foo.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "folder", "foo.py"),
 				// },
 				{
 					Names: []language.ExportName{{Original: "a"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					All:  true,
-					Path: path.Join(exportsTestFolder, "main.py"),
+					Path: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "module"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo_1"}, {Original: "foo_2"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo_3"}, {Original: "foo_4"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "foo_5"}, {Original: "foo_6"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "func"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
 					Names: []language.ExportName{{Original: "Class"}},
-					Path:  path.Join(exportsTestFolder, "main.py"),
+					Path:  filepath.Join(exportsTestFolder, "main.py"),
 				},
 				//{
 				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
-				//	Path:    path.Join(exportsTestFolder, "main.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
 				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
-				//	Path:    path.Join(exportsTestFolder, "main.py"),
+				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				{
 					Names: []language.ExportName{
@@ -101,7 +100,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 						{Original: "b"},
 						{Original: "c"},
 					},
-					Path: path.Join(exportsTestFolder, "foo.py"),
+					Path: filepath.Join(exportsTestFolder, "foo.py"),
 				},
 			},
 		},
@@ -110,10 +109,10 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(path.Join(exportsTestFolder, tt.Entrypoint), nil)
+			lang, err := MakePythonLanguage(filepath.Join(exportsTestFolder, tt.Entrypoint), nil)
 			a.NoError(err)
 
-			parsed, err := lang.ParseFile(path.Join(exportsTestFolder, tt.File))
+			parsed, err := lang.ParseFile(filepath.Join(exportsTestFolder, tt.File))
 			a.NoError(err)
 
 			result, err := lang.ParseExports(parsed)

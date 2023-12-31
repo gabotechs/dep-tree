@@ -2,6 +2,7 @@ package dep_tree
 
 import (
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -103,7 +104,7 @@ func TestRenderGraph(t *testing.T) {
 			result, err := board.Render()
 			a.NoError(err)
 
-			outFile := path.Join(renderDir, path.Base(tt.Name+".txt"))
+			outFile := filepath.Join(renderDir, path.Base(tt.Name+".txt"))
 			utils.GoldenTest(t, outFile, result)
 		})
 	}

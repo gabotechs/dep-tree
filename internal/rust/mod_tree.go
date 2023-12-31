@@ -36,7 +36,7 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 
 	var searchPath string
 	if path.Base(mainPath) == name+".rs" {
-		searchPath = path.Join(filepath.Dir(mainPath), name)
+		searchPath = filepath.Join(filepath.Dir(mainPath), name)
 	} else {
 		searchPath = filepath.Dir(mainPath)
 	}
@@ -57,9 +57,9 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 				}
 			} else {
 				var modPath string
-				if p := path.Join(searchPath, stmt.Mod.Name+".rs"); utils.FileExists(p) {
+				if p := filepath.Join(searchPath, stmt.Mod.Name+".rs"); utils.FileExists(p) {
 					modPath = p
-				} else if p = path.Join(searchPath, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
+				} else if p = filepath.Join(searchPath, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
 					modPath = p
 				} else {
 					return nil, fmt.Errorf(`could not find mod "%s" in path "%s"`, stmt.Mod.Name, searchPath)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -19,13 +18,13 @@ type WorkspaceEntry struct {
 func (w *WorkspaceEntry) index() string {
 	// Independently of what the package.json `main` says, let's
 	// always try first the `src/index.[js|ts|jsx|tsx]` file.
-	fullPath := getFileAbsPath(path.Join(w.absPath, "src"))
+	fullPath := getFileAbsPath(filepath.Join(w.absPath, "src"))
 	if fullPath != "" {
 		return fullPath
 	}
 	// Then, if a `main` property is declared in the package.json, follow it.
 	if w.main != "" {
-		fullPath = getFileAbsPath(path.Join(w.absPath, w.main))
+		fullPath = getFileAbsPath(filepath.Join(w.absPath, w.main))
 		if fullPath != "" {
 			return fullPath
 		}
@@ -73,7 +72,7 @@ func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJso
 	if len(searchPath) < 2 {
 		return nil, nil
 	}
-	packageJsonPath := path.Join(searchPath, "package.json")
+	packageJsonPath := filepath.Join(searchPath, "package.json")
 	if utils.FileExists(packageJsonPath) {
 		var result partialPackageJson
 		content, err := os.ReadFile(packageJsonPath)
@@ -103,7 +102,7 @@ func allDirsWithAPackageJson(start string) ([]string, error) {
 	var result []string
 	for _, entry := range dir {
 		if entry.IsDir() {
-			more, err := allDirsWithAPackageJson(path.Join(start, entry.Name()))
+			more, err := allDirsWithAPackageJson(filepath.Join(start, entry.Name()))
 			if err != nil {
 				return nil, err
 			}
@@ -138,7 +137,7 @@ func NewWorkspaces(searchPath string) (*Workspaces, error) {
 				return nil, err
 			}
 			if match {
-				packageJsonPath := path.Join(dir, "package.json")
+				packageJsonPath := filepath.Join(dir, "package.json")
 				content, err := os.ReadFile(packageJsonPath)
 				if err != nil {
 					return nil, err
@@ -193,7 +192,7 @@ func (w *Workspaces) ResolveFromWorkspaces(unresolved string) (string, error) {
 			return "", fmt.Errorf("workspace '%s' has no index file", ws.absPath)
 		}
 	} else {
-		fullPath = path.Join(ws.absPath, rest)
+		fullPath = filepath.Join(ws.absPath, rest)
 	}
 	result := getFileAbsPath(fullPath)
 	if result == "" {

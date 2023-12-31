@@ -1,7 +1,7 @@
 package systems
 
 import (
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -28,7 +28,7 @@ func TestHelpScreen(t *testing.T) {
 
 	mockScreen.InjectKey(tcell.Key(int16('q')), 'q', tcell.ModMask(0))
 
-	utils.GoldenTest(t, path.Join(".runtime_system_test", "help.txt"), result)
+	utils.GoldenTest(t, filepath.Join(".runtime_system_test", "help.txt"), result)
 
 	err = <-wait
 	a.NoError(err)

@@ -2,7 +2,7 @@ package rust_grammar
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -92,7 +92,7 @@ func TestPub(t *testing.T) {
 			var content []byte
 			if tt.File != "" {
 				var err error
-				content, err = os.ReadFile(path.Join(".test_files", tt.File))
+				content, err = os.ReadFile(filepath.Join(".test_files", tt.File))
 				a.NoError(err)
 			} else {
 				content = []byte(tt.Name)

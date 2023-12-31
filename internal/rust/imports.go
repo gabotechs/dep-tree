@@ -2,7 +2,6 @@ package rust
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -43,9 +42,9 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 			thisDir := filepath.Dir(file.Path)
 
 			var modPath string
-			if p := path.Join(thisDir, stmt.Mod.Name+".rs"); utils.FileExists(p) {
+			if p := filepath.Join(thisDir, stmt.Mod.Name+".rs"); utils.FileExists(p) {
 				modPath = p
-			} else if p = path.Join(thisDir, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
+			} else if p = filepath.Join(thisDir, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
 				modPath = p
 			} else {
 				errors = append(errors, fmt.Errorf("could not find mod %s while looking in dir %s", stmt.Mod.Name, thisDir))

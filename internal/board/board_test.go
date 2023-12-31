@@ -2,6 +2,7 @@ package board
 
 import (
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -275,7 +276,7 @@ func TestBoard(t *testing.T) {
 			result, err := board.Render()
 			if tt.ExpectedError == "" {
 				a.NoError(err)
-				fullPath := path.Join(testPath, path.Base(t.Name())+".txt")
+				fullPath := filepath.Join(testPath, path.Base(t.Name())+".txt")
 				utils.GoldenTest(t, fullPath, result)
 			} else {
 				a.ErrorContains(err, tt.ExpectedError)

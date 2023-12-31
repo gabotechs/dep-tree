@@ -2,7 +2,6 @@ package check
 
 import (
 	"errors"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -80,7 +79,7 @@ func Check[T any](parserBuilder dep_tree.NodeParserBuilder[T], cfg *Config) erro
 	errorFlag := false
 	errs := make([]error, len(cfg.Entrypoints))
 	for i, entrypoint := range cfg.Entrypoints {
-		errs[i] = checkEntrypoint(parserBuilder, cfg, path.Join(cfg.Path, entrypoint))
+		errs[i] = checkEntrypoint(parserBuilder, cfg, filepath.Join(cfg.Path, entrypoint))
 		if errs[i] != nil {
 			errorFlag = true
 		}

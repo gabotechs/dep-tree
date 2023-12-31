@@ -3,7 +3,6 @@ package python
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -37,7 +36,7 @@ var rootFiles = []string{
 
 func isRootFilePresent(dir string) bool {
 	for _, rootFile := range rootFiles {
-		if utils.FileExists(path.Join(dir, rootFile)) {
+		if utils.FileExists(filepath.Join(dir, rootFile)) {
 			return true
 		}
 	}

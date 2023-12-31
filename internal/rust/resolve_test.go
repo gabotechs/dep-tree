@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -17,22 +16,22 @@ func TestDirToModChain(t *testing.T) {
 	}{
 		{
 			Name:     "Simple",
-			Path:     path.Join(testFolder, "src", "random", "slice"),
+			Path:     filepath.Join(testFolder, "src", "random", "slice"),
 			Expected: []string{"random", "slice"},
 		},
 		{
 			Name:     "Does not output just a .",
-			Path:     path.Join(testFolder, "src"),
+			Path:     filepath.Join(testFolder, "src"),
 			Expected: []string{},
 		},
 		{
 			Name:     "src/lib.rs is the source",
-			Path:     path.Join(testFolder, "src", "lib.rs"),
+			Path:     filepath.Join(testFolder, "src", "lib.rs"),
 			Expected: []string{},
 		},
 		{
 			Name:     "mod file refers to parent folder module",
-			Path:     path.Join(testFolder, "src", "div", "mod.rs"),
+			Path:     filepath.Join(testFolder, "src", "div", "mod.rs"),
 			Expected: []string{"div"},
 		},
 	}
@@ -40,7 +39,7 @@ func TestDirToModChain(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -64,37 +63,37 @@ func TestResolve(t *testing.T) {
 	}{
 		{
 			Name:     "crate abs",
-			FilePath: path.Join(testFolder, "src", "abs", "abs.rs"),
-			Expected: path.Join(testFolder, "src", "abs.rs"),
+			FilePath: filepath.Join(testFolder, "src", "abs", "abs.rs"),
+			Expected: filepath.Join(testFolder, "src", "abs.rs"),
 		},
 		{
 			Name:     "crate abs abs",
-			FilePath: path.Join(testFolder, "src", "div", "div_2.rs"),
-			Expected: path.Join(testFolder, "src", "abs", "abs.rs"),
+			FilePath: filepath.Join(testFolder, "src", "div", "div_2.rs"),
+			Expected: filepath.Join(testFolder, "src", "abs", "abs.rs"),
 		},
 		{
 			Name:     "self avg_2 avg",
-			FilePath: path.Join(testFolder, "src", "lib.rs"),
-			Expected: path.Join(testFolder, "src", "avg_2.rs"),
+			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
+			Expected: filepath.Join(testFolder, "src", "avg_2.rs"),
 		},
 		{
 			Name:     "super div_2 div_2",
-			FilePath: path.Join(testFolder, "src", "div", "div.rs"),
-			Expected: path.Join(testFolder, "src", "div", "div_2", "div_2.rs"),
+			FilePath: filepath.Join(testFolder, "src", "div", "div.rs"),
+			Expected: filepath.Join(testFolder, "src", "div", "div_2", "div_2.rs"),
 		},
 		{
 			Name:     "self sum",
-			FilePath: path.Join(testFolder, "src", "lib.rs"),
-			Expected: path.Join(testFolder, "src", "sum.rs"),
+			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
+			Expected: filepath.Join(testFolder, "src", "sum.rs"),
 		},
 		{
 			Name:     "crate div div",
-			FilePath: path.Join(testFolder, "src", "lib.rs"),
-			Expected: path.Join(testFolder, "src", "div", "div.rs"),
+			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
+			Expected: filepath.Join(testFolder, "src", "div", "div.rs"),
 		},
 		{
 			Name:     "un_existing",
-			FilePath: path.Join(testFolder, "src", "lib.rs"),
+			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
 			Expected: "",
 		},
 	}
@@ -102,7 +101,7 @@ func TestResolve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -132,7 +131,7 @@ func TestResolveErrors(t *testing.T) {
 	}{
 		{
 			Name:     "crate un_existing",
-			FilePath: path.Join(testFolder, "src", "lib.rs"),
+			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
 			Expected: "could not find mod",
 		},
 	}
@@ -140,7 +139,7 @@ func TestResolveErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)

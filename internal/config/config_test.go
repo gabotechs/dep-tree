@@ -1,7 +1,7 @@
 package config
 
 import (
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -59,7 +59,7 @@ func TestParseConfig(t *testing.T) {
 			a := require.New(t)
 
 			if tt.File != "" {
-				tt.File = path.Join(testFolder, tt.File)
+				tt.File = filepath.Join(testFolder, tt.File)
 			}
 			cfg, err := ParseConfig(tt.File)
 			a.NoError(err)
@@ -83,7 +83,7 @@ func TestConfig_ErrorHandling(t *testing.T) {
 		},
 		{
 			Name:     "Invalid yml",
-			File:     path.Join(testFolder, ".invalid.yml"),
+			File:     filepath.Join(testFolder, ".invalid.yml"),
 			Expected: "not a valid yml file",
 		},
 	}

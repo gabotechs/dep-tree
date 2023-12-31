@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func TestLanguage_ParseExports(t *testing.T) {
-	absTestFolder, _ := filepath.Abs(path.Join(testFolder))
+	absTestFolder, _ := filepath.Abs(testFolder)
 
 	tests := []struct {
 		Name     string
@@ -23,31 +22,31 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Expected: []language.ExportEntry{
 				{
 					Names: []language.ExportName{{Original: "div"}},
-					Path:  path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "abs"}},
-					Path:  path.Join(absTestFolder, "src", "abs", "abs.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "abs", "abs.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "div"}},
-					Path:  path.Join(absTestFolder, "src", "div", "mod.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "div", "mod.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "avg"}},
-					Path:  path.Join(absTestFolder, "src", "avg_2.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "avg_2.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "sum"}},
-					Path:  path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
 					All:  true,
-					Path: path.Join(absTestFolder, "src", "sum.rs"),
+					Path: filepath.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					Names: []language.ExportName{{Original: "run"}},
-					Path:  path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 			},
 		},
@@ -56,12 +55,12 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)
 
-			file, err := lang.ParseFile(path.Join(absTestFolder, "src", tt.Name))
+			file, err := lang.ParseFile(filepath.Join(absTestFolder, "src", tt.Name))
 			a.NoError(err)
 
 			exports, err := lang.ParseExports(file)

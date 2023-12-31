@@ -2,7 +2,7 @@ package js_grammar
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -207,7 +207,7 @@ func TestExport(t *testing.T) {
 			var content []byte
 			if strings.HasSuffix(tt.Name, ".js") {
 				var err error
-				content, err = os.ReadFile(path.Join(".export_test", tt.Name))
+				content, err = os.ReadFile(filepath.Join(".export_test", tt.Name))
 				a.NoError(err)
 			} else {
 				content = []byte(tt.Name)

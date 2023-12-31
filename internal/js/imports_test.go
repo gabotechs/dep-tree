@@ -2,7 +2,7 @@ package js
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,13 +23,13 @@ func TestParser_parseImports(t *testing.T) {
 	}{
 		{
 			Name: "test 1",
-			File: path.Join(importsTestFolder, "index.ts"),
+			File: filepath.Join(importsTestFolder, "index.ts"),
 			Expected: []language.ImportEntry{
-				{Names: []string{"a", "b"}, Path: path.Join(wd, importsTestFolder, "2", "2.ts")},
-				{All: true, Path: path.Join(wd, importsTestFolder, "2", "index.ts")},
-				{All: true, Path: path.Join(wd, importsTestFolder, "1", "a", "a.ts")},
-				{All: true, Path: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
-				{Names: []string{"Unexisting"}, Path: path.Join(wd, importsTestFolder, "1", "a", "index.ts")},
+				{Names: []string{"a", "b"}, Path: filepath.Join(wd, importsTestFolder, "2", "2.ts")},
+				{All: true, Path: filepath.Join(wd, importsTestFolder, "2", "index.ts")},
+				{All: true, Path: filepath.Join(wd, importsTestFolder, "1", "a", "a.ts")},
+				{All: true, Path: filepath.Join(wd, importsTestFolder, "1", "a", "index.ts")},
+				{Names: []string{"Unexisting"}, Path: filepath.Join(wd, importsTestFolder, "1", "a", "index.ts")},
 			},
 			ExpectedErrors: []string{
 				"could not perform relative import for './unexisting'",

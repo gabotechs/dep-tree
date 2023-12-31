@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -33,7 +32,7 @@ func (m *ModTree) Debug(indent int) string {
 
 func TestMakeModTree(t *testing.T) {
 	a := require.New(t)
-	absPath, err := filepath.Abs(path.Join(testFolder, "src", "lib.rs"))
+	absPath, err := filepath.Abs(filepath.Join(testFolder, "src", "lib.rs"))
 	a.NoError(err)
 
 	modTree, err := MakeModTree(absPath, "crate")
@@ -91,7 +90,7 @@ func TestMakeModTree(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			node := modTree.Search(strings.Split(tt.Name, " "))
 			a.NotNil(node)
-			a.Equal(path.Join(base, tt.Expected), node.Path)
+			a.Equal(filepath.Join(base, tt.Expected), node.Path)
 		})
 	}
 }
@@ -104,7 +103,7 @@ func TestModTree_Errors(t *testing.T) {
 	}{
 		{
 			Name:     "invalid path",
-			Path:     path.Join(testFolder, "src", "_bad.rs"),
+			Path:     filepath.Join(testFolder, "src", "_bad.rs"),
 			Expected: "no such file or directory",
 		},
 	}
