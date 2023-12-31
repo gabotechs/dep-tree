@@ -11,7 +11,9 @@ jobs:
         with:
           fetch-depth: '0' # https://github.com/actions/checkout/issues/217
           token: ${{ secrets.CI_TOKEN }}
-      - uses: ./.github/actions/setup-go
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
       - uses: goreleaser/goreleaser-action@v2
         with:
           args: release --rm-dist
