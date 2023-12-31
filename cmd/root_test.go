@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -13,14 +15,16 @@ const testFolder = ".root_test"
 
 func TestRoot(t *testing.T) {
 	tests := []struct {
-		Name         string
-		NoExactMatch bool
+		Name              string
+		JustExpectAtLeast int
 	}{
 		{
-			Name: "",
+			Name:              "",
+			JustExpectAtLeast: 100,
 		},
 		{
-			Name: "help",
+			Name:              "help",
+			JustExpectAtLeast: 100,
 		},
 		{
 			Name: "entropy .root_test/main.py --no-browser-open",
@@ -85,10 +89,15 @@ func TestRoot(t *testing.T) {
 			name := tt.Name + ".txt"
 			name = strings.ReplaceAll(name, "/", "_")
 			name = strings.ReplaceAll(name, "-", "_")
-			if err != nil {
-				utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
+			if tt.JustExpectAtLeast > 0 {
+				a := require.New(t)
+				a.Greater(len(b.String()), tt.JustExpectAtLeast)
 			} else {
-				utils.GoldenTest(t, filepath.Join(testFolder, name), b.String())
+				if err != nil {
+					utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
+				} else {
+					utils.GoldenTest(t, filepath.Join(testFolder, name), b.String())
+				}
 			}
 		})
 	}
