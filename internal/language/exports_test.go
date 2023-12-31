@@ -70,7 +70,7 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 	a.NoError(err)
 	cached := time.Since(start)
 
-	ratio := nonCached.Nanoseconds() / cached.Nanoseconds()
+	ratio := nonCached.Nanoseconds() / max(cached.Nanoseconds(), 1)
 	a.Greater(ratio, int64(10))
 }
 
