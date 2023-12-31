@@ -2,14 +2,14 @@ package utils
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func GoldenTest(t *testing.T, file string, content string) {
-	dir := path.Dir(file)
+	dir := filepath.Dir(file)
 	if !DirExists(dir) {
 		_ = os.MkdirAll(dir, os.ModePerm)
 	}

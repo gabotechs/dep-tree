@@ -1,7 +1,7 @@
 package js
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -42,7 +42,7 @@ func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult,
 			continue
 		}
 		var err error
-		entry.Path, err = l.ResolvePath(importPath, path.Dir(file.Path))
+		entry.Path, err = l.ResolvePath(importPath, filepath.Dir(file.Path))
 		if err != nil {
 			errors = append(errors, err)
 		} else if entry.Path != "" {

@@ -2,7 +2,7 @@ package python
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python/python_grammar"
@@ -139,7 +139,7 @@ func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsRes
 		case stmt.Import != nil:
 			imports = append(imports, l.handleImport(stmt.Import)...)
 		case stmt.FromImport != nil:
-			newImports, err := l.handleFromImport(stmt.FromImport, path.Dir(file.Path))
+			newImports, err := l.handleFromImport(stmt.FromImport, filepath.Dir(file.Path))
 			imports = append(imports, newImports...)
 			if err != nil {
 				errors = append(errors, err)

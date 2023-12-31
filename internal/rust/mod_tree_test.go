@@ -55,7 +55,7 @@ func TestMakeModTree(t *testing.T) {
   tests src/lib.rs
 `, result)
 
-	base := path.Dir(path.Dir(absPath))
+	base := filepath.Dir(filepath.Dir(absPath))
 
 	tests := []struct {
 		Name     string
