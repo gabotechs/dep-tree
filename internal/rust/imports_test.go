@@ -1,7 +1,6 @@
 package rust
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func TestLanguage_ParseImports(t *testing.T) {
-	absTestFolder, _ := filepath.Abs(path.Join(testFolder))
+	absTestFolder, _ := filepath.Abs(testFolder)
 
 	tests := []struct {
 		Name     string
@@ -24,51 +23,51 @@ func TestLanguage_ParseImports(t *testing.T) {
 				{
 					All:   true,
 					Names: []string{"sum"},
-					Path:  path.Join(absTestFolder, "src", "sum.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					All:   true,
 					Names: []string{"div"},
-					Path:  path.Join(absTestFolder, "src", "div", "mod.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "div", "mod.rs"),
 				},
 				{
 					All:   true,
 					Names: []string{"avg"},
-					Path:  path.Join(absTestFolder, "src", "avg.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "avg.rs"),
 				},
 				{
 					All:   true,
 					Names: []string{"abs"},
-					Path:  path.Join(absTestFolder, "src", "abs.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "abs.rs"),
 				},
 				{
 					All:   true,
 					Names: []string{"avg_2"},
-					Path:  path.Join(absTestFolder, "src", "avg_2.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "avg_2.rs"),
 				},
 				{
 					Names: []string{"abs"},
-					Path:  path.Join(absTestFolder, "src", "abs", "abs.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "abs", "abs.rs"),
 				},
 				{
 					Names: []string{"div"},
-					Path:  path.Join(absTestFolder, "src", "div", "mod.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "div", "mod.rs"),
 				},
 				{
 					Names: []string{"avg"},
-					Path:  path.Join(absTestFolder, "src", "avg_2.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "avg_2.rs"),
 				},
 				{
 					Names: []string{"sum"},
-					Path:  path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
 					All:  true,
-					Path: path.Join(absTestFolder, "src", "sum.rs"),
+					Path: filepath.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
 					Names: []string{"run"},
-					Path:  path.Join(absTestFolder, "src", "lib.rs"),
+					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 			},
 		},
@@ -77,12 +76,12 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(path.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)
 
-			file, err := lang.ParseFile(path.Join(absTestFolder, "src", tt.Name))
+			file, err := lang.ParseFile(filepath.Join(absTestFolder, "src", tt.Name))
 			a.NoError(err)
 
 			exports, err := lang.ParseImports(file)

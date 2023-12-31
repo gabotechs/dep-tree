@@ -2,7 +2,7 @@ package systems
 
 import (
 	"errors"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
@@ -87,7 +87,7 @@ func TestRenderSystem(t *testing.T) {
 
 			utils.GoldenTest(
 				t,
-				path.Join(".render_system_test", tt.Name+".txt"),
+				filepath.Join(".render_system_test", tt.Name+".txt"),
 				gather,
 			)
 		})

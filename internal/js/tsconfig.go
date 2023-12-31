@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -41,7 +40,7 @@ func ParseTsConfig(filePath string) (TsConfig, error) {
 
 func (t *TsConfig) ResolveFromBaseUrl(unresolved string) string {
 	baseUrl := t.CompilerOptions.BaseUrl
-	importFromBaseUrl := path.Join(t.path, baseUrl, unresolved)
+	importFromBaseUrl := filepath.Join(t.path, baseUrl, unresolved)
 	return getFileAbsPath(importFromBaseUrl)
 }
 
@@ -53,7 +52,7 @@ func (t *TsConfig) ResolveFromPaths(unresolved string) (string, error) {
 			for _, searchPath := range searchPaths {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
 				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
-				importFromBaseUrlAndPaths := path.Join(t.path, t.CompilerOptions.BaseUrl, newImportFrom)
+				importFromBaseUrlAndPaths := filepath.Join(t.path, t.CompilerOptions.BaseUrl, newImportFrom)
 				absPath := getFileAbsPath(importFromBaseUrlAndPaths)
 				if absPath != "" {
 					return absPath, nil

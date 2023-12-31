@@ -2,6 +2,7 @@ package dep_tree
 
 import (
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -87,7 +88,7 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 			)
 			a.NoError(err)
 
-			renderOutFile := path.Join(structuredDir, path.Base(tt.Name+".json"))
+			renderOutFile := filepath.Join(structuredDir, path.Base(tt.Name+".json"))
 			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}

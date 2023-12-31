@@ -2,7 +2,7 @@ package rust
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,7 +23,7 @@ func TestMakeRustLanguage_Errors(t *testing.T) {
 		},
 		{
 			Name:       "empty project",
-			Entrypoint: path.Join(cwd, ".empty_project"),
+			Entrypoint: filepath.Join(cwd, ".empty_project"),
 			Expected:   "could not find any of the possible entrypoint paths",
 		},
 	}

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"bytes"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -84,9 +84,9 @@ func TestRoot(t *testing.T) {
 			err := root.Execute()
 			name := strings.ReplaceAll(tt.Name+".txt", "/", "|")
 			if err != nil {
-				utils.GoldenTest(t, path.Join(testFolder, name), err.Error())
+				utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
 			} else {
-				utils.GoldenTest(t, path.Join(testFolder, name), b.String())
+				utils.GoldenTest(t, filepath.Join(testFolder, name), b.String())
 			}
 		})
 	}

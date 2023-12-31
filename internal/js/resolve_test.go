@@ -1,7 +1,6 @@
 package js
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -22,31 +21,31 @@ func TestParser_ResolvePath(t *testing.T) {
 	}{
 		{
 			Name:       "from relative",
-			Cwd:        path.Join(resolverTestFolder, "src", "utils"),
+			Cwd:        filepath.Join(resolverTestFolder, "src", "utils"),
 			Unresolved: "../foo",
-			Resolved:   path.Join(absPath, "src", "foo.ts"),
+			Resolved:   filepath.Join(absPath, "src", "foo.ts"),
 		},
 		{
 			Name:       "from baseUrl",
-			Cwd:        path.Join(resolverTestFolder, "src"),
+			Cwd:        filepath.Join(resolverTestFolder, "src"),
 			Unresolved: "foo",
-			Resolved:   path.Join(absPath, "src", "foo.ts"),
+			Resolved:   filepath.Join(absPath, "src", "foo.ts"),
 		},
 		{
 			Name:       "from paths override",
-			Cwd:        path.Join(resolverTestFolder, "src"),
+			Cwd:        filepath.Join(resolverTestFolder, "src"),
 			Unresolved: "@utils/sum",
-			Resolved:   path.Join(absPath, "src", "utils", "sum.ts"),
+			Resolved:   filepath.Join(absPath, "src", "utils", "sum.ts"),
 		},
 		{
 			Name:       "from paths override with glob pattern",
-			Cwd:        path.Join(resolverTestFolder, "src"),
+			Cwd:        filepath.Join(resolverTestFolder, "src"),
 			Unresolved: "@/helpers/diff",
-			Resolved:   path.Join(absPath, "src", "helpers", "diff.ts"),
+			Resolved:   filepath.Join(absPath, "src", "helpers", "diff.ts"),
 		},
 		{
 			Name:          "Does not resolve invalid relative import",
-			Cwd:           path.Join(resolverTestFolder, "src", "utils"),
+			Cwd:           filepath.Join(resolverTestFolder, "src", "utils"),
 			Unresolved:    "./foo",
 			ExpectedError: "could not perform relative import for './foo' because the file or dir was not found",
 		},
@@ -58,11 +57,11 @@ func TestParser_ResolvePath(t *testing.T) {
 		{
 			Name:       "Does not resolve invalid relative import",
 			Cwd:        resolverTestFolder,
-			Unresolved: path.Join("src", "utils", "foo"),
+			Unresolved: filepath.Join("src", "utils", "foo"),
 		},
 		{
 			Name:          "Does not resolve invalid path override import",
-			Cwd:           path.Join(resolverTestFolder, "src"),
+			Cwd:           filepath.Join(resolverTestFolder, "src"),
 			Unresolved:    "@/helpers/bar",
 			ExpectedError: "import '@/helpers/bar' was matched to path '@/helpers/' in tscofing's paths option, but the resolved path did not match an existing file",
 		},
@@ -87,7 +86,7 @@ func TestParser_ResolvePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeJsLanguage(path.Join(resolverTestFolder, "src", "foo.ts"), nil)
+			_lang, err := MakeJsLanguage(filepath.Join(resolverTestFolder, "src", "foo.ts"), nil)
 			a.NoError(err)
 			lang := _lang.(*Language)
 			resolved, err := lang.ResolvePath(tt.Unresolved, tt.Cwd)

@@ -1,7 +1,6 @@
 package js
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -14,8 +13,8 @@ func TestNewWorkspaces(t *testing.T) {
 	a := require.New(t)
 
 	for _, entry := range []string{
-		path.Join(workspacesTestDir, "nested", "c"),
-		path.Join(workspacesTestDir, "a"),
+		filepath.Join(workspacesTestDir, "nested", "c"),
+		filepath.Join(workspacesTestDir, "a"),
 		workspacesTestDir,
 	} {
 		result, err := NewWorkspaces(entry)
@@ -24,23 +23,23 @@ func TestNewWorkspaces(t *testing.T) {
 		abs, _ := filepath.Abs(workspacesTestDir)
 
 		a.Equal(map[string]WorkspaceEntry{
-			"a":      {absPath: path.Join(abs, "a")},
-			"c":      {absPath: path.Join(abs, "nested", "c")},
-			"f":      {absPath: path.Join(abs, "r-nested", "1", "f")},
-			"g":      {absPath: path.Join(abs, "r-nested", "2", "3", "g")},
-			"h":      {absPath: path.Join(abs, "r-nested", "h")},
-			"@foo/k": {absPath: path.Join(abs, "foo", "k")},
+			"a":      {absPath: filepath.Join(abs, "a")},
+			"c":      {absPath: filepath.Join(abs, "nested", "c")},
+			"f":      {absPath: filepath.Join(abs, "r-nested", "1", "f")},
+			"g":      {absPath: filepath.Join(abs, "r-nested", "2", "3", "g")},
+			"h":      {absPath: filepath.Join(abs, "r-nested", "h")},
+			"@foo/k": {absPath: filepath.Join(abs, "foo", "k")},
 		}, result.ws)
 	}
 }
 
 func TestNewWorkspaces_parses_packages(t *testing.T) {
 	a := require.New(t)
-	result, err := NewWorkspaces(path.Join(workspacesTestDir, "other"))
+	result, err := NewWorkspaces(filepath.Join(workspacesTestDir, "other"))
 	a.NoError(err)
 	abs, _ := filepath.Abs(workspacesTestDir)
 	a.Equal(map[string]WorkspaceEntry{
-		"foo": {absPath: path.Join(abs, "other", "foo")},
+		"foo": {absPath: filepath.Join(abs, "other", "foo")},
 	}, result.ws)
 }
 
@@ -56,27 +55,27 @@ func TestWorkspaces_ResolveFromWorkspaces(t *testing.T) {
 		{
 			Name:       "Basic",
 			Unresolved: "a/src/a",
-			Resolved:   path.Join(abs, "a", "src", "a.js"),
+			Resolved:   filepath.Join(abs, "a", "src", "a.js"),
 		},
 		{
 			Name:       `From npm org`,
 			Unresolved: "@foo/k/src/k",
-			Resolved:   path.Join(abs, "foo", "k", "src", "k.ts"),
+			Resolved:   filepath.Join(abs, "foo", "k", "src", "k.ts"),
 		},
 		{
 			Name:       "Nested",
 			Unresolved: "g/g",
-			Resolved:   path.Join(abs, "r-nested", "2", "3", "g", "g.tsx"),
+			Resolved:   filepath.Join(abs, "r-nested", "2", "3", "g", "g.tsx"),
 		},
 		{
 			Name:       "Index in source",
 			Unresolved: "c",
-			Resolved:   path.Join(abs, "nested", "c", "src", "index.ts"),
+			Resolved:   filepath.Join(abs, "nested", "c", "src", "index.ts"),
 		},
 		{
 			Name:       "Index in root",
 			Unresolved: "f",
-			Resolved:   path.Join(abs, "r-nested", "1", "f", "index.jsx"),
+			Resolved:   filepath.Join(abs, "r-nested", "1", "f", "index.jsx"),
 		},
 		{
 			Name:       "No index",

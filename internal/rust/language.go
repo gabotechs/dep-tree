@@ -2,7 +2,6 @@ package rust
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -30,7 +29,7 @@ var _ language.Language[rust_grammar.File] = &Language{}
 func findCargoToml(searchPath string) string {
 	if len(searchPath) < 2 {
 		return ""
-	} else if p := path.Join(searchPath, "Cargo.toml"); utils.FileExists(p) {
+	} else if p := filepath.Join(searchPath, "Cargo.toml"); utils.FileExists(p) {
 		return p
 	}
 	return findCargoToml(filepath.Dir(searchPath))
@@ -38,7 +37,7 @@ func findCargoToml(searchPath string) string {
 
 func findProjectEntrypoint(rootPath string, searchPaths []string) string {
 	for _, searchPath := range searchPaths {
-		if p := path.Join(rootPath, searchPath); utils.FileExists(p) {
+		if p := filepath.Join(rootPath, searchPath); utils.FileExists(p) {
 			return p
 		}
 	}
@@ -46,8 +45,8 @@ func findProjectEntrypoint(rootPath string, searchPaths []string) string {
 }
 
 var searchPaths = []string{
-	path.Join("src", "lib.rs"),
-	path.Join("src", "main.rs"),
+	filepath.Join("src", "lib.rs"),
+	filepath.Join("src", "main.rs"),
 	"lib.rs",
 	"main.rs",
 }

@@ -2,7 +2,7 @@ package js
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,19 +23,19 @@ func TestParser_parseExports(t *testing.T) {
 	}{
 		{
 			Name: "test",
-			File: path.Join(exportsTestFolder, "src", "index.js"),
+			File: filepath.Join(exportsTestFolder, "src", "index.js"),
 			Expected: []language.ExportEntry{
 				{
 					All:  true,
-					Path: path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					Path: filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
 					Names: []language.ExportName{{Original: "Unexisting"}, {Original: "UnSorter", Alias: "UnSorterAlias"}},
-					Path:  path.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					Path:  filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
 					Names: []language.ExportName{{Original: "aliased"}},
-					Path:  path.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
+					Path:  filepath.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
 				},
 			},
 			ExpectedErrors: []string{

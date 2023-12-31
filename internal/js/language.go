@@ -2,7 +2,6 @@ package js
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
@@ -29,9 +28,9 @@ func _findPackageJson(searchPath string) (TsConfig, string, error) {
 	if len(searchPath) < 2 {
 		return TsConfig{}, "", nil
 	}
-	packageJsonPath := path.Join(searchPath, "package.json")
+	packageJsonPath := filepath.Join(searchPath, "package.json")
 	if utils.FileExists(packageJsonPath) {
-		tsConfigPath := path.Join(searchPath, "tsconfig.json")
+		tsConfigPath := filepath.Join(searchPath, "tsconfig.json")
 		var tsConfig TsConfig
 		var err error
 		if utils.FileExists(tsConfigPath) {

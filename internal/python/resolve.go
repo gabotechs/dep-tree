@@ -57,7 +57,7 @@ func _pythonFilesInDir(dir string) []string {
 	for _, entry := range result {
 		for _, ext := range Extensions {
 			if strings.HasSuffix(entry.Name(), "."+ext) {
-				pythonFiles = append(pythonFiles, path.Join(dir, entry.Name()))
+				pythonFiles = append(pythonFiles, filepath.Join(dir, entry.Name()))
 			}
 		}
 	}
@@ -68,7 +68,7 @@ var pythonFilesInDir = utils.Cached1In1Out(_pythonFilesInDir)
 
 // resolveFromSlicesAndSearchPath returns multiple valid resolved paths.
 func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *ResolveResult {
-	fullFileOrDir := path.Join(append([]string{searchPath}, slices...)...)
+	fullFileOrDir := filepath.Join(append([]string{searchPath}, slices...)...)
 
 	// If there is a Python file, we are done.
 	for _, ext := range Extensions {
@@ -85,7 +85,7 @@ func resolveFromSlicesAndSearchPath(searchPath string, slices []string) *Resolve
 
 	pythonFiles := pythonFilesInDir(fullFileOrDir)
 	// If there is an __init__.py file, we must be referring to that one.
-	initFile := path.Join(fullFileOrDir, "__init__.py")
+	initFile := filepath.Join(fullFileOrDir, "__init__.py")
 	if utils.FileExists(initFile) {
 		abs, _ := filepath.Abs(initFile)
 		return &ResolveResult{InitModule: &InitModuleResult{
@@ -110,7 +110,7 @@ func ResolveRelative(slices []string, dir string, stepsBack int) (*ResolveResult
 	for i := 0; i < stepsBack; i++ {
 		back = append(back, "..")
 	}
-	searchPath := path.Join(append([]string{dir}, back...)...)
+	searchPath := filepath.Join(append([]string{dir}, back...)...)
 	result := resolveFromSlicesAndSearchPath(searchPath, slices)
 	if result == nil {
 		return nil, fmt.Errorf(

@@ -3,7 +3,6 @@ package js
 import (
 	"errors"
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -24,7 +23,7 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 
 	// 1. If import is relative.
 	if unresolved[0] == '.' && (unresolved[1] == '/' || unresolved[1] == '.') {
-		absPath = getFileAbsPath(path.Join(dir, unresolved))
+		absPath = getFileAbsPath(filepath.Join(dir, unresolved))
 		if absPath == "" {
 			return absPath, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)
 		}
@@ -84,7 +83,7 @@ func getFileAbsPath(id string) string {
 	case err != nil:
 		return ""
 	case utils.DirExists(id):
-		return retrieveWithExt(path.Join(absPath, "index"))
+		return retrieveWithExt(filepath.Join(absPath, "index"))
 	default:
 		return retrieveWithExt(absPath)
 	}

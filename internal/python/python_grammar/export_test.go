@@ -1,12 +1,12 @@
 package python_grammar
 
 import (
-	"github.com/stretchr/testify/require"
-
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestExport(t *testing.T) {
@@ -93,7 +93,7 @@ func TestExport(t *testing.T) {
 			var content []byte
 			if strings.HasSuffix(tt.Name, ".py") {
 				var err error
-				content, err = os.ReadFile(path.Join(".export_test", tt.Name))
+				content, err = os.ReadFile(filepath.Join(".export_test", tt.Name))
 				a.NoError(err)
 			} else {
 				content = []byte(tt.Name)

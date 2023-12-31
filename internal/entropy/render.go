@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -38,7 +38,7 @@ func Render(parser language.NodeParser, cfg RenderConfig) error {
 		return err
 	}
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
-	temp := path.Join(os.TempDir(), "index.html")
+	temp := filepath.Join(os.TempDir(), "index.html")
 	err = os.WriteFile(temp, rendered, os.ModePerm)
 	if err != nil {
 		return err

@@ -1,7 +1,6 @@
 package python
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -25,7 +24,7 @@ func TestResolveAbsolute(t *testing.T) {
 			Entrypoint: "main.py",
 			Slices:     []string{"foo", "foo"},
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "foo", "foo.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "foo", "foo.py")},
 			},
 		},
 		{
@@ -33,7 +32,7 @@ func TestResolveAbsolute(t *testing.T) {
 			Entrypoint: "main.py",
 			Slices:     []string{"foo", "bar", "bar"},
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "foo", "bar", "bar.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "foo", "bar", "bar.py")},
 			},
 		},
 		{
@@ -42,10 +41,10 @@ func TestResolveAbsolute(t *testing.T) {
 			Slices:     []string{"foo"},
 			Expected: &ResolveResult{
 				InitModule: &InitModuleResult{
-					Path: path.Join(absPath, "foo", "__init__.py"),
+					Path: filepath.Join(absPath, "foo", "__init__.py"),
 					PythonFiles: []string{
-						path.Join(absPath, "foo", "__init__.py"),
-						path.Join(absPath, "foo", "foo.py"),
+						filepath.Join(absPath, "foo", "__init__.py"),
+						filepath.Join(absPath, "foo", "foo.py"),
 					},
 				},
 			},
@@ -62,7 +61,7 @@ func TestResolveAbsolute(t *testing.T) {
 			Slices:     []string{"baz", "baz"},
 			PythonPath: []string{absPath},
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "baz", "baz.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "baz", "baz.py")},
 			},
 		},
 		{
@@ -72,8 +71,8 @@ func TestResolveAbsolute(t *testing.T) {
 			PythonPath: []string{absPath},
 			Expected: &ResolveResult{
 				Directory: &DirectoryResult{
-					PythonFiles: []string{path.Join(absPath, "baz", "baz.py")},
-					Path:        path.Join(absPath, "baz"),
+					PythonFiles: []string{filepath.Join(absPath, "baz", "baz.py")},
+					Path:        filepath.Join(absPath, "baz"),
 				},
 			},
 		},
@@ -82,7 +81,7 @@ func TestResolveAbsolute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakePythonLanguage(path.Join(absPath, tt.Entrypoint), nil)
+			_lang, err := MakePythonLanguage(filepath.Join(absPath, tt.Entrypoint), nil)
 			a.NoError(err)
 			lang := _lang.(*Language)
 			lang.PythonPath = append(lang.PythonPath, tt.PythonPath...)
@@ -108,16 +107,16 @@ func TestResolveRelative(t *testing.T) {
 			Dir:       absPath,
 			StepsBack: 0,
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "foo", "foo.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "foo", "foo.py")},
 			},
 		},
 		{
 			Name:      "Import from same dir",
 			Slices:    []string{"foo"},
-			Dir:       path.Join(absPath, "foo"),
+			Dir:       filepath.Join(absPath, "foo"),
 			StepsBack: 0,
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "foo", "foo.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "foo", "foo.py")},
 			},
 		},
 		{
@@ -127,10 +126,10 @@ func TestResolveRelative(t *testing.T) {
 			StepsBack: 0,
 			Expected: &ResolveResult{
 				InitModule: &InitModuleResult{
-					Path: path.Join(absPath, "foo", "__init__.py"),
+					Path: filepath.Join(absPath, "foo", "__init__.py"),
 					PythonFiles: []string{
-						path.Join(absPath, "foo", "__init__.py"),
-						path.Join(absPath, "foo", "foo.py"),
+						filepath.Join(absPath, "foo", "__init__.py"),
+						filepath.Join(absPath, "foo", "foo.py"),
 					},
 				},
 			},
@@ -138,32 +137,32 @@ func TestResolveRelative(t *testing.T) {
 		{
 			Name:      "Import from parent dir",
 			Slices:    []string{"foo"},
-			Dir:       path.Join(absPath, "foo", "bar"),
+			Dir:       filepath.Join(absPath, "foo", "bar"),
 			StepsBack: 1,
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "foo", "foo.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "foo", "foo.py")},
 			},
 		},
 		{
 			Name:      "Import from double parent dir",
 			Slices:    []string{"baz", "baz"},
-			Dir:       path.Join(absPath, "foo", "bar"),
+			Dir:       filepath.Join(absPath, "foo", "bar"),
 			StepsBack: 2,
 			Expected: &ResolveResult{
-				File: &FileResult{Path: path.Join(absPath, "baz", "baz.py")},
+				File: &FileResult{Path: filepath.Join(absPath, "baz", "baz.py")},
 			},
 		},
 		{
 			Name:      "Import from parent dir to __init__.py",
 			Slices:    []string{},
-			Dir:       path.Join(absPath, "foo", "bar"),
+			Dir:       filepath.Join(absPath, "foo", "bar"),
 			StepsBack: 1,
 			Expected: &ResolveResult{
 				InitModule: &InitModuleResult{
-					Path: path.Join(absPath, "foo", "__init__.py"),
+					Path: filepath.Join(absPath, "foo", "__init__.py"),
 					PythonFiles: []string{
-						path.Join(absPath, "foo", "__init__.py"),
-						path.Join(absPath, "foo", "foo.py"),
+						filepath.Join(absPath, "foo", "__init__.py"),
+						filepath.Join(absPath, "foo", "foo.py"),
 					},
 				},
 			},
@@ -174,8 +173,8 @@ func TestResolveRelative(t *testing.T) {
 			Dir:    absPath,
 			Expected: &ResolveResult{
 				Directory: &DirectoryResult{
-					PythonFiles: []string{path.Join(absPath, "baz", "baz.py")},
-					Path:        path.Join(absPath, "baz"),
+					PythonFiles: []string{filepath.Join(absPath, "baz", "baz.py")},
+					Path:        filepath.Join(absPath, "baz"),
 				},
 			},
 		},

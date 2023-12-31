@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -112,8 +113,8 @@ func TestTui(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			repoPath := path.Join(tmp, path.Base(tt.Repo))
-			entrypointPath := path.Join(repoPath, tt.Entrypoint)
+			repoPath := filepath.Join(tmp, path.Base(tt.Repo))
+			entrypointPath := filepath.Join(repoPath, tt.Entrypoint)
 			if _, err := os.Stat(entrypointPath); err != nil {
 				_ = os.RemoveAll(repoPath)
 				_, err = git.PlainClone(repoPath, false, &git.CloneOptions{
@@ -188,7 +189,7 @@ func TestTui(t *testing.T) {
 			result := systems.PrintScreen(screen)
 			utils.GoldenTest(
 				t,
-				path.Join(".tui_test", tt.Name+".txt"),
+				filepath.Join(".tui_test", tt.Name+".txt"),
 				result,
 			)
 			for i := 0; i < nQs; i++ {

@@ -1,7 +1,6 @@
 package python
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -29,16 +28,16 @@ func TestLanguage_ParseImports(t *testing.T) {
 			File:       "main.py",
 			Entrypoint: "main.py",
 			Expected: []language.ImportEntry{
-				language.EmptyImport(path.Join(importsTestFolder, "src", "foo.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
-				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
-				language.AllImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "module", "module.py")),
-				language.NamesImport([]string{"bar"}, path.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "foo.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.NamesImport([]string{"main"}, filepath.Join(importsTestFolder, "src", "main.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.NamesImport([]string{"main"}, filepath.Join(importsTestFolder, "src", "main.py")),
+				language.AllImport(filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "module", "module.py")),
+				language.NamesImport([]string{"bar"}, filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
 			},
 			ExpectedErrors: []string{
 				"cannot import file src.py from directory",
@@ -51,16 +50,16 @@ func TestLanguage_ParseImports(t *testing.T) {
 			Entrypoint:                "main.py",
 			ExcludeConditionalImports: true,
 			Expected: []language.ImportEntry{
-				language.EmptyImport(path.Join(importsTestFolder, "src", "foo.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
-				// language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
-				// language.EmptyImport(path.Join(importsTestFolder, "src", "main.py")),
-				language.NamesImport([]string{"main"}, path.Join(importsTestFolder, "src", "main.py")),
-				language.AllImport(path.Join(importsTestFolder, "src", "module", "__init__.py")),
-				language.EmptyImport(path.Join(importsTestFolder, "src", "module", "module.py")),
-				language.NamesImport([]string{"bar"}, path.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "foo.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
+				// language.NamesImport([]string{"main"}, filepath.Join(importsTestFolder, "src", "main.py")),
+				// language.EmptyImport(filepath.Join(importsTestFolder, "src", "main.py")),
+				language.NamesImport([]string{"main"}, filepath.Join(importsTestFolder, "src", "main.py")),
+				language.AllImport(filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
+				language.EmptyImport(filepath.Join(importsTestFolder, "src", "module", "module.py")),
+				language.NamesImport([]string{"bar"}, filepath.Join(importsTestFolder, "src", "module", "__init__.py")),
 			},
 			ExpectedErrors: []string{
 				"cannot import file src.py from directory",
@@ -72,12 +71,12 @@ func TestLanguage_ParseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(path.Join(importsTestFolder, tt.Entrypoint), &Config{
+			lang, err := MakePythonLanguage(filepath.Join(importsTestFolder, tt.Entrypoint), &Config{
 				ExcludeConditionalImports: tt.ExcludeConditionalImports,
 			})
 			a.NoError(err)
 
-			parsed, err := lang.ParseFile(path.Join(importsTestFolder, tt.File))
+			parsed, err := lang.ParseFile(filepath.Join(importsTestFolder, tt.File))
 			a.NoError(err)
 
 			result, err := lang.ParseImports(parsed)
@@ -122,7 +121,7 @@ func TestLanguage_ParseImports_Errors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(path.Join(importsTestFolder, "main.py"), nil)
+			lang, err := MakePythonLanguage(filepath.Join(importsTestFolder, "main.py"), nil)
 			a.NoError(err)
 
 			result, err := lang.ParseImports(&tt.File) //nolint:gosec
