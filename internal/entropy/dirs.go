@@ -2,6 +2,7 @@ package entropy
 
 import (
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -26,11 +27,11 @@ func (d *DirTree) inner() *orderedmap.OrderedMap[string, DirTreeEntry] {
 
 func splitFullPaths(dir string) []string {
 	var result []string
-	for strings.Contains(dir, "/") {
-		if strings.HasSuffix(dir, "/") {
+	for strings.Contains(dir, string(os.PathSeparator)) {
+		if strings.HasSuffix(dir, string(os.PathSeparator)) {
 			dir = dir[:len(dir)-1]
 		}
-		if strings.HasPrefix(dir, "/") {
+		if strings.HasPrefix(dir, string(os.PathSeparator)) {
 			dir = dir[1:]
 		}
 		result = append(result, dir)
