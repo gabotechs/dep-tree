@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/tailscale/hujson"
@@ -34,7 +35,7 @@ func ParseTsConfig(filePath string) (TsConfig, error) {
 	if err != nil {
 		return TsConfig{}, err
 	}
-	tsConfig.path = path.Dir(filePath)
+	tsConfig.path = filepath.Dir(filePath)
 	return tsConfig, err
 }
 

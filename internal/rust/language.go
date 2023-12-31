@@ -33,7 +33,7 @@ func findCargoToml(searchPath string) string {
 	} else if p := path.Join(searchPath, "Cargo.toml"); utils.FileExists(p) {
 		return p
 	}
-	return findCargoToml(path.Dir(searchPath))
+	return findCargoToml(filepath.Dir(searchPath))
 }
 
 func findProjectEntrypoint(rootPath string, searchPaths []string) string {
@@ -62,7 +62,7 @@ func MakeRustLanguage(entrypoint string, _ *Config) (language.Language[rust_gram
 		return nil, fmt.Errorf("could not find Cargo.toml in any parent directory of %s", entrypointAbsPath)
 	}
 
-	projectEntrypoint := findProjectEntrypoint(path.Dir(cargoTomlPath), searchPaths)
+	projectEntrypoint := findProjectEntrypoint(filepath.Dir(cargoTomlPath), searchPaths)
 	if projectEntrypoint == "" {
 		return nil, fmt.Errorf("could not find any of the possible entrypoint paths %s", strings.Join(searchPaths, ", "))
 	}

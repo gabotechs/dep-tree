@@ -67,7 +67,7 @@ func MakePythonLanguage(entrypoint string, cfg *Config) (language.Language[pytho
 	lookupDir := baseDir
 	rootFilePresent := isRootFilePresent(lookupDir)
 	for !rootFilePresent && len(lookupDir) > 2 {
-		lookupDir = path.Dir(lookupDir)
+		lookupDir = filepath.Dir(lookupDir)
 		rootFilePresent = isRootFilePresent(lookupDir)
 	}
 	// Search for the root path based on some key files.

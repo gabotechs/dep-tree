@@ -3,7 +3,6 @@ package rust
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -12,7 +11,7 @@ func (l *Language) filePathToModChain(dir string) ([]string, error) {
 	if dir == l.ProjectEntrypoint {
 		return []string{}, nil
 	}
-	root := path.Dir(l.ProjectEntrypoint)
+	root := filepath.Dir(l.ProjectEntrypoint)
 	rel, err := filepath.Rel(root, dir)
 	if err != nil {
 		return nil, err

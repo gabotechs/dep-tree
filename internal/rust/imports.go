@@ -3,6 +3,7 @@ package rust
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
@@ -39,7 +40,7 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 		} else if stmt.Mod != nil && !stmt.Mod.Local {
 			names := []string{stmt.Mod.Name}
 
-			thisDir := path.Dir(file.Path)
+			thisDir := filepath.Dir(file.Path)
 
 			var modPath string
 			if p := path.Join(thisDir, stmt.Mod.Name+".rs"); utils.FileExists(p) {

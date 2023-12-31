@@ -3,6 +3,7 @@ package js
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -41,7 +42,7 @@ func _findPackageJson(searchPath string) (TsConfig, string, error) {
 		}
 		return tsConfig, searchPath, err
 	} else {
-		return _findPackageJson(path.Dir(searchPath))
+		return _findPackageJson(filepath.Dir(searchPath))
 	}
 }
 

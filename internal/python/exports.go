@@ -1,14 +1,14 @@
 package python
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python/python_grammar"
 )
 
 func (l *Language) handleFromImportForExport(imp *python_grammar.FromImport, filePath string) ([]language.ExportEntry, error) {
-	resolved, err := l.resolveFromImportPath(imp, path.Dir(filePath))
+	resolved, err := l.resolveFromImportPath(imp, filepath.Dir(filePath))
 	if err != nil {
 		return nil, err
 	}

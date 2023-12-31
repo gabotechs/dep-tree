@@ -1,7 +1,6 @@
 package language
 
 import (
-	"path"
 	"path/filepath"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -196,7 +195,7 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 }
 
 func (p *Parser[F]) Display(n *Node) string {
-	base := path.Dir(p.entrypoint.Id)
+	base := filepath.Dir(p.entrypoint.Id)
 	rel, err := filepath.Rel(base, n.Id)
 	if err != nil {
 		return n.Id

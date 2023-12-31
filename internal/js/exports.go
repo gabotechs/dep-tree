@@ -1,7 +1,7 @@
 package js
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -53,7 +53,7 @@ func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsEntries
 				})
 			}
 		case stmt.ProxyExport != nil:
-			exportFrom, err := l.ResolvePath(stmt.ProxyExport.From, path.Dir(file.Path))
+			exportFrom, err := l.ResolvePath(stmt.ProxyExport.From, filepath.Dir(file.Path))
 			if err != nil {
 				errors = append(errors, err)
 				continue

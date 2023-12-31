@@ -88,10 +88,10 @@ func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJso
 			result.path = searchPath
 			return &result, nil
 		} else {
-			return searchFirstPackageJsonWithWorkspaces(path.Dir(searchPath))
+			return searchFirstPackageJsonWithWorkspaces(filepath.Dir(searchPath))
 		}
 	} else {
-		return searchFirstPackageJsonWithWorkspaces(path.Dir(searchPath))
+		return searchFirstPackageJsonWithWorkspaces(filepath.Dir(searchPath))
 	}
 }
 

@@ -3,6 +3,7 @@ package entropy
 import (
 	"math"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -34,7 +35,7 @@ func splitFullPaths(dir string) []string {
 			dir = dir[1:]
 		}
 		result = append(result, dir)
-		dir = path.Dir(dir)
+		dir = filepath.Dir(dir)
 	}
 	if dir != "" && dir != "." {
 		result = append(result, dir)
