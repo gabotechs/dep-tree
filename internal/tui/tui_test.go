@@ -3,7 +3,6 @@ package tui
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -113,7 +112,7 @@ func TestTui(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			repoPath := filepath.Join(tmp, path.Base(tt.Repo))
+			repoPath := filepath.Join(tmp, filepath.Base(tt.Repo))
 			entrypointPath := filepath.Join(repoPath, tt.Entrypoint)
 			if _, err := os.Stat(entrypointPath); err != nil {
 				_ = os.RemoveAll(repoPath)

@@ -2,7 +2,6 @@ package rust
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
@@ -35,7 +34,7 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 	}
 
 	var searchPath string
-	if path.Base(mainPath) == name+".rs" {
+	if filepath.Base(mainPath) == name+".rs" {
 		searchPath = filepath.Join(filepath.Dir(mainPath), name)
 	} else {
 		searchPath = filepath.Dir(mainPath)

@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -88,7 +87,7 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 			)
 			a.NoError(err)
 
-			renderOutFile := filepath.Join(structuredDir, path.Base(tt.Name+".json"))
+			renderOutFile := filepath.Join(structuredDir, filepath.Base(tt.Name+".json"))
 			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}

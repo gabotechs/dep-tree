@@ -3,7 +3,6 @@ package python
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -19,7 +18,7 @@ func (i *InitModuleResult) fileMap() map[string]string {
 	availableFiles := map[string]string{}
 	for _, pythonFile := range i.PythonFiles {
 		for _, ext := range Extensions {
-			fileName := path.Base(pythonFile)
+			fileName := filepath.Base(pythonFile)
 			if strings.HasSuffix(fileName, ext) {
 				availableFiles[strings.TrimSuffix(fileName, "."+ext)] = pythonFile
 			}
@@ -36,7 +35,7 @@ type DirectoryResult struct {
 func (d *DirectoryResult) fileMap() map[string]string {
 	availableFiles := map[string]string{}
 	for _, pythonFile := range d.PythonFiles {
-		availableFiles[strings.TrimSuffix(path.Base(pythonFile), ".py")] = pythonFile
+		availableFiles[strings.TrimSuffix(filepath.Base(pythonFile), ".py")] = pythonFile
 	}
 	return availableFiles
 }
