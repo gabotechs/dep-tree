@@ -69,9 +69,6 @@ func (p *partialPackageJson) workspaces() []string {
 }
 
 func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJson, error) {
-	if len(searchPath) < 2 {
-		return nil, nil
-	}
 	packageJsonPath := filepath.Join(searchPath, "package.json")
 	if utils.FileExists(packageJsonPath) {
 		var result partialPackageJson
@@ -86,12 +83,13 @@ func searchFirstPackageJsonWithWorkspaces(searchPath string) (*partialPackageJso
 		if len(result.workspaces()) > 0 {
 			result.path = searchPath
 			return &result, nil
-		} else {
-			return searchFirstPackageJsonWithWorkspaces(filepath.Dir(searchPath))
 		}
-	} else {
-		return searchFirstPackageJsonWithWorkspaces(filepath.Dir(searchPath))
 	}
+	nextSearchPath := filepath.Dir(searchPath)
+	if nextSearchPath != searchPath {
+		return searchFirstPackageJsonWithWorkspaces(nextSearchPath)
+	}
+	return nil, nil
 }
 
 func allDirsWithAPackageJson(start string) ([]string, error) {
