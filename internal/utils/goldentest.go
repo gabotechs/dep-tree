@@ -17,9 +17,10 @@ func GoldenTest(t *testing.T, file string, content string) {
 	a := require.New(t)
 	content = strings.ReplaceAll(content, "\r\n", "\n")
 	if FileExists(file) {
-		expected, err := os.ReadFile(file)
+		expectedBytes, err := os.ReadFile(file)
 		a.NoError(err)
-		a.Equal(string(expected), content)
+		expected := strings.ReplaceAll(string(expectedBytes), "\r\n", "\n")
+		a.Equal(expected, content)
 	} else {
 		err := os.WriteFile(file, []byte(content), os.ModePerm)
 		a.NoError(err)
