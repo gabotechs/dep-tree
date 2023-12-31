@@ -1,7 +1,6 @@
 package entropy
 
 import (
-	"path"
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
@@ -61,7 +60,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 		dirName := filepath.Dir(filePath)
 		out.Nodes = append(out.Nodes, Node{
 			Id:       node.ID(),
-			FileName: path.Base(filePath),
+			FileName: filepath.Base(filePath),
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
 			Size:     maxNodeSize * node.Data.Loc / maxLoc,

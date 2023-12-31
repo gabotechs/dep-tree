@@ -2,7 +2,6 @@ package entropy
 
 import (
 	"math"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -47,7 +46,7 @@ func splitBaseNames(dir string) []string {
 	fullPaths := splitFullPaths(dir)
 	result := make([]string, len(fullPaths))
 	for i := range fullPaths {
-		result[i] = path.Base(fullPaths[len(fullPaths)-i-1])
+		result[i] = filepath.Base(fullPaths[len(fullPaths)-i-1])
 	}
 	return result
 }
@@ -55,7 +54,7 @@ func splitBaseNames(dir string) []string {
 func (d *DirTree) AddDirs(dir string) {
 	node := d.inner()
 	for _, p := range splitBaseNames(dir) {
-		base := path.Base(p)
+		base := filepath.Base(p)
 		if upper, ok := node.Get(base); ok {
 			node = upper.entry.inner()
 		} else {

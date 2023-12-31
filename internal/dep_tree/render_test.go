@@ -1,7 +1,6 @@
 package dep_tree
 
 import (
-	"path"
 	"path/filepath"
 	"testing"
 
@@ -104,7 +103,7 @@ func TestRenderGraph(t *testing.T) {
 			result, err := board.Render()
 			a.NoError(err)
 
-			outFile := filepath.Join(renderDir, path.Base(tt.Name+".txt"))
+			outFile := filepath.Join(renderDir, filepath.Base(tt.Name+".txt"))
 			utils.GoldenTest(t, outFile, result)
 		})
 	}
