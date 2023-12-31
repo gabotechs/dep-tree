@@ -27,12 +27,14 @@ func (l *Language) ParseFile(id string) (*rust_grammar.File, error) {
 var _ language.Language[rust_grammar.File] = &Language{}
 
 func findCargoToml(searchPath string) string {
-	if len(searchPath) < 2 {
-		return ""
-	} else if p := filepath.Join(searchPath, "Cargo.toml"); utils.FileExists(p) {
+	if p := filepath.Join(searchPath, "Cargo.toml"); utils.FileExists(p) {
 		return p
 	}
-	return findCargoToml(filepath.Dir(searchPath))
+	nextSearchPath := filepath.Dir(searchPath)
+	if nextSearchPath != searchPath {
+		return findCargoToml(nextSearchPath)
+	}
+	return ""
 }
 
 func findProjectEntrypoint(rootPath string, searchPaths []string) string {
