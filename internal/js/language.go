@@ -25,9 +25,6 @@ var _ language.Language[js_grammar.File] = &Language{}
 // dir where it was found and a parsed TsConfig object in case that there
 // was also a tsconfig.json file.
 func _findPackageJson(searchPath string) (TsConfig, string, error) {
-	if len(searchPath) < 2 {
-		return TsConfig{}, "", nil
-	}
 	packageJsonPath := filepath.Join(searchPath, "package.json")
 	if utils.FileExists(packageJsonPath) {
 		tsConfigPath := filepath.Join(searchPath, "tsconfig.json")
@@ -40,8 +37,12 @@ func _findPackageJson(searchPath string) (TsConfig, string, error) {
 			}
 		}
 		return tsConfig, searchPath, err
+	}
+	nextSearchPath := filepath.Dir(searchPath)
+	if nextSearchPath != searchPath {
+		return _findPackageJson(nextSearchPath)
 	} else {
-		return _findPackageJson(filepath.Dir(searchPath))
+		return TsConfig{}, "", nil
 	}
 }
 
