@@ -82,7 +82,9 @@ func TestRoot(t *testing.T) {
 			b := bytes.NewBufferString("")
 			root.SetOut(b)
 			err := root.Execute()
-			name := strings.ReplaceAll(tt.Name+".txt", "/", "|")
+			name := tt.Name + ".txt"
+			name = strings.ReplaceAll(name, "/", "_")
+			name = strings.ReplaceAll(name, "-", "_")
 			if err != nil {
 				utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
 			} else {
