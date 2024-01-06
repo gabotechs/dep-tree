@@ -69,11 +69,11 @@ $ dep-tree check`,
 	root.Flags().SortFlags = false
 	root.PersistentFlags().SortFlags = false
 	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file. (default .dep-tree.yml)")
-	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "unwrap export statements. A file might be exporting a symbol that is declared in other file (e.g. export { foo } from './bar'). If --unwrap-exports is set to true, symbols will be traced back to the source file where they where declared. (default false)")
+	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "trace re-exported symbols to the file where they are declared. (default false)")
 	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags.")
 	root.PersistentFlags().BoolVar(&jsTsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports.")
 	root.PersistentFlags().BoolVar(&jsWorkspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths.")
-	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude conditional imports while calculating file dependencies, like imports wrapped inside if statements. (default false)")
+	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude imports wrapped inside if or try statements. (default false)")
 
 	switch {
 	case len(args) > 0 && utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}):

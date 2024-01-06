@@ -14,6 +14,7 @@ func TestImport(t *testing.T) {
 		Name            string
 		ExpectedStatic  []string
 		ExpectedDynamic []string
+		ExpectedRequire []string
 	}{
 		{
 			Name:           "import * from 'file'",
@@ -100,6 +101,14 @@ func TestImport(t *testing.T) {
 			ExpectedStatic: []string{".export"},
 		},
 		{
+			Name:            "const a = require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
+			Name:            "const { a, b } = require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
 			Name: "import-regex.js",
 			ExpectedStatic: []string{
 				"@angular2/core",
@@ -177,15 +186,20 @@ func TestImport(t *testing.T) {
 
 			var staticResults []string
 			var dynamicResults []string
+			var requires []string
 			for _, stmt := range parsed.Statements {
-				if stmt.StaticImport != nil {
+				switch {
+				case stmt.StaticImport != nil:
 					staticResults = append(staticResults, stmt.StaticImport.Path)
-				} else if stmt.DynamicImport != nil {
+				case stmt.DynamicImport != nil:
 					dynamicResults = append(dynamicResults, stmt.DynamicImport.Path)
+				case stmt.Require != nil:
+					requires = append(requires, stmt.Require.Path)
 				}
 			}
 			a.Equal(tt.ExpectedStatic, staticResults)
 			a.Equal(tt.ExpectedDynamic, dynamicResults)
+			a.Equal(tt.ExpectedRequire, requires)
 		})
 	}
 }
