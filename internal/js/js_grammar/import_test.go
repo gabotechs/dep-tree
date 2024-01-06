@@ -101,11 +101,31 @@ func TestImport(t *testing.T) {
 			ExpectedStatic: []string{".export"},
 		},
 		{
+			Name:            "require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
 			Name:            "const a = require('foo')",
 			ExpectedRequire: []string{"foo"},
 		},
 		{
+			Name:            "var a = require('foo');",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
 			Name:            "const { a, b } = require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
+			Name:            "const { a: a1, b } = require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
+			Name:            "const { a: a1, b: b2, } = require('foo')",
+			ExpectedRequire: []string{"foo"},
+		},
+		{
+			Name:            "let { a, b, } = require('foo')",
 			ExpectedRequire: []string{"foo"},
 		},
 		{

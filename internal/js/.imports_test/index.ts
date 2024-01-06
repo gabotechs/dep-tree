@@ -8,3 +8,6 @@ import('./1/a')
 import('./unexisting')
 // @ts-ignore
 import { Unexisting } from './1/a'
+const two = require('./2/2')
+let { a, b } = require('./2/2')
+require('./1/a')

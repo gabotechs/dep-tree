@@ -29,7 +29,7 @@ type DynamicImport struct {
 }
 
 type Require struct {
-	Names []string `("const"|"let"|"var" ( "{" @Ident (":" Ident)? ("," (@Ident (":" Ident)?)?)* "}"`
-	Alias string   `| @Ident ))?`
-	Path  string   `"=" "require" "(" @String ")"`
+	Names []string `(("const"|"let"|"var") ( "{" @Ident (":" Ident)? ("," (@Ident (":" Ident)?)?)* "}"`
+	Alias string   `                                                                                 | @Ident ) "=")?`
+	Path  string   `"require" "(" @String ")"`
 }

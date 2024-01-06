@@ -42,7 +42,7 @@ var (
 	lex = lexer.MustSimple(
 		[]lexer.SimpleRule{
 			{"ALL", `\*`},
-			{"Punct", `[,{}()]`},
+			{"Punct", `[:,{}()]`},
 			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
 			{"String", `'(?:\\.|[^'])*'` + "|" + `"(?:\\.|[^"])*"`},
 			{"BacktickString", "`(?:\\\\.|[^`])*`"},

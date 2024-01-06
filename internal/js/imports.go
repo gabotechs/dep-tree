@@ -38,6 +38,10 @@ func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult,
 		case stmt.DynamicImport != nil:
 			importPath = stmt.DynamicImport.Path
 			entry.All = true
+		case stmt.Require != nil:
+			importPath = stmt.Require.Path
+			entry.All = stmt.Require.Alias != ""
+			entry.Names = stmt.Require.Names
 		default:
 			continue
 		}

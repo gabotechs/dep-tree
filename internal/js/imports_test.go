@@ -30,6 +30,9 @@ func TestParser_parseImports(t *testing.T) {
 				{All: true, Path: filepath.Join(wd, importsTestFolder, "1", "a", "a.ts")},
 				{All: true, Path: filepath.Join(wd, importsTestFolder, "1", "a", "index.ts")},
 				{Names: []string{"Unexisting"}, Path: filepath.Join(wd, importsTestFolder, "1", "a", "index.ts")},
+				{All: true, Path: filepath.Join(wd, importsTestFolder, "2", "2.ts")},
+				{Names: []string{"a", "b"}, Path: filepath.Join(wd, importsTestFolder, "2", "2.ts")},
+				{Path: filepath.Join(wd, importsTestFolder, "1", "a", "index.ts")},
 			},
 			ExpectedErrors: []string{
 				"could not perform relative import for './unexisting'",
