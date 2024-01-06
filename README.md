@@ -12,7 +12,11 @@
 </p>
 
 <p align="center">
-    Visualize the <span style="font-weight: bold">entropy</span> of a code base with a 3d force-directed graph. 
+    Visualize the <strong>entropy</strong> of a code base with a 3d force-directed graph. 
+</p>
+
+<p align="center">
+    The more decoupled and modular a code base is, the more spread the graph will look like.
 </p>
 
 <p align="center">
@@ -20,7 +24,7 @@
 </p>
 
 <p align="center">
-    The more decoupled a code base is, the more spread the graph will look like.
+    Ensure your code base decoupling by creating your own rules and enforcing them with <code>dep-tree check</code>
 </p>
 
 ## Checkout the entropy graph of well-known projects
@@ -36,6 +40,9 @@
 - [angular](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fangular%2Fangular&entrypoint=packages%2Fcompiler%2Findex.ts)
 - [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)
 - [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
+- [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)
+- [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js)
+- [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
 
 ## Install
 
