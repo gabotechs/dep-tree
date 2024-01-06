@@ -15,6 +15,7 @@ type Statement struct {
 	// imports.
 	DynamicImport *DynamicImport `  @@`
 	StaticImport  *StaticImport  `| @@`
+	Require       *Require       `| @@`
 	// exports.
 	DeclarationExport *DeclarationExport `| @@`
 	DefaultExport     *DefaultExport     `| @@`
