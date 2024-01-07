@@ -43,6 +43,8 @@
 - [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)
 - [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js)
 - [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
+- [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)
+- [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)
 
 ## Install
 
