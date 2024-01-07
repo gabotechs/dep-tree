@@ -28,11 +28,6 @@
 </p>
 
 ## Checkout the entropy graph of well-known projects
-- [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
-- [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
-- [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
-- [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)
-- [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)
 - [typescript](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmicrosoft%2FTypeScript&entrypoint=src%2Ftypescript%2Ftypescript.ts)
 - [react](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact&entrypoint=packages%2Freact-dom%2Findex.js)
 - [svelte](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fsveltejs%2Fsvelte&entrypoint=packages%2Fsvelte%2Fsrc%2Fcompiler%2Findex.js)
@@ -42,9 +37,14 @@
 - [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
 - [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)
 - [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js)
-- [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
 - [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)
 - [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)
+- [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
+- [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
+- [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
+- [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)
+- [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)
+- [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
 
 ## Install
 
