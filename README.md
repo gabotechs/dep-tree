@@ -113,12 +113,20 @@ they are loosely coupled.
 The 3d graph for a clean code base will have groups of nodes clustered together and clearly separated
 from other clusters:
 
-<img height="200px" src="docs/decoupled-code-base.png">
+<div>
+    <img height="200px" src="docs/decoupled-code-base.png">
+    <img height="200px" src="docs/decoupled-code-base-2.png">
+    <img height="200px" src="docs/decoupled-code-base-3.png">
+</div>
 
 The 3d graph for a tightly coupled code base will have all the nodes grouped together with no
 clustering and no clear separation between them:
 
-<img height="200px" src="docs/coupled-code-base.png">
+<div>
+    <img height="200px" src="docs/coupled-code-base.png">
+    <img height="200px" src="docs/coupled-code-base-2.png">
+    <img height="200px" src="docs/coupled-code-base-3.png">
+</div>
 
 ### Tree
 
