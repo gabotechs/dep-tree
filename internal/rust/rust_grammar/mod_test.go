@@ -14,27 +14,34 @@ func TestMod(t *testing.T) {
 		{
 			Name: "mod mod",
 			ExpectedMods: []Mod{{
-				Name: "mod",
+				Name: Ident("mod"),
 			}},
 		},
 		{
 			Name: "pub mod mod",
 			ExpectedMods: []Mod{{
 				Pub:  true,
-				Name: "mod",
+				Name: Ident("mod"),
+			}},
+		},
+		{
+			Name: "pub mod r#async",
+			ExpectedMods: []Mod{{
+				Pub:  true,
+				Name: Ident("async"),
 			}},
 		},
 		{
 			Name: "pub(in crate::this) mod mod",
 			ExpectedMods: []Mod{{
 				Pub:  true,
-				Name: "mod",
+				Name: Ident("mod"),
 			}},
 		},
 		{
 			Name: "mod mod {}",
 			ExpectedMods: []Mod{{
-				Name:  "mod",
+				Name:  Ident("mod"),
 				Local: true,
 			}},
 		},

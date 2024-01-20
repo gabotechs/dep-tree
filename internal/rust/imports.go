@@ -31,20 +31,20 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 					})
 				} else {
 					imports = append(imports, language.ImportEntry{
-						Names: []string{use.Name.Original},
+						Names: []string{string(use.Name.Original)},
 						Path:  id,
 					})
 				}
 			}
 		} else if stmt.Mod != nil && !stmt.Mod.Local {
-			names := []string{stmt.Mod.Name}
+			names := []string{string(stmt.Mod.Name)}
 
 			thisDir := filepath.Dir(file.Path)
 
 			var modPath string
-			if p := filepath.Join(thisDir, stmt.Mod.Name+".rs"); utils.FileExists(p) {
+			if p := filepath.Join(thisDir, string(stmt.Mod.Name)+".rs"); utils.FileExists(p) {
 				modPath = p
-			} else if p = filepath.Join(thisDir, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
+			} else if p = filepath.Join(thisDir, string(stmt.Mod.Name), "mod.rs"); utils.FileExists(p) {
 				modPath = p
 			} else {
 				errors = append(errors, fmt.Errorf("could not find mod %s while looking in dir %s", stmt.Mod.Name, thisDir))

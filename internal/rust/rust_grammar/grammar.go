@@ -37,7 +37,7 @@ var (
 			{"PathSep", `::`},
 			{"Punct", `[,{}()]`},
 			{"String", `"(?:\\.|[^"])*"`},
-			{"Ident", `[_$a-zA-Z][_$a-zA-Z0-9]*`},
+			{"Ident", `(r#)?[_$a-zA-Z][_$a-zA-Z0-9]*`},
 			{"Comment", `//.*|/\*(.|\n)*?\*/`},
 			{"Whitespace", `\s+`},
 			{"ANY", `.`},
