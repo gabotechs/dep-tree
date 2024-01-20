@@ -30,19 +30,19 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsEntri
 					})
 				} else {
 					exports = append(exports, language.ExportEntry{
-						Names: []language.ExportName{{Original: use.Name.Original, Alias: use.Name.Alias}},
+						Names: []language.ExportName{{Original: string(use.Name.Original), Alias: string(use.Name.Alias)}},
 						Path:  path,
 					})
 				}
 			}
 		case stmt.Pub != nil:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{{Original: stmt.Pub.Name}},
+				Names: []language.ExportName{{Original: string(stmt.Pub.Name)}},
 				Path:  file.Path,
 			})
 		case stmt.Mod != nil && stmt.Mod.Pub:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{{Original: stmt.Mod.Name}},
+				Names: []language.ExportName{{Original: string(stmt.Mod.Name)}},
 				Path:  file.Path,
 			})
 		}

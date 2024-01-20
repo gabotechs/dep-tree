@@ -50,20 +50,20 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 	for _, stmt := range file.Statements {
 		if stmt.Mod != nil {
 			if stmt.Mod.Local {
-				modTree.Children[stmt.Mod.Name] = &ModTree{
-					Name: stmt.Mod.Name,
+				modTree.Children[string(stmt.Mod.Name)] = &ModTree{
+					Name: string(stmt.Mod.Name),
 					Path: mainPath,
 				}
 			} else {
 				var modPath string
-				if p := filepath.Join(searchPath, stmt.Mod.Name+".rs"); utils.FileExists(p) {
+				if p := filepath.Join(searchPath, string(stmt.Mod.Name)+".rs"); utils.FileExists(p) {
 					modPath = p
-				} else if p = filepath.Join(searchPath, stmt.Mod.Name, "mod.rs"); utils.FileExists(p) {
+				} else if p = filepath.Join(searchPath, string(stmt.Mod.Name), "mod.rs"); utils.FileExists(p) {
 					modPath = p
 				} else {
 					return nil, fmt.Errorf(`could not find mod "%s" in path "%s"`, stmt.Mod.Name, searchPath)
 				}
-				modTree.Children[stmt.Mod.Name], err = makeModTree(modPath, stmt.Mod.Name, modTree)
+				modTree.Children[string(stmt.Mod.Name)], err = makeModTree(modPath, string(stmt.Mod.Name), modTree)
 				if err != nil {
 					return nil, err
 				}

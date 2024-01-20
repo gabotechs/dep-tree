@@ -15,14 +15,14 @@ func TestUse(t *testing.T) {
 			Name: "use something::something;",
 			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Name:       Name{Original: "something"},
+				Name:       Name{Original: Ident("something")},
 			}},
 		},
 		{
 			Name: "use something::something as another;",
 			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Name:       Name{Original: "something", Alias: "another"},
+				Name:       Name{Original: Ident("something"), Alias: Ident("another")},
 			}},
 		},
 		{
@@ -30,7 +30,7 @@ func TestUse(t *testing.T) {
 			ExpectedUse: []FlattenUse{{
 				Pub:        true,
 				PathSlices: []string{"something"},
-				Name:       Name{Original: "something"},
+				Name:       Name{Original: Ident("something")},
 			}},
 		},
 		{
@@ -38,14 +38,14 @@ func TestUse(t *testing.T) {
 			ExpectedUse: []FlattenUse{{
 				Pub:        true,
 				PathSlices: []string{"something"},
-				Name:       Name{Original: "something"},
+				Name:       Name{Original: Ident("something")},
 			}},
 		},
 		{
 			Name: "use something::{something};",
 			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"something"},
-				Name:       Name{Original: "something"},
+				Name:       Name{Original: Ident("something")},
 			}},
 		},
 		{
@@ -53,11 +53,11 @@ func TestUse(t *testing.T) {
 			ExpectedUse: []FlattenUse{
 				{
 					PathSlices: []string{"something"},
-					Name:       Name{Original: "one"},
+					Name:       Name{Original: Ident("one")},
 				},
 				{
 					PathSlices: []string{"something"},
-					Name:       Name{Original: "OrAnother"},
+					Name:       Name{Original: Ident("OrAnother")},
 				},
 			},
 		},
@@ -66,11 +66,11 @@ func TestUse(t *testing.T) {
 			ExpectedUse: []FlattenUse{
 				{
 					PathSlices: []string{"something"},
-					Name:       Name{Original: "one", Alias: "two"},
+					Name:       Name{Original: Ident("one"), Alias: Ident("two")},
 				},
 				{
 					PathSlices: []string{"something"},
-					Name:       Name{Original: "OrAnother"},
+					Name:       Name{Original: Ident("OrAnother")},
 				},
 			},
 		},
@@ -78,7 +78,7 @@ func TestUse(t *testing.T) {
 			Name: "use one::very_long::veeery_long::path::something;",
 			ExpectedUse: []FlattenUse{{
 				PathSlices: []string{"one", "very_long", "veeery_long", "path"},
-				Name:       Name{Original: "something"},
+				Name:       Name{Original: Ident("something")},
 			}},
 		},
 		{
@@ -94,12 +94,12 @@ func TestUse(t *testing.T) {
 				{
 					Pub:        true,
 					PathSlices: []string{"crate", "ast"},
-					Name:       Name{Original: "Node"},
+					Name:       Name{Original: Ident("Node")},
 				},
 				{
 					Pub:        true,
 					PathSlices: []string{"crate", "ast"},
-					Name:       Name{Original: "Operator"},
+					Name:       Name{Original: Ident("Operator")},
 				},
 			},
 		},
@@ -108,7 +108,7 @@ func TestUse(t *testing.T) {
 			ExpectedUse: []FlattenUse{
 				{
 					PathSlices: []string{"crate", "one"},
-					Name:       Name{Original: "One"},
+					Name:       Name{Original: Ident("One")},
 				},
 				{
 					PathSlices: []string{"crate", "another"},

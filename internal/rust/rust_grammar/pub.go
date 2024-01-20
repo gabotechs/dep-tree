@@ -2,5 +2,5 @@
 package rust_grammar
 
 type Pub struct {
-	Name string `"pub"  ("(" (Ident | PathSep)* ")")? "unsafe"? "async"? ("fn" | "struct" | "trait" | "enum" | "type" | "static" | "const") @Ident`
+	Name Ident `"pub"  ("(" (Ident | PathSep)* ")")? "unsafe"? "async"? ("fn" | "struct" | "trait" | "enum" | "type" | "static" | "const") @Ident`
 }

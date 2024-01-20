@@ -2,12 +2,12 @@
 package rust_grammar
 
 type Name struct {
-	Original string `@Ident`
-	Alias    string `("as" @Ident)?`
+	Original Ident `@Ident`
+	Alias    Ident `("as" @Ident)?`
 }
 
 type UsePath struct {
-	PathSlices []string   `(@Ident PathSep)*`
+	PathSlices []Ident    `(@Ident PathSep)*`
 	All        bool       `(@ALL |`
 	Name       *Name      `      @@ |`
 	UsePaths   []*UsePath `         "{" @@ ("," @@)* "}" )`
@@ -27,7 +27,9 @@ type FlattenUse struct {
 
 func flatten(node *UsePath, pathSlices []string, isPub bool) []FlattenUse {
 	currentSlices := pathSlices
-	currentSlices = append(currentSlices, node.PathSlices...)
+	for _, pathSlice := range node.PathSlices {
+		currentSlices = append(currentSlices, string(pathSlice))
+	}
 	switch {
 	case node.All:
 		return []FlattenUse{

@@ -17,61 +17,61 @@ func TestPub(t *testing.T) {
 		{
 			Name: "pub fn my_function",
 			ExpectedPub: []Pub{{
-				Name: "my_function",
+				Name: Ident("my_function"),
 			}},
 		},
 		{
 			Name: "pub unsafe fn my_function",
 			ExpectedPub: []Pub{{
-				Name: "my_function",
+				Name: Ident("my_function"),
 			}},
 		},
 		{
 			Name: "pub trait my_trait",
 			ExpectedPub: []Pub{{
-				Name: "my_trait",
+				Name: Ident("my_trait"),
 			}},
 		},
 		{
 			Name: "pub struct my_struct",
 			ExpectedPub: []Pub{{
-				Name: "my_struct",
+				Name: Ident("my_struct"),
 			}},
 		},
 		{
 			Name: "pub enum my_enum",
 			ExpectedPub: []Pub{{
-				Name: "my_enum",
+				Name: Ident("my_enum"),
 			}},
 		},
 		{
 			Name: "pub type my_type",
 			ExpectedPub: []Pub{{
-				Name: "my_type",
+				Name: Ident("my_type"),
 			}},
 		},
 		{
 			Name: "pub(crate) fn my_function and a lot of shit after",
 			ExpectedPub: []Pub{{
-				Name: "my_function",
+				Name: Ident("my_function"),
 			}},
 		},
 		{
 			Name: "pub async fn my_function ",
 			ExpectedPub: []Pub{{
-				Name: "my_function",
+				Name: Ident("my_function"),
 			}},
 		},
 		{
 			Name: "pub static VAR",
 			ExpectedPub: []Pub{{
-				Name: "VAR",
+				Name: Ident("VAR"),
 			}},
 		},
 		{
 			Name: "pub const VAR",
 			ExpectedPub: []Pub{{
-				Name: "VAR",
+				Name: Ident("VAR"),
 			}},
 		},
 		{
@@ -81,7 +81,7 @@ func TestPub(t *testing.T) {
 		{
 			Name: "' pub struct MyStruct '",
 			ExpectedPub: []Pub{{
-				Name: "MyStruct",
+				Name: Ident("MyStruct"),
 			}},
 		},
 	}
