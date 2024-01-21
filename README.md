@@ -45,6 +45,7 @@
 - [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)
 - [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)
 - [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
+- [deno](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fdenoland%2Fdeno&entrypoint=cli%2Fmain.rs)
 
 ## Install
 
