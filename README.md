@@ -46,6 +46,9 @@
 - [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)
 - [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
 - [deno](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fdenoland%2Fdeno&entrypoint=cli%2Fmain.rs)
+- [polars](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpola-rs%2Fpolars&entrypoint=crates%2Fpolars-core%2Fsrc%2Flib.rs)
+- [alacritty](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Falacritty%2Falacritty&entrypoint=alacritty%2Fsrc%2Fmain.rs)
+- [bevy (ecs)](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fbevyengine%2Fbevy&entrypoint=crates%2Fbevy_ecs%2Fsrc%2Flib.rs)
 
 ## Install
 
