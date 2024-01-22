@@ -28,41 +28,38 @@
 </p>
 
 ## Checkout the entropy graph of well-known projects
-- [typescript](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmicrosoft%2FTypeScript&entrypoint=src%2Ftypescript%2Ftypescript.ts)
-- [react](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact&entrypoint=packages%2Freact-dom%2Findex.js)
-- [svelte](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fsveltejs%2Fsvelte&entrypoint=packages%2Fsvelte%2Fsrc%2Fcompiler%2Findex.js)
-- [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)
-- [angular](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fangular%2Fangular&entrypoint=packages%2Fcompiler%2Findex.ts)
-- [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)
-- [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)
-- [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)
-- [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js)
-- [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)
-- [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)
-- [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py)
-- [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)
-- [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)
-- [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)
-- [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)
-- [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)
-- [deno](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fdenoland%2Fdeno&entrypoint=cli%2Fmain.rs)
-- [polars](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpola-rs%2Fpolars&entrypoint=crates%2Fpolars-core%2Fsrc%2Flib.rs)
-- [alacritty](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Falacritty%2Falacritty&entrypoint=alacritty%2Fsrc%2Fmain.rs)
-- [bevy (ecs)](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fbevyengine%2Fbevy&entrypoint=crates%2Fbevy_ecs%2Fsrc%2Flib.rs)
+
+| Ts/Js                                                                                                                                                         | Python                                                                                                                                                               | Rust                                                                                                                                                 |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [typescript](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmicrosoft%2FTypeScript&entrypoint=src%2Ftypescript%2Ftypescript.ts)     | [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py) | [deno](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fdenoland%2Fdeno&entrypoint=cli%2Fmain.rs)                            |
+| [react](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact&entrypoint=packages%2Freact-dom%2Findex.js)                 | [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)                            | [polars](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpola-rs%2Fpolars&entrypoint=crates%2Fpolars-core%2Fsrc%2Flib.rs)   |
+| [svelte](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fsveltejs%2Fsvelte&entrypoint=packages%2Fsvelte%2Fsrc%2Fcompiler%2Findex.js) | [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)    | [alacritty](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Falacritty%2Falacritty&entrypoint=alacritty%2Fsrc%2Fmain.rs)     |
+| [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)                                | [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)                              | [bevy (ecs)](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fbevyengine%2Fbevy&entrypoint=crates%2Fbevy_ecs%2Fsrc%2Flib.rs) |
+| [angular](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fangular%2Fangular&entrypoint=packages%2Fcompiler%2Findex.ts)               | [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)                                       |                                                                                                                                                      |
+| [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)  | [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)                |                                                                                                                                                      |
+| [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)                              |                                                                                                                                                                      |                                                                                                                                                      |
+| [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)                         |                                                                                                                                                                      |                                                                                                                                                      |
+| [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js) |                                                                                                                                                                      |                                                                                                                                                      |
+| [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)                                    |                                                                                                                                                                      |                                                                                                                                                      |
+| [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)                                  |                                                                                                                                                                      |                                                                                                                                                      |
+
 
 ## Install
 
 On Mac and Linux, it can be installed using brew:
+
 ```shell
 brew install gabotechs/taps/dep-tree
 ```
 
 Alternatively, on any platform including Windows it can be installed with `pip`...
+
 ```shell
 pip install python-dep-tree
 ```
 
 ...or `npm`:
+
 ```shell
 npm install @dep-tree/cli
 ```
@@ -82,21 +79,22 @@ npm install @dep-tree/cli
 rules for ensuring its loosely coupling.
 
 It works with files, meaning that each file is a node in the dependency tree:
+
 - It starts from an entrypoint, which is usually the main executable file in a
-program or the file that exposes the contents of a library (like `package/main.py`, `src/index.ts`, `src/lib.rs`...).
+  program or the file that exposes the contents of a library (like `package/main.py`, `src/index.ts`, `src/lib.rs`...).
 - It makes a parent node out of the root file, and one child node for each imported file.
 
 > [!NOTE]
 > it only takes into account local files, not files imported from external libraries.
 
 - That process is repeated recursively with all the imported files, until the file dependency
-graph is formed.
+  graph is formed.
 - If rendering the **code base entropy**, the nodes will be rendered using a 3d force-directed graph
-in the browser.
+  in the browser.
 - If rendering the **dependency tree** in the terminal, the nodes will be placed in a human-readable
-way, and users can navigate through the graph using the keyboard.
+  way, and users can navigate through the graph using the keyboard.
 - If validating the **dependency rules** in a CI system, it will check that the dependencies between files
-match some boundaries declared in a `.dep-tree.yml` file.
+  match some boundaries declared in a `.dep-tree.yml` file.
 
 ## Usage
 
@@ -165,25 +163,30 @@ should not be coupled remain decoupled as the project evolves.
 
 These are the parameters that can be configured in the `.dep-tree.yml` file:
 
-### `entrypoints`: 
+### `entrypoints`:
+
 List of entrypoints that will act as root nodes for evaluating multiple
 dependency trees. Some applications might expose more than one entrypoint, for that reason,
 this parameter is a list. The most typical thing is that there is only one entrypoint.
 
 ### `allow`:
+
 Map from glob pattern to list of glob patterns that define, using a "white list"
 logic, what files can depend on what other files. For example:
+
 ```yml
 allow:
   "src/products/**":
     - "src/products/**"
     - "src/common/**"
 ```
+
 In the example above, any file under the `src/products` folder has the restriction of only
 being able to import files that live either in the same `src/products` folder, or in the
 `src/common` folder.
 
-### `deny`: 
+### `deny`:
+
 Map from glob pattern to list of glob patterns that define, using a "black list"
 logic, what dependencies are forbidden. For example:
 
@@ -205,6 +208,7 @@ allowCircularDependencies: true
 ```
 
 ### `aliases`:
+
 Map from string to glob pattern that gathers utility groups of glob patterns that
 can be reused in the `deny` and `allow` fields. For example:
 
@@ -219,6 +223,7 @@ allow:
     - "common-stuff"
     - "src/class.py"
 ```
+
 is the same as saying:
 
 ```yml
@@ -231,6 +236,7 @@ allow:
 ```
 
 ### Example configuration file
+
 Dep Tree by default will read the configuration file in `.dep-tree.yml`, which is expected to be a file
 that contains the following settings:
 
@@ -354,6 +360,7 @@ area: file structure and dependency management.
 
 Luckily, the community has come up with very useful tools
 for keeping our projects in check:
+
 - **Type checkers** ensure correct interactions between code segments.
 - **Linters** elevate code quality and maintain a consistent style.
 - **Formatters** guarantee a uniform code format throughout.
@@ -363,7 +370,6 @@ Dep Tree is a dedicated tool addressing this very challenge,
 it aids developers in preserving a project's structural integrity
 throughout its lifecycle. And with integration capabilities in CI systems,
 the tool ensures that this architectural "harmony" remains undisturbed.
-
 
 ## Supported languages
 
