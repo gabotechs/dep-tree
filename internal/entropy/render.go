@@ -19,8 +19,9 @@ const ToReplace = "const DATA = {}"
 const ReplacePrefix = "const DATA = "
 
 type RenderConfig struct {
-	NoOpen    bool
-	EnableGui bool
+	NoOpen     bool
+	EnableGui  bool
+	RenderPath string
 }
 
 func Render(parser language.NodeParser, cfg RenderConfig) error {
@@ -38,15 +39,20 @@ func Render(parser language.NodeParser, cfg RenderConfig) error {
 		return err
 	}
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
-	temp := filepath.Join(os.TempDir(), "index.html")
-	err = os.WriteFile(temp, rendered, os.ModePerm)
+
+	renderFile := cfg.RenderPath
+	if renderFile == "" {
+		renderFile = filepath.Join(os.TempDir(), "index.html")
+	}
+
+	err = os.WriteFile(renderFile, rendered, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	if cfg.NoOpen {
-		fmt.Println(temp)
+		fmt.Println(renderFile)
 		return nil
 	} else {
-		return openInBrowser(temp)
+		return openInBrowser(renderFile)
 	}
 }

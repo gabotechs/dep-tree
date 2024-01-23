@@ -8,6 +8,7 @@ import (
 
 var noBrowserOpen bool
 var enableGui bool
+var renderPath string
 
 func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -31,8 +32,9 @@ func EntropyCmd() *cobra.Command {
 				return err
 			}
 			err = entropy.Render(parser, entropy.RenderConfig{
-				NoOpen:    noBrowserOpen,
-				EnableGui: enableGui,
+				NoOpen:     noBrowserOpen,
+				EnableGui:  enableGui,
+				RenderPath: renderPath,
 			})
 			return err
 		},
@@ -40,6 +42,7 @@ func EntropyCmd() *cobra.Command {
 
 	cmd.Flags().BoolVar(&noBrowserOpen, "no-browser-open", false, "Disable the automatic browser open while rendering entropy")
 	cmd.Flags().BoolVar(&enableGui, "enable-gui", false, "Enables a GUI for changing rendering settings")
+	cmd.Flags().StringVar(&renderPath, "render-path", "", "Renders the HTML file in the specified path")
 
 	return cmd
 }
