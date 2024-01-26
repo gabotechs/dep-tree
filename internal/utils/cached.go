@@ -66,3 +66,15 @@ func Cached1In2OutErr[I comparable, O1 any, O2 any](f func(I) (O1, O2, error)) f
 		return value.o1, value.o2, nil
 	}
 }
+
+func Cached1In2Out[I comparable, O1 any, O2 any](f func(I) (O1, O2)) func(I) (O1, O2) {
+	cache := make(map[I]out2[O1, O2])
+	return func(x I) (O1, O2) {
+		if _, ok := cache[x]; !ok {
+			o1, o2 := f(x)
+			cache[x] = out2[O1, O2]{o1, o2}
+		}
+		value, _ := cache[x]
+		return value.o1, value.o2
+	}
+}

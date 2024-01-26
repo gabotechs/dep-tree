@@ -44,6 +44,12 @@ func TestParser_ResolvePath(t *testing.T) {
 			Resolved:   filepath.Join(absPath, "src", "helpers", "diff.ts"),
 		},
 		{
+			Name:       "from package.json in folder",
+			Cwd:        filepath.Join(resolverTestFolder, "src"),
+			Unresolved: "./module",
+			Resolved:   filepath.Join(absPath, "src", "module", "main.ts"),
+		},
+		{
 			Name:          "Does not resolve invalid relative import",
 			Cwd:           filepath.Join(resolverTestFolder, "src", "utils"),
 			Unresolved:    "./foo",
