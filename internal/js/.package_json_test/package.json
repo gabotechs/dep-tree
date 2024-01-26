@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "main": "foo.js",
+  "workspaces": [
+    "foo"
+  ]
+}

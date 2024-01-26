@@ -82,8 +82,13 @@ func getFileAbsPath(id string) string {
 	switch {
 	case err != nil:
 		return ""
-	case utils.DirExists(id):
-		return retrieveWithExt(filepath.Join(absPath, "index"))
+	case utils.DirExists(absPath):
+		pckJson, err := readPackageJson(absPath)
+		if err != nil || pckJson.Main == "" {
+			return retrieveWithExt(filepath.Join(absPath, "index"))
+		} else {
+			return retrieveWithExt(filepath.Join(absPath, pckJson.Main))
+		}
 	default:
 		return retrieveWithExt(absPath)
 	}

@@ -22,13 +22,13 @@ func TestNewWorkspaces(t *testing.T) {
 		a.NotNil(result)
 		abs, _ := filepath.Abs(workspacesTestDir)
 
-		a.Equal(map[string]WorkspaceEntry{
-			"a":      {absPath: filepath.Join(abs, "a")},
-			"c":      {absPath: filepath.Join(abs, "nested", "c")},
-			"f":      {absPath: filepath.Join(abs, "r-nested", "1", "f")},
-			"g":      {absPath: filepath.Join(abs, "r-nested", "2", "3", "g")},
-			"h":      {absPath: filepath.Join(abs, "r-nested", "h")},
-			"@foo/k": {absPath: filepath.Join(abs, "foo", "k")},
+		a.Equal(map[string]*packageJson{
+			"a":      {absPath: filepath.Join(abs, "a"), Name: "a"},
+			"c":      {absPath: filepath.Join(abs, "nested", "c"), Name: "c"},
+			"f":      {absPath: filepath.Join(abs, "r-nested", "1", "f"), Name: "f"},
+			"g":      {absPath: filepath.Join(abs, "r-nested", "2", "3", "g"), Name: "g"},
+			"h":      {absPath: filepath.Join(abs, "r-nested", "h"), Name: "h"},
+			"@foo/k": {absPath: filepath.Join(abs, "foo", "k"), Name: "@foo/k"},
 		}, result.ws)
 	}
 }
@@ -38,8 +38,8 @@ func TestNewWorkspaces_parses_packages(t *testing.T) {
 	result, err := NewWorkspaces(filepath.Join(workspacesTestDir, "other"))
 	a.NoError(err)
 	abs, _ := filepath.Abs(workspacesTestDir)
-	a.Equal(map[string]WorkspaceEntry{
-		"foo": {absPath: filepath.Join(abs, "other", "foo")},
+	a.Equal(map[string]*packageJson{
+		"foo": {absPath: filepath.Join(abs, "other", "foo"), Name: "foo"},
 	}, result.ws)
 }
 
