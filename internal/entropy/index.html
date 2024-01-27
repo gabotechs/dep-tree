@@ -38,9 +38,10 @@
         UNSELECTED_LINK_ALPHA: 0.1,
 
         LINK_DISTANCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
-        NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
+        FILE_NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
+        DIR_NODE_REPULSION_FORCE: 40,
         FILE_LINK_STRENGTH_FACTOR: 1,
-        DIR_LINK_STRENGTH_FACTOR: 2,
+        DIR_LINK_STRENGTH_FACTOR: 2.5,
         HIGHLIGHT_CYCLES: false
     }
 
@@ -186,7 +187,7 @@
 
     Graph
         .d3Force('charge')
-        .strength(_node => -SETTINGS.NODE_REPULSION_FORCE)
+        .strength(node => -(node['isDir'] ? SETTINGS.DIR_NODE_REPULSION_FORCE : SETTINGS.FILE_NODE_REPULSION_FORCE))
 
     let recomputeTimeout
     function debouncedRecompute() {
@@ -201,6 +202,8 @@
         gui.add(SETTINGS, 'LINK_DISTANCE', 10, 100).onChange(debouncedRecompute)
         gui.add(SETTINGS, 'FILE_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
         gui.add(SETTINGS, 'DIR_LINK_STRENGTH_FACTOR', 0.2, 5).onChange(debouncedRecompute)
+        gui.add(SETTINGS, 'FILE_NODE_REPULSION_FORCE', 10, 100).onChange(debouncedRecompute)
+        gui.add(SETTINGS, 'DIR_NODE_REPULSION_FORCE', 10, 100).onChange(debouncedRecompute)
         gui.add(SETTINGS, 'HIGHLIGHT_CYCLES').onChange(() => Graph.linkColor(Graph.linkColor()))
         gui.add(SETTINGS, 'LINK_ALPHA', 0, 1).onChange(() => Graph.linkColor(Graph.linkColor()))
     }

@@ -2,6 +2,7 @@ package entropy
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
@@ -75,6 +76,12 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 		}
 
 		for _, parentFolder := range splitFullPaths(dirName) {
+			// NOTE: just ignore parent folders like ".." or "../..", otherwise they will contribute
+			//  to grouping folders that might be unrelated. Empirically, visualizations look nicer if
+			//  we ignore them.
+			if strings.HasSuffix(parentFolder, "..") {
+				continue
+			}
 			folderNode := graph.MakeNode(parentFolder, 0)
 			out.Links = append(out.Links, Link{
 				From:  node.ID(),
