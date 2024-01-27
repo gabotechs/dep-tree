@@ -8,7 +8,8 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-const cargoTomlFile = "Cargo.toml"
+const CargoTomlFile = "Cargo.toml"
+const cargoTomlFile = "cargo.toml"
 
 type localDependency struct {
 	Path string
@@ -30,8 +31,11 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 	}
 	fullPath := ""
 	dir := ""
-	if filepath.Base(path) != cargoTomlFile {
+	if filepath.Base(path) != cargoTomlFile && filepath.Base(path) != CargoTomlFile {
 		fullPath = filepath.Join(path, cargoTomlFile)
+		if !utils.FileExists(fullPath) {
+			fullPath = filepath.Join(path, CargoTomlFile)
+		}
 		dir = path
 	} else {
 		fullPath = path
@@ -67,9 +71,11 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 // until a Cargo.toml file is found. If one is found, it returns the
 // parsed Cargo.toml file, if none is found, returns nil.
 func findClosestCargoToml(searchPath string) (*CargoToml, error) {
-	cargoTomlPath := filepath.Join(searchPath, "Cargo.toml")
-	if utils.FileExists(cargoTomlPath) {
-		return readCargoToml(cargoTomlPath)
+	for _, name := range []string{cargoTomlFile, CargoTomlFile} {
+		cargoTomlPath := filepath.Join(searchPath, name)
+		if utils.FileExists(cargoTomlPath) {
+			return readCargoToml(cargoTomlPath)
+		}
 	}
 	nextSearchPath := filepath.Dir(searchPath)
 	if nextSearchPath != searchPath {
