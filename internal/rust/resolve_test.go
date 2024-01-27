@@ -38,8 +38,9 @@ func TestDirToModChain(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
+			entrypoint := filepath.Join(testFolder, "src", "lib.rs")
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(entrypoint, nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)
@@ -47,7 +48,7 @@ func TestDirToModChain(t *testing.T) {
 			abs, err := filepath.Abs(tt.Path)
 			a.NoError(err)
 
-			slices, err := lang.filePathToModChain(abs)
+			slices, err := lang.filePathToModChain(abs, entrypoint)
 			a.NoError(err)
 
 			a.Equal(tt.Expected, slices)

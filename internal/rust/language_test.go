@@ -24,7 +24,7 @@ func TestMakeRustLanguage_Errors(t *testing.T) {
 		{
 			Name:       "empty project",
 			Entrypoint: filepath.Join(cwd, ".empty_project"),
-			Expected:   "could not find any of the possible entrypoint paths",
+			Expected:   "main executable/library Rust file not found for cargo workspace",
 		},
 	}
 

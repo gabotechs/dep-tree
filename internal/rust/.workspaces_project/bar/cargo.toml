@@ -1,0 +1,5 @@
+[package]
+name = "bar"
+
+[dependencies]
+baz = { path = "../baz" }

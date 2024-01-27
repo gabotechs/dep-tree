@@ -35,11 +35,12 @@ func TestMakeModTree(t *testing.T) {
 	absPath, err := filepath.Abs(filepath.Join(testFolder, "src", "lib.rs"))
 	a.NoError(err)
 
-	modTree, err := MakeModTree(absPath, "crate")
+	modTree, err := MakeModTree(absPath)
 	a.NoError(err)
 
 	result := modTree.Debug(0)
-	a.Equal(`crate src/lib.rs
+	a.Equal(`
+crate src/lib.rs
   abs src/abs.rs
     abs src/abs/abs.rs
   avg src/avg.rs
@@ -52,7 +53,7 @@ func TestMakeModTree(t *testing.T) {
       div_2 src/div/div_2/div_2.rs
   sum src/sum.rs
   tests src/lib.rs
-`, result)
+`, "\n"+result)
 
 	base := filepath.Dir(filepath.Dir(absPath))
 
@@ -114,7 +115,7 @@ func TestModTree_Errors(t *testing.T) {
 			absPath, err := filepath.Abs(tt.Path)
 			a.NoError(err)
 
-			_, err = MakeModTree(absPath, "crate")
+			_, err = MakeModTree(absPath)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}

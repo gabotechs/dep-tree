@@ -1,0 +1,4 @@
+[package]
+name = "baz"
+
+[dependencies]
