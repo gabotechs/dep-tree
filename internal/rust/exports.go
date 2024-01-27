@@ -15,7 +15,7 @@ func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsEntri
 		switch {
 		case stmt.Use != nil && stmt.Use.Pub:
 			for _, use := range stmt.Use.Flatten() {
-				path, err := l.resolve(use.PathSlices, file.Path)
+				path, err := resolve(use.PathSlices, file.Path)
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue

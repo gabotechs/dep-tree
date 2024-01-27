@@ -7,3 +7,8 @@ members = [
     "bar",
     "baz"
 ]
+
+[dependencies]
+bar = { path = "./bar" }
+baz = { path = "baz" }
+foo = { path = "foo" }

@@ -8,6 +8,8 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+const cargoTomlFile = "Cargo.toml"
+
 type localDependency struct {
 	Path string
 }
@@ -28,8 +30,8 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 	}
 	fullPath := ""
 	dir := ""
-	if filepath.Base(path) != "Cargo.toml" {
-		fullPath = filepath.Join(path, "Cargo.toml")
+	if filepath.Base(path) != cargoTomlFile {
+		fullPath = filepath.Join(path, cargoTomlFile)
 		dir = path
 	} else {
 		fullPath = path
