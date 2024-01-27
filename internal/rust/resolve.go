@@ -95,6 +95,9 @@ func resolve(pathSlices []string, filePath string) (string, error) {
 		}
 		cargoTomlPath := filepath.Join(workspaceRoot, cargoTomlFile)
 		if !utils.FileExists(cargoTomlPath) {
+			cargoTomlPath = filepath.Join(workspaceRoot, CargoTomlFile)
+		}
+		if !utils.FileExists(cargoTomlPath) {
 			return "", fmt.Errorf("could not find Cargo.toml file in workspace %s", cargoTomlPath)
 		}
 		cargoToml, err = readCargoToml(cargoTomlPath)
