@@ -1,0 +1,9 @@
+[package]
+name = "wall-runner"
+
+[workspace]
+members = [
+    "foo",
+    "bar",
+    "baz"
+]

@@ -21,11 +21,11 @@ const super = "super"
 
 var CachedRustFile = utils.Cached1In1OutErr(rust_grammar.Parse)
 
-func _MakeModTree(mainPath string, name string) (*ModTree, error) {
-	return makeModTree(mainPath, name, nil)
-}
-
-var MakeModTree = utils.Cached2In1OutErr(_MakeModTree)
+// MakeModTree builds the ModTree given the main library/executable file path (src/lib.rs or src/main.rs).
+var MakeModTree = utils.Cached1In1OutErr(func(mainPath string) (*ModTree, error) {
+	// "crate" always refers to the root mod of the cargo workspace.
+	return makeModTree(mainPath, "crate", nil)
+})
 
 func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error) {
 	file, err := CachedRustFile(mainPath)
@@ -55,18 +55,18 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 					Path: mainPath,
 				}
 			} else {
-				var modPath string
+				var node *ModTree
 				if p := filepath.Join(searchPath, string(stmt.Mod.Name)+".rs"); utils.FileExists(p) {
-					modPath = p
+					node, err = makeModTree(p, string(stmt.Mod.Name), modTree)
 				} else if p = filepath.Join(searchPath, string(stmt.Mod.Name), "mod.rs"); utils.FileExists(p) {
-					modPath = p
+					node, err = makeModTree(p, string(stmt.Mod.Name), modTree)
 				} else {
 					return nil, fmt.Errorf(`could not find mod "%s" in path "%s"`, stmt.Mod.Name, searchPath)
 				}
-				modTree.Children[string(stmt.Mod.Name)], err = makeModTree(modPath, string(stmt.Mod.Name), modTree)
 				if err != nil {
 					return nil, err
 				}
+				modTree.Children[string(stmt.Mod.Name)] = node
 			}
 		}
 	}

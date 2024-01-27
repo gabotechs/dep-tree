@@ -3,6 +3,7 @@ module github.com/gabotechs/dep-tree
 go 1.21
 
 require (
+	github.com/BurntSushi/toml v1.3.2
 	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/elliotchance/orderedmap/v2 v2.2.0
