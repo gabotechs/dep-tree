@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 // filePathToModChain builds the mod chain for the file located in the filePath argument
@@ -93,20 +91,13 @@ func resolve(pathSlices []string, filePath string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("could not find workspace %s relative to %s: %w", workspace.Path, cargoToml.path, err)
 		}
-		cargoTomlPath := filepath.Join(workspaceRoot, cargoTomlFile)
-		if !utils.FileExists(cargoTomlPath) {
-			cargoTomlPath = filepath.Join(workspaceRoot, CargoTomlFile)
-		}
-		if !utils.FileExists(cargoTomlPath) {
-			return "", fmt.Errorf("could not find Cargo.toml file in workspace %s", cargoTomlPath)
-		}
-		cargoToml, err = readCargoToml(cargoTomlPath)
+		cargoToml, err = readCargoToml(workspaceRoot)
 		if err != nil {
-			return "", fmt.Errorf("could not parse %s: %w", cargoTomlPath, err)
+			return "", err
 		}
 		modTree, err := cargoToml.ModTree()
 		if err != nil {
-			return "", fmt.Errorf("could not create its mod tree for workspace %s: %w", workspace.Path, err)
+			return "", fmt.Errorf("could not create mod tree for workspace %s: %w", workspace.Path, err)
 		}
 		mod = modTree.Search(pathSlices[1:])
 	} else {

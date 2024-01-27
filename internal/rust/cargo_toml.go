@@ -32,9 +32,9 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 	fullPath := ""
 	dir := ""
 	if filepath.Base(path) != cargoTomlFile && filepath.Base(path) != CargoTomlFile {
-		fullPath = filepath.Join(path, cargoTomlFile)
+		fullPath = filepath.Join(path, CargoTomlFile)
 		if !utils.FileExists(fullPath) {
-			fullPath = filepath.Join(path, CargoTomlFile)
+			fullPath = filepath.Join(path, cargoTomlFile)
 		}
 		dir = path
 	} else {
