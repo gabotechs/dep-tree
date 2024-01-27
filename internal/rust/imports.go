@@ -16,7 +16,7 @@ func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResul
 	for _, stmt := range file.Statements {
 		if stmt.Use != nil {
 			for _, use := range stmt.Use.Flatten() {
-				id, err := l.resolve(use.PathSlices, file.Path)
+				id, err := resolve(use.PathSlices, file.Path)
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue

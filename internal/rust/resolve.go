@@ -5,11 +5,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 // filePathToModChain builds the mod chain for the file located in the filePath argument
 // based on its relative position to the main file (src/lib.rs, src/main.rs...)
-func (l *Language) filePathToModChain(filePath string, mainFile string) ([]string, error) {
+func filePathToModChain(filePath string, mainFile string) ([]string, error) {
 	mainFile, err := filepath.Abs(mainFile)
 	if err != nil {
 		return nil, err
@@ -52,7 +54,7 @@ func (l *Language) filePathToModChain(filePath string, mainFile string) ([]strin
 // we need the last `filePath` argument because:
 // - we need to check what is the closest Cargo.toml file
 // - we need
-func (l *Language) resolve(pathSlices []string, filePath string) (string, error) {
+func resolve(pathSlices []string, filePath string) (string, error) {
 	if len(pathSlices) == 0 {
 		return filePath, nil
 	}
@@ -73,24 +75,43 @@ func (l *Language) resolve(pathSlices []string, filePath string) (string, error)
 		return "", err
 	}
 
+	var mod *ModTree
+
 	if first == crate {
-		modSearch = pathSlices[1:]
-	} else {
-		mods, err := l.filePathToModChain(filePath, mainFile)
+		// Referring to a mod in this workspace, and the path slices are relative to the root of the workspace.
+		mod = modTree.Search(pathSlices[1:])
+	} else if first == self || first == super {
+		// Referring to a mod in this workspace, and the path slices are relative to the evaluated file.
+		mods, err := filePathToModChain(filePath, mainFile)
 		if err != nil {
 			return "", err
 		}
-		mods = append(mods, pathSlices...)
-		modSearch = mods
+		mod = modTree.Search(append(mods, pathSlices...))
+	} else if workspace, ok := cargoToml.Dependencies[first]; ok {
+		// Referring to a mod in another workspace
+		workspaceRoot, err := filepath.Abs(filepath.Join(cargoToml.path, workspace.Path))
+		if err != nil {
+			return "", fmt.Errorf("could not find workspace %s relative to %s: %w", workspace.Path, cargoToml.path, err)
+		}
+		cargoTomlPath := filepath.Join(workspaceRoot, cargoTomlFile)
+		if !utils.FileExists(cargoTomlPath) {
+			return "", fmt.Errorf("could not find Cargo.toml file in workspace %s", cargoTomlPath)
+		}
+		cargoToml, err = readCargoToml(cargoTomlPath)
+		if err != nil {
+			return "", fmt.Errorf("could not parse %s: %w", cargoTomlPath, err)
+		}
+		modTree, err := cargoToml.ModTree()
+		if err != nil {
+			return "", fmt.Errorf("could not create its mod tree for workspace %s: %w", workspace.Path, err)
+		}
+		mod = modTree.Search(pathSlices[1:])
+	} else {
+		return "", nil
 	}
 
-	mod := modTree.Search(modSearch)
-	switch {
-	case mod == nil && (first == self || first == super || first == crate):
+	if mod == nil {
 		return "", fmt.Errorf("could not find mod chain %s in the projects mod tree", strings.Join(modSearch, " -> "))
-	case mod == nil:
-		return "", nil
-	default:
-		return mod.Path, nil
 	}
+	return mod.Path, nil
 }

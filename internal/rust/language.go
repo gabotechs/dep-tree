@@ -2,9 +2,10 @@ package rust
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
-	"path/filepath"
 )
 
 var Extensions = []string{

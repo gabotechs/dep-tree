@@ -1,9 +1,10 @@
 package rust
 
 import (
-	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const cargoTomlTestFolder = ".cargo_toml_test"

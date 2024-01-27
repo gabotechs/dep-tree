@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testWorkspacesFolder = ".workspaces_project"
+
 func TestDirToModChain(t *testing.T) {
 	tests := []struct {
 		Name     string
@@ -40,15 +42,10 @@ func TestDirToModChain(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			entrypoint := filepath.Join(testFolder, "src", "lib.rs")
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(entrypoint, nil)
-			a.NoError(err)
-
-			lang := _lang.(*Language)
-
 			abs, err := filepath.Abs(tt.Path)
 			a.NoError(err)
 
-			slices, err := lang.filePathToModChain(abs, entrypoint)
+			slices, err := filePathToModChain(abs, entrypoint)
 			a.NoError(err)
 
 			a.Equal(tt.Expected, slices)
@@ -97,20 +94,35 @@ func TestResolve(t *testing.T) {
 			FilePath: filepath.Join(testFolder, "src", "lib.rs"),
 			Expected: "",
 		},
+		{
+			Name:     "foo foo",
+			FilePath: filepath.Join(testWorkspacesFolder, "src", "main.rs"),
+			Expected: filepath.Join(testWorkspacesFolder, "foo", "src", "lib.rs"),
+		},
+		{
+			Name:     "bar bar",
+			FilePath: filepath.Join(testWorkspacesFolder, "src", "main.rs"),
+			Expected: filepath.Join(testWorkspacesFolder, "bar", "src", "lib.rs"),
+		},
+		{
+			Name:     "bar",
+			FilePath: filepath.Join(testWorkspacesFolder, "foo", "src", "lib.rs"),
+			Expected: filepath.Join(testWorkspacesFolder, "bar", "src", "lib.rs"),
+		},
+		{
+			Name:     "baz",
+			FilePath: filepath.Join(testWorkspacesFolder, "foo", "src", "lib.rs"),
+			Expected: filepath.Join(testWorkspacesFolder, "baz", "src", "lib.rs"),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
-			a.NoError(err)
-
-			lang := _lang.(*Language)
-
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			resolved, err := lang.resolve(strings.Split(tt.Name, " "), abs)
+			resolved, err := resolve(strings.Split(tt.Name, " "), abs)
 			a.NoError(err)
 
 			var expectedAbs string
@@ -140,15 +152,10 @@ func TestResolveErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
-			a.NoError(err)
-
-			lang := _lang.(*Language)
-
 			abs, err := filepath.Abs(tt.FilePath)
 			a.NoError(err)
 
-			_, err = lang.resolve(strings.Split(tt.Name, " "), abs)
+			_, err = resolve(strings.Split(tt.Name, " "), abs)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}
