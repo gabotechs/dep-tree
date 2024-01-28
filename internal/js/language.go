@@ -14,8 +14,7 @@ var Extensions = []string{
 }
 
 type Language struct {
-	Workspaces *Workspaces
-	Cfg        *Config
+	Cfg *Config
 }
 
 var _ language.Language[js_grammar.File] = &Language{}
@@ -24,43 +23,27 @@ var _ language.Language[js_grammar.File] = &Language{}
 // until a package.json file is found. If one is found, it returns the
 // dir where it was found and a parsed TsConfig object in case that there
 // was also a tsconfig.json file.
-func _findPackageJson(searchPath string) (TsConfig, string, error) {
-	packageJsonPath := filepath.Join(searchPath, "package.json")
+func _findClosestPackageJsonPath(searchPath string) string {
+	packageJsonPath := filepath.Join(searchPath, packageJsonFile)
 	if utils.FileExists(packageJsonPath) {
-		tsConfigPath := filepath.Join(searchPath, "tsconfig.json")
-		var tsConfig TsConfig
-		var err error
-		if utils.FileExists(tsConfigPath) {
-			tsConfig, err = ParseTsConfig(tsConfigPath)
-			if err != nil {
-				err = fmt.Errorf("found TypeScript config file in %s but there was an error reading it: %w", tsConfigPath, err)
-			}
-		}
-		return tsConfig, searchPath, err
+		return packageJsonPath
 	}
 	nextSearchPath := filepath.Dir(searchPath)
 	if nextSearchPath != searchPath {
-		return _findPackageJson(nextSearchPath)
+		return _findClosestPackageJsonPath(nextSearchPath)
 	} else {
-		return TsConfig{}, "", nil
+		return ""
 	}
 }
 
-var findPackageJson = utils.Cached1In2OutErr(_findPackageJson)
+var findClosestPackageJsonPath = utils.Cached1In1Out(_findClosestPackageJsonPath)
 
 func MakeJsLanguage(entrypoint string, cfg *Config) (language.Language[js_grammar.File], error) {
 	if !utils.FileExists(entrypoint) {
 		return nil, fmt.Errorf("file %s does not exist", entrypoint)
 	}
-	workspaces, err := NewWorkspaces(entrypoint)
-	if err != nil {
-		return nil, err
-	}
 
-	return &Language{
-		Cfg:        cfg,
-		Workspaces: workspaces,
-	}, nil
+	return &Language{Cfg: cfg}, nil
 }
 
 func (l *Language) ParseFile(id string) (*js_grammar.File, error) {

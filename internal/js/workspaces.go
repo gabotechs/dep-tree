@@ -27,7 +27,7 @@ func allDirsWithAPackageJson(start string) ([]string, error) {
 				return nil, err
 			}
 			result = append(result, more...)
-		} else if entry.Name() == "package.json" {
+		} else if entry.Name() == packageJsonFile {
 			result = append(result, start)
 		}
 	}
@@ -35,7 +35,7 @@ func allDirsWithAPackageJson(start string) ([]string, error) {
 }
 
 func searchFirstPackageJsonWithWorkspaces(searchPath string) (*packageJson, error) {
-	packageJsonPath := filepath.Join(searchPath, "package.json")
+	packageJsonPath := filepath.Join(searchPath, packageJsonFile)
 	if utils.FileExists(packageJsonPath) {
 		result, err := readPackageJson(packageJsonPath)
 		if err != nil {
@@ -52,7 +52,7 @@ func searchFirstPackageJsonWithWorkspaces(searchPath string) (*packageJson, erro
 	return nil, nil
 }
 
-func NewWorkspaces(searchPath string) (*Workspaces, error) {
+var NewWorkspaces = utils.Cached1In1OutErr(func(searchPath string) (*Workspaces, error) {
 	searchPath, err := filepath.Abs(searchPath)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func NewWorkspaces(searchPath string) (*Workspaces, error) {
 		}
 	}
 	return &Workspaces{ws: workspacesMap}, nil
-}
+})
 
 func (w *Workspaces) ResolveFromWorkspaces(unresolved string) (string, error) {
 	if w == nil {
