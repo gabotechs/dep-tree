@@ -111,7 +111,6 @@ func (p *Parser[F]) updateNodeInfo(n *Node) error {
 	return nil
 }
 
-//nolint:gocyclo
 func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 	_ = p.updateNodeInfo(n)
 	imports, err := p.gatherImportsFromFile(n.Id)
@@ -120,27 +119,26 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 	}
 	n.AddErrors(imports.Errors...)
 
-	// If exports are not going to be unwrapped, then we should take an export as if it
-	// was importing names into the file. This might happen because of configured that way
-	// or because it's the root file.
-	if !p.unwrapProxyExports || n.Id == p.entrypoint.Id {
-		var exports *ExportsResult
-		// TODO: if exports are parsed as imports, they might say that that a name is being
-		//  imported from a path when it's actually not available.
-		//  ex:
-		//   index.ts -> import { foo } from 'foo.ts'
-		//   foo.ts   -> import { bar as foo } from 'bar.ts'
-		//   bar.ts   -> export { bar }
-		//  If unwrappedExports is true, this will say that `foo` is exported from `bar.ts`, which
-		//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
-		//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
-		//  Instead we never unwrap export to avoid this.
-		exports, err = p.parseExports(n.Id, false, nil)
-		if err != nil {
-			return nil, err
-		}
-		n.AddErrors(exports.Errors...)
-		for el := exports.Exports.Front(); el != nil; el = el.Next() {
+	// Some exports might be re-exporting symbols from other files, we consider
+	// those as if they where normal imports.
+	//
+	// TODO: if exports are parsed as imports, they might say that that a name is being
+	//  imported from a path when it's actually not available.
+	//  ex:
+	//   index.ts -> import { foo } from 'foo.ts'
+	//   foo.ts   -> import { bar as foo } from 'bar.ts'
+	//   bar.ts   -> export { bar }
+	//  If unwrappedExports is true, this will say that `foo` is exported from `bar.ts`, which
+	//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
+	//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
+	//  Instead we never unwrap export to avoid this.
+	exports, err := p.parseExports(n.Id, false, nil)
+	if err != nil {
+		return nil, err
+	}
+	n.AddErrors(exports.Errors...)
+	for el := exports.Exports.Front(); el != nil; el = el.Next() {
+		if el.Value != n.Id {
 			imports.Imports = append(imports.Imports, ImportEntry{
 				Names: []string{el.Key},
 				Path:  el.Value,
