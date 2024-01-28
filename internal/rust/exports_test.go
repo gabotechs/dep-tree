@@ -55,7 +55,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakeRustLanguage(filepath.Join(testFolder, "src", "lib.rs"), nil)
+			_lang, err := MakeRustLanguage(nil)
 			a.NoError(err)
 
 			lang := _lang.(*Language)

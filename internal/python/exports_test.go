@@ -109,7 +109,7 @@ func TestLanguage_ParseExports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakePythonLanguage(filepath.Join(exportsTestFolder, tt.Entrypoint), nil)
+			lang, err := MakePythonLanguage(nil)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(filepath.Join(exportsTestFolder, tt.File))

@@ -9,11 +9,11 @@ import (
 )
 
 // handleImport Handles an `import` statement, e.g. `import foo`
-func (l *Language) handleImport(imp *python_grammar.Import) []language.ImportEntry {
+func (l *Language) handleImport(imp *python_grammar.Import, currDir string) []language.ImportEntry {
 	if l.cfg.ExcludeConditionalImports && imp.Indented {
 		return nil
 	}
-	resolved := l.ResolveAbsolute(imp.Path[0:])
+	resolved := l.ResolveAbsolute(imp.Path[0:], currDir)
 	if resolved == nil {
 		return nil
 	}
@@ -137,7 +137,7 @@ func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsRes
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.Import != nil:
-			imports = append(imports, l.handleImport(stmt.Import)...)
+			imports = append(imports, l.handleImport(stmt.Import, filepath.Dir(file.Path))...)
 		case stmt.FromImport != nil:
 			newImports, err := l.handleFromImport(stmt.FromImport, filepath.Dir(file.Path))
 			imports = append(imports, newImports...)
@@ -153,6 +153,6 @@ func (l *Language) resolveFromImportPath(imp *python_grammar.FromImport, currDir
 	if len(imp.Relative) > 0 {
 		return ResolveRelative(imp.Path, currDir, len(imp.Relative)-1)
 	} else {
-		return l.ResolveAbsolute(imp.Path), nil
+		return l.ResolveAbsolute(imp.Path, currDir), nil
 	}
 }

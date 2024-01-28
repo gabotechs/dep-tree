@@ -43,7 +43,7 @@ func TestParser_parseImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := MakeJsLanguage(tt.File, nil)
+			lang, err := MakeJsLanguage(nil)
 			a.NoError(err)
 
 			parsed, err := lang.ParseFile(tt.File)
