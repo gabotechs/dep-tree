@@ -13,19 +13,19 @@ func TestCheck(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Spec     [][]int
-		Config   Config
+		Config   *Config
 		Failures []string
 	}{
 		{
 			Name: "Simple",
 			Spec: [][]int{
-				{1, 2, 3},
-				{2, 4},
-				{3, 4},
-				{4},
-				{3},
+				0: {1, 2, 3},
+				1: {2, 4},
+				2: {3, 4},
+				3: {4},
+				4: {3},
 			},
-			Config: Config{
+			Config: &Config{
 				Entrypoints: []string{"0"},
 				WhiteList: map[string][]string{
 					"4": {},
@@ -35,8 +35,8 @@ func TestCheck(t *testing.T) {
 				},
 			},
 			Failures: []string{
-				"4 -> 3",
 				"0 -> 3",
+				"4 -> 3",
 				"detected circular dependency: 3 -> 4 -> 3",
 			},
 		},
@@ -46,16 +46,15 @@ func TestCheck(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			err := Check(func(s string) (dep_tree.NodeParser[[]int], error) {
-				return &dep_tree.TestParser{
-					Start: s,
-					Spec:  tt.Spec,
-				}, nil
-			}, &tt.Config) //nolint:gosec
+			parserBuilder := func(s []string) (dep_tree.NodeParser[[]int], error) {
+				return &dep_tree.TestParser{Spec: tt.Spec}, nil
+			}
+
+			err := Check(parserBuilder, tt.Config)
 			if tt.Failures != nil {
 				msg := err.Error()
 				failures := strings.Split(msg, "\n")
-				failures = failures[1 : len(failures)-1]
+				failures = failures[1:]
 				a.Equal(tt.Failures, failures)
 			}
 		})

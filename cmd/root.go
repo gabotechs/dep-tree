@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -92,17 +93,37 @@ $ dep-tree check`,
 	return root
 }
 
-func makeParserBuilder(entrypoint string, cfg *config.Config) (language.NodeParserBuilder, error) {
+func makeParserBuilder(files []string, cfg *config.Config) (language.NodeParserBuilder, error) {
+	if len(files) == 0 {
+		return nil, errors.New("at least one file must be provided")
+	}
+	// TODO: There's smarter ways to check which language are we in than just reading the
+	//  first encountered file extension.
 	switch {
-	case utils.EndsWith(entrypoint, js.Extensions):
+	case utils.EndsWith(files[0], js.Extensions):
 		return language.ParserBuilder(js.MakeJsLanguage, &cfg.Js, cfg), nil
-	case utils.EndsWith(entrypoint, rust.Extensions):
+	case utils.EndsWith(files[0], rust.Extensions):
 		return language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust, cfg), nil
-	case utils.EndsWith(entrypoint, python.Extensions):
+	case utils.EndsWith(files[0], python.Extensions):
 		return language.ParserBuilder(python.MakePythonLanguage, &cfg.Python, cfg), nil
 	default:
-		return nil, fmt.Errorf("file \"%s\" not supported", entrypoint)
+		return nil, fmt.Errorf("file \"%s\" not supported", files[0])
 	}
+}
+
+func filesFromArgs(args []string) ([]string, error) {
+	var result []string
+	for _, arg := range args {
+		abs, err := filepath.Abs(arg)
+		if err == nil {
+			result = append(result, abs)
+		}
+	}
+	if len(result) == 0 {
+		return result, errors.New("no valid files where provided")
+	}
+
+	return result, nil
 }
 
 func loadConfig() (*config.Config, error) {

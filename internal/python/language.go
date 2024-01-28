@@ -2,6 +2,7 @@ package python
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -19,6 +20,15 @@ type Language struct {
 }
 
 var _ language.Language[python_grammar.File] = &Language{}
+
+func (l *Language) Display(id string) string {
+	basePath := findClosestDirWithRootFile(filepath.Dir(id))
+	result, err := filepath.Rel(basePath, id)
+	if err != nil {
+		return id
+	}
+	return result
+}
 
 func MakePythonLanguage(cfg *Config) (language.Language[python_grammar.File], error) {
 	lang := Language{

@@ -3,6 +3,7 @@ package dep_tree
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
@@ -40,19 +41,18 @@ func (dt *DepTree[T]) makeStructuredTree(
 }
 
 func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
-	root, err := dt.Root()
-	if err != nil {
-		return nil, err
+	if len(dt.Entrypoints) > 1 {
+		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where detected. Consider providing a single entrypoint to your program", len(dt.Entrypoints))
 	}
 
-	tree, err := dt.makeStructuredTree(root.Id, nil)
+	tree, err := dt.makeStructuredTree(dt.Entrypoints[0].Id, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	structuredTree := StructuredTree{
 		Tree: map[string]interface{}{
-			dt.NodeParser.Display(root): tree,
+			dt.NodeParser.Display(dt.Entrypoints[0]): tree,
 		},
 		CircularDependencies: make([][]string, 0),
 		Errors:               make(map[string][]string),
@@ -82,14 +82,14 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 }
 
 func PrintStructured[T any](
-	entrypoint string,
+	files []string,
 	parserBuilder NodeParserBuilder[T],
 ) (string, error) {
-	parser, err := parserBuilder(entrypoint)
+	parser, err := parserBuilder(files)
 	if err != nil {
 		return "", err
 	}
-	dt := NewDepTree(parser)
+	dt := NewDepTree(parser, files)
 	if err != nil {
 		return "", err
 	}

@@ -1,12 +1,12 @@
-GCodeModel.tsx                          
+src/GCodeViewer/GCodeModel.tsx          
 │                                       
-├▷GCodeLines.tsx                        
-├▷│SceneElements/Camera.tsx             
-├▷│SceneElements/Floor.tsx              
-├▷│SceneElements/OrbitControls.tsx      
-├▷│gcode/GCode.ts                       
+├▷src/GCodeViewer/GCodeLines.tsx        
+├▷│src/GCodeViewer/SceneElements/Camera.
+├▷│src/GCodeViewer/SceneElements/Floor.t
+├▷│src/GCodeViewer/SceneElements/OrbitCo
+├▷│src/GCodeViewer/gcode/GCode.ts       
 │ ││                                    
-│ │├▷gcode/parser.ts                    
+│ │├▷src/GCodeViewer/gcode/parser.ts    
 │ ││ │                                  
-└─────▷gcode/types.ts                   
+└─────▷src/GCodeViewer/gcode/types.ts   
                                         

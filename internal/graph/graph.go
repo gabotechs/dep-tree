@@ -185,3 +185,17 @@ func (g *Graph[T]) to(idHash int64) []*Node[T] {
 		return make([]*Node[T], 0)
 	}
 }
+
+func (g *Graph[T]) GetNodesWithoutParents() []*Node[T] {
+	result := make([]*Node[T], 0)
+	for el := g.nodes.Front(); el != nil; el = el.Next() {
+		if nodes, ok := g.toEdges.Get(el.Key); ok {
+			if nodes.Len() == 0 {
+				result = append(result, el.Value)
+			}
+		} else {
+			result = append(result, el.Value)
+		}
+	}
+	return result
+}

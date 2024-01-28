@@ -80,9 +80,9 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 			a := require.New(t)
 
 			rendered, err := PrintStructured(
-				"0",
-				func(s string) (NodeParser[[]int], error) {
-					return &TestParser{Start: s, Spec: tt.Spec}, nil
+				[]string{"0"},
+				func(s []string) (NodeParser[[]int], error) {
+					return &TestParser{Spec: tt.Spec}, nil
 				},
 			)
 			a.NoError(err)

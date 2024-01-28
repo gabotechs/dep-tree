@@ -23,8 +23,8 @@ type RenderConfig struct {
 	EnableGui bool
 }
 
-func Render(parser language.NodeParser, cfg RenderConfig) error {
-	dt := dep_tree.NewDepTree(parser)
+func Render(parser language.NodeParser, files []string, cfg RenderConfig) error {
+	dt := dep_tree.NewDepTree(parser, files).WithStdErrLoader()
 	err := dt.LoadGraph()
 	if err != nil {
 		return err

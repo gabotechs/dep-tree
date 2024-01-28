@@ -9,46 +9,39 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func checkEntrypoint[T any](
-	parserBuilder dep_tree.NodeParserBuilder[T],
-	cfg *Config,
-	entrypoint string,
-) error {
-	parser, err := parserBuilder(entrypoint)
+func Check[T any](parserBuilder dep_tree.NodeParserBuilder[T], cfg *Config) error {
+	parser, err := parserBuilder(cfg.Entrypoints)
 	if err != nil {
 		return err
 	}
-	dt := dep_tree.NewDepTree(parser)
-	root, err := dt.Root()
-	if err != nil {
-		return err
-	}
+	dt := dep_tree.NewDepTree(parser, cfg.Entrypoints).WithStdErrLoader()
 	err = dt.LoadGraph()
 	if err != nil {
 		return err
 	}
-	failures, err := cfg.Validate(
-		root.Id,
-		func(from string) []string {
-			toNodes := dt.Graph.FromId(from)
-			result := make([]string, len(toNodes))
-			for i, c := range toNodes {
-				result[i] = c.Id
+	// 1. Check for rule violations in the graph.
+	failures := make([]string, 0)
+	for _, node := range dt.Graph.AllNodes() {
+		for _, dep := range dt.Graph.FromId(node.Id) {
+			from, to := cfg.rel(node.Id), cfg.rel(dep.Id)
+			pass, err := cfg.Check(from, to)
+			if err != nil {
+				return err
+			} else if !pass {
+				failures = append(failures, from+" -> "+to)
 			}
-			return result
-		},
-	)
+		}
+	}
+	// 2. Check for cycles.
 	dt.LoadCycles()
-	if !cfg.AllowCircularDependencies && dt.Cycles.Len() > 0 {
-		for _, cycleId := range dt.Cycles.Keys() {
-			cycle, _ := dt.Cycles.Get(cycleId)
-			formattedCycleStack := make([]string, len(cycle.Stack))
-			for i, el := range cycle.Stack {
-				node := dt.Graph.Get(el)
-				if node == nil {
-					formattedCycleStack[i] = el
-				} else {
+	if !cfg.AllowCircularDependencies {
+		for el := dt.Cycles.Front(); el != nil; el = el.Next() {
+			formattedCycleStack := make([]string, len(el.Value.Stack))
+			for i, el := range el.Value.Stack {
+				if node := dt.Graph.Get(el); node != nil {
 					formattedCycleStack[i] = parser.Display(node)
+				} else {
+					formattedCycleStack[i] = el
 				}
 			}
 
@@ -56,36 +49,8 @@ func checkEntrypoint[T any](
 			failures = append(failures, msg)
 		}
 	}
-	if err != nil {
-		return err
-	} else if len(failures) > 0 {
-		return errors.New("Check failed for entrypoint \"" + entrypoint + "\" the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
-	}
-	return nil
-}
-
-type Error []error
-
-func (e Error) Error() string {
-	msg := ""
-	for _, err := range e {
-		msg += err.Error()
-		msg += "\n"
-	}
-	return msg
-}
-
-func Check[T any](parserBuilder dep_tree.NodeParserBuilder[T], cfg *Config) error {
-	errorFlag := false
-	errs := make([]error, len(cfg.Entrypoints))
-	for i, entrypoint := range cfg.Entrypoints {
-		errs[i] = checkEntrypoint(parserBuilder, cfg, filepath.Join(cfg.Path, entrypoint))
-		if errs[i] != nil {
-			errorFlag = true
-		}
-	}
-	if errorFlag {
-		return Error(errs)
+	if len(failures) > 0 {
+		return errors.New("Check failed, the following dependencies are not allowed:\n" + strings.Join(failures, "\n"))
 	}
 	return nil
 }
@@ -148,38 +113,4 @@ func (c *Config) rel(p string) string {
 		return p
 	}
 	return relPath
-}
-
-func (c *Config) validate(
-	start string,
-	destinations func(from string) []string,
-	seen map[string]bool,
-) ([]string, error) {
-	collectedErrors := make([]string, 0)
-
-	if _, ok := seen[start]; ok {
-		return collectedErrors, nil
-	} else {
-		seen[start] = true
-	}
-
-	for _, dest := range destinations(start) {
-		from, to := c.rel(start), c.rel(dest)
-		pass, err := c.Check(from, to)
-		if err != nil {
-			return nil, err
-		} else if !pass {
-			collectedErrors = append(collectedErrors, from+" -> "+to)
-		}
-		moreErrors, err := c.validate(dest, destinations, seen)
-		if err != nil {
-			return nil, err
-		}
-		collectedErrors = append(collectedErrors, moreErrors...)
-	}
-	return collectedErrors, nil
-}
-
-func (c *Config) Validate(start string, destinations func(from string) []string) ([]string, error) {
-	return c.validate(start, destinations, map[string]bool{})
 }

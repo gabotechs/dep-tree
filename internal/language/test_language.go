@@ -3,8 +3,6 @@ package language
 import (
 	"errors"
 	"time"
-
-	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestFile struct {
@@ -24,10 +22,8 @@ type TestLanguage struct {
 	exports map[string]*ExportsEntries
 }
 
-func (t *TestLanguage) testParser(entrypoint string) *Parser[TestFile] {
-	entrypointNode := graph.MakeNode(entrypoint, FileInfo{})
+func (t *TestLanguage) testParser() *Parser[TestFile] {
 	return &Parser[TestFile]{
-		entrypoint:   entrypointNode,
 		lang:         t,
 		fileCache:    map[string]*TestFile{},
 		importsCache: map[string]*ImportsResult{},
@@ -60,4 +56,8 @@ func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsEntries, error) {
 	} else {
 		return exports, errors.New(file.Name + " not found")
 	}
+}
+
+func (t *TestLanguage) Display(id string) string {
+	return id
 }

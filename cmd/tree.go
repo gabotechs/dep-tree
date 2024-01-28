@@ -15,27 +15,29 @@ func TreeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tree",
 		Short:   "Render the dependency tree starting from the provided entrypoint",
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MinimumNArgs(1),
 		GroupID: renderGroupId,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			entrypoint := args[0]
-
+			files, err := filesFromArgs(args)
+			if err != nil {
+				return err
+			}
 			cfg, err := loadConfig()
 			if err != nil {
 				return err
 			}
 
-			parserBuilder, err := makeParserBuilder(entrypoint, cfg)
+			parserBuilder, err := makeParserBuilder(files, cfg)
 			if err != nil {
 				return err
 			}
 
 			if jsonFormat {
-				rendered, err := dep_tree.PrintStructured(entrypoint, parserBuilder)
+				rendered, err := dep_tree.PrintStructured(files, parserBuilder)
 				fmt.Println(rendered)
 				return err
 			} else {
-				return tui.Loop(entrypoint, parserBuilder, nil, true, nil)
+				return tui.Loop(files, parserBuilder, nil, true, nil)
 			}
 		},
 	}

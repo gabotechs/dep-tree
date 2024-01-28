@@ -1,15 +1,15 @@
-index.ts                                
+src/index.ts                            
 │                                       
-├▷StlViewer/StlViewer.tsx               
+├▷src/StlViewer/StlViewer.tsx           
 │ │                                     
-│ ├▷StlViewer/ErrorBoundary.tsx         
-│ └▷StlViewer/SceneSetup.tsx            
+│ ├▷src/StlViewer/ErrorBoundary.tsx     
+│ └▷src/StlViewer/SceneSetup.tsx        
 │   │                                   
-├────▷StlViewer/SceneElements/Camera.tsx
-│   ├▷StlViewer/SceneElements/Floor.tsx 
-│   ├▷StlViewer/SceneElements/Lights.tsx
-└────▷StlViewer/SceneElements/Model3D.ts
-    ├▷StlViewer/SceneElements/OrbitContr
-    └▷StlViewer/exporters/STLExporter.ts
+├────▷src/StlViewer/SceneElements/Camera
+│   ├▷src/StlViewer/SceneElements/Floor.
+│   ├▷src/StlViewer/SceneElements/Lights
+└────▷src/StlViewer/SceneElements/Model3
+    ├▷src/StlViewer/SceneElements/OrbitC
+    └▷src/StlViewer/exporters/STLExporte
                                         
                                         

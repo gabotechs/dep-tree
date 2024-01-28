@@ -9,28 +9,21 @@ import (
 )
 
 type TestParser struct {
-	Start string
-	Spec  [][]int
+	Spec [][]int
 }
 
 var _ NodeParser[[]int] = &TestParser{}
 
-func (t *TestParser) getNode(id string) (*graph.Node[[]int], error) {
+func (t *TestParser) Node(id string) (*graph.Node[[]int], error) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
 	}
-	var children []int
 	if idInt >= len(t.Spec) {
 		return nil, fmt.Errorf("%d not present in spec", idInt)
 	} else {
-		children = t.Spec[idInt]
+		return graph.MakeNode(id, t.Spec[idInt]), nil
 	}
-	return graph.MakeNode(id, children), nil
-}
-
-func (t *TestParser) Entrypoint() (*graph.Node[[]int], error) {
-	return t.getNode(t.Start)
 }
 
 func (t *TestParser) Deps(n *graph.Node[[]int]) ([]*graph.Node[[]int], error) {
@@ -39,7 +32,7 @@ func (t *TestParser) Deps(n *graph.Node[[]int]) ([]*graph.Node[[]int], error) {
 		if child < 0 {
 			return nil, errors.New("no negative children")
 		}
-		c, err := t.getNode(strconv.Itoa(child))
+		c, err := t.Node(strconv.Itoa(child))
 		if err != nil {
 			n.Errors = append(n.Errors, err)
 		} else {

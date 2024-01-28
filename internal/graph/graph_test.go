@@ -76,3 +76,25 @@ func TestGraph_Cycles(t *testing.T) {
 	cycles := topo.DirectedCyclesIn(g)
 	a.Equal(len(cycles), 2)
 }
+
+func TestGraph_GetNodesWithoutParents(t *testing.T) {
+	a := require.New(t)
+	g := NewGraph[int]()
+
+	node0 := MakeNode[int]("0", 0)
+	node1 := MakeNode[int]("1", 1)
+
+	g.AddNode(node0)
+	g.AddNode(node1)
+	err := g.AddFromToEdge("0", "1")
+	a.NoError(err)
+
+	nodes := g.GetNodesWithoutParents()
+	a.Equal(1, len(nodes))
+	a.Equal("0", nodes[0].Id)
+
+	err = g.AddFromToEdge("1", "0")
+	a.NoError(err)
+	nodes = g.GetNodesWithoutParents()
+	a.Equal(0, len(nodes))
+}

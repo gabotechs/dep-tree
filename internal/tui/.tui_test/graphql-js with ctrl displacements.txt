@@ -1,20 +1,20 @@
-├▷execution/execute.ts                                                                              
-├▷│language/parser.ts                                                                               
-├▷││validation/validate.ts                                                                          
+├▷src/execution/execute.ts                                                                          
+├▷│src/language/parser.ts                                                                           
+├▷││src/validation/validate.ts                                                                      
 │ │││                                                                                               
-│ ├││▷error/locatedError.ts                                                                         
-│ ├││▷│execution/flattenAsyncIterable.ts                                                            
-│ ├││▷│execution/mapAsyncIterable.ts                                                                
-│ ├││▷││jsutils/isAsyncIterable.ts                                                                  
-│ ├││▷││jsutils/memoize3.ts                                                                         
-│ ├││▷││jsutils/promiseForObject.ts                                                                 
-│ ├││▷│││jsutils/promiseReduce.ts                                                                   
-│ │├│▷││││language/lexer.ts                                                                         
-├─├│├▷│││││type/validate.ts                                                                         
-│ ││├▷││││││validation/specifiedRules.ts                                                            
+│ ├││▷src/error/locatedError.ts                                                                     
+│ ├││▷│src/execution/flattenAsyncIterable.ts                                                        
+│ ├││▷│src/execution/mapAsyncIterable.ts                                                            
+│ ├││▷││src/jsutils/isAsyncIterable.ts                                                              
+│ ├││▷││src/jsutils/memoize3.ts                                                                     
+│ ├││▷││src/jsutils/promiseForObject.ts                                                             
+│ ├││▷│││src/jsutils/promiseReduce.ts                                                               
+│ │├│▷││││src/language/lexer.ts                                                                     
+├─├│├▷│││││src/type/validate.ts                                                                     
+│ ││├▷││││││src/validation/specifiedRules.ts                                                        
 │ │││ │││││││                                                                                       
-│ │├│─││││┼││▷error/syntaxError.ts                                                                  
-│ │││ │││││├│▷│jsutils/capitalize.ts                                                                
-├─├││─│││┼│││▷│jsutils/isPromise.ts                                                                 
-│ │││ ├││││││▷│jsutils/toError.ts                                                                   
-│ │││ ││││││├▷││validation/rules/DeferStreamDirectiveLabelRule.ts                                   
+│ │├│─││││┼││▷src/error/syntaxError.ts                                                              
+│ │││ │││││├│▷│src/jsutils/capitalize.ts                                                            
+├─├││─│││┼│││▷│src/jsutils/isPromise.ts                                                             
+│ │││ ├││││││▷│src/jsutils/toError.ts                                                               
+│ │││ ││││││├▷││src/validation/rules/DeferStreamDirectiveLabelRule.ts                               

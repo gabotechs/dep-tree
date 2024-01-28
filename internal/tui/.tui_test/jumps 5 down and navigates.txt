@@ -1,11 +1,11 @@
-SceneSetup.tsx                          
+src/StlViewer/SceneSetup.tsx            
 │                                       
-├▷SceneElements/Camera.tsx              
-├▷SceneElements/Floor.tsx               
-├▷SceneElements/Lights.tsx              
-├▷SceneElements/Model3D.tsx             
-├▷SceneElements/OrbitControls.tsx       
-└▷exporters/STLExporter.ts              
+├▷src/StlViewer/SceneElements/Camera.tsx
+├▷src/StlViewer/SceneElements/Floor.tsx 
+├▷src/StlViewer/SceneElements/Lights.tsx
+├▷src/StlViewer/SceneElements/Model3D.ts
+├▷src/StlViewer/SceneElements/OrbitContr
+└▷src/StlViewer/exporters/STLExporter.ts
                                         
                                         
                                         

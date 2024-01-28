@@ -58,7 +58,7 @@ func TestParser_parseExports_IsCached(t *testing.T) {
 			Build(),
 	}
 
-	parser := lang.testParser("1")
+	parser := lang.testParser()
 
 	start := time.Now()
 	_, err := parser.parseExports("1", false, nil)
@@ -269,7 +269,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 			lang := &TestLanguage{
 				exports: tt.Exports,
 			}
-			parser := lang.testParser(tt.Path)
+			parser := lang.testParser()
 
 			for i := 0; i < 2; i++ {
 				exports, err := parser.parseExports("1", true, nil)

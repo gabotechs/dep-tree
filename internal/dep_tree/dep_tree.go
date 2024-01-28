@@ -11,11 +11,11 @@ import (
 	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
-type NodeParserBuilder[T any] func(string) (NodeParser[T], error)
+type NodeParserBuilder[T any] func([]string) (NodeParser[T], error)
 
 type NodeParser[T any] interface {
 	Display(node *graph.Node[T]) string
-	Entrypoint() (*graph.Node[T], error)
+	Node(id string) (*graph.Node[T], error)
 	Deps(node *graph.Node[T]) ([]*graph.Node[T], error)
 }
 
@@ -26,13 +26,13 @@ type DepTreeNode[T any] struct {
 
 type DepTree[T any] struct {
 	// Info present on DepTree construction.
+	Ids []string
 	NodeParser[T]
 	// Info present just after node processing.
-	Graph  *graph.Graph[T]
-	Nodes  []*DepTreeNode[T]
-	Cycles *orderedmap.OrderedMap[[2]string, graph.Cycle]
-	// just some internal longestPathCache.
-	root *graph.Node[T]
+	Graph       *graph.Graph[T]
+	Entrypoints []*graph.Node[T]
+	Nodes       []*DepTreeNode[T]
+	Cycles      *orderedmap.OrderedMap[[2]string, graph.Cycle]
 	// callbacks
 	onStartLoading   func()
 	onNodeStartLoad  func(*graph.Node[T])
@@ -42,8 +42,9 @@ type DepTree[T any] struct {
 	longestPathCache map[string]int
 }
 
-func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
-	return (&DepTree[T]{
+func NewDepTree[T any](parser NodeParser[T], ids []string) *DepTree[T] {
+	return &DepTree[T]{
+		Ids:              ids,
 		NodeParser:       parser,
 		Nodes:            []*DepTreeNode[T]{},
 		Graph:            graph.NewGraph[T](),
@@ -53,10 +54,10 @@ func NewDepTree[T any](parser NodeParser[T]) *DepTree[T] {
 		onNodeFinishLoad: func(_ []*graph.Node[T]) {},
 		onFinishLoad:     func() {},
 		longestPathCache: map[string]int{},
-	}).withLoader()
+	}
 }
 
-func (dt *DepTree[T]) withLoader() *DepTree[T] {
+func (dt *DepTree[T]) WithStdErrLoader() *DepTree[T] {
 	bar := progressbar.NewOptions64(
 		-1,
 		progressbar.OptionSetDescription("Loading graph..."),
@@ -90,16 +91,4 @@ func (dt *DepTree[T]) withLoader() *DepTree[T] {
 		_ = bar.Clear()
 	}
 	return dt
-}
-
-func (dt *DepTree[T]) Root() (*graph.Node[T], error) {
-	if dt.root != nil {
-		return dt.root, nil
-	}
-	root, err := dt.NodeParser.Entrypoint()
-	if err != nil {
-		return nil, err
-	}
-	dt.root = root
-	return dt.root, nil
 }

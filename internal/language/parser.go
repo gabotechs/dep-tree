@@ -1,10 +1,7 @@
 package language
 
 import (
-	"path/filepath"
-
 	"github.com/elliotchance/orderedmap/v2"
-
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -35,10 +32,11 @@ type Language[F CodeFile] interface {
 	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
 	//  F contains.
 	ParseExports(file *F) (*ExportsEntries, error)
+	// Display takes an absolute path to a file and displays it nicely.
+	Display(path string) string
 }
 
 type Parser[F CodeFile] struct {
-	entrypoint         *Node
 	lang               Language[F]
 	unwrapProxyExports bool
 	exclude            []string
@@ -61,19 +59,13 @@ func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, 
 	fileCache := map[string]*F{}
 	importsCache := map[string]*ImportsResult{}
 	exportsCache := map[string]*ExportsResult{}
-	return func(entrypoint string) (NodeParser, error) {
+	return func(files []string) (NodeParser, error) {
 		lang, err := languageBuilder(langCfg)
 		if err != nil {
 			return nil, err
 		}
-		absEntrypoint, err := filepath.Abs(entrypoint)
-		if err != nil {
-			return nil, err
-		}
 
-		entrypointNode := graph.MakeNode(absEntrypoint, FileInfo{})
 		parser := &Parser[F]{
-			entrypoint:         entrypointNode,
 			lang:               lang,
 			unwrapProxyExports: true,
 			fileCache:          fileCache,
@@ -97,8 +89,8 @@ func (p *Parser[F]) shouldExclude(path string) bool {
 	return false
 }
 
-func (p *Parser[F]) Entrypoint() (*Node, error) {
-	return p.entrypoint, nil
+func (p *Parser[F]) Node(id string) (*Node, error) {
+	return graph.MakeNode(id, FileInfo{}), nil
 }
 
 func (p *Parser[F]) updateNodeInfo(n *Node) error {
@@ -157,8 +149,8 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 			continue
 		}
 
-		var exports *ExportsResult
-		exports, err = p.parseExports(importEntry.Path, true, nil)
+		// NOTE: at this point p.unwrapProxyExports is always true.
+		exports, err = p.parseExports(importEntry.Path, p.unwrapProxyExports, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -193,11 +185,5 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 }
 
 func (p *Parser[F]) Display(n *Node) string {
-	base := filepath.Dir(p.entrypoint.Id)
-	rel, err := filepath.Rel(base, n.Id)
-	if err != nil {
-		return n.Id
-	} else {
-		return rel
-	}
+	return p.lang.Display(n.Id)
 }

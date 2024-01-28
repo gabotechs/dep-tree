@@ -25,17 +25,17 @@ func initScreen() (tcell.Screen, error) {
 }
 
 func Loop[T any](
-	initial string,
+	files []string,
 	parserBuilder dep_tree.NodeParserBuilder[T],
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
 ) error {
-	parser, err := parserBuilder(initial)
+	parser, err := parserBuilder(files)
 	if err != nil {
 		return err
 	}
-	dt := dep_tree.NewDepTree(parser)
+	dt := dep_tree.NewDepTree(parser, files).WithStdErrLoader()
 	err = dt.LoadDeps()
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func Loop[T any](
 		Event:            nil,
 		IsRootNavigation: isRootNavigation,
 		OnNavigate: func(s *systems.State) error {
-			return Loop[T](s.SelectedId, parserBuilder, screen, false, tickChan)
+			return Loop[T]([]string{s.SelectedId}, parserBuilder, screen, false, tickChan)
 		},
 	}
 
