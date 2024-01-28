@@ -81,11 +81,11 @@ func TestResolveAbsolute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_lang, err := MakePythonLanguage(filepath.Join(absPath, tt.Entrypoint), nil)
+			_lang, err := MakePythonLanguage(nil)
 			a.NoError(err)
 			lang := _lang.(*Language)
-			lang.PythonPath = append(lang.PythonPath, tt.PythonPath...)
-			resolved := lang.ResolveAbsolute(tt.Slices)
+			lang.cfg.PythonPath = append(lang.cfg.PythonPath, tt.PythonPath...)
+			resolved := lang.ResolveAbsolute(tt.Slices, filepath.Dir(filepath.Join(absPath, tt.Entrypoint)))
 			a.Equal(tt.Expected, resolved)
 		})
 	}

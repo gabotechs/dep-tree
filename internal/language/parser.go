@@ -55,14 +55,14 @@ type Config interface {
 	IgnoreFiles() []string
 }
 
-type Builder[F CodeFile, C any] func(string, C) (Language[F], error)
+type Builder[F CodeFile, C any] func(C) (Language[F], error)
 
 func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, generalCfg Config) NodeParserBuilder {
 	fileCache := map[string]*F{}
 	importsCache := map[string]*ImportsResult{}
 	exportsCache := map[string]*ExportsResult{}
 	return func(entrypoint string) (NodeParser, error) {
-		lang, err := languageBuilder(entrypoint, langCfg)
+		lang, err := languageBuilder(langCfg)
 		if err != nil {
 			return nil, err
 		}

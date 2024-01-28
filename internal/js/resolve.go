@@ -108,3 +108,22 @@ func getFileAbsPath(id string) string {
 		return retrieveWithExt(absPath)
 	}
 }
+
+// findPackageJson starts from a search path and goes up dir by dir
+// until a package.json file is found. If one is found, it returns the
+// dir where it was found and a parsed TsConfig object in case that there
+// was also a tsconfig.json file.
+func _findClosestPackageJsonPath(searchPath string) string {
+	packageJsonPath := filepath.Join(searchPath, packageJsonFile)
+	if utils.FileExists(packageJsonPath) {
+		return packageJsonPath
+	}
+	nextSearchPath := filepath.Dir(searchPath)
+	if nextSearchPath != searchPath {
+		return _findClosestPackageJsonPath(nextSearchPath)
+	} else {
+		return ""
+	}
+}
+
+var findClosestPackageJsonPath = utils.Cached1In1Out(_findClosestPackageJsonPath)

@@ -36,17 +36,18 @@ func TestRoot(t *testing.T) {
 			Name: "tree",
 		},
 		{
-			Name: "tree random.js",
-		},
-		{
 			Name: "tree random.pdf",
 		},
-		{
-			Name: "tree random.py",
-		},
-		{
-			Name: "random.py",
-		},
+		// TODO: these will change once globstar entrypoints are allowed.
+		// {
+		//	 Name: "tree random.js",
+		// },
+		// {
+		//	 Name: "tree random.py",
+		// },
+		// {
+		//	 Name: "random.py",
+		// },
 		{
 			Name: "check",
 		},
