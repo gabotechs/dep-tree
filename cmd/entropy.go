@@ -14,23 +14,25 @@ func EntropyCmd() *cobra.Command {
 		Use:     "entropy",
 		Short:   "(default) Renders a 3d force-directed graph in the browser",
 		GroupID: renderGroupId,
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			entrypoint := args[0]
-
+			files, err := filesFromArgs(args)
+			if err != nil {
+				return err
+			}
 			cfg, err := loadConfig()
 			if err != nil {
 				return err
 			}
-			parserBuilder, err := makeParserBuilder(entrypoint, cfg)
+			parserBuilder, err := makeParserBuilder(files, cfg)
 			if err != nil {
 				return err
 			}
-			parser, err := parserBuilder(entrypoint)
+			parser, err := parserBuilder(files)
 			if err != nil {
 				return err
 			}
-			err = entropy.Render(parser, entropy.RenderConfig{
+			err = entropy.Render(parser, files, entropy.RenderConfig{
 				NoOpen:    noBrowserOpen,
 				EnableGui: enableGui,
 			})

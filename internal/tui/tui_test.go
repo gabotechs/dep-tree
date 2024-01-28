@@ -146,7 +146,7 @@ func TestTui(t *testing.T) {
 				}
 
 				finish <- Loop[language.FileInfo](
-					entrypointPath,
+					[]string{entrypointPath},
 					parserBuilder,
 					screen,
 					true,

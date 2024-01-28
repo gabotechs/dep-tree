@@ -11,7 +11,7 @@ func TestParser_parseFile_IsCached(t *testing.T) {
 	a := require.New(t)
 	lang := TestLanguage{}
 
-	parser := lang.testParser("1")
+	parser := lang.testParser()
 
 	start := time.Now()
 	_, err := parser.parseFile("1")

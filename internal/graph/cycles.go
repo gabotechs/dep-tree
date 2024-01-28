@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"gonum.org/v1/gonum/graph/topo"
+
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -44,4 +46,22 @@ func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack, done 
 
 func (g *Graph[T]) RemoveCycles(node *Node[T]) []Cycle {
 	return g.removeCycles(node, utils.NewCallStack(), map[string]bool{})
+}
+
+func (g *Graph[T]) RemoveJohnsonCycles() []Cycle {
+	johnsonCycles := topo.DirectedCyclesIn(g)
+	cycles := make([]Cycle, len(johnsonCycles))
+	for i, c := range johnsonCycles {
+		stack := make([]string, len(c))
+		for i, n := range c {
+			stack[i] = n.(*Node[T]).Id
+		}
+		g.RemoveFromToEdge(stack[0], stack[1])
+		cycles[i] = Cycle{
+			Cause: [2]string{stack[0], stack[1]},
+			Stack: stack,
+		}
+	}
+
+	return cycles
 }

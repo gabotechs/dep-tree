@@ -26,7 +26,7 @@ func CheckCmd() *cobra.Command {
 			if len(cfg.Check.Entrypoints) == 0 {
 				return fmt.Errorf(`config file "%s" has no entrypoints`, configPath)
 			}
-			parserBuilder, err := makeParserBuilder(cfg.Check.Entrypoints[0], cfg)
+			parserBuilder, err := makeParserBuilder(cfg.Check.Entrypoints, cfg)
 			if err != nil {
 				return err
 			}

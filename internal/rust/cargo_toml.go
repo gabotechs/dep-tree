@@ -70,7 +70,7 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 // findClosestCargoToml starts from a search path and goes up dir by dir
 // until a Cargo.toml file is found. If one is found, it returns the
 // parsed Cargo.toml file, if none is found, returns nil.
-func findClosestCargoToml(searchPath string) (*CargoToml, error) {
+func _findClosestCargoToml(searchPath string) (*CargoToml, error) {
 	for _, name := range []string{cargoTomlFile, CargoTomlFile} {
 		cargoTomlPath := filepath.Join(searchPath, name)
 		if utils.FileExists(cargoTomlPath) {
@@ -79,11 +79,13 @@ func findClosestCargoToml(searchPath string) (*CargoToml, error) {
 	}
 	nextSearchPath := filepath.Dir(searchPath)
 	if nextSearchPath != searchPath {
-		return findClosestCargoToml(nextSearchPath)
+		return _findClosestCargoToml(nextSearchPath)
 	} else {
 		return nil, nil
 	}
 }
+
+var findClosestCargoToml = utils.Cached1In1OutErr(_findClosestCargoToml)
 
 var searchPaths = []string{
 	filepath.Join("src", "lib.rs"),

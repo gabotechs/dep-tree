@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func TestParser_Deps(t *testing.T) {
@@ -203,10 +201,9 @@ func TestParser_Deps(t *testing.T) {
 				imports: tt.Imports,
 				exports: tt.Exports,
 			}
-			parser := lang.testParser(tt.Path)
+			parser := lang.testParser()
 			parser.unwrapProxyExports = true
-
-			node, err := parser.Entrypoint()
+			node, err := parser.Node(tt.Path)
 			a.NoError(err)
 			deps, err := parser.Deps(node)
 			a.NoError(err)
@@ -273,8 +270,8 @@ func TestParser_DepsErrors(t *testing.T) {
 				imports: tt.Imports,
 				exports: tt.Exports,
 			}
-			parser := lang.testParser(tt.Path)
-			node, err := parser.Entrypoint()
+			parser := lang.testParser()
+			node, err := parser.Node(tt.Path)
 			a.NoError(err)
 			_, err = parser.Deps(node)
 			a.NoError(err)
@@ -284,33 +281,6 @@ func TestParser_DepsErrors(t *testing.T) {
 				i += 1
 			}
 			a.Equal(i, len(tt.ExpectedErrors))
-		})
-	}
-}
-
-func TestParser_Display(t *testing.T) {
-	tests := []struct {
-		Name       string
-		Entrypoint string
-		NodeId     string
-		Expected   string
-	}{
-		{
-			Name:       "one dir below",
-			Entrypoint: "/a/b/c/foo.ts",
-			NodeId:     "/a/b/c/d/foo.ts",
-			Expected:   "d/foo.ts",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.Name, func(t *testing.T) {
-			a := require.New(t)
-			parser := Parser[CodeFile]{
-				entrypoint: graph.MakeNode(tt.Entrypoint, FileInfo{}),
-			}
-			actual := parser.Display(graph.MakeNode(tt.NodeId, FileInfo{}))
-			a.Equal(tt.Expected, actual)
 		})
 	}
 }

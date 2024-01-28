@@ -89,11 +89,10 @@ func TestRenderGraph(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			testParser := TestParser{
-				Start: "0",
-				Spec:  tt.Spec,
+				Spec: tt.Spec,
 			}
 
-			dt := NewDepTree[[]int](&testParser)
+			dt := NewDepTree[[]int](&testParser, []string{"0"})
 
 			err := dt.LoadDeps()
 			a.NoError(err)

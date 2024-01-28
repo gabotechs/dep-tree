@@ -18,7 +18,7 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 			},
 		},
 	}
-	parser := lang.testParser("1")
+	parser := lang.testParser()
 
 	start := time.Now()
 	_, err := parser.gatherImportsFromFile("1")
