@@ -10,6 +10,8 @@ import (
 	"github.com/tailscale/hujson"
 )
 
+const tsConfigFile = "tsconfig.json"
+
 type CompilerOptions struct {
 	BaseUrl string              `json:"baseUrl,omitempty"`
 	Paths   map[string][]string `json:"paths,omitempty"`

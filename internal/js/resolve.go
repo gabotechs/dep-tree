@@ -14,6 +14,7 @@ import (
 //nolint:gocyclo
 func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	absPath := ""
+	var err error
 
 	if len(unresolved) == 0 {
 		return "", errors.New("import path cannot be empty")
@@ -25,25 +26,39 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	if unresolved[0] == '.' && (unresolved[1] == '/' || unresolved[1] == '.') {
 		absPath = getFileAbsPath(filepath.Join(dir, unresolved))
 		if absPath == "" {
-			return absPath, fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)
+			return "", fmt.Errorf("could not perform relative import for '%s' because the file or dir was not found", unresolved)
 		}
 		return absPath, nil
 	}
 
-	tsConfig, _, err := findPackageJson(dir)
-	if err != nil {
-		return "", err
-	}
-
 	// 2. If is imported from a workspace.
 	if l.Cfg == nil || l.Cfg.Workspaces {
-		absPath, err = l.Workspaces.ResolveFromWorkspaces(unresolved)
+		workspaces, err := NewWorkspaces(dir)
+		absPath, err = workspaces.ResolveFromWorkspaces(unresolved)
 		if absPath != "" || err != nil {
 			return absPath, err
 		}
 	}
 
 	// 3. If is imported from baseUrl.
+
+	// 3.1 first load the appropriate tsconfig.json file
+	packageJsonPath := findClosestPackageJsonPath(dir)
+	if packageJsonPath == "" {
+		return "", nil
+	}
+	tsConfigPath := filepath.Join(filepath.Dir(packageJsonPath), tsConfigFile)
+
+	// 3.2 if there's no tsconfig file, then nothing else can be done.
+	if !utils.FileExists(tsConfigPath) {
+		return "", nil
+	}
+	tsConfig, err := ParseTsConfig(tsConfigPath)
+	if err != nil {
+		return "", fmt.Errorf("found TypeScript config file in %s but there was an error reading it: %w", tsConfigPath, err)
+	}
+
+	// 3.2 then use it for resolving the base url.
 	absPath = tsConfig.ResolveFromBaseUrl(unresolved)
 	if absPath != "" {
 		return absPath, nil

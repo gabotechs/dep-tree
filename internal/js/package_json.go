@@ -9,6 +9,8 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
+const packageJsonFile = "package.json"
+
 type packageJson struct {
 	absPath    string
 	Main       string      `json:"main,omitempty"`
@@ -23,8 +25,8 @@ var readPackageJson = utils.Cached1In2Out(func(path string) (*packageJson, error
 	}
 	fullPath := ""
 	dir := ""
-	if filepath.Base(path) != "package.json" {
-		fullPath = filepath.Join(path, "package.json")
+	if filepath.Base(path) != packageJsonFile {
+		fullPath = filepath.Join(path, packageJsonFile)
 		dir = path
 	} else {
 		fullPath = path
