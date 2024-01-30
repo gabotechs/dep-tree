@@ -46,11 +46,7 @@ func TestCheck(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			parserBuilder := func(s []string) (dep_tree.NodeParser[[]int], error) {
-				return &dep_tree.TestParser{Spec: tt.Spec}, nil
-			}
-
-			err := Check(parserBuilder, tt.Config)
+			err := Check[[]int](&dep_tree.TestParser{Spec: tt.Spec}, tt.Config)
 			if tt.Failures != nil {
 				msg := err.Error()
 				failures := strings.Split(msg, "\n")

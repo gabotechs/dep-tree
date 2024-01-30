@@ -83,17 +83,10 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 
 func PrintStructured[T any](
 	files []string,
-	parserBuilder NodeParserBuilder[T],
+	parser NodeParser[T],
 ) (string, error) {
-	parser, err := parserBuilder(files)
-	if err != nil {
-		return "", err
-	}
 	dt := NewDepTree(parser, files)
-	if err != nil {
-		return "", err
-	}
-	err = dt.LoadDeps()
+	err := dt.LoadDeps()
 	if err != nil {
 		return "", err
 	}
