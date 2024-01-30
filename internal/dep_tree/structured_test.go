@@ -79,11 +79,9 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			rendered, err := PrintStructured(
+			rendered, err := PrintStructured[[]int](
 				[]string{"0"},
-				func(s []string) (NodeParser[[]int], error) {
-					return &TestParser{Spec: tt.Spec}, nil
-				},
+				&TestParser{Spec: tt.Spec},
 			)
 			a.NoError(err)
 

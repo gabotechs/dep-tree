@@ -9,13 +9,9 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func Check[T any](parserBuilder dep_tree.NodeParserBuilder[T], cfg *Config) error {
-	parser, err := parserBuilder(cfg.Entrypoints)
-	if err != nil {
-		return err
-	}
+func Check[T any](parser dep_tree.NodeParser[T], cfg *Config) error {
 	dt := dep_tree.NewDepTree(parser, cfg.Entrypoints).WithStdErrLoader()
-	err = dt.LoadGraph()
+	err := dt.LoadGraph()
 	if err != nil {
 		return err
 	}

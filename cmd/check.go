@@ -30,7 +30,11 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return check.Check(parserBuilder, &cfg.Check)
+			parser, err := parserBuilder(args)
+			if err != nil {
+				return err
+			}
+			return check.Check(parser, &cfg.Check)
 		},
 	}
 }

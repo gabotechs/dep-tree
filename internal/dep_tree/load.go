@@ -93,7 +93,7 @@ func (dt *DepTree[T]) LoadCycles() {
 		}
 	}
 	// Then, remove the cycles computed without taking entrypoints into account.
-	// These are not as nice as the rule for which cycles are trimmed is more arbitrary.
+	// These are not as nice, as the rule for determining which cycles are trimmed is more arbitrary.
 	for _, cycle := range dt.Graph.RemoveJohnsonCycles() {
 		dt.Cycles.Set(cycle.Cause, cycle)
 	}
