@@ -104,3 +104,39 @@ func TestRoot(t *testing.T) {
 		})
 	}
 }
+
+func TestInferLang(t *testing.T) {
+	tests := []struct {
+		Name     string
+		Files    []string
+		Expected string
+	}{
+		{
+			Name:     "only 1 file",
+			Files:    []string{"foo.js"},
+			Expected: "js",
+		},
+		{
+			Name:     "majority of files",
+			Files:    []string{"foo.js", "bar.js", "foo.rs", "foo.py"},
+			Expected: "js",
+		},
+		{
+			Name:     "unrelated files",
+			Files:    []string{"foo.js", "foo.pdf"},
+			Expected: "js",
+		},
+		{
+			Name:     "no match",
+			Files:    []string{"foo.pdf", "bar.docx"},
+			Expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			a.Equal(tt.Expected, inferLang(tt.Files))
+		})
+	}
+}
