@@ -118,13 +118,13 @@ func TestInferLang(t *testing.T) {
 		},
 		{
 			Name:     "majority of files",
-			Files:    []string{"foo.js", "bar.js", "foo.rs", "foo.py"},
-			Expected: "js",
+			Files:    []string{"foo.js", "bar.rs", "foo.rs", "foo.py"},
+			Expected: "rust",
 		},
 		{
 			Name:     "unrelated files",
-			Files:    []string{"foo.js", "foo.pdf"},
-			Expected: "js",
+			Files:    []string{"foo.py", "foo.pdf"},
+			Expected: "python",
 		},
 		{
 			Name:     "no match",
