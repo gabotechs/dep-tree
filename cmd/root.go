@@ -93,18 +93,51 @@ $ dep-tree check`,
 	return root
 }
 
+func inferLang(files []string) string {
+	score := struct {
+		js     int
+		python int
+		rust   int
+	}{}
+	top := struct {
+		lang string
+		v    int
+	}{}
+	for _, file := range files {
+		switch {
+		case utils.EndsWith(file, js.Extensions):
+			score.js += 1
+			if score.js > top.v {
+				top.v = score.js
+				top.lang = "js"
+			}
+		case utils.EndsWith(file, rust.Extensions):
+			score.rust += 1
+			if score.rust > top.v {
+				top.v = score.rust
+				top.lang = "rust"
+			}
+		case utils.EndsWith(file, python.Extensions):
+			score.python += 1
+			if score.python > top.v {
+				top.v = score.python
+				top.lang = "python"
+			}
+		}
+	}
+	return top.lang
+}
+
 func makeParserBuilder(files []string, cfg *config.Config) (language.NodeParserBuilder, error) {
 	if len(files) == 0 {
 		return nil, errors.New("at least one file must be provided")
 	}
-	// TODO: There's smarter ways to check which language are we in than just reading the
-	//  first encountered file extension.
-	switch {
-	case utils.EndsWith(files[0], js.Extensions):
+	switch inferLang(files) {
+	case "js":
 		return language.ParserBuilder(js.MakeJsLanguage, &cfg.Js, cfg), nil
-	case utils.EndsWith(files[0], rust.Extensions):
+	case "rust":
 		return language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust, cfg), nil
-	case utils.EndsWith(files[0], python.Extensions):
+	case "python":
 		return language.ParserBuilder(python.MakePythonLanguage, &cfg.Python, cfg), nil
 	default:
 		return nil, fmt.Errorf("file \"%s\" not supported", files[0])
