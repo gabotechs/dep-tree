@@ -79,8 +79,8 @@ rules for ensuring its loosely coupling.
 
 It works with files, meaning that each file is a node in the dependency tree:
 
-- It starts from an entrypoint, which is usually the main executable file in a
-  program or the file that exposes the contents of a library (like `package/main.py`, `src/index.ts`, `src/lib.rs`...).
+- It starts from one or more entrypoints, which are usually the main executable files in a
+  program or the files that expose the contents of a library (like `package/main.py`, `src/index.ts`, `src/lib.rs`...).
 - It makes a parent node out of the root file, and one child node for each imported file.
 
 > [!NOTE]
@@ -103,6 +103,12 @@ Choose the file that will act as the root of the dependency graph (for example `
 
 ```shell
 dep-tree entropy src/index.ts
+```
+
+You can also pass multiple files if you don't have a single entrypoint:
+
+```shell
+dep-tree entropy src/*
 ```
 
 It will open a browser window and will render your file dependency graph using a 3d force-directed graph.
