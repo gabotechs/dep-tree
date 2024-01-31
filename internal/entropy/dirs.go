@@ -66,10 +66,25 @@ func (d *DirTree) AddDirs(dir string) {
 	}
 }
 
+// ColorFor smartly assigns a color for the specified dir based on all the dir tree that
+// the codebase has. Files in the same folder will receive the same color, and colors for
+// each sub folder will be assigned evenly following a radial distribution in an HSV wheel.
+// As it goes deeper into more sub folders, colors fade, but the distribution rules are
+// the same.
 func (d *DirTree) ColorFor(dir string) []int {
 	baseNames := splitBaseNames(dir)
 	depth := 0
 	node := d.inner()
+	// It might happen that all the nodes have some common folders, like src/,
+	// so if literally all of them have the same common folders, we do not want to take
+	// them into account for distributing colors, as they will appear very faded.
+	for node.Len() == 1 && len(baseNames) > 0 {
+		if node.Front().Key != baseNames[0] {
+			break
+		}
+		node = node.Front().Value.entry.inner()
+		baseNames = baseNames[1:]
+	}
 	h, s, v := float64(0), 0., 1.
 	for depth < len(baseNames) {
 		el, ok := node.Get(baseNames[depth])
