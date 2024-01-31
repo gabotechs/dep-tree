@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,6 +43,46 @@ func TestLoadDeps_ErrorHandle(t *testing.T) {
 	node2 := dt.Graph.Get("2")
 	a.NotNil(node2)
 	a.ErrorContains(node2.Errors[0], "no negative children")
+}
+
+func TestLoadDeps_Callbacks(t *testing.T) {
+	a := require.New(t)
+
+	testGraph := &TestParser{
+		Spec: [][]int{
+			0: {1},
+			1: {2},
+			2: {0, 3},
+			3: {4},
+			4: {3},
+			5: {},
+		},
+	}
+
+	dt := NewDepTree[[]int](testGraph, []string{"5", "0"})
+	startLoad := 0
+	startNode := 0
+	finishLoad := 0
+	finishNode := 0
+	dt.onStartLoading = func() {
+		startLoad++
+	}
+	dt.onFinishLoad = func() {
+		finishLoad++
+	}
+	dt.onNodeStartLoad = func(_ *graph.Node[[]int]) {
+		startNode++
+	}
+	dt.onNodeFinishLoad = func(_ *graph.Node[[]int], _ []*graph.Node[[]int]) {
+		finishNode++
+	}
+	err := dt.LoadGraph()
+	a.NoError(err)
+
+	a.Equal(1, startLoad)
+	a.Equal(6, startNode)
+	a.Equal(1, finishLoad)
+	a.Equal(6, finishNode)
 }
 
 func TestLoadDeps_loadGraph(t *testing.T) {
