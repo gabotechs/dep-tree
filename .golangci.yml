@@ -11,6 +11,9 @@ linters-settings:
     check-all: true
   goimports:
     local-prefixes: dep-tree
+  gocritic:
+    disabled-checks:
+      - ifElseChain
   revive:
     confidence: 0.8
 
