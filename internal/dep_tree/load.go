@@ -51,7 +51,7 @@ func (dt *DepTree[T]) LoadGraph() error {
 				node.AddErrors(err)
 				continue
 			}
-			dt.onNodeFinishLoad(deps)
+			dt.onNodeFinishLoad(node, deps)
 
 			for _, dep := range deps {
 				// No own child.

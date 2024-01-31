@@ -36,7 +36,7 @@ type DepTree[T any] struct {
 	// callbacks
 	onStartLoading   func()
 	onNodeStartLoad  func(*graph.Node[T])
-	onNodeFinishLoad func([]*graph.Node[T])
+	onNodeFinishLoad func(*graph.Node[T], []*graph.Node[T])
 	onFinishLoad     func()
 	// cache
 	longestPathCache map[string]int
@@ -51,7 +51,7 @@ func NewDepTree[T any](parser NodeParser[T], ids []string) *DepTree[T] {
 		Cycles:           orderedmap.NewOrderedMap[[2]string, graph.Cycle](),
 		onStartLoading:   func() {},
 		onNodeStartLoad:  func(_ *graph.Node[T]) {},
-		onNodeFinishLoad: func(_ []*graph.Node[T]) {},
+		onNodeFinishLoad: func(_ *graph.Node[T], _ []*graph.Node[T]) {},
 		onFinishLoad:     func() {},
 		longestPathCache: map[string]int{},
 	}
@@ -70,20 +70,20 @@ func (dt *DepTree[T]) WithStdErrLoader() *DepTree[T] {
 		progressbar.OptionSetRenderBlankState(true),
 	)
 	diff := make(map[string]bool)
-	total := 0
+	done := 0
 	dt.onStartLoading = func() {
 		bar.Reset()
 	}
 	dt.onNodeStartLoad = func(n *graph.Node[T]) {
-		total += 1
-		_ = bar.Set(total)
-		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", total, len(diff), dt.NodeParser.Display(n)))
+		done += 1
+		_ = bar.Set(done)
+		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n)))
 	}
-	dt.onNodeFinishLoad = func(ns []*graph.Node[T]) {
+	dt.onNodeFinishLoad = func(n *graph.Node[T], ns []*graph.Node[T]) {
 		for _, n := range ns {
 			diff[n.Id] = true
 		}
-		bar.ChangeMax(len(diff))
+		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n)))
 	}
 	dt.onFinishLoad = func() {
 		bar.Describe("Finished loading")
