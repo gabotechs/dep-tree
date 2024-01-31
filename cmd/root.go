@@ -151,13 +151,11 @@ func filesFromArgs(args []string) ([]string, error) {
 		abs, err := filepath.Abs(arg)
 		if err != nil {
 			errs = append(errs, err)
-			continue
-		}
-		if !utils.FileExists(abs) {
+		} else if !utils.FileExists(abs) {
 			errs = append(errs, fmt.Errorf("file %s does not exist", arg))
-			continue
+		} else {
+			result = append(result, abs)
 		}
-		result = append(result, abs)
 	}
 	if len(result) == 0 {
 		if len(errs) == 1 {

@@ -99,7 +99,6 @@ func (w *Workspaces) ResolveFromWorkspaces(unresolved string) (string, error) {
 	var pkgJson *packageJson
 	for {
 		entry, ok := w.ws[firstSlice]
-		//nolint:gocritic
 		if ok {
 			pkgJson = entry
 			break
