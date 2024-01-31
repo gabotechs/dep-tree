@@ -35,20 +35,18 @@ func TestRoot(t *testing.T) {
 		{
 			Name: "tree",
 		},
-		// TODO: this test now refers to an absolute path, so it's not golden testable
-		// {
-		//   Name: "tree random.pdf",
-		// },
-		// TODO: these will change once globstar entrypoints are allowed.
-		// {
-		//	 Name: "tree random.js",
-		// },
-		// {
-		//	 Name: "tree random.py",
-		// },
-		// {
-		//	 Name: "random.py",
-		// },
+		{
+			Name: "tree random.pdf",
+		},
+		{
+			Name: "tree random.js",
+		},
+		{
+			Name: "tree random.py",
+		},
+		{
+			Name: "random.py",
+		},
 		{
 			Name: "check",
 		},

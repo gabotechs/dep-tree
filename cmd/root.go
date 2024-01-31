@@ -146,13 +146,23 @@ func makeParserBuilder(files []string, cfg *config.Config) (language.NodeParserB
 
 func filesFromArgs(args []string) ([]string, error) {
 	var result []string
+	var errs []error
 	for _, arg := range args {
 		abs, err := filepath.Abs(arg)
-		if err == nil {
-			result = append(result, abs)
+		if err != nil {
+			errs = append(errs, err)
+			continue
 		}
+		if !utils.FileExists(abs) {
+			errs = append(errs, fmt.Errorf("file %s does not exist", arg))
+			continue
+		}
+		result = append(result, abs)
 	}
 	if len(result) == 0 {
+		if len(errs) == 1 {
+			return result, errs[0]
+		}
 		return result, errors.New("no valid files where provided")
 	}
 
