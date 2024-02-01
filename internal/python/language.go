@@ -21,13 +21,13 @@ type Language struct {
 
 var _ language.Language[python_grammar.File] = &Language{}
 
-func (l *Language) Display(id string) string {
+func (l *Language) Display(id string) language.DisplayResult {
 	basePath := findClosestDirWithRootFile(filepath.Dir(id))
 	result, err := filepath.Rel(basePath, id)
 	if err != nil {
-		return id
+		return language.DisplayResult{Name: id}
 	}
-	return result
+	return language.DisplayResult{Name: result}
 }
 
 func MakePythonLanguage(cfg *Config) (language.Language[python_grammar.File], error) {

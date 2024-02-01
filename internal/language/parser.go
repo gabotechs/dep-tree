@@ -11,6 +11,7 @@ type Node = graph.Node[FileInfo]
 type Graph = graph.Graph[FileInfo]
 type NodeParser = dep_tree.NodeParser[FileInfo]
 type NodeParserBuilder = dep_tree.NodeParserBuilder[FileInfo]
+type DisplayResult = dep_tree.DisplayResult
 
 type FileInfo struct {
 	Loc  int
@@ -33,7 +34,7 @@ type Language[F CodeFile] interface {
 	//  F contains.
 	ParseExports(file *F) (*ExportsEntries, error)
 	// Display takes an absolute path to a file and displays it nicely.
-	Display(path string) string
+	Display(path string) DisplayResult
 }
 
 type Parser[F CodeFile] struct {
@@ -177,13 +178,13 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 	deps := make([]*Node, 0)
 	for _, imported := range resolvedImports.Keys() {
 		node := graph.MakeNode(imported, FileInfo{})
-		if !p.shouldExclude(p.Display(node)) {
+		if !p.shouldExclude(p.Display(node).Name) {
 			deps = append(deps, node)
 		}
 	}
 	return deps, nil
 }
 
-func (p *Parser[F]) Display(n *Node) string {
+func (p *Parser[F]) Display(n *Node) dep_tree.DisplayResult {
 	return p.lang.Display(n.Id)
 }

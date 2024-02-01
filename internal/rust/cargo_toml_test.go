@@ -21,6 +21,9 @@ func TestCargoToml(t *testing.T) {
 			Name: "normal",
 			Expected: CargoToml{
 				path: filepath.Join(absPath, "normal"),
+				PackageDefinition: packageDefinition{
+					Name: "foo",
+				},
 				Dependencies: map[string]localDependency{
 					"bar": {"../bar"},
 					"baz": {"../baz"},

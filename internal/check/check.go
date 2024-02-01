@@ -35,7 +35,7 @@ func Check[T any](parser dep_tree.NodeParser[T], cfg *Config) error {
 			formattedCycleStack := make([]string, len(el.Value.Stack))
 			for i, el := range el.Value.Stack {
 				if node := dt.Graph.Get(el); node != nil {
-					formattedCycleStack[i] = parser.Display(node)
+					formattedCycleStack[i] = parser.Display(node).Name
 				} else {
 					formattedCycleStack[i] = el
 				}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/gabotechs/dep-tree/internal/language"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
@@ -52,53 +53,100 @@ func splitBaseNames(dir string) []string {
 	return result
 }
 
-func (d *DirTree) AddDirs(dir string) {
+func (d *DirTree) AddDirs(dirs []string) {
 	node := d.inner()
-	for _, p := range splitBaseNames(dir) {
-		base := filepath.Base(p)
-		if upper, ok := node.Get(base); ok {
+	for _, dir := range dirs {
+		if upper, ok := node.Get(dir); ok {
 			node = upper.entry.inner()
 		} else {
 			newNode := NewDirTree()
-			node.Set(base, DirTreeEntry{newNode, node.Len()})
+			node.Set(dir, DirTreeEntry{newNode, node.Len()})
 			node = newNode.inner()
 		}
 	}
 }
 
-// ColorFor smartly assigns a color for the specified dir based on all the dir tree that
+func (d *DirTree) AddDirsFromDisplay(display language.DisplayResult) {
+	dirs := splitBaseNames(filepath.Dir(display.Name))
+	if display.Group != "" {
+		d.AddDirs(utils.AppendFront(display.Group, dirs))
+	} else {
+		d.AddDirs(dirs)
+	}
+}
+
+// ColorForDir smartly assigns a color for the specified dir based on all the dir tree that
 // the codebase has. Files in the same folder will receive the same color, and colors for
 // each sub folder will be assigned evenly following a radial distribution in an HSV wheel.
 // As it goes deeper into more sub folders, colors fade, but the distribution rules are
 // the same.
-func (d *DirTree) ColorFor(dir string) []int {
-	baseNames := splitBaseNames(dir)
+func (d *DirTree) ColorForDir(dirs []string) []int {
 	depth := 0
 	node := d.inner()
 	// It might happen that all the nodes have some common folders, like src/,
 	// so if literally all of them have the same common folders, we do not want to take
 	// them into account for distributing colors, as they will appear very faded.
-	for node.Len() == 1 && len(baseNames) > 0 {
-		if node.Front().Key != baseNames[0] {
+	for node.Len() == 1 && len(dirs) > 0 {
+		if node.Front().Key != dirs[0] {
 			break
 		}
 		node = node.Front().Value.entry.inner()
-		baseNames = baseNames[1:]
+		dirs = dirs[1:]
 	}
 	h, s, v := float64(0), 0., 1.
-	for depth < len(baseNames) {
-		el, ok := node.Get(baseNames[depth])
+	for depth < len(dirs) {
+		el, ok := node.Get(dirs[depth])
 		if !ok {
 			return []int{0, 0, 0}
 		}
 		h = float64(int(h+360*float64(el.index)/float64(node.Len())) % 360)
-		s = utils.Scale(1-float64(depth)/float64(len(baseNames)), 0, 1, .2, .9)
+		s = utils.Scale(1-float64(depth)/float64(len(dirs)), 0, 1, .2, .9)
 
 		depth += 1
 		node = el.entry.inner()
 	}
 	r, g, b := HSVToRGB(h, s, v)
 	return []int{int(r), int(g), int(b)}
+}
+
+func (d *DirTree) ColorForDisplay(display language.DisplayResult) []int {
+	dirs := splitBaseNames(filepath.Dir(display.Name))
+	if display.Group != "" {
+		return d.ColorForDir(utils.AppendFront(display.Group, dirs))
+	} else {
+		return d.ColorForDir(dirs)
+	}
+}
+
+func (d *DirTree) GroupingsForDir(dirs []string) []string {
+	depth := 0
+	var result []string
+
+	node := d.inner()
+	acc := ""
+	for depth < len(dirs) {
+		acc = filepath.Join(acc, dirs[depth])
+		el, ok := node.Get(dirs[depth])
+		if !ok {
+			return result
+		}
+		if node.Len() > 1 {
+			result = append(result, acc)
+		}
+
+		depth += 1
+		node = el.entry.inner()
+	}
+	return result
+}
+
+func (d *DirTree) GroupingsForDisplay(display language.DisplayResult) []string {
+	dirs := splitBaseNames(filepath.Dir(display.Name))
+	if display.Group != "" {
+		return d.GroupingsForDir(utils.AppendFront(display.Group, dirs))
+	} else {
+		return d.GroupingsForDir(dirs)
+	}
 }
 
 // HSVToRGB converts an HSV triple to an RGB triple.

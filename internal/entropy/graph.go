@@ -2,7 +2,6 @@ package entropy
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
@@ -17,6 +16,7 @@ const (
 type Node struct {
 	Id       int64  `json:"id"`
 	FileName string `json:"fileName"`
+	Group    string `json:"group,omitempty"`
 	DirName  string `json:"dirName"`
 	Loc      int    `json:"loc"`
 	Size     int    `json:"size"`
@@ -53,19 +53,20 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 	dirTree := NewDirTree()
 
 	for _, node := range allNodes {
-		dirTree.AddDirs(filepath.Dir(parser.Display(node)))
+		dirTree.AddDirsFromDisplay(parser.Display(node))
 	}
 
 	for _, node := range allNodes {
-		filePath := parser.Display(node)
-		dirName := filepath.Dir(filePath)
+		display := parser.Display(node)
+		dirName := filepath.Dir(display.Name)
 		out.Nodes = append(out.Nodes, Node{
 			Id:       node.ID(),
-			FileName: filepath.Base(filePath),
+			FileName: filepath.Base(display.Name),
+			Group:    display.Group,
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
 			Size:     maxNodeSize * node.Data.Loc / maxLoc,
-			Color:    dirTree.ColorFor(dirName),
+			Color:    dirTree.ColorForDisplay(display),
 		})
 
 		for _, to := range dt.Graph.FromId(node.Id) {
@@ -75,13 +76,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 			})
 		}
 
-		for _, parentFolder := range splitFullPaths(dirName) {
-			// NOTE: just ignore parent folders like ".." or "../..", otherwise they will contribute
-			//  to grouping folders that might be unrelated. Empirically, visualizations look nicer if
-			//  we ignore them.
-			if strings.HasSuffix(parentFolder, "..") {
-				continue
-			}
+		for _, parentFolder := range dirTree.GroupingsForDisplay(display) {
 			folderNode := graph.MakeNode(parentFolder, 0)
 			out.Links = append(out.Links, Link{
 				From:  node.ID(),

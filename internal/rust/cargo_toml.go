@@ -11,13 +11,18 @@ import (
 const CargoTomlFile = "Cargo.toml"
 const cargoTomlFile = "cargo.toml"
 
+type packageDefinition struct {
+	Name string
+}
+
 type localDependency struct {
 	Path string
 }
 
 type CargoToml struct {
 	// directory where the Cargo.toml file is located.
-	path string
+	path              string
+	PackageDefinition packageDefinition `toml:"package"`
 	// It's [dev-]dependencies.
 	Dependencies map[string]localDependency
 }
@@ -42,16 +47,18 @@ var readCargoToml = utils.Cached1In2Out(func(path string) (*CargoToml, error) {
 		dir = filepath.Dir(path)
 	}
 	var decoded struct {
-		Dependencies    map[string]any `toml:"dependencies"`
-		DevDependencies map[string]any `toml:"dev-dependencies"`
+		PackageDefinition packageDefinition `toml:"package"`
+		Dependencies      map[string]any    `toml:"dependencies"`
+		DevDependencies   map[string]any    `toml:"dev-dependencies"`
 	}
 	_, err = toml.DecodeFile(fullPath, &decoded)
 	if err != nil {
 		return nil, err
 	}
 	result := CargoToml{
-		path:         dir,
-		Dependencies: map[string]localDependency{},
+		path:              dir,
+		PackageDefinition: decoded.PackageDefinition,
+		Dependencies:      map[string]localDependency{},
 	}
 	for _, deps := range []map[string]any{decoded.DevDependencies, decoded.Dependencies} {
 		for k, v := range deps {
