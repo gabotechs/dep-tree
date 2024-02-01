@@ -115,6 +115,7 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 		Paths             []string
 		ExpectedTree      map[string]any
 		ExpectedGroupings [][]string
+		ExpectedColors    [][]float64
 	}{
 		{
 			Name:  "Single File",
@@ -125,6 +126,7 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 				},
 			},
 			ExpectedGroupings: [][]string{nil},
+			ExpectedColors:    [][]float64{{0, 0, 1}},
 		},
 		{
 			Name:  "two unrelated files",
@@ -138,6 +140,7 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 				},
 			},
 			ExpectedGroupings: [][]string{{"foo"}, {"baz"}},
+			ExpectedColors:    [][]float64{{0, 0.76, 1}, {180, 0.76, 1}},
 		},
 		{
 			Name:  "two files with a shared first folder",
@@ -149,6 +152,7 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 				},
 			},
 			ExpectedGroupings: [][]string{{"foo/bar"}, {"foo/baz"}},
+			ExpectedColors:    [][]float64{{0, 0.76, 1}, {180, 0.76, 1}},
 		},
 		{
 			Name:  "with middle folders",
@@ -171,6 +175,11 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 				{"foo", "foo/bar/baz/2"},
 				{"bar"},
 			},
+			ExpectedColors: [][]float64{
+				{0, 0.592, 1},
+				{180, 0.592, 1},
+				{180, 0.76, 1},
+			},
 		},
 	}
 
@@ -183,10 +192,13 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 			}
 			a.Equal(tt.ExpectedTree, unwrapDirTree(dirTree))
 			var groupings [][]string
+			var colors [][]float64
 			for _, path := range tt.Paths {
 				groupings = append(groupings, dirTree.GroupingsForDir(splitBaseNames(path)))
+				colors = append(colors, dirTree.ColorForDir(splitBaseNames(path), HSV))
 			}
 			a.Equal(tt.ExpectedGroupings, groupings)
+			a.Equal(tt.ExpectedColors, colors)
 		})
 	}
 }

@@ -75,46 +75,57 @@ func (d *DirTree) AddDirsFromDisplay(display language.DisplayResult) {
 	}
 }
 
+type colorFormat int
+
+const (
+	HSV colorFormat = iota
+	RGB
+)
+
 // ColorForDir smartly assigns a color for the specified dir based on all the dir tree that
 // the codebase has. Files in the same folder will receive the same color, and colors for
 // each sub folder will be assigned evenly following a radial distribution in an HSV wheel.
 // As it goes deeper into more sub folders, colors fade, but the distribution rules are
 // the same.
-func (d *DirTree) ColorForDir(dirs []string) []int {
-	depth := 0
+func (d *DirTree) ColorForDir(dirs []string, format colorFormat) []float64 {
 	node := d.inner()
-	// It might happen that all the nodes have some common folders, like src/,
-	// so if literally all of them have the same common folders, we do not want to take
-	// them into account for distributing colors, as they will appear very faded.
-	for node.Len() == 1 && len(dirs) > 0 {
-		if node.Front().Key != dirs[0] {
-			break
-		}
-		node = node.Front().Value.entry.inner()
-		dirs = dirs[1:]
-	}
-	h, s, v := float64(0), 0., 1.
+	h, s, v := 0., 0., 1.
+	depth := 0
 	for depth < len(dirs) {
 		el, ok := node.Get(dirs[depth])
 		if !ok {
-			return []int{0, 0, 0}
+			return []float64{0, 0, 0}
 		}
-		h = float64(int(h+360*float64(el.index)/float64(node.Len())) % 360)
-		s = utils.Scale(1-float64(depth)/float64(len(dirs)), 0, 1, .2, .9)
+
+		// It might happen that all the nodes have some common folders, like src/,
+		// so if literally all of them have the same common folders, we do not want to take
+		// them into account for reducing the saturation, as they will appear very faded.
+		if node.Len() > 1 {
+			h = float64(int(h+360*float64(el.index)/float64(node.Len())) % 360)
+			if s == 0 {
+				s = 1
+			}
+			s -= .2
+			s = utils.Scale(s, 0, 1, .2, .9)
+		}
 
 		depth += 1
 		node = el.entry.inner()
 	}
-	r, g, b := HSVToRGB(h, s, v)
-	return []int{int(r), int(g), int(b)}
+	if format == RGB {
+		r, g, b := HSVToRGB(h, s, v)
+		return []float64{float64(r), float64(g), float64(b)}
+	} else {
+		return []float64{h, s, v}
+	}
 }
 
-func (d *DirTree) ColorForDisplay(display language.DisplayResult) []int {
+func (d *DirTree) ColorForDisplay(display language.DisplayResult, format colorFormat) []float64 {
 	dirs := splitBaseNames(filepath.Dir(display.Name))
 	if display.Group != "" {
-		return d.ColorForDir(utils.AppendFront(display.Group, dirs))
+		return d.ColorForDir(utils.AppendFront(display.Group, dirs), format)
 	} else {
-		return d.ColorForDir(dirs)
+		return d.ColorForDir(dirs, format)
 	}
 }
 
