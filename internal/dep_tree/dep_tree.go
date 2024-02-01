@@ -13,8 +13,13 @@ import (
 
 type NodeParserBuilder[T any] func([]string) (NodeParser[T], error)
 
+type DisplayResult struct {
+	Name  string
+	Group string
+}
+
 type NodeParser[T any] interface {
-	Display(node *graph.Node[T]) string
+	Display(node *graph.Node[T]) DisplayResult
 	Node(id string) (*graph.Node[T], error)
 	Deps(node *graph.Node[T]) ([]*graph.Node[T], error)
 }
@@ -77,13 +82,13 @@ func (dt *DepTree[T]) WithStdErrLoader() *DepTree[T] {
 	dt.onNodeStartLoad = func(n *graph.Node[T]) {
 		done += 1
 		_ = bar.Set(done)
-		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n)))
+		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n).Name))
 	}
 	dt.onNodeFinishLoad = func(n *graph.Node[T], ns []*graph.Node[T]) {
 		for _, n := range ns {
 			diff[n.Id] = true
 		}
-		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n)))
+		bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", done, len(diff), dt.NodeParser.Display(n).Name))
 	}
 	dt.onFinishLoad = func() {
 		bar.Describe("Finished loading")

@@ -3,6 +3,8 @@ package language
 import (
 	"errors"
 	"time"
+
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 )
 
 type TestFile struct {
@@ -58,6 +60,6 @@ func (t *TestLanguage) ParseExports(file *TestFile) (*ExportsEntries, error) {
 	}
 }
 
-func (t *TestLanguage) Display(id string) string {
-	return id
+func (t *TestLanguage) Display(id string) dep_tree.DisplayResult {
+	return dep_tree.DisplayResult{Name: id}
 }

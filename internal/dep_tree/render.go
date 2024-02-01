@@ -53,7 +53,7 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 		err := b.AddBlock(
 			&board.Block{
 				Id:       n.Node.Id,
-				Label:    prefix + dt.NodeParser.Display(n.Node),
+				Label:    prefix + dt.NodeParser.Display(n.Node).Name,
 				Position: utils.Vec(indent*n.Lvl+xOffset, i+yOffset),
 				Tags:     tags,
 			},

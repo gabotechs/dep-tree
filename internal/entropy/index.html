@@ -131,13 +131,13 @@
     }
 
     function nodeThreeObject(node) {
-        const nodeEl = document.getElementById(node['id']) ?? document.createElement('div');
+        const nodeEl = document.getElementById(node['id']) ?? document.createElement('div')
         nodeEl.id = node['id']
         nodeEl.className = 'nodeLabel nodeLabelSelected'
-        nodeEl.textContent = node['dirName']+node['fileName'];
+        nodeEl.textContent = node['dirName']+node['fileName']
         nodeEl.style.color = colorNode(node)
         if (highlightNodes.has(node)) {
-            return new CSS2DObject(nodeEl);
+            return new CSS2DObject(nodeEl)
         } else {
             return undefined
         }
@@ -150,8 +150,9 @@
         .nodeResolution(SETTINGS.NODE_RESOLUTION)
         .onBackgroundClick(backgroundClick)
         // Node params
-        .nodeLabel(({fileName, dirName, loc}) =>  selectedNode ? undefined :`<div class="nodeLabel">
+        .nodeLabel(({fileName, dirName, group, loc}) =>  selectedNode ? undefined :`<div class="nodeLabel">
             <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
+            <span>${group ?? ''}</span>
             <span>LOC: ${loc}</span>
         </div>`)
         .nodeThreeObject(nodeThreeObject)

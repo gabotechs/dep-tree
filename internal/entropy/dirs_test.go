@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_dirs(t *testing.T) {
+func TestDirTree_baseFunctions(t *testing.T) {
 	tests := []struct {
 		Name              string
 		ExpectedFullPaths []string
@@ -101,10 +101,92 @@ func Test_dirs(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 			dirTree := NewDirTree()
-			dirTree.AddDirs(tt.Name)
+			dirTree.AddDirs(splitBaseNames(tt.Name))
 			a.Equal(tt.ExpectedFullPaths, splitFullPaths(tt.Name))
 			a.Equal(tt.ExpectedBaseNames, splitBaseNames(tt.Name))
 			a.Equal(tt.ExpectedTree, unwrapDirTree(dirTree))
+		})
+	}
+}
+
+func TestDirTree_GroupingsForDir(t *testing.T) {
+	tests := []struct {
+		Name              string
+		Paths             []string
+		ExpectedTree      map[string]any
+		ExpectedGroupings [][]string
+	}{
+		{
+			Name:  "Single File",
+			Paths: []string{"foo/bar"},
+			ExpectedTree: map[string]any{
+				"foo": map[string]any{
+					"bar": map[string]any{},
+				},
+			},
+			ExpectedGroupings: [][]string{nil},
+		},
+		{
+			Name:  "two unrelated files",
+			Paths: []string{"foo/bar", "baz/bar"},
+			ExpectedTree: map[string]any{
+				"foo": map[string]any{
+					"bar": map[string]any{},
+				},
+				"baz": map[string]any{
+					"bar": map[string]any{},
+				},
+			},
+			ExpectedGroupings: [][]string{{"foo"}, {"baz"}},
+		},
+		{
+			Name:  "two files with a shared first folder",
+			Paths: []string{"foo/bar", "foo/baz"},
+			ExpectedTree: map[string]any{
+				"foo": map[string]any{
+					"bar": map[string]any{},
+					"baz": map[string]any{},
+				},
+			},
+			ExpectedGroupings: [][]string{{"foo/bar"}, {"foo/baz"}},
+		},
+		{
+			Name:  "with middle folders",
+			Paths: []string{"foo/bar/baz/1", "foo/bar/baz/2", "bar/foo"},
+			ExpectedTree: map[string]any{
+				"foo": map[string]any{
+					"bar": map[string]any{
+						"baz": map[string]any{
+							"1": map[string]any{},
+							"2": map[string]any{},
+						},
+					},
+				},
+				"bar": map[string]any{
+					"foo": map[string]any{},
+				},
+			},
+			ExpectedGroupings: [][]string{
+				{"foo", "foo/bar/baz/1"},
+				{"foo", "foo/bar/baz/2"},
+				{"bar"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			dirTree := NewDirTree()
+			for _, path := range tt.Paths {
+				dirTree.AddDirs(splitBaseNames(path))
+			}
+			a.Equal(tt.ExpectedTree, unwrapDirTree(dirTree))
+			var groupings [][]string
+			for _, path := range tt.Paths {
+				groupings = append(groupings, dirTree.GroupingsForDir(splitBaseNames(path)))
+			}
+			a.Equal(tt.ExpectedGroupings, groupings)
 		})
 	}
 }

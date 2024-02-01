@@ -31,7 +31,7 @@ func (dt *DepTree[T]) makeStructuredTree(
 			result = make(map[string]interface{})
 		}
 		var err error
-		result[dt.NodeParser.Display(to)], err = dt.makeStructuredTree(to.Id, nil)
+		result[dt.NodeParser.Display(to).Name], err = dt.makeStructuredTree(to.Id, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 
 	structuredTree := StructuredTree{
 		Tree: map[string]interface{}{
-			dt.NodeParser.Display(dt.Entrypoints[0]): tree,
+			dt.NodeParser.Display(dt.Entrypoints[0]).Name: tree,
 		},
 		CircularDependencies: make([][]string, 0),
 		Errors:               make(map[string][]string),
@@ -62,14 +62,14 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 		cycleDep, _ := dt.Cycles.Get(cycle)
 		renderedCycle := make([]string, len(cycleDep.Stack))
 		for i, cycleDepEntry := range cycleDep.Stack {
-			renderedCycle[i] = dt.NodeParser.Display(dt.Graph.Get(cycleDepEntry))
+			renderedCycle[i] = dt.NodeParser.Display(dt.Graph.Get(cycleDepEntry)).Name
 		}
 		structuredTree.CircularDependencies = append(structuredTree.CircularDependencies, renderedCycle)
 	}
 
 	for _, node := range dt.Nodes {
 		if node.Node.Errors != nil && len(node.Node.Errors) > 0 {
-			erroredNode := dt.NodeParser.Display(dt.Graph.Get(node.Node.Id))
+			erroredNode := dt.NodeParser.Display(dt.Graph.Get(node.Node.Id)).Name
 			nodeErrors := make([]string, len(node.Node.Errors))
 			for i, err := range node.Node.Errors {
 				nodeErrors[i] = err.Error()

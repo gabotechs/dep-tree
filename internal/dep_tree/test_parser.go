@@ -42,6 +42,6 @@ func (t *TestParser) Deps(n *graph.Node[[]int]) ([]*graph.Node[[]int], error) {
 	return result, nil
 }
 
-func (t *TestParser) Display(n *graph.Node[[]int]) string {
-	return n.Id
+func (t *TestParser) Display(n *graph.Node[[]int]) DisplayResult {
+	return DisplayResult{Name: n.Id}
 }
