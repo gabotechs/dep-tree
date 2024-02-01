@@ -37,6 +37,14 @@ type Graph struct {
 	EnableGui bool   `json:"enableGui"`
 }
 
+func toInt(arr []float64) []int {
+	result := make([]int, len(arr))
+	for i, v := range arr {
+		result[i] = int(v)
+	}
+	return result
+}
+
 func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser) Graph {
 	out := Graph{
 		Nodes: make([]Node, 0),
@@ -66,7 +74,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
 			Size:     maxNodeSize * node.Data.Loc / maxLoc,
-			Color:    dirTree.ColorForDisplay(display),
+			Color:    toInt(dirTree.ColorForDisplay(display, RGB)),
 		})
 
 		for _, to := range dt.Graph.FromId(node.Id) {
