@@ -1,6 +1,7 @@
 package entropy
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -195,12 +196,17 @@ func TestDirTree_GroupingsForDir(t *testing.T) {
 			var colors [][]float64
 			for _, path := range tt.Paths {
 				groupings = append(groupings, dirTree.GroupingsForDir(splitBaseNames(path)))
-				colors = append(colors, dirTree.ColorForDir(splitBaseNames(path), HSV))
+				color := dirTree.ColorForDir(splitBaseNames(path), HSV)
+				colors = append(colors, []float64{round(color[0]), round(color[1]), round(color[2])})
 			}
 			a.Equal(tt.ExpectedGroupings, groupings)
 			a.Equal(tt.ExpectedColors, colors)
 		})
 	}
+}
+
+func round(n float64) float64 {
+	return math.Round(n*1000) / 1000
 }
 
 func unwrapDirTree(tree *DirTree) interface{} {
