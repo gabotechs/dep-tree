@@ -32,12 +32,12 @@ func TreeCmd() *cobra.Command {
 				return err
 			}
 
-			parser, err := parserBuilder(files)
-			if err != nil {
-				return err
-			}
-
 			if jsonFormat {
+				parser, err := parserBuilder(files)
+				if err != nil {
+					return err
+				}
+
 				rendered, err := dep_tree.PrintStructured(files, parser)
 				fmt.Println(rendered)
 				return err
