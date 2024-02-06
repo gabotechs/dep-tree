@@ -1,17 +1,15 @@
-package dep_tree
+package tree
 
 import (
 	"errors"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 // longestPath finds the longest path between two nodes in a directed acyclic graph.
 //
 //	It uses the context as cache, so next calculations even with different nodes are quick.
-func (dt *DepTree[T]) longestPath(
-	g *graph.Graph[T],
+func (t *Tree[T]) longestPath(
 	rootId string,
 	nodeId string,
 	stack *utils.CallStack,
@@ -23,7 +21,7 @@ func (dt *DepTree[T]) longestPath(
 		return 0, nil
 	}
 	var cachedLevelKey = rootId + "-" + nodeId
-	if cachedLevel, ok := dt.longestPathCache[cachedLevelKey]; ok {
+	if cachedLevel, ok := t.longestPathCache[cachedLevelKey]; ok {
 		return cachedLevel, nil
 	}
 	err := stack.Push(nodeId)
@@ -32,8 +30,8 @@ func (dt *DepTree[T]) longestPath(
 	}
 
 	maxLongestPath := 0
-	for _, from := range g.ToId(nodeId) {
-		length, err := dt.longestPath(g, rootId, from.Id, stack)
+	for _, from := range t.Graph.ToId(nodeId) {
+		length, err := t.longestPath(rootId, from.Id, stack)
 		if err != nil {
 			return 0, err
 		}
@@ -42,7 +40,7 @@ func (dt *DepTree[T]) longestPath(
 		}
 	}
 	if maxLongestPath >= 0 {
-		dt.longestPathCache[cachedLevelKey] = maxLongestPath + 1
+		t.longestPathCache[cachedLevelKey] = maxLongestPath + 1
 	}
 
 	stack.Pop()

@@ -24,11 +24,6 @@ type NodeParser[T any] interface {
 	Deps(node *graph.Node[T]) ([]*graph.Node[T], error)
 }
 
-type DepTreeNode[T any] struct {
-	Node *graph.Node[T]
-	Lvl  int
-}
-
 type DepTree[T any] struct {
 	// Info present on DepTree construction.
 	Ids []string
@@ -36,29 +31,24 @@ type DepTree[T any] struct {
 	// Info present just after node processing.
 	Graph       *graph.Graph[T]
 	Entrypoints []*graph.Node[T]
-	Nodes       []*DepTreeNode[T]
 	Cycles      *orderedmap.OrderedMap[[2]string, graph.Cycle]
 	// callbacks
 	onStartLoading   func()
 	onNodeStartLoad  func(*graph.Node[T])
 	onNodeFinishLoad func(*graph.Node[T], []*graph.Node[T])
 	onFinishLoad     func()
-	// cache
-	longestPathCache map[string]int
 }
 
 func NewDepTree[T any](parser NodeParser[T], ids []string) *DepTree[T] {
 	return &DepTree[T]{
 		Ids:              ids,
 		NodeParser:       parser,
-		Nodes:            []*DepTreeNode[T]{},
 		Graph:            graph.NewGraph[T](),
 		Cycles:           orderedmap.NewOrderedMap[[2]string, graph.Cycle](),
 		onStartLoading:   func() {},
 		onNodeStartLoad:  func(_ *graph.Node[T]) {},
 		onNodeFinishLoad: func(_ *graph.Node[T], _ []*graph.Node[T]) {},
 		onFinishLoad:     func() {},
-		longestPathCache: map[string]int{},
 	}
 }
 

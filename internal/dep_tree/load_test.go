@@ -14,8 +14,9 @@ func TestLoadDeps_noOwnChild(t *testing.T) {
 		Spec: [][]int{{0}},
 	}
 	dt := NewDepTree[[]int](testGraph, []string{"0"})
-	err := dt.LoadDeps()
+	err := dt.LoadGraph()
 	a.NoError(err)
+	dt.LoadCycles()
 
 	a.Equal(0, len(dt.Graph.ToId("0")))
 }
@@ -32,8 +33,9 @@ func TestLoadDeps_ErrorHandle(t *testing.T) {
 
 	dt := NewDepTree[[]int](testGraph, []string{"0"})
 
-	err := dt.LoadDeps()
+	err := dt.LoadGraph()
 	a.NoError(err)
+	dt.LoadCycles()
 	node0 := dt.Graph.Get("0")
 	a.NotNil(node0)
 	a.Equal(len(node0.Errors), 0)

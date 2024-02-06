@@ -1,19 +1,20 @@
-package dep_tree
+package tree
 
 import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
 const (
-	renderDir = ".render_test"
+	structuredDir = ".structured_test"
 )
 
-func TestRenderGraph(t *testing.T) {
+func TestDepTree_RenderStructuredGraph(t *testing.T) {
 	tests := []struct {
 		Name string
 		Spec [][]int
@@ -64,16 +65,6 @@ func TestRenderGraph(t *testing.T) {
 			},
 		},
 		{
-			Name: "Weird cycle combination 2",
-			Spec: [][]int{
-				0: {3, 1},
-				1: {2},
-				2: {3},
-				3: {4},
-				4: {0},
-			},
-		},
-		{
 			Name: "Some nodes have errors",
 			Spec: [][]int{
 				{1, 2, 3},
@@ -88,22 +79,15 @@ func TestRenderGraph(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			testParser := TestParser{
-				Spec: tt.Spec,
-			}
 
-			dt := NewDepTree[[]int](&testParser, []string{"0"})
-
-			err := dt.LoadDeps()
+			rendered, err := PrintStructured[[]int](
+				[]string{"0"},
+				&dep_tree.TestParser{Spec: tt.Spec},
+			)
 			a.NoError(err)
 
-			board, err := dt.Render()
-			a.NoError(err)
-			result, err := board.Render()
-			a.NoError(err)
-
-			outFile := filepath.Join(renderDir, filepath.Base(tt.Name+".txt"))
-			utils.GoldenTest(t, outFile, result)
+			renderOutFile := filepath.Join(structuredDir, filepath.Base(tt.Name+".json"))
+			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}
 }

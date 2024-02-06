@@ -12,13 +12,13 @@ import (
 func TestGraph_RemoveCycles(t *testing.T) {
 	var tests = []struct {
 		Name           string
-		Children       map[int][]int
+		Children       [][]int
 		ExpectedCauses [][2]int
 		ExpectedCycles [][]int
 	}{
 		{
 			Name: "Simple",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2},
 				1: {3},
 				2: {3},
@@ -27,7 +27,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2, 3},
 				1: {2, 4},
 				2: {3, 4},
@@ -39,7 +39,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 2",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2},
 				1: {2, 0},
 				2: {0, 1},
@@ -49,7 +49,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 3",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {1},
@@ -59,7 +59,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 4",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {0},
@@ -69,7 +69,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 5",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {3},
@@ -81,7 +81,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 6",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {3},
@@ -94,7 +94,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 7",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {0, 2},
 				2: {3},
@@ -106,7 +106,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 		},
 		{
 			Name: "Cycle 8",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {3, 1},
 				1: {2},
 				2: {3},

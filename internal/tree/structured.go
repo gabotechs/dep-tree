@@ -1,10 +1,11 @@
-package dep_tree
+package tree
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -14,7 +15,7 @@ type StructuredTree struct {
 	Errors               map[string][]string    `json:"errors" yaml:"errors"`
 }
 
-func (dt *DepTree[T]) makeStructuredTree(
+func (t *Tree[T]) makeStructuredTree(
 	from string,
 	stack *utils.CallStack,
 	cache map[string]map[string]interface{},
@@ -34,12 +35,12 @@ func (dt *DepTree[T]) makeStructuredTree(
 	}
 
 	var result map[string]interface{}
-	for _, to := range dt.Graph.FromId(from) {
+	for _, to := range t.Graph.FromId(from) {
 		if result == nil {
 			result = make(map[string]interface{})
 		}
 		var err error
-		result[dt.NodeParser.Display(to).Name], err = dt.makeStructuredTree(to.Id, stack, cache)
+		result[t.NodeParser.Display(to).Name], err = t.makeStructuredTree(to.Id, stack, cache)
 		if err != nil {
 			return nil, err
 		}
@@ -49,13 +50,13 @@ func (dt *DepTree[T]) makeStructuredTree(
 	return result, nil
 }
 
-func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
-	if len(dt.Entrypoints) > 1 {
-		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where detected. Consider providing a single entrypoint to your program", len(dt.Entrypoints))
+func (t *Tree[T]) RenderStructured() ([]byte, error) {
+	if len(t.Entrypoints) > 1 {
+		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where detected. Consider providing a single entrypoint to your program", len(t.Entrypoints))
 	}
 
 	println("building structured tree")
-	tree, err := dt.makeStructuredTree(dt.Entrypoints[0].Id, nil, nil)
+	tree, err := t.makeStructuredTree(t.Entrypoints[0].Id, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,24 +64,24 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 
 	structuredTree := StructuredTree{
 		Tree: map[string]interface{}{
-			dt.NodeParser.Display(dt.Entrypoints[0]).Name: tree,
+			t.NodeParser.Display(t.Entrypoints[0]).Name: tree,
 		},
 		CircularDependencies: make([][]string, 0),
 		Errors:               make(map[string][]string),
 	}
 
-	for _, cycle := range dt.Cycles.Keys() {
-		cycleDep, _ := dt.Cycles.Get(cycle)
+	for _, cycle := range t.Cycles.Keys() {
+		cycleDep, _ := t.Cycles.Get(cycle)
 		renderedCycle := make([]string, len(cycleDep.Stack))
 		for i, cycleDepEntry := range cycleDep.Stack {
-			renderedCycle[i] = dt.NodeParser.Display(dt.Graph.Get(cycleDepEntry)).Name
+			renderedCycle[i] = t.NodeParser.Display(t.Graph.Get(cycleDepEntry)).Name
 		}
 		structuredTree.CircularDependencies = append(structuredTree.CircularDependencies, renderedCycle)
 	}
 
-	for _, node := range dt.Nodes {
+	for _, node := range t.Nodes {
 		if node.Node.Errors != nil && len(node.Node.Errors) > 0 {
-			erroredNode := dt.NodeParser.Display(dt.Graph.Get(node.Node.Id)).Name
+			erroredNode := t.NodeParser.Display(t.Graph.Get(node.Node.Id)).Name
 			nodeErrors := make([]string, len(node.Node.Errors))
 			for i, err := range node.Node.Errors {
 				nodeErrors[i] = err.Error()
@@ -94,14 +95,21 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 
 func PrintStructured[T any](
 	files []string,
-	parser NodeParser[T],
+	parser dep_tree.NodeParser[T],
 ) (string, error) {
-	dt := NewDepTree(parser, files)
-	err := dt.LoadDeps()
+	dt := dep_tree.NewDepTree(parser, files)
+	err := dt.LoadGraph()
 	if err != nil {
 		return "", err
 	}
-	output, err := dt.RenderStructured()
+	dt.LoadCycles()
+
+	tree, err := NewTree(dt)
+	if err != nil {
+		return "", err
+	}
+
+	output, err := tree.RenderStructured()
 	if err != nil {
 		return "", err
 	}
