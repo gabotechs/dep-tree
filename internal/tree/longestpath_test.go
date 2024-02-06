@@ -1,25 +1,23 @@
-package dep_tree
+package tree
 
 import (
-	"strconv"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/stretchr/testify/require"
-
-	testgraph "github.com/gabotechs/dep-tree/internal/graph"
 )
 
 func Test_longestPath(t *testing.T) {
 	var tests = []struct {
 		Name           string
-		Children       map[int][]int
+		Children       [][]int
 		ExpectedLevels []int
 		NoTrimCycles   bool
 		ExpectedError  string
 	}{
 		{
 			Name: "Simple",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2},
 				1: {3},
 				2: {3},
@@ -29,7 +27,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2, 3},
 				1: {2, 4},
 				2: {3, 4},
@@ -40,7 +38,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle 2",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2},
 				1: {2, 0},
 				2: {0, 1},
@@ -49,7 +47,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle 3",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {1},
@@ -58,7 +56,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle 4",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {0},
@@ -67,7 +65,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle 5",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {3},
@@ -78,7 +76,7 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Cycle 6",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {3},
@@ -89,16 +87,16 @@ func Test_longestPath(t *testing.T) {
 		},
 		{
 			Name: "Avoid same level",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1, 2},
 				1: {},
 				2: {1},
 			},
-			ExpectedLevels: []int{0, 2, 1},
+			ExpectedLevels: []int{0, 1, 2},
 		},
 		{
 			Name: "Cycle (without trimming cycles first)",
-			Children: map[int][]int{
+			Children: [][]int{
 				0: {1},
 				1: {2},
 				2: {1},
@@ -111,31 +109,28 @@ func Test_longestPath(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			g := testgraph.MakeTestGraph(tt.Children)
+			testParser := dep_tree.TestParser{
+				Spec: tt.Children,
+			}
 
-			var err error
+			dt := dep_tree.NewDepTree[[]int](&testParser, []string{"0"})
+			err := dt.LoadGraph()
+			a.NoError(err)
+
 			if !tt.NoTrimCycles {
-				g.RemoveCycles(g.Get("0"))
-				a.NoError(err)
+				dt.LoadCycles()
 			}
 
 			numNodes := len(tt.Children)
-			dt := DepTree[int]{longestPathCache: map[string]int{}}
 			if tt.ExpectedError != "" {
-				for i := 0; i < numNodes; i++ {
-					_, err = dt.longestPath(g, "0", strconv.Itoa(i), nil)
-					if err != nil {
-						break
-					}
-				}
+				_, err = NewTree(dt)
 				a.EqualError(err, tt.ExpectedError)
 			} else {
+				tree, err := NewTree(dt)
+				a.NoError(err)
 				var lvls []int
 				for i := 0; i < numNodes; i++ {
-					var lvl int
-					lvl, err = dt.longestPath(g, "0", strconv.Itoa(i), nil)
-					a.NoError(err)
-					lvls = append(lvls, lvl)
+					lvls = append(lvls, tree.Nodes[i].Lvl)
 				}
 				a.Equal(tt.ExpectedLevels, lvls)
 			}

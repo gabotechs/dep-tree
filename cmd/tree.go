@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/spf13/cobra"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/tui"
 )
 
@@ -38,7 +38,7 @@ func TreeCmd() *cobra.Command {
 					return err
 				}
 
-				rendered, err := dep_tree.PrintStructured(files, parser)
+				rendered, err := tree.PrintStructured(files, parser)
 				fmt.Println(rendered)
 				return err
 			} else {

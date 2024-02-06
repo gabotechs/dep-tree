@@ -3,10 +3,10 @@ package systems
 import (
 	"strings"
 
+	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/gabotechs/dep-tree/internal/board/graphics"
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -18,7 +18,7 @@ type RenderState struct {
 func computeCursor(s *State, rs *RenderState) {
 	if s.Cursor.Y < len(rs.Cells) {
 		for j := range rs.Cells[s.Cursor.Y] {
-			if nodeId := rs.Cells[s.Cursor.Y][j].Tag(dep_tree.NodeIdTag); nodeId != "" {
+			if nodeId := rs.Cells[s.Cursor.Y][j].Tag(tree.NodeIdTag); nodeId != "" {
 				s.Cursor.X = j
 				s.SelectedId = nodeId
 				return
@@ -53,22 +53,22 @@ func forEachCell(
 			cell := rs.Cells[i][j]
 			priorityTags := map[string]string{}
 			style := defaultStyle
-			if errors := rs.Errors[cell.Tag(dep_tree.NodeIdTag)]; len(errors) > 0 {
+			if errors := rs.Errors[cell.Tag(tree.NodeIdTag)]; len(errors) > 0 {
 				style = errorStyle
 			}
 			switch {
 			case s.SelectedId == "":
 				// nothing here.
-			case cell.Is(dep_tree.NodeIdTag, s.SelectedId):
+			case cell.Is(tree.NodeIdTag, s.SelectedId):
 				if style == errorStyle {
 					style = errorSelectedStyle
 				} else {
 					style = primaryStyle
 				}
-			case cell.Is(dep_tree.ConnectorOriginNodeIdTag, s.SelectedId):
+			case cell.Is(tree.ConnectorOriginNodeIdTag, s.SelectedId):
 				style = primaryStyle
-				priorityTags[dep_tree.ConnectorOriginNodeIdTag] = s.SelectedId
-			case strings.Contains(cell.Tag(dep_tree.NodeFromTag), s.SelectedId):
+				priorityTags[tree.ConnectorOriginNodeIdTag] = s.SelectedId
+			case strings.Contains(cell.Tag(tree.NodeFromTag), s.SelectedId):
 				style = secondaryStyle
 			}
 

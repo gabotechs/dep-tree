@@ -6,7 +6,7 @@ import (
 	"github.com/gammazero/deque"
 )
 
-func MakeTestGraph(spec map[int][]int) *Graph[int] {
+func MakeTestGraph(spec [][]int) *Graph[int] {
 	g := NewGraph[int]()
 
 	var queue deque.Deque[*Node[int]]

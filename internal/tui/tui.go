@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/gabotechs/dep-tree/internal/dep_tree"
@@ -36,11 +37,16 @@ func Loop[T any](
 		return err
 	}
 	dt := dep_tree.NewDepTree(parser, files).WithStdErrLoader()
-	err = dt.LoadDeps()
+	err = dt.LoadGraph()
 	if err != nil {
 		return err
 	}
-	board, err := dt.Render()
+	dt.LoadCycles()
+	t, err := tree.NewTree(dt)
+	if err != nil {
+		return err
+	}
+	board, err := t.Render()
 	if err != nil {
 		return err
 	}
@@ -58,7 +64,7 @@ func Loop[T any](
 		Cells:  cells,
 		Errors: make(map[string][]error),
 	}
-	for _, n := range dt.Nodes {
+	for _, n := range t.Nodes {
 		renderState.Errors[n.Node.Id] = n.Node.Errors
 	}
 	spatialState := &systems.SpatialState{

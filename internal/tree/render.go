@@ -1,4 +1,4 @@
-package dep_tree
+package tree
 
 import (
 	"strconv"
@@ -14,7 +14,7 @@ const ConnectorOriginNodeIdTag = "connectorOrigin"
 const ConnectorDestinationNodeIdTag = "connectorDestination"
 const NodeFromTag = "nodeFrom"
 
-func (dt *DepTree[T]) Render() (*board.Board, error) {
+func (t *Tree[T]) Render() (*board.Board, error) {
 	b := board.MakeBoard()
 
 	lastLevel := -1
@@ -22,9 +22,9 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 	xOffsetCount := 0
 	xOffset := 0
 	yOffset := 0
-	for i, n := range dt.Nodes {
+	for i, n := range t.Nodes {
 		if n.Lvl == lastLevel {
-			if len(dt.Graph.FromId(dt.Nodes[i-1].Node.Id)) > 0 {
+			if len(t.Graph.FromId(t.Nodes[i-1].Node.Id)) > 0 {
 				xOffsetCount++
 				prefix += " "
 			}
@@ -38,7 +38,7 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 			}
 		}
 
-		fromNodes := dt.Graph.ToId(n.Node.Id)
+		fromNodes := t.Graph.ToId(n.Node.Id)
 
 		tags := map[string]string{
 			NodeIdTag:    n.Node.Id,
@@ -53,7 +53,7 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 		err := b.AddBlock(
 			&board.Block{
 				Id:       n.Node.Id,
-				Label:    prefix + dt.NodeParser.Display(n.Node).Name,
+				Label:    prefix + t.NodeParser.Display(n.Node).Name,
 				Position: utils.Vec(indent*n.Lvl+xOffset, i+yOffset),
 				Tags:     tags,
 			},
@@ -63,8 +63,8 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 		}
 	}
 
-	for _, n := range dt.Nodes {
-		for _, to := range dt.Graph.FromId(n.Node.Id) {
+	for _, n := range t.Nodes {
+		for _, to := range t.Graph.FromId(n.Node.Id) {
 			tags := map[string]string{
 				ConnectorOriginNodeIdTag:      n.Node.Id,
 				ConnectorDestinationNodeIdTag: to.Id,
@@ -76,7 +76,7 @@ func (dt *DepTree[T]) Render() (*board.Board, error) {
 			}
 		}
 	}
-	for _, cycle := range dt.Cycles.Keys() {
+	for _, cycle := range t.Cycles.Keys() {
 		tags := map[string]string{
 			ConnectorOriginNodeIdTag:      cycle[0],
 			ConnectorDestinationNodeIdTag: cycle[1],
