@@ -17,26 +17,35 @@ type StructuredTree struct {
 func (dt *DepTree[T]) makeStructuredTree(
 	from string,
 	stack *utils.CallStack,
+	cache map[string]map[string]interface{},
 ) (map[string]interface{}, error) {
 	if stack == nil {
 		stack = utils.NewCallStack()
+	}
+	if cache == nil {
+		cache = make(map[string]map[string]interface{})
+	}
+	if result, ok := cache[from]; ok {
+		return result, nil
 	}
 	err := stack.Push(from)
 	if err != nil {
 		return nil, errors.New("cannot create a structured object out of the graph because it contains at least 1 cycle: " + err.Error())
 	}
+
 	var result map[string]interface{}
 	for _, to := range dt.Graph.FromId(from) {
 		if result == nil {
 			result = make(map[string]interface{})
 		}
 		var err error
-		result[dt.NodeParser.Display(to).Name], err = dt.makeStructuredTree(to.Id, nil)
+		result[dt.NodeParser.Display(to).Name], err = dt.makeStructuredTree(to.Id, stack, cache)
 		if err != nil {
 			return nil, err
 		}
 	}
 	stack.Pop()
+	cache[from] = result
 	return result, nil
 }
 
@@ -45,10 +54,12 @@ func (dt *DepTree[T]) RenderStructured() ([]byte, error) {
 		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where detected. Consider providing a single entrypoint to your program", len(dt.Entrypoints))
 	}
 
-	tree, err := dt.makeStructuredTree(dt.Entrypoints[0].Id, nil)
+	println("building structured tree")
+	tree, err := dt.makeStructuredTree(dt.Entrypoints[0].Id, nil, nil)
 	if err != nil {
 		return nil, err
 	}
+	println("structured tree built")
 
 	structuredTree := StructuredTree{
 		Tree: map[string]interface{}{
