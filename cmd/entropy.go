@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 
 	"github.com/gabotechs/dep-tree/internal/entropy"
@@ -32,9 +34,10 @@ func EntropyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			err = entropy.Render(parser, files, entropy.RenderConfig{
-				NoOpen:    noBrowserOpen,
-				EnableGui: enableGui,
+			err = entropy.Render(files, parser, entropy.RenderConfig{
+				NoOpen:        noBrowserOpen,
+				EnableGui:     enableGui,
+				LoadCallbacks: graph.NewStdErrCallbacks[*language.FileInfo](),
 			})
 			return err
 		},

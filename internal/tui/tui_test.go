@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -135,7 +135,7 @@ func TestTui(t *testing.T) {
 			finish := make(chan error)
 
 			go func() {
-				var parserBuilder dep_tree.NodeParserBuilder[language.FileInfo]
+				var parserBuilder graph.NodeParserBuilder[*language.FileInfo]
 				switch {
 				case utils.EndsWith(entrypointPath, js.Extensions):
 					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil, nil)
@@ -145,12 +145,13 @@ func TestTui(t *testing.T) {
 					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil, nil)
 				}
 
-				finish <- Loop[language.FileInfo](
+				finish <- Loop[*language.FileInfo](
 					[]string{entrypointPath},
 					parserBuilder,
 					screen,
 					true,
 					update,
+					nil,
 				)
 			}()
 

@@ -4,9 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
-
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 )
 
 func TestCheck(t *testing.T) {
@@ -37,7 +36,7 @@ func TestCheck(t *testing.T) {
 			Failures: []string{
 				"0 -> 3",
 				"4 -> 3",
-				"detected circular dependency: 3 -> 4 -> 3",
+				"detected circular dependency: 4 -> 3 -> 4",
 			},
 		},
 	}
@@ -46,7 +45,7 @@ func TestCheck(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			err := Check[[]int](&dep_tree.TestParser{Spec: tt.Spec}, tt.Config)
+			err := Check[[]int](&graph.TestParser{Spec: tt.Spec}, tt.Config, nil)
 			if tt.Failures != nil {
 				msg := err.Error()
 				failures := strings.Split(msg, "\n")

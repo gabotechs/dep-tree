@@ -5,20 +5,26 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func Check[T any](parser dep_tree.NodeParser[T], cfg *Config) error {
-	dt := dep_tree.NewDepTree(parser, cfg.Entrypoints).WithStdErrLoader()
-	err := dt.LoadGraph()
+func Check[T any](parser graph.NodeParser[T], cfg *Config, callbacks graph.LoadCallbacks[T]) error {
+	// 1. build the graph.
+	files := make([]string, len(cfg.Entrypoints))
+	for i, file := range cfg.Entrypoints {
+		files[i] = filepath.Join(cfg.Path, file)
+	}
+
+	g := graph.NewGraph[T]()
+	err := g.Load(files, parser, callbacks)
 	if err != nil {
 		return err
 	}
-	// 1. Check for rule violations in the graph.
+	// 2. Check for rule violations in the graph.
 	failures := make([]string, 0)
-	for _, node := range dt.Graph.AllNodes() {
-		for _, dep := range dt.Graph.FromId(node.Id) {
+	for _, node := range g.AllNodes() {
+		for _, dep := range g.FromId(node.Id) {
 			from, to := cfg.rel(node.Id), cfg.rel(dep.Id)
 			pass, err := cfg.Check(from, to)
 			if err != nil {
@@ -28,13 +34,13 @@ func Check[T any](parser dep_tree.NodeParser[T], cfg *Config) error {
 			}
 		}
 	}
-	// 2. Check for cycles.
-	dt.LoadCycles()
+	// 3. Check for cycles.
+	cycles := g.RemoveElementaryCycles()
 	if !cfg.AllowCircularDependencies {
-		for el := dt.Cycles.Front(); el != nil; el = el.Next() {
-			formattedCycleStack := make([]string, len(el.Value.Stack))
-			for i, el := range el.Value.Stack {
-				if node := dt.Graph.Get(el); node != nil {
+		for _, cycle := range cycles {
+			formattedCycleStack := make([]string, len(cycle.Stack))
+			for i, el := range cycle.Stack {
+				if node := g.Get(el); node != nil {
 					formattedCycleStack[i] = parser.Display(node).Name
 				} else {
 					formattedCycleStack[i] = el

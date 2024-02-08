@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 )
 
@@ -12,12 +12,12 @@ func TestLanguage_Display(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Path     string
-		Expected language.DisplayResult
+		Expected graph.DisplayResult
 	}{
 		{
 			Name: "with a parent package.json",
 			Path: filepath.Join(resolverTestFolder, "src", "utils", "sum.ts"),
-			Expected: language.DisplayResult{
+			Expected: graph.DisplayResult{
 				Name:  "src/utils/sum.ts",
 				Group: "test-project",
 			},
@@ -25,7 +25,7 @@ func TestLanguage_Display(t *testing.T) {
 		{
 			Name: "with a parent package.json (same as above for checking cache)",
 			Path: filepath.Join(resolverTestFolder, "src", "utils", "sum.ts"),
-			Expected: language.DisplayResult{
+			Expected: graph.DisplayResult{
 				Name:  "src/utils/sum.ts",
 				Group: "test-project",
 			},
@@ -33,7 +33,7 @@ func TestLanguage_Display(t *testing.T) {
 		{
 			Name: "with two parent package.json, one without name",
 			Path: filepath.Join(resolverTestFolder, "src", "module", "main.ts"),
-			Expected: language.DisplayResult{
+			Expected: graph.DisplayResult{
 				Name:  "src/module/main.ts",
 				Group: "test-project",
 			},

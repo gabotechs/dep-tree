@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -89,17 +89,8 @@ func TestRenderGraph(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			testParser := dep_tree.TestParser{
-				Spec: tt.Spec,
-			}
 
-			dt := dep_tree.NewDepTree[[]int](&testParser, []string{"0"})
-
-			err := dt.LoadGraph()
-			a.NoError(err)
-			dt.LoadCycles()
-
-			tree, err := NewTree(dt)
+			tree, err := NewTree[[]int]([]string{"0"}, &graph.TestParser{Spec: tt.Spec}, nil)
 			a.NoError(err)
 
 			board, err := tree.Render()

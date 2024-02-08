@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
@@ -15,27 +14,45 @@ type NodeWithLevel[T any] struct {
 }
 
 type Tree[T any] struct {
-	*dep_tree.DepTree[T]
-	Nodes []*NodeWithLevel[T]
-	// cache
+	Graph      *graph.Graph[T]
+	NodeParser graph.NodeParser[T]
+
+	entrypoint       *graph.Node[T]
+	Nodes            []*NodeWithLevel[T]
+	Cycles           []graph.Cycle
 	longestPathCache map[string]int
 }
 
-func NewTree[T any](dt *dep_tree.DepTree[T]) (*Tree[T], error) {
-	if len(dt.Entrypoints) == 0 {
+func NewTree[T any](files []string, parser graph.NodeParser[T], callbacks graph.LoadCallbacks[T]) (*Tree[T], error) {
+	if len(files) == 0 {
 		return nil, errors.New("this functionality requires that at least 1 entrypoint is provided")
 	}
-	if len(dt.Entrypoints) > 1 {
-		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where detected. Consider providing a single entrypoint to your program", len(dt.Entrypoints))
+	if len(files) > 1 {
+		return nil, fmt.Errorf("this functionality requires that only 1 entrypoint is provided, but %d where passed. Consider providing a single entrypoint to your program", len(files))
 	}
-	allNodes := dt.Graph.AllNodes()
+	g := graph.NewGraph[T]()
+	err := g.Load(files, parser, callbacks)
+	if err != nil {
+		return nil, err
+	}
+	entrypoint, err := parser.Node(files[0])
+	if err != nil {
+		return nil, err
+	}
+
+	cycles := g.RemoveCyclesStartingFromNode(entrypoint)
+
+	allNodes := g.AllNodes()
 	tree := Tree[T]{
-		dt,
-		make([]*NodeWithLevel[T], len(allNodes)),
-		make(map[string]int),
+		Graph:            g,
+		NodeParser:       parser,
+		entrypoint:       entrypoint,
+		Nodes:            make([]*NodeWithLevel[T], len(allNodes)),
+		Cycles:           cycles,
+		longestPathCache: make(map[string]int),
 	}
 	for i, n := range allNodes {
-		lvl, err := tree.longestPath(dt.Entrypoints[0].Id, n.Id, nil)
+		lvl, err := tree.longestPath(entrypoint.Id, n.Id, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -50,8 +67,4 @@ func NewTree[T any](dt *dep_tree.DepTree[T]) (*Tree[T], error) {
 		}
 	})
 	return &tree, nil
-}
-
-func (t *Tree[T]) LoadNodes() error {
-	return nil
 }

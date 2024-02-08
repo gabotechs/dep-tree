@@ -3,8 +3,8 @@ package rust
 import (
 	"path/filepath"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
-	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
 )
 
 var Extensions = []string{
@@ -13,26 +13,26 @@ var Extensions = []string{
 
 type Language struct{}
 
-func (l *Language) ParseFile(id string) (*rust_grammar.File, error) {
+func (l *Language) ParseFile(id string) (*language.FileInfo, error) {
 	return CachedRustFile(id)
 }
 
-func (l *Language) Display(id string) language.DisplayResult {
+func (l *Language) Display(id string) graph.DisplayResult {
 	cargoToml, err := findClosestCargoToml(filepath.Dir(id))
 	if err != nil {
-		return language.DisplayResult{
+		return graph.DisplayResult{
 			Name: id,
 		}
 	}
 	result, err := filepath.Rel(cargoToml.path, id)
 	if err != nil {
-		return language.DisplayResult{Name: id, Group: cargoToml.PackageDefinition.Name}
+		return graph.DisplayResult{Name: id, Group: cargoToml.PackageDefinition.Name}
 	}
-	return language.DisplayResult{Name: result, Group: cargoToml.PackageDefinition.Name}
+	return graph.DisplayResult{Name: result, Group: cargoToml.PackageDefinition.Name}
 }
 
-var _ language.Language[rust_grammar.File] = &Language{}
+var _ language.Language = &Language{}
 
-func MakeRustLanguage(_ *Config) (language.Language[rust_grammar.File], error) {
+func MakeRustLanguage(_ *Config) (language.Language, error) {
 	return &Language{}, nil
 }

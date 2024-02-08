@@ -124,7 +124,11 @@ func TestLanguage_ParseImports_Errors(t *testing.T) {
 			lang, err := MakePythonLanguage(nil)
 			a.NoError(err)
 
-			result, err := lang.ParseImports(&tt.File) //nolint:gosec
+			file := language.FileInfo{
+				Content: &tt.File,
+			}
+
+			result, err := lang.ParseImports(&file)
 			a.NoError(err)
 
 			a.Equal(len(tt.ExpectedErrors), len(result.Errors))

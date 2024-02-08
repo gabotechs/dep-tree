@@ -11,7 +11,7 @@ type Cycle struct {
 	Stack []string
 }
 
-func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack, done map[string]bool) []Cycle {
+func (g *Graph[T]) removeCyclesStartingFromNode(node *Node[T], callstack *utils.CallStack, done map[string]bool) []Cycle {
 	if done[node.Id] {
 		return nil
 	}
@@ -37,18 +37,22 @@ func (g *Graph[T]) removeCycles(node *Node[T], callstack *utils.CallStack, done 
 	}
 	var cycles []Cycle
 	for _, toNode := range g.FromId(node.Id) {
-		cycles = append(cycles, g.removeCycles(toNode, callstack, done)...)
+		cycles = append(cycles, g.removeCyclesStartingFromNode(toNode, callstack, done)...)
 	}
 	done[node.Id] = true
 	callstack.Pop()
 	return cycles
 }
 
-func (g *Graph[T]) RemoveCycles(node *Node[T]) []Cycle {
-	return g.removeCycles(node, utils.NewCallStack(), map[string]bool{})
+// RemoveCyclesStartingFromNode removes cycles that appear in order while performing a depth
+// first search from a certain node. Note that this may not remove all cycles in the graph.
+func (g *Graph[T]) RemoveCyclesStartingFromNode(node *Node[T]) []Cycle {
+	return g.removeCyclesStartingFromNode(node, utils.NewCallStack(), map[string]bool{})
 }
 
-func (g *Graph[T]) RemoveJohnsonCycles() []Cycle {
+// RemoveElementaryCycles removes all the elementary cycles in the graph. The result
+// of this can be non-deterministic.
+func (g *Graph[T]) RemoveElementaryCycles() []Cycle {
 	johnsonCycles := topo.DirectedCyclesIn(g)
 	cycles := make([]Cycle, len(johnsonCycles))
 	for i, c := range johnsonCycles {
@@ -63,5 +67,25 @@ func (g *Graph[T]) RemoveJohnsonCycles() []Cycle {
 		}
 	}
 
+	return cycles
+}
+
+// RemoveCycles removes all cycles in the graph, giving preference to cycles that start
+// from the provided nodes.
+func (g *Graph[T]) RemoveCycles(nodes []*Node[T]) []Cycle {
+	var cycles []Cycle
+
+	// First, remove the cycles computed from each entrypoint. This allows
+	// us trim the cycles in a more "controlled way"
+	for _, node := range nodes {
+		for _, cycle := range g.RemoveCyclesStartingFromNode(node) {
+			cycles = append(cycles, cycle)
+		}
+	}
+	// Then, remove the cycles computed without taking entrypoints into account.
+	// These are not as nice, as the rule for determining which cycles are trimmed is more arbitrary.
+	for _, cycle := range g.RemoveElementaryCycles() {
+		cycles = append(cycles, cycle)
+	}
 	return cycles
 }

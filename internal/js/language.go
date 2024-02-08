@@ -3,6 +3,7 @@ package js
 import (
 	"path/filepath"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -16,7 +17,7 @@ type Language struct {
 	Cfg *Config
 }
 
-var _ language.Language[js_grammar.File] = &Language{}
+var _ language.Language = &Language{}
 
 var findFirstPackageJsonWithNameCache = map[string]*packageJson{}
 
@@ -36,23 +37,23 @@ func findFirstPackageJsonWithName(searchPath string) *packageJson {
 	return findFirstPackageJsonWithNameCache[searchPath]
 }
 
-func (l *Language) Display(id string) language.DisplayResult {
+func (l *Language) Display(id string) graph.DisplayResult {
 	pkgJson := findFirstPackageJsonWithName(filepath.Dir(id))
 	if pkgJson == nil {
-		return language.DisplayResult{Name: id}
+		return graph.DisplayResult{Name: id}
 	}
 
 	result, err := filepath.Rel(pkgJson.absPath, id)
 	if err != nil {
-		return language.DisplayResult{Name: id, Group: pkgJson.Name}
+		return graph.DisplayResult{Name: id, Group: pkgJson.Name}
 	}
-	return language.DisplayResult{Name: result, Group: pkgJson.Name}
+	return graph.DisplayResult{Name: result, Group: pkgJson.Name}
 }
 
-func MakeJsLanguage(cfg *Config) (language.Language[js_grammar.File], error) {
+func MakeJsLanguage(cfg *Config) (language.Language, error) {
 	return &Language{Cfg: cfg}, nil
 }
 
-func (l *Language) ParseFile(id string) (*js_grammar.File, error) {
+func (l *Language) ParseFile(id string) (*language.FileInfo, error) {
 	return js_grammar.Parse(id)
 }

@@ -47,7 +47,8 @@ func makeModTree(mainPath string, name string, parent *ModTree) (*ModTree, error
 		Children: make(map[string]*ModTree),
 	}
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*rust_grammar.File)
+	for _, stmt := range content.Statements {
 		if stmt.Mod != nil {
 			if stmt.Mod.Local {
 				modTree.Children[string(stmt.Mod.Name)] = &ModTree{

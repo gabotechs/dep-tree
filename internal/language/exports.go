@@ -47,7 +47,7 @@ type ExportsResult struct {
 }
 
 //nolint:gocyclo
-func (p *Parser[F]) parseExports(
+func (p *Parser) parseExports(
 	id string,
 	unwrappedExports bool,
 	stack *utils.CallStack,

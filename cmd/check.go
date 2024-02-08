@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 
 	"github.com/gabotechs/dep-tree/internal/check"
@@ -34,7 +36,7 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return check.Check(parser, &cfg.Check)
+			return check.Check(parser, &cfg.Check, graph.NewStdErrCallbacks[*language.FileInfo]())
 		},
 	}
 }

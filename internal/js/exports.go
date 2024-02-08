@@ -10,11 +10,12 @@ import (
 type ExportsCacheKey string
 
 //nolint:gocyclo
-func (l *Language) ParseExports(file *js_grammar.File) (*language.ExportsEntries, error) {
+func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntries, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*js_grammar.File)
+	for _, stmt := range content.Statements {
 		switch {
 		case stmt == nil:
 			// Is this even possible?

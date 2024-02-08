@@ -9,11 +9,12 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func (l *Language) ParseImports(file *rust_grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*rust_grammar.File)
+	for _, stmt := range content.Statements {
 		if stmt.Use != nil {
 			for _, use := range stmt.Use.Flatten() {
 				id, err := resolve(use.PathSlices, file.Path)

@@ -7,8 +7,7 @@ import (
 	"strings"
 
 	"github.com/elliotchance/orderedmap/v2"
-	"github.com/gabotechs/dep-tree/internal/language"
-
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
@@ -66,7 +65,7 @@ func (d *DirTree) AddDirs(dirs []string) {
 	}
 }
 
-func (d *DirTree) AddDirsFromDisplay(display language.DisplayResult) {
+func (d *DirTree) AddDirsFromDisplay(display graph.DisplayResult) {
 	dirs := splitBaseNames(filepath.Dir(display.Name))
 	if display.Group != "" {
 		d.AddDirs(utils.AppendFront(display.Group, dirs))
@@ -120,7 +119,7 @@ func (d *DirTree) ColorForDir(dirs []string, format colorFormat) []float64 {
 	}
 }
 
-func (d *DirTree) ColorForDisplay(display language.DisplayResult, format colorFormat) []float64 {
+func (d *DirTree) ColorForDisplay(display graph.DisplayResult, format colorFormat) []float64 {
 	dirs := splitBaseNames(filepath.Dir(display.Name))
 	if display.Group != "" {
 		return d.ColorForDir(utils.AppendFront(display.Group, dirs), format)
@@ -151,7 +150,7 @@ func (d *DirTree) GroupingsForDir(dirs []string) []string {
 	return result
 }
 
-func (d *DirTree) GroupingsForDisplay(display language.DisplayResult) []string {
+func (d *DirTree) GroupingsForDisplay(display graph.DisplayResult) []string {
 	dirs := splitBaseNames(filepath.Dir(display.Name))
 	if display.Group != "" {
 		return d.GroupingsForDir(utils.AppendFront(display.Group, dirs))
