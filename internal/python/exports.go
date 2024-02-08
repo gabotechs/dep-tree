@@ -36,10 +36,12 @@ func (l *Language) handleFromImportForExport(imp *python_grammar.FromImport, fil
 }
 
 //nolint:gocyclo
-func (l *Language) ParseExports(file *python_grammar.File) (*language.ExportsEntries, error) {
+func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntries, error) {
 	var exports []language.ExportEntry
 	var errors []error
-	for _, stmt := range file.Statements {
+
+	content := file.Content.(*python_grammar.File)
+	for _, stmt := range content.Statements {
 		switch {
 		case stmt == nil:
 			continue

@@ -1,11 +1,11 @@
 package tui
 
 import (
-	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gdamore/tcell/v2"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/ecs"
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gabotechs/dep-tree/internal/tui/systems"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
@@ -27,22 +27,17 @@ func initScreen() (tcell.Screen, error) {
 
 func Loop[T any](
 	files []string,
-	parserBuilder dep_tree.NodeParserBuilder[T],
+	parserBuilder graph.NodeParserBuilder[T],
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
+	callbacks graph.LoadCallbacks[T],
 ) error {
 	parser, err := parserBuilder(files)
 	if err != nil {
 		return err
 	}
-	dt := dep_tree.NewDepTree(parser, files).WithStdErrLoader()
-	err = dt.LoadGraph()
-	if err != nil {
-		return err
-	}
-	dt.LoadCycles()
-	t, err := tree.NewTree(dt)
+	t, err := tree.NewTree(files, parser, callbacks)
 	if err != nil {
 		return err
 	}
@@ -79,7 +74,7 @@ func Loop[T any](
 		Event:            nil,
 		IsRootNavigation: isRootNavigation,
 		OnNavigate: func(s *systems.State) error {
-			return Loop[T]([]string{s.SelectedId}, parserBuilder, screen, false, tickChan)
+			return Loop[T]([]string{s.SelectedId}, parserBuilder, screen, false, tickChan, nil)
 		},
 	}
 

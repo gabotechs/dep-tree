@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -128,7 +129,7 @@ func inferLang(files []string) string {
 	return top.lang
 }
 
-func makeParserBuilder(files []string, cfg *config.Config) (language.NodeParserBuilder, error) {
+func makeParserBuilder(files []string, cfg *config.Config) (graph.NodeParserBuilder[*language.FileInfo], error) {
 	if len(files) == 0 {
 		return nil, errors.New("at least one file must be provided")
 	}

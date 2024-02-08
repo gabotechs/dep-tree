@@ -1,48 +1,46 @@
-package dep_tree
+package graph
 
 import (
 	"strconv"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLoadDeps_noOwnChild(t *testing.T) {
 	a := require.New(t)
-	testGraph := &TestParser{
+	testParser := TestParser{
 		Spec: [][]int{{0}},
 	}
-	dt := NewDepTree[[]int](testGraph, []string{"0"})
-	err := dt.LoadGraph()
+	g := NewGraph[[]int]()
+	err := g.Load([]string{"0"}, &testParser, nil)
 	a.NoError(err)
-	dt.LoadCycles()
 
-	a.Equal(0, len(dt.Graph.ToId("0")))
+	a.Equal(0, len(g.ToId("0")))
 }
 
 func TestLoadDeps_ErrorHandle(t *testing.T) {
 	a := require.New(t)
-	testGraph := &TestParser{
+	testParser := TestParser{
 		Spec: [][]int{
 			{1},
 			{2},
 			{-3},
 		},
 	}
-
-	dt := NewDepTree[[]int](testGraph, []string{"0"})
-
-	err := dt.LoadGraph()
+	g := NewGraph[[]int]()
+	err := g.Load([]string{"0"}, &testParser, nil)
 	a.NoError(err)
-	dt.LoadCycles()
-	node0 := dt.Graph.Get("0")
+
+	g.RemoveCycles([]*Node[[]int]{MakeNode("0", testParser.Spec[0])})
+
+	node0 := g.Get("0")
 	a.NotNil(node0)
 	a.Equal(len(node0.Errors), 0)
-	node1 := dt.Graph.Get("1")
+	node1 := g.Get("1")
 	a.NotNil(node1)
 	a.Equal(len(node1.Errors), 0)
-	node2 := dt.Graph.Get("2")
+	node2 := g.Get("2")
 	a.NotNil(node2)
 	a.ErrorContains(node2.Errors[0], "no negative children")
 }
@@ -50,7 +48,7 @@ func TestLoadDeps_ErrorHandle(t *testing.T) {
 func TestLoadDeps_Callbacks(t *testing.T) {
 	a := require.New(t)
 
-	testGraph := &TestParser{
+	testParser := TestParser{
 		Spec: [][]int{
 			0: {1},
 			1: {2},
@@ -61,30 +59,16 @@ func TestLoadDeps_Callbacks(t *testing.T) {
 		},
 	}
 
-	dt := NewDepTree[[]int](testGraph, []string{"5", "0"})
-	startLoad := 0
-	startNode := 0
-	finishLoad := 0
-	finishNode := 0
-	dt.onStartLoading = func() {
-		startLoad++
-	}
-	dt.onFinishLoad = func() {
-		finishLoad++
-	}
-	dt.onNodeStartLoad = func(_ *graph.Node[[]int]) {
-		startNode++
-	}
-	dt.onNodeFinishLoad = func(_ *graph.Node[[]int], _ []*graph.Node[[]int]) {
-		finishNode++
-	}
-	err := dt.LoadGraph()
+	testCallbacks := TestCallbacks[[]int]{}
+
+	g := NewGraph[[]int]()
+	err := g.Load([]string{"0"}, &testParser, &testCallbacks)
 	a.NoError(err)
 
-	a.Equal(1, startLoad)
-	a.Equal(6, startNode)
-	a.Equal(1, finishLoad)
-	a.Equal(6, finishNode)
+	a.Equal(1, testCallbacks.startLoad)
+	a.Equal(5, testCallbacks.startNode)
+	a.Equal(1, testCallbacks.finishLoad)
+	a.Equal(5, testCallbacks.finishNode)
 }
 
 func TestLoadDeps_loadGraph(t *testing.T) {
@@ -191,25 +175,28 @@ func TestLoadDeps_loadGraph(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			testGraph := &TestParser{
+			testParser := TestParser{
 				Spec: tt.Spec,
 			}
-			var files []string
+			var ids []string
 			for _, id := range tt.Ids {
-				files = append(files, string(rune(id)))
+				ids = append(ids, strconv.Itoa(id))
 			}
 
-			dt := NewDepTree[[]int](testGraph, []string{"0", "1", "2", "3", "4"})
-			err := dt.LoadGraph()
+			g := NewGraph[[]int]()
+			err := g.Load(ids, &testParser, nil)
 			a.NoError(err)
-			dt.LoadCycles()
+
+			nodesWithoutParents := g.GetNodesWithoutParents()
+			cycles := g.RemoveCycles(nodesWithoutParents)
+
 			entrypoints := make([]int, 0)
-			for _, entrypoint := range dt.Entrypoints {
+			for _, entrypoint := range nodesWithoutParents {
 				id, _ := strconv.Atoi(entrypoint.Id)
 				entrypoints = append(entrypoints, id)
 			}
 			a.Equal(tt.Entrypoints, entrypoints)
-			a.Equal(tt.NCycles, dt.Cycles.Len())
+			a.Equal(tt.NCycles, len(cycles))
 		})
 	}
 }

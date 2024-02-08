@@ -7,11 +7,12 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-func (l *Language) ParseImports(file *js_grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*js_grammar.File)
+	for _, stmt := range content.Statements {
 		importPath := ""
 		entry := language.ImportEntry{}
 

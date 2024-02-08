@@ -7,11 +7,12 @@ import (
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
 )
 
-func (l *Language) ParseExports(file *rust_grammar.File) (*language.ExportsEntries, error) {
+func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntries, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*rust_grammar.File)
+	for _, stmt := range content.Statements {
 		switch {
 		case stmt.Use != nil && stmt.Use.Pub:
 			for _, use := range stmt.Use.Flatten() {

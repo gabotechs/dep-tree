@@ -2,71 +2,65 @@ package language
 
 import (
 	"github.com/elliotchance/orderedmap/v2"
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-type Node = graph.Node[FileInfo]
-type Graph = graph.Graph[FileInfo]
-type NodeParser = dep_tree.NodeParser[FileInfo]
-type NodeParserBuilder = dep_tree.NodeParserBuilder[FileInfo]
-type DisplayResult = dep_tree.DisplayResult
-
 type FileInfo struct {
-	Loc  int
-	Size int
+	Content any
+	Path    string
+	Loc     int
+	Size    int
 }
 
-type CodeFile interface {
-	Loc() int
-	Size() int
-}
-
-type Language[F CodeFile] interface {
+type Language interface {
 	// ParseFile receives an absolute file path and returns F, where F is the specific file implementation
 	//  defined by the language. This file object F will be used as input for parsing imports and exports.
-	ParseFile(path string) (*F, error)
+	ParseFile(path string) (*FileInfo, error)
 	// ParseImports receives the file F parsed by the ParseFile method and gathers the imports that the file
 	//  F contains.
-	ParseImports(file *F) (*ImportsResult, error)
+	ParseImports(file *FileInfo) (*ImportsResult, error)
 	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
 	//  F contains.
-	ParseExports(file *F) (*ExportsEntries, error)
+	ParseExports(file *FileInfo) (*ExportsEntries, error)
 	// Display takes an absolute path to a file and displays it nicely.
-	Display(path string) DisplayResult
+	Display(path string) graph.DisplayResult
 }
 
-type Parser[F CodeFile] struct {
-	lang               Language[F]
+type Parser struct {
+	lang               Language
 	unwrapProxyExports bool
 	exclude            []string
 	// cache
-	fileCache    map[string]*F
+	fileCache    map[string]*FileInfo
 	importsCache map[string]*ImportsResult
 	exportsCache map[string]*ExportsResult
 }
 
-var _ NodeParser = &Parser[CodeFile]{}
+var _ graph.NodeParser[*FileInfo] = &Parser{}
 
 type Config interface {
 	UnwrapProxyExports() bool
 	IgnoreFiles() []string
 }
 
-type Builder[F CodeFile, C any] func(C) (Language[F], error)
+type Builder[C any] func(C) (Language, error)
 
-func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, generalCfg Config) NodeParserBuilder {
-	fileCache := map[string]*F{}
+func ParserBuilder[C any](
+	languageBuilder Builder[C],
+	langCfg C,
+	generalCfg Config,
+) graph.NodeParserBuilder[*FileInfo] {
+	fileCache := map[string]*FileInfo{}
 	importsCache := map[string]*ImportsResult{}
 	exportsCache := map[string]*ExportsResult{}
-	return func(files []string) (NodeParser, error) {
+	return func(files []string) (graph.NodeParser[*FileInfo], error) {
 		lang, err := languageBuilder(langCfg)
 		if err != nil {
 			return nil, err
 		}
 
-		parser := &Parser[F]{
+		parser := &Parser{
 			lang:               lang,
 			unwrapProxyExports: true,
 			fileCache:          fileCache,
@@ -81,7 +75,7 @@ func ParserBuilder[F CodeFile, C any](languageBuilder Builder[F, C], langCfg C, 
 	}
 }
 
-func (p *Parser[F]) shouldExclude(path string) bool {
+func (p *Parser) shouldExclude(path string) bool {
 	for _, exclusion := range p.exclude {
 		if ok, _ := utils.GlobstarMatch(exclusion, path); ok {
 			return true
@@ -90,22 +84,15 @@ func (p *Parser[F]) shouldExclude(path string) bool {
 	return false
 }
 
-func (p *Parser[F]) Node(id string) (*Node, error) {
-	return graph.MakeNode(id, FileInfo{}), nil
-}
-
-func (p *Parser[F]) updateNodeInfo(n *Node) error {
-	file, err := p.parseFile(n.Id)
+func (p *Parser) Node(id string) (*graph.Node[*FileInfo], error) {
+	file, err := p.parseFile(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	n.Data.Size = (*file).Size()
-	n.Data.Loc = (*file).Loc()
-	return nil
+	return graph.MakeNode(id, file), nil
 }
 
-func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
-	_ = p.updateNodeInfo(n)
+func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error) {
 	imports, err := p.gatherImportsFromFile(n.Id)
 	if err != nil {
 		return nil, err
@@ -175,9 +162,14 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 		}
 	}
 
-	deps := make([]*Node, 0)
+	deps := make([]*graph.Node[*FileInfo], 0)
 	for _, imported := range resolvedImports.Keys() {
-		node := graph.MakeNode(imported, FileInfo{})
+		file, err := p.parseFile(imported)
+		if err != nil {
+			n.AddErrors(err)
+			continue
+		}
+		node := graph.MakeNode(imported, file)
 		if !p.shouldExclude(p.Display(node).Name) {
 			deps = append(deps, node)
 		}
@@ -185,6 +177,6 @@ func (p *Parser[F]) Deps(n *Node) ([]*Node, error) {
 	return deps, nil
 }
 
-func (p *Parser[F]) Display(n *Node) dep_tree.DisplayResult {
+func (p *Parser) Display(n *graph.Node[*FileInfo]) graph.DisplayResult {
 	return p.lang.Display(n.Id)
 }

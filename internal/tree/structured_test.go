@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -22,36 +22,36 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 		{
 			Name: "Simple",
 			Spec: [][]int{
-				{1, 2, 3},
-				{2, 4},
-				{3, 4},
-				{4},
-				{3},
+				0: {1, 2, 3},
+				1: {2, 4},
+				2: {3, 4},
+				3: {4},
+				4: {3},
 			},
 		},
 		{
 			Name: "Two in the same level",
 			Spec: [][]int{
-				{1, 2, 3},
-				{3},
-				{3},
-				{},
+				0: {1, 2, 3},
+				1: {3},
+				2: {3},
+				3: {},
 			},
 		},
 		{
 			Name: "Cyclic deps",
 			Spec: [][]int{
-				{1},
-				{2},
-				{1},
+				0: {1},
+				1: {2},
+				2: {1},
 			},
 		},
 		{
 			Name: "Children and Parents should be consistent",
 			Spec: [][]int{
-				{1, 2},
-				{},
-				{1},
+				0: {1, 2},
+				1: {},
+				2: {1},
 			},
 		},
 		{
@@ -67,11 +67,11 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 		{
 			Name: "Some nodes have errors",
 			Spec: [][]int{
-				{1, 2, 3},
-				{2, 4, 4275},
-				{3, 4},
-				{1423},
-				{},
+				0: {1, 2, 3},
+				1: {2, 4, 4275},
+				2: {3, 4},
+				3: {1423},
+				4: {},
 			},
 		},
 	}
@@ -80,14 +80,14 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			rendered, err := PrintStructured[[]int](
-				[]string{"0"},
-				&dep_tree.TestParser{Spec: tt.Spec},
-			)
+			tree, err := NewTree[[]int]([]string{"0"}, &graph.TestParser{Spec: tt.Spec}, nil)
+			a.NoError(err)
+
+			rendered, err := tree.RenderStructured()
 			a.NoError(err)
 
 			renderOutFile := filepath.Join(structuredDir, filepath.Base(tt.Name+".json"))
-			utils.GoldenTest(t, renderOutFile, rendered)
+			utils.GoldenTest(t, renderOutFile, string(rendered))
 		})
 	}
 }

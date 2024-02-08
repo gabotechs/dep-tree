@@ -76,13 +76,13 @@ func (t *Tree[T]) Render() (*board.Board, error) {
 			}
 		}
 	}
-	for _, cycle := range t.Cycles.Keys() {
+	for _, cycle := range t.Cycles {
 		tags := map[string]string{
-			ConnectorOriginNodeIdTag:      cycle[0],
-			ConnectorDestinationNodeIdTag: cycle[1],
+			ConnectorOriginNodeIdTag:      cycle.Cause[0],
+			ConnectorDestinationNodeIdTag: cycle.Cause[1],
 		}
 
-		err := b.AddConnector(cycle[0], cycle[1], tags)
+		err := b.AddConnector(cycle.Cause[0], cycle.Cause[1], tags)
 		if err != nil {
 			return nil, err
 		}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
+	"github.com/gabotechs/dep-tree/internal/language"
 )
 
 type Statement struct {
@@ -50,16 +51,19 @@ var (
 	)
 )
 
-func Parse(filePath string) (*File, error) {
+func Parse(filePath string) (*language.FileInfo, error) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 	file, err := parser.ParseBytes(filePath, content)
-	if file != nil {
-		file.Path = filePath
-		file.loc = bytes.Count(content, []byte("\n"))
-		file.size = len(content)
+	if err != nil {
+		return nil, err
 	}
-	return file, err
+	return &language.FileInfo{
+		Content: file,
+		Loc:     bytes.Count(content, []byte("\n")),
+		Size:    len(content),
+		Path:    filePath,
+	}, nil
 }

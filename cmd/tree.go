@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/spf13/cobra"
 
@@ -38,11 +40,16 @@ func TreeCmd() *cobra.Command {
 					return err
 				}
 
-				rendered, err := tree.PrintStructured(files, parser)
+				depTree, err := tree.NewTree(files, parser, graph.NewStdErrCallbacks[*language.FileInfo]())
+				if err != nil {
+					return err
+				}
+
+				rendered, err := depTree.RenderStructured()
 				fmt.Println(rendered)
 				return err
 			} else {
-				return tui.Loop(files, parserBuilder, nil, true, nil)
+				return tui.Loop(files, parserBuilder, nil, true, nil, graph.NewStdErrCallbacks[*language.FileInfo]())
 			}
 		},
 	}

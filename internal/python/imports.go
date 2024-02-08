@@ -128,11 +128,12 @@ func (l *Language) handleFromImport(imp *python_grammar.FromImport, currDir stri
 	}
 }
 
-func (l *Language) ParseImports(file *python_grammar.File) (*language.ImportsResult, error) {
+func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	imports := make([]language.ImportEntry, 0)
 	var errors []error
 
-	for _, stmt := range file.Statements {
+	content := file.Content.(*python_grammar.File)
+	for _, stmt := range content.Statements {
 		switch {
 		case stmt == nil:
 			// Is this even possible?

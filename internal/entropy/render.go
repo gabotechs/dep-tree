@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
@@ -19,21 +19,18 @@ const ToReplace = "const DATA = {}"
 const ReplacePrefix = "const DATA = "
 
 type RenderConfig struct {
-	NoOpen    bool
-	EnableGui bool
+	NoOpen        bool
+	EnableGui     bool
+	LoadCallbacks graph.LoadCallbacks[*language.FileInfo]
 }
 
-func Render(parser language.NodeParser, files []string, cfg RenderConfig) error {
-	dt := dep_tree.NewDepTree(parser, files).WithStdErrLoader()
-	err := dt.LoadGraph()
+func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg RenderConfig) error {
+	graph3d, err := makeGraph(files, parser, cfg.LoadCallbacks)
 	if err != nil {
 		return err
 	}
-
-	dt.LoadCycles()
-	graph := makeGraph(dt, parser)
-	graph.EnableGui = cfg.EnableGui
-	marshaled, err := json.Marshal(graph)
+	graph3d.EnableGui = cfg.EnableGui
+	marshaled, err := json.Marshal(graph3d)
 	if err != nil {
 		return err
 	}

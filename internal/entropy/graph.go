@@ -1,9 +1,9 @@
 package entropy
 
 import (
+	"fmt"
 	"path/filepath"
 
-	"github.com/gabotechs/dep-tree/internal/dep_tree"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -45,14 +45,30 @@ func toInt(arr []float64) []int {
 	return result
 }
 
-func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodeParser) Graph {
+func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], loadCallbacks graph.LoadCallbacks[*language.FileInfo]) (Graph, error) {
+	g := graph.NewGraph[*language.FileInfo]()
+	err := g.Load(files, parser, loadCallbacks)
+	if err != nil {
+		return Graph{}, err
+	}
+	var entrypoints []*graph.Node[*language.FileInfo]
+	if len(files) == 1 {
+		entrypoint := g.Get(files[0])
+		if entrypoint == nil {
+			return Graph{}, fmt.Errorf("could not find entrypoint %s", files[0])
+		}
+		entrypoints = append(entrypoints, entrypoint)
+	} else {
+		entrypoints = g.GetNodesWithoutParents()
+	}
+	cycles := g.RemoveCycles(entrypoints)
 	out := Graph{
 		Nodes: make([]Node, 0),
 		Links: make([]Link, 0),
 	}
 
-	allNodes := dt.Graph.AllNodes()
-	maxLoc := max(utils.Max(allNodes, func(n *language.Node) int {
+	allNodes := g.AllNodes()
+	maxLoc := max(utils.Max(allNodes, func(n *graph.Node[*language.FileInfo]) int {
 		return n.Data.Loc
 	}), 1)
 
@@ -77,7 +93,7 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 			Color:    toInt(dirTree.ColorForDisplay(display, RGB)),
 		})
 
-		for _, to := range dt.Graph.FromId(node.Id) {
+		for _, to := range g.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
 				From: node.ID(),
 				To:   to.ID(),
@@ -103,13 +119,13 @@ func makeGraph(dt *dep_tree.DepTree[language.FileInfo], parser language.NodePars
 		}
 	}
 
-	for el := dt.Cycles.Front(); el != nil; el = el.Next() {
+	for _, cycle := range cycles {
 		out.Links = append(out.Links, Link{
-			From:     graph.MakeNode(el.Key[0], 0).ID(),
-			To:       graph.MakeNode(el.Key[1], 0).ID(),
+			From:     graph.MakeNode(cycle.Cause[0], 0).ID(),
+			To:       graph.MakeNode(cycle.Cause[1], 0).ID(),
 			IsCyclic: true,
 		})
 	}
 
-	return out
+	return out, nil
 }

@@ -31,7 +31,7 @@ type ImportsResult struct {
 
 type ImportsCacheKey string
 
-func (p *Parser[F]) gatherImportsFromFile(id string) (*ImportsResult, error) {
+func (p *Parser) gatherImportsFromFile(id string) (*ImportsResult, error) {
 	if cached, ok := p.importsCache[id]; ok {
 		return cached, nil
 	}

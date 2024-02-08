@@ -122,7 +122,7 @@ func TestGraph_RemoveCycles(t *testing.T) {
 			a := require.New(t)
 			g := MakeTestGraph(tt.Children)
 
-			cycles := g.RemoveCycles(g.Get("0"))
+			cycles := g.RemoveCyclesStartingFromNode(g.Get("0"))
 
 			var actualCycles [][]int
 			var actualCauses [][2]int
