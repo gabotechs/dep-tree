@@ -9,7 +9,6 @@ import (
 
 type ExportsCacheKey string
 
-//nolint:gocyclo
 func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntries, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error

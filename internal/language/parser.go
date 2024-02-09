@@ -72,7 +72,6 @@ func (p *Parser) Node(id string) (*graph.Node[*FileInfo], error) {
 	return graph.MakeNode(id, file), nil
 }
 
-//nolint:gocyclo
 func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error) {
 	imports, err := p.gatherImportsFromFile(n.Id)
 	if err != nil {
