@@ -8,7 +8,9 @@ import (
 
 type FileInfo struct {
 	Content any
-	Path    string
+	AbsPath string
+	RelPath string
+	Package string
 	Loc     int
 	Size    int
 }
@@ -23,8 +25,6 @@ type Language interface {
 	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
 	//  F contains.
 	ParseExports(file *FileInfo) (*ExportsEntries, error)
-	// Display takes an absolute path to a file and displays it nicely.
-	Display(path string) graph.DisplayResult
 }
 
 type Parser struct {
@@ -150,8 +150,4 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 		deps = append(deps, node)
 	}
 	return deps, nil
-}
-
-func (p *Parser) Display(n *graph.Node[*FileInfo]) graph.DisplayResult {
-	return p.Lang.Display(n.Id)
 }

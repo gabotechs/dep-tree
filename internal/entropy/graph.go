@@ -77,20 +77,19 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 	dirTree := NewDirTree()
 
 	for _, node := range allNodes {
-		dirTree.AddDirsFromDisplay(parser.Display(node))
+		dirTree.AddDirsFromFileInfo(node.Data)
 	}
 
 	for _, node := range allNodes {
-		display := parser.Display(node)
-		dirName := filepath.Dir(display.Name)
+		dirName := filepath.Dir(node.Data.RelPath)
 		out.Nodes = append(out.Nodes, Node{
 			Id:       node.ID(),
-			FileName: filepath.Base(display.Name),
-			Group:    display.Group,
+			FileName: filepath.Base(node.Data.RelPath),
+			Group:    node.Data.Package,
 			DirName:  dirName + "/",
 			Loc:      node.Data.Loc,
 			Size:     maxNodeSize * node.Data.Loc / maxLoc,
-			Color:    toInt(dirTree.ColorForDisplay(display, RGB)),
+			Color:    toInt(dirTree.ColorForFileInfo(node.Data, RGB)),
 		})
 
 		for _, to := range g.FromId(node.Id) {
@@ -100,7 +99,7 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			})
 		}
 
-		for _, parentFolder := range dirTree.GroupingsForDisplay(display) {
+		for _, parentFolder := range dirTree.GroupingsForFileInfo(node.Data) {
 			folderNode := graph.MakeNode(parentFolder, 0)
 			out.Links = append(out.Links, Link{
 				From:  node.ID(),

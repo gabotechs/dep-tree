@@ -38,7 +38,7 @@ func (t *Tree[T]) makeStructuredTree(
 			result = make(map[string]interface{})
 		}
 		var err error
-		result[t.NodeParser.Display(to).Name], err = t.makeStructuredTree(to.Id, stack, cache)
+		result[t.display(to)], err = t.makeStructuredTree(to.Id, stack, cache)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +56,7 @@ func (t *Tree[T]) RenderStructured() ([]byte, error) {
 
 	structuredTree := StructuredTree{
 		Tree: map[string]interface{}{
-			t.NodeParser.Display(t.entrypoint).Name: tree,
+			t.display(t.entrypoint): tree,
 		},
 		CircularDependencies: make([][]string, 0),
 		Errors:               make(map[string][]string),
@@ -65,14 +65,14 @@ func (t *Tree[T]) RenderStructured() ([]byte, error) {
 	for _, cycle := range t.Cycles {
 		renderedCycle := make([]string, len(cycle.Stack))
 		for i, cycleDepEntry := range cycle.Stack {
-			renderedCycle[i] = t.NodeParser.Display(t.Graph.Get(cycleDepEntry)).Name
+			renderedCycle[i] = t.display(t.Graph.Get(cycleDepEntry))
 		}
 		structuredTree.CircularDependencies = append(structuredTree.CircularDependencies, renderedCycle)
 	}
 
 	for _, node := range t.Nodes {
 		if node.Node.Errors != nil && len(node.Node.Errors) > 0 {
-			erroredNode := t.NodeParser.Display(t.Graph.Get(node.Node.Id)).Name
+			erroredNode := t.display(t.Graph.Get(node.Node.Id))
 			nodeErrors := make([]string, len(node.Node.Errors))
 			for i, err := range node.Node.Errors {
 				nodeErrors[i] = err.Error()

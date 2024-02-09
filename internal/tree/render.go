@@ -53,7 +53,7 @@ func (t *Tree[T]) Render() (*board.Board, error) {
 		err := b.AddBlock(
 			&board.Block{
 				Id:       n.Node.Id,
-				Label:    prefix + t.NodeParser.Display(n.Node).Name,
+				Label:    prefix + t.display(n.Node),
 				Position: utils.Vec(indent*n.Lvl+xOffset, i+yOffset),
 				Tags:     tags,
 			},

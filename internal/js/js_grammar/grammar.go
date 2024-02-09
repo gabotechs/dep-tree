@@ -62,6 +62,6 @@ func Parse(filePath string) (*language.FileInfo, error) {
 		Content: statements,
 		Loc:     bytes.Count(content, []byte("\n")),
 		Size:    len(content),
-		Path:    filePath,
+		AbsPath: filePath,
 	}, nil
 }

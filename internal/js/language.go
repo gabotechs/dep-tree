@@ -3,7 +3,6 @@ package js
 import (
 	"path/filepath"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/js/js_grammar"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -33,21 +32,10 @@ func findFirstPackageJsonWithName(searchPath string) *packageJson {
 		}
 	}
 	nextSearchPath := filepath.Dir(searchPath)
-	findFirstPackageJsonWithNameCache[searchPath] = findFirstPackageJsonWithName(nextSearchPath)
+	if nextSearchPath != searchPath {
+		findFirstPackageJsonWithNameCache[searchPath] = findFirstPackageJsonWithName(nextSearchPath)
+	}
 	return findFirstPackageJsonWithNameCache[searchPath]
-}
-
-func (l *Language) Display(id string) graph.DisplayResult {
-	pkgJson := findFirstPackageJsonWithName(filepath.Dir(id))
-	if pkgJson == nil {
-		return graph.DisplayResult{Name: id}
-	}
-
-	result, err := filepath.Rel(pkgJson.absPath, id)
-	if err != nil {
-		return graph.DisplayResult{Name: id, Group: pkgJson.Name}
-	}
-	return graph.DisplayResult{Name: result, Group: pkgJson.Name}
 }
 
 func MakeJsLanguage(cfg *Config) (language.Language, error) {
@@ -55,5 +43,15 @@ func MakeJsLanguage(cfg *Config) (language.Language, error) {
 }
 
 func (l *Language) ParseFile(id string) (*language.FileInfo, error) {
-	return js_grammar.Parse(id)
+	fileInfo, err := js_grammar.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+	pkgJson := findFirstPackageJsonWithName(filepath.Dir(id))
+	if pkgJson == nil {
+		return fileInfo, nil
+	}
+	fileInfo.Package = pkgJson.Name
+	fileInfo.RelPath, _ = filepath.Rel(pkgJson.absPath, id)
+	return fileInfo, nil
 }

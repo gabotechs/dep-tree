@@ -47,7 +47,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			continue
 		}
 		var err error
-		entry.Path, err = l.ResolvePath(importPath, filepath.Dir(file.Path))
+		entry.Path, err = l.ResolvePath(importPath, filepath.Dir(file.AbsPath))
 		if err != nil {
 			errors = append(errors, err)
 		} else if entry.Path != "" {

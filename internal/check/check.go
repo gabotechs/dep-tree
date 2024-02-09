@@ -9,7 +9,12 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-func Check[T any](parser graph.NodeParser[T], cfg *Config, callbacks graph.LoadCallbacks[T]) error {
+func Check[T any](
+	parser graph.NodeParser[T],
+	display func(node *graph.Node[T]) string,
+	cfg *Config,
+	callbacks graph.LoadCallbacks[T],
+) error {
 	// 1. build the graph.
 	files := make([]string, len(cfg.Entrypoints))
 	for i, file := range cfg.Entrypoints {
@@ -41,7 +46,7 @@ func Check[T any](parser graph.NodeParser[T], cfg *Config, callbacks graph.LoadC
 			formattedCycleStack := make([]string, len(cycle.Stack))
 			for i, el := range cycle.Stack {
 				if node := g.Get(el); node != nil {
-					formattedCycleStack[i] = parser.Display(node).Name
+					formattedCycleStack[i] = display(node)
 				} else {
 					formattedCycleStack[i] = el
 				}

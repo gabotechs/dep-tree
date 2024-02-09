@@ -66,6 +66,7 @@ func SpatialSystem(s *State, ss *SpatialState) {
 			up(ss.ScreenSize.Y/2, s, ss)
 		case tcell.KeyCtrlD:
 			down(ss.ScreenSize.Y/2, s, ss)
+		default:
 		}
 	}
 	computeScreenOffset(s, ss)

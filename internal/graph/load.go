@@ -9,13 +9,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-type DisplayResult struct {
-	Name  string
-	Group string
-}
-
 type NodeParser[T any] interface {
-	Display(node *Node[T]) DisplayResult
 	Node(id string) (*Node[T], error)
 	Deps(node *Node[T]) ([]*Node[T], error)
 }
