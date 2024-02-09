@@ -46,7 +46,6 @@ type ExportsResult struct {
 	Errors []error
 }
 
-//nolint:gocyclo
 func (p *Parser) parseExports(
 	id string,
 	unwrappedExports bool,

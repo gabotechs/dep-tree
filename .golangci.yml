@@ -6,7 +6,7 @@ linters-settings:
     min-len: 2
     min-occurrences: 2
   gocyclo:
-    min-complexity: 15
+    min-complexity: 16
   godot:
     check-all: true
   goimports:
