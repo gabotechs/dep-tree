@@ -28,15 +28,17 @@ func CheckCmd() *cobra.Command {
 			if len(cfg.Check.Entrypoints) == 0 {
 				return fmt.Errorf(`config file "%s" has no entrypoints`, configPath)
 			}
-			parserBuilder, err := makeParserBuilder(cfg.Check.Entrypoints, cfg)
+			lang, err := inferLang(cfg.Check.Entrypoints, cfg)
 			if err != nil {
 				return err
 			}
-			parser, err := parserBuilder(args)
+			parser := language.NewParser(lang)
+			parser.UnwrapProxyExports = cfg.UnwrapExports
+			parser.Exclude = cfg.Exclude
 			if err != nil {
 				return err
 			}
-			return check.Check(parser, &cfg.Check, graph.NewStdErrCallbacks[*language.FileInfo]())
+			return check.Check[*language.FileInfo](parser, &cfg.Check, graph.NewStdErrCallbacks[*language.FileInfo]())
 		},
 	}
 }

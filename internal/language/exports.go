@@ -60,7 +60,7 @@ func (p *Parser) parseExports(
 	}
 	defer stack.Pop()
 	cacheKey := fmt.Sprintf("%s-%t", id, unwrappedExports)
-	if cached, ok := p.exportsCache[cacheKey]; ok {
+	if cached, ok := p.ExportsCache[cacheKey]; ok {
 		return cached, nil
 	}
 
@@ -69,7 +69,7 @@ func (p *Parser) parseExports(
 		return nil, err
 	}
 
-	wrapped, err := p.lang.ParseExports(file)
+	wrapped, err := p.Lang.ParseExports(file)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +119,6 @@ func (p *Parser) parseExports(
 	}
 
 	result := ExportsResult{Exports: exports, Errors: exportErrors}
-	p.exportsCache[cacheKey] = &result
+	p.ExportsCache[cacheKey] = &result
 	return &result, nil
 }

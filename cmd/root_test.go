@@ -6,6 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/js"
+	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/python"
+	"github.com/gabotechs/dep-tree/internal/rust"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -107,34 +112,41 @@ func TestInferLang(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Files    []string
-		Expected string
+		Expected language.Language
+		Error    string
 	}{
 		{
 			Name:     "only 1 file",
 			Files:    []string{"foo.js"},
-			Expected: "js",
+			Expected: &js.Language{},
 		},
 		{
 			Name:     "majority of files",
 			Files:    []string{"foo.js", "bar.rs", "foo.rs", "foo.py"},
-			Expected: "rust",
+			Expected: &rust.Language{},
 		},
 		{
 			Name:     "unrelated files",
 			Files:    []string{"foo.py", "foo.pdf"},
-			Expected: "python",
+			Expected: &python.Language{},
 		},
 		{
-			Name:     "no match",
-			Files:    []string{"foo.pdf", "bar.docx"},
-			Expected: "",
+			Name:  "no match",
+			Files: []string{"foo.pdf", "bar.docx"},
+			Error: "at least one file must be provided",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			a.Equal(tt.Expected, inferLang(tt.Files))
+			lang, err := inferLang(tt.Files, &config.Config{})
+			if tt.Error != "" {
+				a.ErrorContains(err, tt.Error)
+			} else {
+				a.NoError(err)
+				a.IsType(tt.Expected, lang)
+			}
 		})
 	}
 }
