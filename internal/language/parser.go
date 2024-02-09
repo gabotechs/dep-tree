@@ -80,9 +80,9 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 	n.AddErrors(imports.Errors...)
 
 	// Some exports might be re-exporting symbols from other files, we consider
-	// those as if they where normal imports.
+	// those as if they were normal imports.
 	//
-	// TODO: if exports are parsed as imports, they might say that that a name is being
+	// NOTE: if exports are parsed as imports, they might say that a name is being
 	//  imported from a path when it's actually not available.
 	//  ex:
 	//   index.ts -> import { foo } from 'foo.ts'
@@ -91,7 +91,7 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 	//  If unwrappedExports is true, this will say that `foo` is exported from `bar.ts`, which
 	//  technically is true, but it's not true to say that `foo` is imported from `bar.ts`.
 	//  It's more accurate to say that `bar` is imported from `bar.ts`, even if the alias is `foo`.
-	//  Instead we never unwrap export to avoid this.
+	//  Instead, we never unwrap export to avoid this.
 	exports, err := p.parseExports(n.Id, false, nil)
 	if err != nil {
 		return nil, err
@@ -144,12 +144,11 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 
 	deps := make([]*graph.Node[*FileInfo], 0)
 	for _, imported := range resolvedImports.Keys() {
-		file, err := p.parseFile(imported)
+		node, err := p.Node(imported)
 		if err != nil {
 			n.AddErrors(err)
 			continue
 		}
-		node := graph.MakeNode(imported, file)
 		if !p.shouldExclude(p.Display(node).Name) {
 			deps = append(deps, node)
 		}
