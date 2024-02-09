@@ -50,11 +50,6 @@ func NewParser(lang Language) *Parser {
 
 var _ graph.NodeParser[*FileInfo] = &Parser{}
 
-type Config interface {
-	UnwrapProxyExports() bool
-	IgnoreFiles() []string
-}
-
 func (p *Parser) shouldExclude(path string) bool {
 	for _, exclusion := range p.Exclude {
 		if ok, _ := utils.GlobstarMatch(exclusion, path); ok {

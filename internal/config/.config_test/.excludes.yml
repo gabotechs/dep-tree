@@ -1,0 +1,5 @@
+exclude:
+  - '**/foo.js'
+  - '*/foo.js'
+  - 'foo/**/foo.js'
+  - '/**/*.js'
