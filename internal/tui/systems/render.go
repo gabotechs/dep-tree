@@ -3,10 +3,10 @@ package systems
 import (
 	"strings"
 
-	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/gabotechs/dep-tree/internal/board/graphics"
+	"github.com/gabotechs/dep-tree/internal/tree"
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 

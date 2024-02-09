@@ -3,8 +3,6 @@ package language
 import (
 	"errors"
 	"time"
-
-	"github.com/gabotechs/dep-tree/internal/graph"
 )
 
 type TestFileContent struct {
@@ -52,8 +50,4 @@ func (t *TestLanguage) ParseExports(file *FileInfo) (*ExportsEntries, error) {
 	} else {
 		return exports, errors.New(content.Name + " not found")
 	}
-}
-
-func (t *TestLanguage) Display(id string) graph.DisplayResult {
-	return graph.DisplayResult{Name: id}
 }

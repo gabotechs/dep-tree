@@ -25,7 +25,7 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 						Original: stmt.DeclarationExport.Name,
 					},
 				},
-				Path: file.Path,
+				Path: file.AbsPath,
 			})
 		case stmt.ListExport != nil:
 			if stmt.ListExport.ExportDeconstruction != nil {
@@ -37,7 +37,7 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 								Alias:    name.Alias,
 							},
 						},
-						Path: file.Path,
+						Path: file.AbsPath,
 					})
 				}
 			}
@@ -49,11 +49,11 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 							Original: "default",
 						},
 					},
-					Path: file.Path,
+					Path: file.AbsPath,
 				})
 			}
 		case stmt.ProxyExport != nil:
-			exportFrom, err := l.ResolvePath(stmt.ProxyExport.From, filepath.Dir(file.Path))
+			exportFrom, err := l.ResolvePath(stmt.ProxyExport.From, filepath.Dir(file.AbsPath))
 			if err != nil {
 				errors = append(errors, err)
 				continue

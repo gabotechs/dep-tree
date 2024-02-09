@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -152,6 +153,7 @@ func TestTui(t *testing.T) {
 				finish <- Loop[*language.FileInfo](
 					[]string{entrypointPath},
 					parser,
+					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
 					screen,
 					true,
 					update,

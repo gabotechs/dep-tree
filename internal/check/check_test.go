@@ -45,7 +45,12 @@ func TestCheck(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			err := Check[[]int](&graph.TestParser{Spec: tt.Spec}, tt.Config, nil)
+			err := Check[[]int](
+				&graph.TestParser{Spec: tt.Spec},
+				func(node *graph.Node[[]int]) string { return node.Id },
+				tt.Config,
+				nil,
+			)
 			if tt.Failures != nil {
 				msg := err.Error()
 				failures := strings.Split(msg, "\n")

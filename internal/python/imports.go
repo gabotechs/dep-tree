@@ -138,9 +138,9 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 		case stmt == nil:
 			// Is this even possible?
 		case stmt.Import != nil:
-			imports = append(imports, l.handleImport(stmt.Import, filepath.Dir(file.Path))...)
+			imports = append(imports, l.handleImport(stmt.Import, filepath.Dir(file.AbsPath))...)
 		case stmt.FromImport != nil:
-			newImports, err := l.handleFromImport(stmt.FromImport, filepath.Dir(file.Path))
+			newImports, err := l.handleFromImport(stmt.FromImport, filepath.Dir(file.AbsPath))
 			imports = append(imports, newImports...)
 			if err != nil {
 				errors = append(errors, err)

@@ -39,7 +39,12 @@ func TreeCmd() *cobra.Command {
 			parser.Exclude = cfg.Exclude
 
 			if jsonFormat {
-				t, err := tree.NewTree[*language.FileInfo](files, parser, graph.NewStdErrCallbacks[*language.FileInfo]())
+				t, err := tree.NewTree[*language.FileInfo](
+					files,
+					parser,
+					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+					graph.NewStdErrCallbacks[*language.FileInfo](),
+				)
 				if err != nil {
 					return err
 				}
@@ -51,6 +56,7 @@ func TreeCmd() *cobra.Command {
 				return tui.Loop[*language.FileInfo](
 					files,
 					parser,
+					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
 					nil,
 					true,
 					nil,

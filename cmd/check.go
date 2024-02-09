@@ -38,7 +38,12 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return check.Check[*language.FileInfo](parser, &cfg.Check, graph.NewStdErrCallbacks[*language.FileInfo]())
+			return check.Check[*language.FileInfo](
+				parser,
+				func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+				&cfg.Check,
+				graph.NewStdErrCallbacks[*language.FileInfo](),
+			)
 		},
 	}
 }

@@ -17,13 +17,19 @@ type Tree[T any] struct {
 	Graph      *graph.Graph[T]
 	NodeParser graph.NodeParser[T]
 
+	display          func(node *graph.Node[T]) string
 	entrypoint       *graph.Node[T]
 	Nodes            []*NodeWithLevel[T]
 	Cycles           []graph.Cycle
 	longestPathCache map[string]int
 }
 
-func NewTree[T any](files []string, parser graph.NodeParser[T], callbacks graph.LoadCallbacks[T]) (*Tree[T], error) {
+func NewTree[T any](
+	files []string,
+	parser graph.NodeParser[T],
+	display func(node *graph.Node[T]) string,
+	callbacks graph.LoadCallbacks[T],
+) (*Tree[T], error) {
 	if len(files) == 0 {
 		return nil, errors.New("this functionality requires that at least 1 entrypoint is provided")
 	}
@@ -46,6 +52,7 @@ func NewTree[T any](files []string, parser graph.NodeParser[T], callbacks graph.
 	tree := Tree[T]{
 		Graph:            g,
 		NodeParser:       parser,
+		display:          display,
 		entrypoint:       entrypoint,
 		Nodes:            make([]*NodeWithLevel[T], len(allNodes)),
 		Cycles:           cycles,

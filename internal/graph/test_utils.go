@@ -77,7 +77,3 @@ func (t *TestParser) Deps(n *Node[[]int]) ([]*Node[[]int], error) {
 	}
 	return result, nil
 }
-
-func (t *TestParser) Display(n *Node[[]int]) DisplayResult {
-	return DisplayResult{Name: n.Id}
-}

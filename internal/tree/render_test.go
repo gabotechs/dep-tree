@@ -90,7 +90,12 @@ func TestRenderGraph(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			tree, err := NewTree[[]int]([]string{"0"}, &graph.TestParser{Spec: tt.Spec}, nil)
+			tree, err := NewTree[[]int](
+				[]string{"0"},
+				&graph.TestParser{Spec: tt.Spec},
+				func(node *graph.Node[[]int]) string { return node.Id },
+				nil,
+			)
 			a.NoError(err)
 
 			board, err := tree.Render()

@@ -16,7 +16,7 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 		switch {
 		case stmt.Use != nil && stmt.Use.Pub:
 			for _, use := range stmt.Use.Flatten() {
-				path, err := resolve(use.PathSlices, file.Path)
+				path, err := resolve(use.PathSlices, file.AbsPath)
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue
@@ -39,12 +39,12 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 		case stmt.Pub != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: string(stmt.Pub.Name)}},
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			})
 		case stmt.Mod != nil && stmt.Mod.Pub:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: string(stmt.Mod.Name)}},
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			})
 		}
 	}

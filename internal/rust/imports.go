@@ -17,7 +17,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	for _, stmt := range content.Statements {
 		if stmt.Use != nil {
 			for _, use := range stmt.Use.Flatten() {
-				id, err := resolve(use.PathSlices, file.Path)
+				id, err := resolve(use.PathSlices, file.AbsPath)
 				if err != nil {
 					errors = append(errors, fmt.Errorf("error resolving use statement for name %s: %w", use.Name.Original, err))
 					continue
@@ -40,7 +40,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 		} else if stmt.Mod != nil && !stmt.Mod.Local {
 			names := []string{string(stmt.Mod.Name)}
 
-			thisDir := filepath.Dir(file.Path)
+			thisDir := filepath.Dir(file.AbsPath)
 
 			var modPath string
 			if p := filepath.Join(thisDir, string(stmt.Mod.Name)+".rs"); utils.FileExists(p) {

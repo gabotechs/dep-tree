@@ -53,10 +53,10 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 						Alias:    stmt.Import.Alias,
 					},
 				},
-				Path: file.Path,
+				Path: file.AbsPath,
 			})
 		case stmt.FromImport != nil && !stmt.FromImport.Indented && !l.cfg.IgnoreFromImportsAsExports:
-			newExports, err := l.handleFromImportForExport(stmt.FromImport, file.Path)
+			newExports, err := l.handleFromImportForExport(stmt.FromImport, file.AbsPath)
 			if err != nil {
 				errors = append(errors, err)
 			} else {
@@ -66,7 +66,7 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 		case stmt.VariableUnpack != nil:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableUnpack.Names)),
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			}
 			for i, name := range stmt.VariableUnpack.Names {
 				entry.Names[i] = language.ExportName{Original: name}
@@ -75,7 +75,7 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 		case stmt.VariableAssign != nil:
 			entry := language.ExportEntry{
 				Names: make([]language.ExportName, len(stmt.VariableAssign.Names)),
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			}
 			for i, name := range stmt.VariableAssign.Names {
 				entry.Names[i] = language.ExportName{Original: name}
@@ -84,17 +84,17 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 		case stmt.VariableTyping != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.VariableTyping.Name}},
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			})
 		case stmt.Function != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.Function.Name}},
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			})
 		case stmt.Class != nil:
 			exports = append(exports, language.ExportEntry{
 				Names: []language.ExportName{{Original: stmt.Class.Name}},
-				Path:  file.Path,
+				Path:  file.AbsPath,
 			})
 		}
 	}
