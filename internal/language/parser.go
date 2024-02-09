@@ -28,13 +28,24 @@ type Language interface {
 }
 
 type Parser struct {
-	lang               Language
-	unwrapProxyExports bool
-	exclude            []string
+	Lang               Language
+	UnwrapProxyExports bool
+	Exclude            []string
 	// cache
-	fileCache    map[string]*FileInfo
-	importsCache map[string]*ImportsResult
-	exportsCache map[string]*ExportsResult
+	FileCache    map[string]*FileInfo
+	ImportsCache map[string]*ImportsResult
+	ExportsCache map[string]*ExportsResult
+}
+
+func NewParser(lang Language) *Parser {
+	return &Parser{
+		Lang:               lang,
+		UnwrapProxyExports: false,
+		Exclude:            nil,
+		FileCache:          make(map[string]*FileInfo),
+		ImportsCache:       make(map[string]*ImportsResult),
+		ExportsCache:       make(map[string]*ExportsResult),
+	}
 }
 
 var _ graph.NodeParser[*FileInfo] = &Parser{}
@@ -44,39 +55,8 @@ type Config interface {
 	IgnoreFiles() []string
 }
 
-type Builder[C any] func(C) (Language, error)
-
-func ParserBuilder[C any](
-	languageBuilder Builder[C],
-	langCfg C,
-	generalCfg Config,
-) graph.NodeParserBuilder[*FileInfo] {
-	fileCache := map[string]*FileInfo{}
-	importsCache := map[string]*ImportsResult{}
-	exportsCache := map[string]*ExportsResult{}
-	return func(files []string) (graph.NodeParser[*FileInfo], error) {
-		lang, err := languageBuilder(langCfg)
-		if err != nil {
-			return nil, err
-		}
-
-		parser := &Parser{
-			lang:               lang,
-			unwrapProxyExports: true,
-			fileCache:          fileCache,
-			importsCache:       importsCache,
-			exportsCache:       exportsCache,
-		}
-		if generalCfg != nil {
-			parser.unwrapProxyExports = generalCfg.UnwrapProxyExports()
-			parser.exclude = generalCfg.IgnoreFiles()
-		}
-		return parser, err
-	}
-}
-
 func (p *Parser) shouldExclude(path string) bool {
-	for _, exclusion := range p.exclude {
+	for _, exclusion := range p.Exclude {
 		if ok, _ := utils.GlobstarMatch(exclusion, path); ok {
 			return true
 		}
@@ -132,13 +112,13 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 	// a different file, we want that file. Ex: foo.ts -> utils/index.ts -> utils/sum.ts. If unwrapProxyExports is
 	// set to true, we must trace those exports back.
 	for _, importEntry := range imports.Imports {
-		if !p.unwrapProxyExports {
+		if !p.UnwrapProxyExports {
 			resolvedImports.Set(importEntry.Path, true)
 			continue
 		}
 
 		// NOTE: at this point p.unwrapProxyExports is always true.
-		exports, err = p.parseExports(importEntry.Path, p.unwrapProxyExports, nil)
+		exports, err = p.parseExports(importEntry.Path, p.UnwrapProxyExports, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -178,5 +158,5 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 }
 
 func (p *Parser) Display(n *graph.Node[*FileInfo]) graph.DisplayResult {
-	return p.lang.Display(n.Id)
+	return p.Lang.Display(n.Id)
 }

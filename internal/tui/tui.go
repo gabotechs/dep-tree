@@ -27,16 +27,12 @@ func initScreen() (tcell.Screen, error) {
 
 func Loop[T any](
 	files []string,
-	parserBuilder graph.NodeParserBuilder[T],
+	parser graph.NodeParser[T],
 	screen tcell.Screen,
 	isRootNavigation bool,
 	tickChan chan bool,
 	callbacks graph.LoadCallbacks[T],
 ) error {
-	parser, err := parserBuilder(files)
-	if err != nil {
-		return err
-	}
 	t, err := tree.NewTree(files, parser, callbacks)
 	if err != nil {
 		return err
@@ -74,7 +70,7 @@ func Loop[T any](
 		Event:            nil,
 		IsRootNavigation: isRootNavigation,
 		OnNavigate: func(s *systems.State) error {
-			return Loop[T]([]string{s.SelectedId}, parserBuilder, screen, false, tickChan, nil)
+			return Loop[T]([]string{s.SelectedId}, parser, screen, false, tickChan, nil)
 		},
 	}
 

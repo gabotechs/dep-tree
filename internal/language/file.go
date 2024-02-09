@@ -3,13 +3,13 @@ package language
 type FileCacheKey string
 
 func (p *Parser) parseFile(absPath string) (*FileInfo, error) {
-	if cached, ok := p.fileCache[absPath]; ok {
+	if cached, ok := p.FileCache[absPath]; ok {
 		return cached, nil
 	}
-	result, err := p.lang.ParseFile(absPath)
+	result, err := p.Lang.ParseFile(absPath)
 	if err != nil {
 		return nil, err
 	}
-	p.fileCache[absPath] = result
+	p.FileCache[absPath] = result
 	return result, err
 }

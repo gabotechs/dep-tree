@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -135,19 +134,24 @@ func TestTui(t *testing.T) {
 			finish := make(chan error)
 
 			go func() {
-				var parserBuilder graph.NodeParserBuilder[*language.FileInfo]
+				var lang language.Language
+				var err error
 				switch {
 				case utils.EndsWith(entrypointPath, js.Extensions):
-					parserBuilder = language.ParserBuilder(js.MakeJsLanguage, nil, nil)
+					lang, err = js.MakeJsLanguage(nil)
 				case utils.EndsWith(entrypointPath, rust.Extensions):
-					parserBuilder = language.ParserBuilder(rust.MakeRustLanguage, nil, nil)
+					lang, err = rust.MakeRustLanguage(nil)
 				case utils.EndsWith(entrypointPath, python.Extensions):
-					parserBuilder = language.ParserBuilder(python.MakePythonLanguage, nil, nil)
+					lang, err = python.MakePythonLanguage(nil)
 				}
+				a.NoError(err)
+
+				parser := language.NewParser(lang)
+				parser.UnwrapProxyExports = true
 
 				finish <- Loop[*language.FileInfo](
 					[]string{entrypointPath},
-					parserBuilder,
+					parser,
 					screen,
 					true,
 					update,

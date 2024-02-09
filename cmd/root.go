@@ -6,16 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gabotechs/dep-tree/internal/graph"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
 	"github.com/gabotechs/dep-tree/internal/rust"
 	"github.com/gabotechs/dep-tree/internal/utils"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 const renderGroupId = "render"
@@ -94,7 +92,7 @@ $ dep-tree check`,
 	return root
 }
 
-func inferLang(files []string) string {
+func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 	score := struct {
 		js     int
 		python int
@@ -126,20 +124,16 @@ func inferLang(files []string) string {
 			}
 		}
 	}
-	return top.lang
-}
-
-func makeParserBuilder(files []string, cfg *config.Config) (graph.NodeParserBuilder[*language.FileInfo], error) {
-	if len(files) == 0 {
+	if top.lang == "" {
 		return nil, errors.New("at least one file must be provided")
 	}
-	switch inferLang(files) {
+	switch top.lang {
 	case "js":
-		return language.ParserBuilder(js.MakeJsLanguage, &cfg.Js, cfg), nil
+		return js.MakeJsLanguage(&cfg.Js)
 	case "rust":
-		return language.ParserBuilder(rust.MakeRustLanguage, &cfg.Rust, cfg), nil
+		return rust.MakeRustLanguage(&cfg.Rust)
 	case "python":
-		return language.ParserBuilder(python.MakePythonLanguage, &cfg.Python, cfg), nil
+		return python.MakePythonLanguage(&cfg.Python)
 	default:
 		return nil, fmt.Errorf("file \"%s\" not supported", files[0])
 	}

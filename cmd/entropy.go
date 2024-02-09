@@ -26,14 +26,13 @@ func EntropyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			parserBuilder, err := makeParserBuilder(files, cfg)
+			lang, err := inferLang(files, cfg)
 			if err != nil {
 				return err
 			}
-			parser, err := parserBuilder(files)
-			if err != nil {
-				return err
-			}
+			parser := language.NewParser(lang)
+			parser.UnwrapProxyExports = cfg.UnwrapExports
+			parser.Exclude = cfg.Exclude
 			err = entropy.Render(files, parser, entropy.RenderConfig{
 				NoOpen:        noBrowserOpen,
 				EnableGui:     enableGui,

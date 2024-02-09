@@ -29,27 +29,32 @@ func TreeCmd() *cobra.Command {
 				return err
 			}
 
-			parserBuilder, err := makeParserBuilder(files, cfg)
+			lang, err := inferLang(files, cfg)
 			if err != nil {
 				return err
 			}
 
+			parser := language.NewParser(lang)
+			parser.UnwrapProxyExports = cfg.UnwrapExports
+			parser.Exclude = cfg.Exclude
+
 			if jsonFormat {
-				parser, err := parserBuilder(files)
+				t, err := tree.NewTree[*language.FileInfo](files, parser, graph.NewStdErrCallbacks[*language.FileInfo]())
 				if err != nil {
 					return err
 				}
 
-				depTree, err := tree.NewTree(files, parser, graph.NewStdErrCallbacks[*language.FileInfo]())
-				if err != nil {
-					return err
-				}
-
-				rendered, err := depTree.RenderStructured()
+				rendered, err := t.RenderStructured()
 				fmt.Println(rendered)
 				return err
 			} else {
-				return tui.Loop(files, parserBuilder, nil, true, nil, graph.NewStdErrCallbacks[*language.FileInfo]())
+				return tui.Loop[*language.FileInfo](
+					files,
+					parser,
+					nil,
+					true,
+					nil,
+					graph.NewStdErrCallbacks[*language.FileInfo]())
 			}
 		},
 	}

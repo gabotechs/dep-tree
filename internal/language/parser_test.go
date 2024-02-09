@@ -202,7 +202,7 @@ func TestParser_Deps(t *testing.T) {
 				exports: tt.Exports,
 			}
 			parser := lang.testParser()
-			parser.unwrapProxyExports = true
+			parser.UnwrapProxyExports = true
 			node, err := parser.Node(tt.Path)
 			a.NoError(err)
 			deps, err := parser.Deps(node)
@@ -214,7 +214,7 @@ func TestParser_Deps(t *testing.T) {
 			}
 			a.Equal(tt.ExpectedUnwrapped, result)
 
-			parser.unwrapProxyExports = false
+			parser.UnwrapProxyExports = false
 
 			deps, err = parser.Deps(node)
 			a.NoError(err)

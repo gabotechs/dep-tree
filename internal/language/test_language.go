@@ -18,10 +18,10 @@ type TestLanguage struct {
 
 func (t *TestLanguage) testParser() *Parser {
 	return &Parser{
-		lang:         t,
-		fileCache:    map[string]*FileInfo{},
-		importsCache: map[string]*ImportsResult{},
-		exportsCache: map[string]*ExportsResult{},
+		Lang:         t,
+		FileCache:    map[string]*FileInfo{},
+		ImportsCache: map[string]*ImportsResult{},
+		ExportsCache: map[string]*ExportsResult{},
 	}
 }
 
