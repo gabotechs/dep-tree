@@ -57,6 +57,8 @@ func ParseConfig(cfgPath string) (*Config, error) {
 		cfgPath = DefaultConfigPath
 	}
 	content, err := os.ReadFile(cfgPath)
+	// If a specific path was requested, and it does not exist, fail
+	// If no specific path was requested, and the default config path does not exist, succeed
 	if os.IsNotExist(err) {
 		if !isDefault {
 			return &cfg, err
@@ -71,7 +73,6 @@ func ParseConfig(cfgPath string) (*Config, error) {
 		return &cfg, err
 	}
 	cfg.Path = filepath.Dir(absCfgPath)
-	// TODO: The exclusion list should be either absolute glob paths or relative to the config file.
 
 	decoder := yaml.NewDecoder(bytes.NewReader(content))
 	decoder.KnownFields(true)
@@ -79,6 +80,19 @@ func ParseConfig(cfgPath string) (*Config, error) {
 	if err != nil {
 		return &cfg, fmt.Errorf(`config file "%s" is not a valid yml file: %w`, cfgPath, err)
 	}
+
+	exclude := make([]string, len(cfg.Exclude))
+	for i, pattern := range cfg.Exclude {
+		if !filepath.IsAbs(pattern) {
+			exclude[i] = filepath.Join(cfg.Path, pattern)
+		} else {
+			exclude[i] = pattern
+		}
+	}
+	if len(exclude) > 0 {
+		cfg.Exclude = exclude
+	}
+
 	cfg.Check.Init(filepath.Dir(absCfgPath))
 	return &cfg, nil
 }

@@ -6,6 +6,60 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestParser_shouldExclude(t *testing.T) {
+	tests := []struct {
+		Name     string
+		Paths    []string
+		Exclude  []string
+		Expected []string
+	}{
+		{
+			Name:     "simple",
+			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
+			Exclude:  []string{"/foo/bar.ts"},
+			Expected: []string{"/foo/baz.ts"},
+		},
+		{
+			Name:     "globstar",
+			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
+			Exclude:  []string{"/foo/*.ts"},
+			Expected: nil,
+		},
+		{
+			Name:     "globstar 2",
+			Paths:    []string{"/foo/1/2/3/4/bar.ts", "/foo/baz.ts"},
+			Exclude:  []string{"/foo/**/*.ts"},
+			Expected: nil,
+		},
+		{
+			Name:     "globstar 3",
+			Paths:    []string{"/foo/1/2/3/4/bar.ts", "/foo/baz.ts"},
+			Exclude:  []string{"2/**/*.ts"},
+			Expected: []string{"/foo/1/2/3/4/bar.ts", "/foo/baz.ts"},
+		},
+		{
+			Name:     "globstar 4",
+			Paths:    []string{"/foo/1/2/3/4/bar.ts", "/foo/baz.ts"},
+			Exclude:  []string{"*/2/**/*.ts"},
+			Expected: []string{"/foo/1/2/3/4/bar.ts", "/foo/baz.ts"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			parser := Parser{Exclude: tt.Exclude}
+			var result []string
+			for _, path := range tt.Paths {
+				if !parser.shouldExclude(path) {
+					result = append(result, path)
+				}
+			}
+			a.Equal(tt.Expected, result)
+		})
+	}
+}
+
 func TestParser_Deps(t *testing.T) {
 	tests := []struct {
 		Name              string

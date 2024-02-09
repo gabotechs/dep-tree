@@ -10,11 +10,14 @@ import (
 const testFolder = ".config_test"
 
 func TestParseConfig(t *testing.T) {
+	absTestFolder, _ := filepath.Abs(testFolder)
+
 	tests := []struct {
 		Name              string
 		File              string
 		ExpectedWhiteList map[string][]string
 		ExpectedBlackList map[string][]string
+		ExpectedExclude   []string
 	}{
 		{
 			Name: "default file",
@@ -52,6 +55,16 @@ func TestParseConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name: "Exclusion",
+			File: ".excludes.yml",
+			ExpectedExclude: []string{
+				filepath.Join(absTestFolder, "**/foo.js"),
+				filepath.Join(absTestFolder, "*/foo.js"),
+				filepath.Join(absTestFolder, "foo/**/foo.js"),
+				"/**/*.js",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -66,6 +79,7 @@ func TestParseConfig(t *testing.T) {
 
 			a.Equal(tt.ExpectedWhiteList, cfg.Check.WhiteList)
 			a.Equal(tt.ExpectedBlackList, cfg.Check.BlackList)
+			a.Equal(tt.ExpectedExclude, cfg.Exclude)
 		})
 	}
 }
