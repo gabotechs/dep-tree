@@ -71,6 +71,7 @@ func ParseConfig(cfgPath string) (*Config, error) {
 		return &cfg, err
 	}
 	cfg.Path = filepath.Dir(absCfgPath)
+	// TODO: The exclusion list should be either absolute glob paths or relative to the config file.
 
 	decoder := yaml.NewDecoder(bytes.NewReader(content))
 	decoder.KnownFields(true)

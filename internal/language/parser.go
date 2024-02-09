@@ -72,6 +72,7 @@ func (p *Parser) Node(id string) (*graph.Node[*FileInfo], error) {
 	return graph.MakeNode(id, file), nil
 }
 
+//nolint:gocyclo
 func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error) {
 	imports, err := p.gatherImportsFromFile(n.Id)
 	if err != nil {
@@ -128,30 +129,31 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 			for el := exports.Exports.Front(); el != nil; el = el.Next() {
 				resolvedImports.Set(el.Value, true)
 			}
-			continue
 		} else if len(importEntry.Names) == 0 {
 			resolvedImports.Set(importEntry.Path, true)
-		}
-		for _, name := range importEntry.Names {
-			if exportPath, ok := exports.Exports.Get(name); ok {
-				resolvedImports.Set(exportPath, true)
-			} else {
-				// TODO: this is not retro-compatible, do it in a different PR.
-				// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id)).
+		} else {
+			for _, name := range importEntry.Names {
+				if exportPath, ok := exports.Exports.Get(name); ok {
+					resolvedImports.Set(exportPath, true)
+				} else {
+					// TODO: this is not retro-compatible, do it in a different PR.
+					// n.AddErrors(fmt.Errorf("name %s is imported by %s but not exported by %s", name, n.Id, importEntry.Id)).
+				}
 			}
 		}
 	}
 
 	deps := make([]*graph.Node[*FileInfo], 0)
 	for _, imported := range resolvedImports.Keys() {
+		if p.shouldExclude(imported) {
+			continue
+		}
 		node, err := p.Node(imported)
 		if err != nil {
 			n.AddErrors(err)
 			continue
 		}
-		if !p.shouldExclude(p.Display(node).Name) {
-			deps = append(deps, node)
-		}
+		deps = append(deps, node)
 	}
 	return deps, nil
 }

@@ -183,6 +183,7 @@ func loadConfig() (*config.Config, error) {
 	cfg.Python.IgnoreFromImportsAsExports = true
 	cfg.Python.IgnoreDirectoryImports = true
 
+	// TODO: the excluded list should be relative to the CWD
 	cfg.Exclude = append(cfg.Exclude, exclude...)
 	// validate exclusion patterns.
 	for _, exclusion := range cfg.Exclude {

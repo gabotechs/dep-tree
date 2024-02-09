@@ -73,7 +73,7 @@ func (g *Graph[T]) RemoveElementaryCycles() []Cycle {
 // RemoveCycles removes all cycles in the graph, giving preference to cycles that start
 // from the provided nodes.
 func (g *Graph[T]) RemoveCycles(nodes []*Node[T]) []Cycle {
-	var cycles []Cycle
+	cycles := make([]Cycle, 0)
 
 	// First, remove the cycles computed from each entrypoint. This allows
 	// us trim the cycles in a more "controlled way"
