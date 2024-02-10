@@ -2,6 +2,7 @@ package entropy
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/graph"
@@ -14,14 +15,15 @@ const (
 )
 
 type Node struct {
-	Id       int64  `json:"id"`
-	FileName string `json:"fileName"`
-	Group    string `json:"group,omitempty"`
-	DirName  string `json:"dirName"`
-	Loc      int    `json:"loc"`
-	Size     int    `json:"size"`
-	Color    []int  `json:"color,omitempty"`
-	IsDir    bool   `json:"isDir"`
+	Id           int64  `json:"id"`
+	IsEntrypoint bool   `json:"isEntrypoint"`
+	FileName     string `json:"fileName"`
+	Group        string `json:"group,omitempty"`
+	DirName      string `json:"dirName"`
+	Loc          int    `json:"loc"`
+	Size         int    `json:"size"`
+	Color        []int  `json:"color,omitempty"`
+	IsDir        bool   `json:"isDir"`
 }
 
 type Link struct {
@@ -51,6 +53,7 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 	if err != nil {
 		return Graph{}, err
 	}
+	var singleEntrypointAbsPath string
 	var entrypoints []*graph.Node[*language.FileInfo]
 	if len(files) == 1 {
 		entrypoint := g.Get(files[0])
@@ -58,9 +61,11 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			return Graph{}, fmt.Errorf("could not find entrypoint %s", files[0])
 		}
 		entrypoints = append(entrypoints, entrypoint)
+		singleEntrypointAbsPath = entrypoint.Data.AbsPath
 	} else {
 		entrypoints = g.GetNodesWithoutParents()
 	}
+
 	cycles := g.RemoveCycles(entrypoints)
 	out := Graph{
 		Nodes: make([]Node, 0),
@@ -72,25 +77,27 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 		return n.Data.Loc
 	}), 1)
 
-	addedFolders := map[string]bool{}
-
 	dirTree := NewDirTree()
 
 	for _, node := range allNodes {
 		dirTree.AddDirsFromFileInfo(node.Data)
 	}
 
+	addedFolders := map[string]bool{}
+
 	for _, node := range allNodes {
 		dirName := filepath.Dir(node.Data.RelPath)
-		out.Nodes = append(out.Nodes, Node{
-			Id:       node.ID(),
-			FileName: filepath.Base(node.Data.RelPath),
-			Group:    node.Data.Package,
-			DirName:  dirName + "/",
-			Loc:      node.Data.Loc,
-			Size:     maxNodeSize * node.Data.Loc / maxLoc,
-			Color:    toInt(dirTree.ColorForFileInfo(node.Data, RGB)),
-		})
+		n := Node{
+			Id:           node.ID(),
+			IsEntrypoint: node.Data.AbsPath == singleEntrypointAbsPath,
+			FileName:     filepath.Base(node.Data.RelPath),
+			Group:        node.Data.Package,
+			DirName:      dirName + string(os.PathSeparator),
+			Loc:          node.Data.Loc,
+			Size:         maxNodeSize * node.Data.Loc / maxLoc,
+			Color:        toInt(dirTree.ColorForFileInfo(node.Data, RGB)),
+		}
+		out.Nodes = append(out.Nodes, n)
 
 		for _, to := range g.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
