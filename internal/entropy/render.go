@@ -21,6 +21,7 @@ const ReplacePrefix = "const DATA = "
 type RenderConfig struct {
 	NoOpen        bool
 	EnableGui     bool
+	RenderPath    string
 	LoadCallbacks graph.LoadCallbacks[*language.FileInfo]
 }
 
@@ -35,7 +36,12 @@ func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg Ren
 		return err
 	}
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
-	temp := filepath.Join(os.TempDir(), "index.html")
+	var temp string
+	if cfg.RenderPath != "" {
+		temp = cfg.RenderPath
+	} else {
+		temp = filepath.Join(os.TempDir(), "index.html")
+	}
 	err = os.WriteFile(temp, rendered, os.ModePerm)
 	if err != nil {
 		return err
