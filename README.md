@@ -180,10 +180,11 @@ Map from glob pattern to list of glob patterns that define, using a "white list"
 logic, what files can depend on what other files. For example:
 
 ```yml
-allow:
-  "src/products/**":
-    - "src/products/**"
-    - "src/common/**"
+check:
+  allow:
+    "src/products/**":
+      - "src/products/**"
+      - "src/common/**"
 ```
 
 In the example above, any file under the `src/products` folder has the restriction of only
@@ -196,9 +197,10 @@ Map from glob pattern to list of glob patterns that define, using a "black list"
 logic, what dependencies are forbidden. For example:
 
 ```yml
-deny:
-  "api/routes.py":
-    - "adapters/**"
+check:
+  deny:
+    "api/routes.py":
+      - "adapters/**"
 ```
 
 In the example above, the file `api/routes.py` can import from anywhere but the `adapters` folder.
@@ -209,7 +211,8 @@ Boolean parameter that defines whether circular dependencies are allowed or not.
 they are not allowed.
 
 ```yml
-allowCircularDependencies: true
+check:
+  allowCircularDependencies: true
 ```
 
 ### `aliases`:
@@ -218,26 +221,28 @@ Map from string to glob pattern that gathers utility groups of glob patterns tha
 can be reused in the `deny` and `allow` fields. For example:
 
 ```yml
-aliases:
-  "common-stuff":
-    - "src/common/**"
-    - "src/utils/**"
-    - "src/helpers/**"
-allow:
-  "src/function.py":
-    - "common-stuff"
-    - "src/class.py"
+check:
+  aliases:
+    "common-stuff":
+      - "src/common/**"
+      - "src/utils/**"
+      - "src/helpers/**"
+  allow:
+    "src/function.py":
+      - "common-stuff"
+      - "src/class.py"
 ```
 
 is the same as saying:
 
 ```yml
-allow:
-  "src/function.py":
-    - "src/common/**"
-    - "src/utils/**"
-    - "src/helpers/**"
-    - "src/class.py"
+check:
+  allow:
+    "src/function.py":
+      - "src/common/**"
+      - "src/utils/**"
+      - "src/helpers/**"
+      - "src/class.py"
 ```
 
 ### Example configuration file
