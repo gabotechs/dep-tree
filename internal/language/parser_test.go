@@ -75,7 +75,7 @@ func TestParser_Deps(t *testing.T) {
 			Imports: map[string]*ImportsResult{
 				"1": {
 					Imports: []ImportEntry{
-						{All: true, Path: "2"},
+						{All: true, AbsPath: "2"},
 					},
 				},
 			},
@@ -128,7 +128,7 @@ func TestParser_Deps(t *testing.T) {
 			Imports: map[string]*ImportsResult{
 				"1": {
 					Imports: []ImportEntry{
-						{All: true, Path: "2"},
+						{All: true, AbsPath: "2"},
 					},
 				},
 			},
@@ -296,8 +296,8 @@ func TestParser_DepsErrors(t *testing.T) {
 			Imports: map[string]*ImportsResult{
 				"1": {Imports: []ImportEntry{
 					{
-						Names: []string{"foo"},
-						Path:  "2",
+						Symbols: []string{"foo"},
+						AbsPath: "2",
 					},
 				}},
 			},

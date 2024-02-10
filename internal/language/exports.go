@@ -39,13 +39,6 @@ type ExportsEntries struct {
 	Errors []error
 }
 
-type ExportsResult struct {
-	// Exports: map from exported name to exported path.
-	Exports *orderedmap.OrderedMap[string, string]
-	// Errors: errors gathered while resolving exports.
-	Errors []error
-}
-
 func (p *Parser) parseExports(
 	id string,
 	unwrappedExports bool,
@@ -92,7 +85,7 @@ func (p *Parser) parseExports(
 		}
 
 		if export.All {
-			for el := unwrapped.Exports.Front(); el != nil; el = el.Next() {
+			for el := unwrapped.Symbols.Front(); el != nil; el = el.Next() {
 				if unwrappedExports {
 					exports.Set(el.Key, el.Value)
 				} else {
@@ -104,7 +97,7 @@ func (p *Parser) parseExports(
 		exportErrors = append(exportErrors, unwrapped.Errors...)
 
 		for _, name := range export.Names {
-			if exportPath, ok := unwrapped.Exports.Get(name.Original); ok {
+			if exportPath, ok := unwrapped.Symbols.Get(name.Original); ok {
 				if unwrappedExports {
 					exports.Set(name.name(), exportPath)
 				} else {
@@ -117,7 +110,7 @@ func (p *Parser) parseExports(
 		}
 	}
 
-	result := ExportsResult{Exports: exports, Errors: exportErrors}
+	result := ExportsResult{Symbols: exports, Errors: exportErrors}
 	p.ExportsCache[cacheKey] = &result
 	return &result, nil
 }
