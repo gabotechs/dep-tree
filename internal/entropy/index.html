@@ -103,7 +103,7 @@
     }
 
     function colorNode(node) {
-        const [r, g, b] = node['color']
+        const [r, g, b] = node['isEntrypoint'] ? [255, 255, 255] : node['color']
         let alpha = SETTINGS.NODE_ALPHA
         if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = SETTINGS.UNSELECTED_NODE_ALPHA
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
@@ -152,7 +152,7 @@
         // Node params
         .nodeLabel(({fileName, dirName, group, loc}) =>  selectedNode ? undefined :`<div class="nodeLabel">
             <span>${dirName}<span style="font-weight: bold">${fileName}</span></span>
-            <span>${group ?? ''}</span>
+            <span>${group != null ? `package: ${group}` : ''}</span>
             <span>LOC: ${loc}</span>
         </div>`)
         .nodeThreeObject(nodeThreeObject)
