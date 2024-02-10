@@ -100,6 +100,11 @@ func TestConfig_ErrorHandling(t *testing.T) {
 			File:     filepath.Join(testFolder, ".invalid.yml"),
 			Expected: "not a valid yml file",
 		},
+		{
+			Name:     "Entrypoints on top level",
+			File:     filepath.Join(testFolder, ".top-level-entrypoints.yml"),
+			Expected: "not a valid yml file",
+		},
 	}
 
 	for _, tt := range tests {
