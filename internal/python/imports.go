@@ -61,7 +61,7 @@ func handleFromImportNames(resolved *ResolveResult, names []string) ([]language.
 	switch {
 	// `from my_file import foo, bar` -> names foo and bar from my_file.py are imported.
 	case resolved.File != nil:
-		return []language.ImportEntry{language.NamesImport(names, resolved.File.Path)}, nil
+		return []language.ImportEntry{language.SymbolsImport(names, resolved.File.Path)}, nil
 
 	// `from my_module import foo, bar` -> names foo and bar from the my_module/__init__.py file are imported.
 	// It might happen that some of those names are actually Python files (e.g. my_module/foo.py).
@@ -84,7 +84,7 @@ func handleFromImportNames(resolved *ResolveResult, names []string) ([]language.
 			}
 		}
 		if namesFromInit != nil {
-			imports = append(imports, language.NamesImport(namesFromInit, resolved.InitModule.Path))
+			imports = append(imports, language.SymbolsImport(namesFromInit, resolved.InitModule.Path))
 		}
 		return imports, nil
 

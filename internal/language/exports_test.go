@@ -275,12 +275,12 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 				exports, err := parser.parseExports("1", true, nil)
 				a.NoError(err)
 
-				a.Equal(tt.ExpectedUnwrapped, exports.Exports)
+				a.Equal(tt.ExpectedUnwrapped, exports.Symbols)
 
 				exports, err = parser.parseExports("1", false, nil)
 				a.NoError(err)
 
-				a.Equal(tt.ExpectedWrapped, exports.Exports)
+				a.Equal(tt.ExpectedWrapped, exports.Symbols)
 				var expectedErrors []error
 				for _, expectedError := range tt.ExpectedErrors {
 					expectedErrors = append(expectedErrors, errors.New(expectedError))

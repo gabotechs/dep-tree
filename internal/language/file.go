@@ -1,7 +1,5 @@
 package language
 
-type FileCacheKey string
-
 func (p *Parser) parseFile(absPath string) (*FileInfo, error) {
 	if cached, ok := p.FileCache[absPath]; ok {
 		return cached, nil

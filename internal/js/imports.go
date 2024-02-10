@@ -23,14 +23,14 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			importPath = stmt.StaticImport.Path
 			if imported := stmt.StaticImport.Imported; imported != nil {
 				if imported.Default {
-					entry.Names = append(entry.Names, "default")
+					entry.Symbols = append(entry.Symbols, "default")
 				}
 				if selection := imported.SelectionImport; selection != nil {
 					if selection.AllImport != nil {
 						entry.All = true
 					}
 					if selection.Deconstruction != nil {
-						entry.Names = append(entry.Names, selection.Deconstruction.Names...)
+						entry.Symbols = append(entry.Symbols, selection.Deconstruction.Names...)
 					}
 				}
 			} else {
@@ -42,15 +42,15 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 		case stmt.Require != nil:
 			importPath = stmt.Require.Path
 			entry.All = stmt.Require.Alias != ""
-			entry.Names = stmt.Require.Names
+			entry.Symbols = stmt.Require.Names
 		default:
 			continue
 		}
 		var err error
-		entry.Path, err = l.ResolvePath(importPath, filepath.Dir(file.AbsPath))
+		entry.AbsPath, err = l.ResolvePath(importPath, filepath.Dir(file.AbsPath))
 		if err != nil {
 			errors = append(errors, err)
-		} else if entry.Path != "" {
+		} else if entry.AbsPath != "" {
 			imports = append(imports, entry)
 		}
 	}

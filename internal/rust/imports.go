@@ -27,13 +27,13 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 
 				if use.All {
 					imports = append(imports, language.ImportEntry{
-						All:  use.All,
-						Path: id,
+						All:     use.All,
+						AbsPath: id,
 					})
 				} else {
 					imports = append(imports, language.ImportEntry{
-						Names: []string{string(use.Name.Original)},
-						Path:  id,
+						Symbols: []string{string(use.Name.Original)},
+						AbsPath: id,
 					})
 				}
 			}
@@ -53,9 +53,9 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			}
 
 			imports = append(imports, language.ImportEntry{
-				All:   true,
-				Names: names,
-				Path:  modPath,
+				All:     true,
+				Symbols: names,
+				AbsPath: modPath,
 			})
 		}
 	}

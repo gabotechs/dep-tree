@@ -13,7 +13,7 @@ func TestParser_parseImports_IsCached(t *testing.T) {
 		imports: map[string]*ImportsResult{
 			"1": {
 				Imports: []ImportEntry{
-					{All: true, Path: "2"},
+					{All: true, AbsPath: "2"},
 				},
 			},
 		},
