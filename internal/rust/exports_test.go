@@ -21,32 +21,32 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Name: "lib.rs",
 			Expected: []language.ExportEntry{
 				{
-					Names: []language.ExportName{{Original: "div"}},
-					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
+					Symbols: []language.ExportSymbol{{Original: "div"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
-					Names: []language.ExportName{{Original: "abs"}},
-					Path:  filepath.Join(absTestFolder, "src", "abs", "abs.rs"),
+					Symbols: []language.ExportSymbol{{Original: "abs"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "abs", "abs.rs"),
 				},
 				{
-					Names: []language.ExportName{{Original: "div"}},
-					Path:  filepath.Join(absTestFolder, "src", "div", "mod.rs"),
+					Symbols: []language.ExportSymbol{{Original: "div"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "div", "mod.rs"),
 				},
 				{
-					Names: []language.ExportName{{Original: "avg"}},
-					Path:  filepath.Join(absTestFolder, "src", "avg_2.rs"),
+					Symbols: []language.ExportSymbol{{Original: "avg"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "avg_2.rs"),
 				},
 				{
-					Names: []language.ExportName{{Original: "sum"}},
-					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
+					Symbols: []language.ExportSymbol{{Original: "sum"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 				{
-					All:  true,
-					Path: filepath.Join(absTestFolder, "src", "sum.rs"),
+					All:     true,
+					AbsPath: filepath.Join(absTestFolder, "src", "sum.rs"),
 				},
 				{
-					Names: []language.ExportName{{Original: "run"}},
-					Path:  filepath.Join(absTestFolder, "src", "lib.rs"),
+					Symbols: []language.ExportSymbol{{Original: "run"}},
+					AbsPath: filepath.Join(absTestFolder, "src", "lib.rs"),
 				},
 			},
 		},

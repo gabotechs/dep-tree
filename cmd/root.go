@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/dummy"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -97,6 +98,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		js     int
 		python int
 		rust   int
+		dummy  int
 	}{}
 	top := struct {
 		lang string
@@ -122,6 +124,12 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 				top.v = score.python
 				top.lang = "python"
 			}
+		case utils.EndsWith(file, dummy.Extensions):
+			score.dummy += 1
+			if score.dummy > top.v {
+				top.v = score.dummy
+				top.lang = "dummy"
+			}
 		}
 	}
 	if top.lang == "" {
@@ -134,6 +142,8 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		return rust.MakeRustLanguage(&cfg.Rust)
 	case "python":
 		return python.MakePythonLanguage(&cfg.Python)
+	case "dummy":
+		return &dummy.Language{}, nil
 	default:
 		return nil, fmt.Errorf("file \"%s\" not supported", files[0])
 	}

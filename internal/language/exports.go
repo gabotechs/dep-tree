@@ -9,12 +9,7 @@ import (
 	"github.com/gabotechs/dep-tree/internal/utils"
 )
 
-type ExportName struct {
-	Original string
-	Alias    string
-}
-
-func (en *ExportName) name() string {
+func (en *ExportSymbol) name() string {
 	if en.Alias != "" {
 		return en.Alias
 	} else {
@@ -22,20 +17,20 @@ func (en *ExportName) name() string {
 	}
 }
 
-type ExportEntry struct {
-	// All: all the names from Path are exported.
-	All bool
-	// Names: exported specific names from Path.
-	Names []ExportName
-	// Path: absolute path from where they are exported, it might be from the same file or from another.
-	Path string
-}
-
-type ExportsEntries struct {
-	// Exports: array of ExportEntry
-	//  NOTE: even though it could work returning a path relative to the file, it should return absolute.
-	Exports []ExportEntry
-	// Errors: errors while parsing exports.
+// ExportEntries is the result of gathering all the export statements from
+// a source file, in case the language implementation explicitly exports certain files.
+type ExportEntries struct {
+	// Symbols is an ordered map data structure where the keys are the symbols exported from
+	// the source file and the values are path from where they are declared. Symbols might
+	// be declared in a different path from where they are exported, for example:
+	//
+	// export { foo } from './bar'
+	//
+	// the `foo` symbol is being exported from the current file, but it's declared on the
+	// `bar.ts` file.
+	Symbols *orderedmap.OrderedMap[string, string]
+	// Errors are the non-fatal errors that occurred while parsing exports. These
+	// might be rendered nicely in a UI.
 	Errors []error
 }
 
@@ -43,7 +38,7 @@ func (p *Parser) parseExports(
 	id string,
 	unwrappedExports bool,
 	stack *utils.CallStack,
-) (*ExportsResult, error) {
+) (*ExportEntries, error) {
 	if stack == nil {
 		stack = utils.NewCallStack()
 	}
@@ -70,15 +65,15 @@ func (p *Parser) parseExports(
 	var exportErrors []error
 
 	for _, export := range wrapped.Exports {
-		if export.Path == id {
-			for _, name := range export.Names {
-				exports.Set(name.name(), export.Path)
+		if export.AbsPath == id {
+			for _, name := range export.Symbols {
+				exports.Set(name.name(), export.AbsPath)
 			}
 			continue
 		}
 
-		var unwrapped *ExportsResult
-		unwrapped, err = p.parseExports(export.Path, unwrappedExports, stack)
+		var unwrapped *ExportEntries
+		unwrapped, err = p.parseExports(export.AbsPath, unwrappedExports, stack)
 		if err != nil {
 			exportErrors = append(exportErrors, err)
 			continue
@@ -89,28 +84,28 @@ func (p *Parser) parseExports(
 				if unwrappedExports {
 					exports.Set(el.Key, el.Value)
 				} else {
-					exports.Set(el.Key, export.Path)
+					exports.Set(el.Key, export.AbsPath)
 				}
 			}
 			continue
 		}
 		exportErrors = append(exportErrors, unwrapped.Errors...)
 
-		for _, name := range export.Names {
+		for _, name := range export.Symbols {
 			if exportPath, ok := unwrapped.Symbols.Get(name.Original); ok {
 				if unwrappedExports {
 					exports.Set(name.name(), exportPath)
 				} else {
-					exports.Set(name.name(), export.Path)
+					exports.Set(name.name(), export.AbsPath)
 				}
 			} else {
-				exports.Set(name.name(), export.Path)
+				exports.Set(name.name(), export.AbsPath)
 				// errors = append(errors, fmt.Errorf(`name "%s" exported in "%s" from "%s" cannot be found in origin file`, name.Original, id, export.Id)).
 			}
 		}
 	}
 
-	result := ExportsResult{Symbols: exports, Errors: exportErrors}
+	result := ExportEntries{Symbols: exports, Errors: exportErrors}
 	p.ExportsCache[cacheKey] = &result
 	return &result, nil
 }

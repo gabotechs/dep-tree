@@ -27,80 +27,80 @@ func TestLanguage_ParseExports(t *testing.T) {
 			Entrypoint: "main.py",
 			Expected: []language.ExportEntry{
 				{
-					Names: []language.ExportName{{Original: "foo", Alias: "foo_2"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo", Alias: "foo_2"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "foo", Alias: "foo_3"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo", Alias: "foo_3"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				//{
-				//	Names: []language.ExportName{{Original: "foo"}},
+				//	Names: []language.ExportSymbol{{Original: "foo"}},
 				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
-				//	Names: []language.ExportName{{Original: "folder", Alias: "foo"}},
+				//	Names: []language.ExportSymbol{{Original: "folder", Alias: "foo"}},
 				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
-				//	Names: []language.ExportName{{Original: "bar"}},
+				//	Names: []language.ExportSymbol{{Original: "bar"}},
 				//	Path:    filepath.Join(exportsTestFolder, "foo.py"),
 				// },
 				//{
-				//	Names: []language.ExportName{{Original: "baz", Alias: "baz_2"}},
+				//	Names: []language.ExportSymbol{{Original: "baz", Alias: "baz_2"}},
 				//	Path:    filepath.Join(exportsTestFolder, "folder", "foo.py"),
 				// },
 				{
-					Names: []language.ExportName{{Original: "a"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "a"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					All:  true,
-					Path: filepath.Join(exportsTestFolder, "main.py"),
+					All:     true,
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "module"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "module"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "foo"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "foo_1"}, {Original: "foo_2"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo_1"}, {Original: "foo_2"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "foo_3"}, {Original: "foo_4"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo_3"}, {Original: "foo_4"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "foo_5"}, {Original: "foo_6"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "foo_5"}, {Original: "foo_6"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "func"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "func"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				{
-					Names: []language.ExportName{{Original: "Class"}},
-					Path:  filepath.Join(exportsTestFolder, "main.py"),
+					Symbols: []language.ExportSymbol{{Original: "Class"}},
+					AbsPath: filepath.Join(exportsTestFolder, "main.py"),
 				},
 				//{
-				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
+				//	Names: []language.ExportSymbol{{Original: "collections", Alias: "collections_abc"}},
 				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				//{
-				//	Names: []language.ExportName{{Original: "collections", Alias: "collections_abc"}},
+				//	Names: []language.ExportSymbol{{Original: "collections", Alias: "collections_abc"}},
 				//	Path:    filepath.Join(exportsTestFolder, "main.py"),
 				// },
 				{
-					Names: []language.ExportName{
+					Symbols: []language.ExportSymbol{
 						{Original: "a"},
 						{Original: "b"},
 						{Original: "c"},
 					},
-					Path: filepath.Join(exportsTestFolder, "foo.py"),
+					AbsPath: filepath.Join(exportsTestFolder, "foo.py"),
 				},
 			},
 		},

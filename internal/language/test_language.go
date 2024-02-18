@@ -11,7 +11,7 @@ type TestFileContent struct {
 
 type TestLanguage struct {
 	imports map[string]*ImportsResult
-	exports map[string]*ExportsEntries
+	exports map[string]*ExportsResult
 }
 
 func (t *TestLanguage) testParser() *Parser {
@@ -19,7 +19,7 @@ func (t *TestLanguage) testParser() *Parser {
 		Lang:         t,
 		FileCache:    map[string]*FileInfo{},
 		ImportsCache: map[string]*ImportsResult{},
-		ExportsCache: map[string]*ExportsResult{},
+		ExportsCache: map[string]*ExportEntries{},
 	}
 }
 
@@ -42,7 +42,7 @@ func (t *TestLanguage) ParseImports(file *FileInfo) (*ImportsResult, error) {
 	}
 }
 
-func (t *TestLanguage) ParseExports(file *FileInfo) (*ExportsEntries, error) {
+func (t *TestLanguage) ParseExports(file *FileInfo) (*ExportsResult, error) {
 	time.Sleep(time.Millisecond)
 	content := file.Content.(TestFileContent)
 	if exports, ok := t.exports[content.Name]; ok {

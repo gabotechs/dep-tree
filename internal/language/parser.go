@@ -13,7 +13,7 @@ type Parser struct {
 	// cache
 	FileCache    map[string]*FileInfo
 	ImportsCache map[string]*ImportsResult
-	ExportsCache map[string]*ExportsResult
+	ExportsCache map[string]*ExportEntries
 }
 
 func NewParser(lang Language) *Parser {
@@ -23,7 +23,7 @@ func NewParser(lang Language) *Parser {
 		Exclude:            nil,
 		FileCache:          make(map[string]*FileInfo),
 		ImportsCache:       make(map[string]*ImportsResult),
-		ExportsCache:       make(map[string]*ExportsResult),
+		ExportsCache:       make(map[string]*ExportEntries),
 	}
 }
 

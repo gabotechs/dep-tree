@@ -65,7 +65,7 @@ func TestParser_Deps(t *testing.T) {
 		Name              string
 		Path              string
 		Imports           map[string]*ImportsResult
-		Exports           map[string]*ExportsEntries
+		Exports           map[string]*ExportsResult
 		ExpectedUnwrapped []string
 		ExpectedWrapped   []string
 	}{
@@ -79,12 +79,12 @@ func TestParser_Deps(t *testing.T) {
 					},
 				},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "2",
 					}},
 				},
 			},
@@ -101,17 +101,17 @@ func TestParser_Deps(t *testing.T) {
 			Imports: map[string]*ImportsResult{
 				"1": {Imports: []ImportEntry{}},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "2",
 					}},
 				},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "2",
 					}},
 				},
 			},
@@ -132,18 +132,18 @@ func TestParser_Deps(t *testing.T) {
 					},
 				},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "3",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "3",
 					}},
 				},
 				"3": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
-						Path:  "3",
+						Symbols: []ExportSymbol{{Original: "Exported"}, {Original: "Another-one"}},
+						AbsPath: "3",
 					}},
 				},
 			},
@@ -162,35 +162,35 @@ func TestParser_Deps(t *testing.T) {
 					Imports: []ImportEntry{},
 				},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {
 					Exports: []ExportEntry{{
-						All:  true,
-						Path: "2",
+						All:     true,
+						AbsPath: "2",
 					}, {
-						Names: []ExportName{{Original: "Exported-3"}},
-						Path:  "3",
+						Symbols: []ExportSymbol{{Original: "Exported-3"}},
+						AbsPath: "3",
 					}},
 				},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "4",
 					}, {
-						Names: []ExportName{{Original: "Exported-2"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "Exported-2"}},
+						AbsPath: "2",
 					}},
 				},
 				"3": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Another-one", Alias: "Exported-3"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Another-one", Alias: "Exported-3"}},
+						AbsPath: "4",
 					}},
 				},
 				"4": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Exported"}, {Original: "Another-one"}},
+						AbsPath: "4",
 					}},
 				},
 			},
@@ -209,32 +209,32 @@ func TestParser_Deps(t *testing.T) {
 					Imports: []ImportEntry{},
 				},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported-3"}},
-						Path:  "3",
+						Symbols: []ExportSymbol{{Original: "Exported-3"}},
+						AbsPath: "3",
 					}},
 				},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Exported"}},
+						AbsPath: "4",
 					}, {
-						Names: []ExportName{{Original: "Exported-2"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "Exported-2"}},
+						AbsPath: "2",
 					}},
 				},
 				"3": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Another-one", Alias: "Exported-3"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Another-one", Alias: "Exported-3"}},
+						AbsPath: "4",
 					}},
 				},
 				"4": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "Exported"}, {Original: "Another-one"}},
-						Path:  "4",
+						Symbols: []ExportSymbol{{Original: "Exported"}, {Original: "Another-one"}},
+						AbsPath: "4",
 					}},
 				},
 			},
@@ -287,7 +287,7 @@ func TestParser_DepsErrors(t *testing.T) {
 		Name           string
 		Path           string
 		Imports        map[string]*ImportsResult
-		Exports        map[string]*ExportsEntries
+		Exports        map[string]*ExportsResult
 		ExpectedErrors []string
 	}{
 		{
@@ -301,12 +301,12 @@ func TestParser_DepsErrors(t *testing.T) {
 					},
 				}},
 			},
-			Exports: map[string]*ExportsEntries{
+			Exports: map[string]*ExportsResult{
 				"1": {},
 				"2": {
 					Exports: []ExportEntry{{
-						Names: []ExportName{{Original: "bar"}},
-						Path:  "2",
+						Symbols: []ExportSymbol{{Original: "bar"}},
+						AbsPath: "2",
 					}},
 				},
 			},

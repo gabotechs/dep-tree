@@ -26,16 +26,16 @@ func TestParser_parseExports(t *testing.T) {
 			File: filepath.Join(exportsTestFolder, "src", "index.js"),
 			Expected: []language.ExportEntry{
 				{
-					All:  true,
-					Path: filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					All:     true,
+					AbsPath: filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
-					Names: []language.ExportName{{Original: "Unexisting"}, {Original: "UnSorter", Alias: "UnSorterAlias"}},
-					Path:  filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
+					Symbols: []language.ExportSymbol{{Original: "Unexisting"}, {Original: "UnSorter", Alias: "UnSorterAlias"}},
+					AbsPath: filepath.Join(cwd, exportsTestFolder, "src", "utils", "index.js"),
 				},
 				{
-					Names: []language.ExportName{{Original: "aliased"}},
-					Path:  filepath.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
+					Symbols: []language.ExportSymbol{{Original: "aliased"}},
+					AbsPath: filepath.Join(cwd, exportsTestFolder, "src", "utils", "unsort.js"),
 				},
 			},
 			ExpectedErrors: []string{

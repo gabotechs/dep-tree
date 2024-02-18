@@ -72,6 +72,10 @@ npm install @dep-tree/cli
     <img height="40px" src="docs/rust-logo.png">
 </div>
 
+If you want to contribute additional languages, there's a guide [here](docs/IMPLEMENTING_NEW_LANGUAGES.md)
+that teaches how to implement new languages with a hands-on example based on a fictional language.
+Contributions are always welcome!
+
 ## About Dep Tree
 
 `dep-tree` is a cli tool for visualizing the complexity of a code base, and creating

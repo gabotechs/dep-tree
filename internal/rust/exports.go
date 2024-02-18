@@ -7,7 +7,7 @@ import (
 	"github.com/gabotechs/dep-tree/internal/rust/rust_grammar"
 )
 
-func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntries, error) {
+func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsResult, error) {
 	exports := make([]language.ExportEntry, 0)
 	var errors []error
 
@@ -26,30 +26,30 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsEntri
 
 				if use.All {
 					exports = append(exports, language.ExportEntry{
-						All:  use.All,
-						Path: path,
+						All:     use.All,
+						AbsPath: path,
 					})
 				} else {
 					exports = append(exports, language.ExportEntry{
-						Names: []language.ExportName{{Original: string(use.Name.Original), Alias: string(use.Name.Alias)}},
-						Path:  path,
+						Symbols: []language.ExportSymbol{{Original: string(use.Name.Original), Alias: string(use.Name.Alias)}},
+						AbsPath: path,
 					})
 				}
 			}
 		case stmt.Pub != nil:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{{Original: string(stmt.Pub.Name)}},
-				Path:  file.AbsPath,
+				Symbols: []language.ExportSymbol{{Original: string(stmt.Pub.Name)}},
+				AbsPath: file.AbsPath,
 			})
 		case stmt.Mod != nil && stmt.Mod.Pub:
 			exports = append(exports, language.ExportEntry{
-				Names: []language.ExportName{{Original: string(stmt.Mod.Name)}},
-				Path:  file.AbsPath,
+				Symbols: []language.ExportSymbol{{Original: string(stmt.Mod.Name)}},
+				AbsPath: file.AbsPath,
 			})
 		}
 	}
 
-	return &language.ExportsEntries{
+	return &language.ExportsResult{
 		Exports: exports,
 		Errors:  errors,
 	}, nil

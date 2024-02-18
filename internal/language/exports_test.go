@@ -10,36 +10,36 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ExportsResultBuilder map[string]*ExportsEntries
+type ExportsResultBuilder map[string]*ExportsResult
 
-func (e *ExportsResultBuilder) Build() map[string]*ExportsEntries {
+func (e *ExportsResultBuilder) Build() map[string]*ExportsResult {
 	return *e
 }
 
 func (e *ExportsResultBuilder) Entry(inId string, toId string, names ...string) *ExportsResultBuilder {
-	var result *ExportsEntries
+	var result *ExportsResult
 	var ok bool
 	if result, ok = (*e)[inId]; !ok {
-		result = &ExportsEntries{}
+		result = &ExportsResult{}
 	}
 
 	if len(names) == 1 && names[0] == "*" {
 		result.Exports = append(result.Exports, ExportEntry{
-			All:  true,
-			Path: toId,
+			All:     true,
+			AbsPath: toId,
 		})
 	} else {
-		var n []ExportName
+		var n []ExportSymbol
 		for _, name := range names {
 			if strings.HasPrefix(name, "as ") {
 				n[len(n)-1].Alias = strings.TrimLeft(name, "as ")
 			} else {
-				n = append(n, ExportName{Original: name})
+				n = append(n, ExportSymbol{Original: name})
 			}
 		}
 		result.Exports = append(result.Exports, ExportEntry{
-			Names: n,
-			Path:  toId,
+			Symbols: n,
+			AbsPath: toId,
 		})
 	}
 	(*e)[inId] = result
@@ -86,7 +86,7 @@ func TestParser_CachedUnwrappedParseExports(t *testing.T) {
 	tests := []struct {
 		Name              string
 		Path              string
-		Exports           map[string]*ExportsEntries
+		Exports           map[string]*ExportsResult
 		ExpectedUnwrapped *orderedmap.OrderedMap[string, string]
 		ExpectedWrapped   *orderedmap.OrderedMap[string, string]
 		ExpectedErrors    []string

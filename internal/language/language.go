@@ -1,7 +1,5 @@
 package language
 
-import "github.com/elliotchance/orderedmap/v2"
-
 // FileInfo gathers all the information related to a source file.
 type FileInfo struct {
 	// Content is a bucket for language implementations to inject some language-specific data in it,
@@ -24,7 +22,7 @@ type FileInfo struct {
 	Size int
 }
 
-// ImportEntry represent an import statement in a programming language.
+// ImportEntry represents an import statement in a programming language.
 type ImportEntry struct {
 	// All is true if all the symbols from another source file are imported. Some programming languages
 	// allow importing all the symbols:
@@ -60,8 +58,7 @@ func SymbolsImport(symbols []string, absPath string) ImportEntry {
 	return ImportEntry{Symbols: symbols, AbsPath: absPath}
 }
 
-// ImportsResult is the result of gathering all the import statements from
-// a source file.
+// ImportsResult is the result of gathering all the import statements from a source file.
 type ImportsResult struct {
 	// Imports is the list of ImportEntry for the source file.
 	Imports []ImportEntry
@@ -70,18 +67,45 @@ type ImportsResult struct {
 	Errors []error
 }
 
-// ExportsResult is the result of gathering all the export statements from
-// a source file, in case the language implementation explicitly exports certain files.
+// ExportSymbol represents a symbol that it's being exported.
+// Exported symbols might be aliased in certain programming languages, for example, in JS:
+//
+// export { foo as bar } from './file'
+//
+// would export something that looks like this:
+//
+// ExportSymbol{ Original: "foo", Alias: "bar" }
+type ExportSymbol struct {
+	// Original is the original value of the symbol.
+	Original string
+	// Alias is the alias under which the symbol is exported.
+	Alias string
+}
+
+// ExportEntry represents an import statement in a programming language.
+type ExportEntry struct {
+	// All means that all the symbols from AbsPath are exported.
+	// This is specially useful for languages that allow re-exporting all the symbols
+	// from a certain location, for example, in JS:
+	//
+	// export * from './file'
+	All bool
+	// Symbols are symbols that are exported from AbsPath.
+	Symbols []ExportSymbol
+	// AbsPath is absolute path from where they are exported, it might be from the same file or from another.
+	// Typically, this value will be the same as FileInfo.AbsPath, but in some language, you can re-export
+	// symbols that are declared in different source files, for example:
+	//
+	// export function foo() {} // <- exports symbol `foo` that is declared in that same file.
+	//
+	// export foo from './file' // <= exports symbol `foo` that is declared in another file.
+	AbsPath string
+}
+
+// ExportsResult is the result of gathering all the export statements from a source file.
 type ExportsResult struct {
-	// Symbols is an ordered map data structure where the keys are the symbols exported from
-	// the source file and the values are path from where they are declared. Symbols might
-	// be declared in a different path from where they are exported, for example:
-	//
-	// export { foo } from './bar'
-	//
-	// the `foo` symbol is being exported from the current file, but it's declared on the
-	// `bar.ts` file.
-	Symbols *orderedmap.OrderedMap[string, string]
+	// Exports is the list of ExportEntry in the source file.
+	Exports []ExportEntry
 	// Errors are the non-fatal errors that occurred while parsing exports. These
 	// might be rendered nicely in a UI.
 	Errors []error
@@ -96,5 +120,5 @@ type Language interface {
 	ParseImports(file *FileInfo) (*ImportsResult, error)
 	// ParseExports receives the file F parsed by the ParseFile method and gathers the exports that the file
 	//  F contains.
-	ParseExports(file *FileInfo) (*ExportsEntries, error)
+	ParseExports(file *FileInfo) (*ExportsResult, error)
 }
