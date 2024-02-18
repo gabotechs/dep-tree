@@ -43,6 +43,23 @@
 | [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)                                    |                                                                                                                                                                      |                                                                                                                                                      |
 | [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)                                  |                                                                                                                                                                      |                                                                                                                                                      |
 
+
+## Supported languages
+
+<div>
+    <img height="40px" src="docs/js-logo.png">
+    <img height="40px" src="docs/ts-logo.png">
+    <img height="40px" src="docs/python-logo.png">
+    <img height="40px" src="docs/rust-logo.png">
+</div>
+
+## Contributing additional languages
+
+If you want to contribute additional languages, there's a guide [here](docs/IMPLEMENTING_NEW_LANGUAGES.md)
+that teaches how to implement new languages with a hands-on example based on a fictional language.
+
+Contributions are always welcome!
+
 ## Install
 
 On Mac and Linux, it can be installed using brew:
@@ -62,19 +79,6 @@ pip install python-dep-tree
 ```shell
 npm install @dep-tree/cli
 ```
-
-## Supported languages
-
-<div>
-    <img height="40px" src="docs/js-logo.png">
-    <img height="40px" src="docs/ts-logo.png">
-    <img height="40px" src="docs/python-logo.png">
-    <img height="40px" src="docs/rust-logo.png">
-</div>
-
-If you want to contribute additional languages, there's a guide [here](docs/IMPLEMENTING_NEW_LANGUAGES.md)
-that teaches how to implement new languages with a hands-on example based on a fictional language.
-Contributions are always welcome!
 
 ## About Dep Tree
 
