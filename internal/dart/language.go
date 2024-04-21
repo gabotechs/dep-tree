@@ -2,7 +2,6 @@ package dart
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -38,9 +37,19 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 
 	for _, statement := range file.Content.([]Statement) {
 		if statement.Import != nil {
-			fmt.Println(filepath.Join(filepath.Dir(file.AbsPath), statement.Import.From))
+			var importPath string
+
+			if statement.Import.IsAbsolute {
+				// Code files must always be in the <root-where-pubspec-is-located>/lib directory.
+				importPath = filepath.Join(findClosestDartRootDir(file.AbsPath), "lib", statement.Import.From)
+			} else {
+				// Relative imports are relative to the current file.
+				importPath = filepath.Join(filepath.Dir(file.AbsPath), statement.Import.From)
+			}
+
+			// fmt.Println(importPath)
 			result.Imports = append(result.Imports, language.ImportEntry{
-				AbsPath: filepath.Join(filepath.Dir(file.AbsPath), statement.Import.From),
+				AbsPath: importPath,
 			})
 		}
 	}

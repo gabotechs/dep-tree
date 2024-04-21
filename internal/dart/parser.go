@@ -12,7 +12,8 @@ var importRegex = regexp.MustCompile(`import\s+(['"])(.*?\.dart)`)
 var exportRegex = regexp.MustCompile(`export\s+(['"])(.*?\.dart)`)
 
 type ImportStatement struct {
-	From string
+	From       string
+	IsAbsolute bool
 }
 
 type ExportStatement struct {
@@ -38,13 +39,28 @@ func ParseFile(path string) (*File, error) {
 	var fileData File
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		// Remove package patterns from the line
-		line := packageRegex.ReplaceAllString(scanner.Text(), "")
+		line := scanner.Text()
+
+		// Remove comments
+		if idx := strings.Index(line, "//"); idx != -1 {
+			line = line[:idx]
+		}
+
 		line = strings.TrimSpace(line)
+
+		// Remove package patterns from the line and determine if the import is absolute
+		originalLine := line // Keep the original line to check for package later
+		line = packageRegex.ReplaceAllString(line, "")
+
+		// Check if the package pattern was matched to set IsAbsolute
+		isAbsolute := line != originalLine
 
 		if importMatch := importRegex.FindStringSubmatch(line); importMatch != nil {
 			fileData.Statements = append(fileData.Statements, Statement{
-				Import: &ImportStatement{From: importMatch[2]},
+				Import: &ImportStatement{
+					From:       importMatch[2],
+					IsAbsolute: isAbsolute,
+				},
 			})
 		} else if exportMatch := exportRegex.FindStringSubmatch(line); exportMatch != nil {
 			fileData.Statements = append(fileData.Statements, Statement{
