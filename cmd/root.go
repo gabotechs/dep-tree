@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/dart"
 	"github.com/gabotechs/dep-tree/internal/dummy"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -99,6 +100,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		python int
 		rust   int
 		dummy  int
+		dart   int
 	}{}
 	top := struct {
 		lang string
@@ -130,6 +132,12 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 				top.v = score.dummy
 				top.lang = "dummy"
 			}
+		case utils.EndsWith(file, dart.Extensions):
+			score.dart += 1
+			if score.dart > top.v {
+				top.v = score.dart
+				top.lang = "dart"
+			}
 		}
 	}
 	if top.lang == "" {
@@ -142,6 +150,8 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		return rust.MakeRustLanguage(&cfg.Rust)
 	case "python":
 		return python.MakePythonLanguage(&cfg.Python)
+	case "dart":
+		return &dart.Language{}, nil
 	case "dummy":
 		return &dummy.Language{}, nil
 	default:
