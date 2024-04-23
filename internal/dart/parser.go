@@ -17,7 +17,8 @@ type ImportStatement struct {
 }
 
 type ExportStatement struct {
-	From string
+	From       string
+	IsAbsolute bool
 }
 
 type Statement struct {
@@ -64,7 +65,14 @@ func ParseFile(path string) (*File, error) {
 			})
 		} else if exportMatch := exportRegex.FindStringSubmatch(line); exportMatch != nil {
 			fileData.Statements = append(fileData.Statements, Statement{
-				Export: &ExportStatement{From: exportMatch[2]},
+				Import: &ImportStatement{ // Treat exports like imports!
+					From:       exportMatch[2],
+					IsAbsolute: isAbsolute,
+				},
+				Export: &ExportStatement{
+					From:       exportMatch[2],
+					IsAbsolute: isAbsolute,
+				},
 			})
 		}
 	}

@@ -62,8 +62,19 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsResul
 
 	for _, statement := range file.Content.([]Statement) {
 		if statement.Export != nil {
+			var exportPath string
+
+			if statement.Export.IsAbsolute {
+				// Code files must always be in the <root-where-pubspec-is-located>/lib directory.
+				exportPath = filepath.Join(findClosestDartRootDir(file.AbsPath), "lib", statement.Export.From)
+			} else {
+				// Relative imports are relative to the current file.
+				exportPath = filepath.Join(filepath.Dir(file.AbsPath), statement.Export.From)
+			}
+
+			// fmt.Println(exportPath)
 			result.Exports = append(result.Exports, language.ExportEntry{
-				AbsPath: filepath.Join(filepath.Dir(file.AbsPath), statement.Export.From),
+				AbsPath: exportPath,
 			})
 		}
 	}
