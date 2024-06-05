@@ -9,6 +9,9 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
+// ParseImports TODO: refactor this.
+//
+//nolint:gocyclo
 func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	content := file.Content.(*File)
 	result := language.ImportsResult{}

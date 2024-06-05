@@ -116,6 +116,11 @@ func TestInferLang(t *testing.T) {
 		Error    string
 	}{
 		{
+			Name:  "zero files",
+			Files: []string{},
+			Error: "at least 1 file must be provided for infering the language",
+		},
+		{
 			Name:     "only 1 file",
 			Files:    []string{"foo.js"},
 			Expected: &js.Language{},
@@ -133,7 +138,7 @@ func TestInferLang(t *testing.T) {
 		{
 			Name:  "no match",
 			Files: []string{"foo.pdf", "bar.docx"},
-			Error: "at least one file must be provided",
+			Error: "any of the provided files belong to the a supported language",
 		},
 	}
 

@@ -20,7 +20,7 @@ func ConfigCmd() *cobra.Command {
 				configPath = config.DefaultConfigPath
 			}
 			if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
-				return os.WriteFile(configPath, []byte(config.SampleConfig), os.ModePerm)
+				return os.WriteFile(configPath, []byte(config.SampleConfig), 0o600)
 			} else {
 				return errors.New("Cannot generate config file, as one already exists in " + configPath)
 			}
