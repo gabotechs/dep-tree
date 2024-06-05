@@ -8,6 +8,7 @@ import (
 
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dummy"
+	"github.com/gabotechs/dep-tree/internal/golang"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -94,10 +95,14 @@ $ dep-tree check`,
 }
 
 func inferLang(files []string, cfg *config.Config) (language.Language, error) {
+	if len(files) == 0 {
+		return nil, fmt.Errorf("at least 1 file must be provided for infering the language")
+	}
 	score := struct {
 		js     int
 		python int
 		rust   int
+		golang int
 		dummy  int
 	}{}
 	top := struct {
@@ -124,6 +129,12 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 				top.v = score.python
 				top.lang = "python"
 			}
+		case utils.EndsWith(file, golang.Extensions):
+			score.golang += 1
+			if score.golang > top.v {
+				top.v = score.golang
+				top.lang = "golang"
+			}
 		case utils.EndsWith(file, dummy.Extensions):
 			score.dummy += 1
 			if score.dummy > top.v {
@@ -133,7 +144,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		}
 	}
 	if top.lang == "" {
-		return nil, errors.New("at least one file must be provided")
+		return nil, errors.New("any of the provided files belong to the a supported language")
 	}
 	switch top.lang {
 	case "js":
@@ -142,6 +153,8 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		return rust.MakeRustLanguage(&cfg.Rust)
 	case "python":
 		return python.MakePythonLanguage(&cfg.Python)
+	case "golang":
+		return golang.NewLanguage(files[0], &cfg.Golang)
 	case "dummy":
 		return &dummy.Language{}, nil
 	default:
