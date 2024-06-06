@@ -1,7 +1,6 @@
 package golang
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -20,7 +19,7 @@ type Package struct {
 	SymbolToFile map[string]*File
 }
 
-func _NewPackageFromDir(dir string) (*Package, error) {
+func _packagesInDir(dir string) ([]Package, error) {
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
@@ -31,28 +30,25 @@ func _NewPackageFromDir(dir string) (*Package, error) {
 		return nil, err
 	}
 
-	var pkg *ast.Package
-	for _, pkg = range pkgs {
-		// There should only be one entry in `pkgs`, I don't know how there would
-		// be multiple.
-	}
-	if pkg == nil {
-		return nil, fmt.Errorf("could not find any packages in directory %s", dir)
-	}
-
-	exports := make(map[string]*File)
-	for absFileName, file := range pkg.Files {
-		for name := range file.Scope.Objects {
-			exports[name] = &File{
-				File:    file,
-				AbsPath: absFileName,
+	result := make([]Package, len(pkgs))
+	i := 0
+	for _, pkg := range pkgs {
+		exports := make(map[string]*File)
+		for absFileName, file := range pkg.Files {
+			for name := range file.Scope.Objects {
+				exports[name] = &File{
+					File:    file,
+					AbsPath: absFileName,
+				}
 			}
 		}
+		result[i] = Package{
+			Package:      pkg,
+			SymbolToFile: exports,
+		}
+		i += 1
 	}
-	return &Package{
-		Package:      pkg,
-		SymbolToFile: exports,
-	}, nil
+	return result, nil
 }
 
-var NewPackageFromDir = utils.Cached1In1OutErr(_NewPackageFromDir)
+var PackagesInDir = utils.Cached1In1OutErr(_packagesInDir)

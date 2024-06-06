@@ -9,13 +9,14 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
+//nolint:gocyclo
 func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	content := file.Content.(*File)
 	result := language.ImportsResult{}
 
 	// 1. Load all the exported symbols in the current package. They can
 	//    be referenced without the package name prefix in this file.
-	thisPackage, err := NewPackageFromDir(filepath.Dir(file.AbsPath))
+	thisPackages, err := PackagesInDir(filepath.Dir(file.AbsPath))
 	if err != nil {
 		return nil, err
 	}
@@ -32,15 +33,17 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			continue
 		}
 
-		if f, ok := thisPackage.SymbolToFile[unresolved.Name]; ok {
-			result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, f.AbsPath))
-			localResolutions[unresolved.Name] = struct{}{}
+		for _, pkg := range thisPackages {
+			if f, ok := pkg.SymbolToFile[unresolved.Name]; ok {
+				result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, f.AbsPath))
+				localResolutions[unresolved.Name] = struct{}{}
+			}
 		}
 	}
 
 	// 3. Load all the local packages imported by the file that are not
 	//    third party libraries, and that in fact are part of the codebase.
-	importedPackages := make(map[string]*Package)
+	importedPackages := make(map[string][]Package)
 	module := l.GoMod.Module + "/"
 	for _, importSpec := range content.Imports {
 		// TODO: what about dot imports?
@@ -50,11 +53,12 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 		if !importStmt.IsLocal(module) {
 			continue
 		}
-		pkgDir := filepath.Join(l.Root.AbsDir, importStmt.RelPath(module))
-		importedPackages[importStmt.Alias()], err = NewPackageFromDir(pkgDir)
+		pkgs, err := PackagesInDir(filepath.Join(l.Root.AbsDir, importStmt.RelPath(module)))
 		if err != nil {
 			result.Errors = append(result.Errors, err)
+			continue
 		}
+		importedPackages[importStmt.Alias()] = pkgs
 	}
 
 	// 4. Walk the ast looking for references to imported packages.
@@ -82,21 +86,27 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 
 			// 4.4 the selected lib must be in the list of imported packages,
 			//     otherwise it might be a third party library.
-			pkg, ok := importedPackages[libAlias.Name]
-			if !ok || pkg == nil {
+			pkgs, ok := importedPackages[libAlias.Name]
+			if !ok {
 				return true
 			}
 
 			// 4.5 the selector identifier (the right side of the dot) must be in the
 			//     list symbols exported from that package.
-			f, ok := pkg.SymbolToFile[selectorExpr.Sel.Name]
-			if !ok {
+			var absPath string
+			for _, pkg := range pkgs {
+				if f, ok := pkg.SymbolToFile[selectorExpr.Sel.Name]; ok {
+					absPath = f.AbsPath
+				}
+			}
+
+			if absPath == "" {
 				return true
 			}
 
 			result.Imports = append(result.Imports, language.SymbolsImport(
 				[]string{selectorExpr.Sel.Name},
-				f.AbsPath,
+				absPath,
 			))
 			otherPackageResolutions[key] = struct{}{}
 			return true
@@ -107,8 +117,8 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 }
 
 type ImportStmt struct {
-	importPath string
-	importName string
+	ImportPath string
+	ImportName string
 }
 
 func NewImportStmt(imp *ast.ImportSpec) ImportStmt {
@@ -117,8 +127,8 @@ func NewImportStmt(imp *ast.ImportSpec) ImportStmt {
 		importName = imp.Name.Name
 	}
 	return ImportStmt{
-		importPath: imp.Path.Value[1 : len(imp.Path.Value)-1],
-		importName: importName,
+		ImportPath: imp.Path.Value[1 : len(imp.Path.Value)-1],
+		ImportName: importName,
 	}
 }
 
@@ -126,7 +136,7 @@ func (i *ImportStmt) IsLocal(moduleName string) bool {
 	if !strings.HasSuffix(moduleName, "/") {
 		moduleName += "/"
 	}
-	return strings.HasPrefix(i.importPath, moduleName)
+	return strings.HasPrefix(i.ImportPath, moduleName)
 }
 
 func (i *ImportStmt) RelPath(moduleName string) string {
@@ -136,15 +146,15 @@ func (i *ImportStmt) RelPath(moduleName string) string {
 	if !i.IsLocal(moduleName) {
 		return ""
 	}
-	return strings.TrimPrefix(i.importPath, moduleName)
+	return strings.TrimPrefix(i.ImportPath, moduleName)
 }
 
 func (i *ImportStmt) Alias() string {
-	if i.importName != "" {
-		return i.importName
+	if i.ImportName != "" {
+		return i.ImportName
 	}
 
-	base := path.Base(i.importPath)
+	base := path.Base(i.ImportPath)
 	for _, split := range []string{".", "-"} {
 		baseSplit := strings.Split(base, split)
 		base = baseSplit[len(baseSplit)-1]

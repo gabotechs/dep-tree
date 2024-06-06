@@ -29,9 +29,9 @@ func TestPackage(t *testing.T) {
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
 		},
 		{
-			Name:                "_NewPackageFromDir function on this package",
+			Name:                "_packagesInDir function on this package",
 			Path:                ".",
-			ExpectedSymbol:      "_NewPackageFromDir",
+			ExpectedSymbol:      "_packagesInDir",
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
 		},
 	}
@@ -40,12 +40,18 @@ func TestPackage(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			result, err := NewPackageFromDir(tt.Path)
+			result, err := PackagesInDir(tt.Path)
 			a.NoError(err)
+			var pkg Package
+			for _, pkg = range result {
+				if _, ok := pkg.SymbolToFile[tt.ExpectedSymbol]; ok {
+					break
+				}
+			}
 
 			a.Equal(
 				tt.ExpectedFileAbsPath,
-				result.SymbolToFile[tt.ExpectedSymbol].AbsPath,
+				pkg.SymbolToFile[tt.ExpectedSymbol].AbsPath,
 			)
 		})
 	}

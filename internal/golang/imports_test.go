@@ -1,4 +1,4 @@
-package golang
+package golang_test
 
 import (
 	"path/filepath"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/golang"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +20,7 @@ func TestImports(t *testing.T) {
 			Expected: [][2]string{
 				{"SymbolsImport", "internal/language/language.go"},
 				{"Package", "internal/golang/package.go"},
-				{"NewPackageFromDir", "internal/golang/package.go"},
+				{"PackagesInDir", "internal/golang/package.go"},
 				{"Language", "internal/golang/language.go"},
 				{"ImportsResult", "internal/language/language.go"},
 				{"FileInfo", "internal/language/language.go"},
@@ -48,7 +49,7 @@ func TestImports(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := NewLanguage(".", &Config{})
+			lang, err := golang.NewLanguage(".", &golang.Config{})
 			a.NoError(err)
 			file, err := lang.ParseFile(tt.Name)
 			a.NoError(err)
@@ -72,7 +73,7 @@ func TestImports(t *testing.T) {
 				return actual[i][0] > actual[j][0]
 			})
 			sort.Slice(expected, func(i, j int) bool {
-				return actual[i][0] > actual[j][0]
+				return expected[i][0] > expected[j][0]
 			})
 
 			a.Equal(expected, actual)
@@ -122,15 +123,15 @@ func Test_ImportStmt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			lang, err := NewLanguage(".", &Config{})
+			lang, err := golang.NewLanguage(".", &golang.Config{})
 			a.NoError(err)
 			nameSlices := strings.Split(tt.Name, " ")
-			var importStmt ImportStmt
+			var importStmt golang.ImportStmt
 			if len(nameSlices) == 1 {
-				importStmt.importPath = nameSlices[0]
+				importStmt.ImportPath = nameSlices[0]
 			} else {
-				importStmt.importName = nameSlices[0]
-				importStmt.importPath = nameSlices[1]
+				importStmt.ImportName = nameSlices[0]
+				importStmt.ImportPath = nameSlices[1]
 			}
 			a.Equal(tt.IsLocal, importStmt.IsLocal(lang.GoMod.Module))
 			a.Equal(tt.Alias, importStmt.Alias())

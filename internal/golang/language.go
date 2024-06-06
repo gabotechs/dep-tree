@@ -52,13 +52,20 @@ func (l *Language) ParseFile(path string) (*language.FileInfo, error) {
 
 	absDir := filepath.Dir(absPath)
 
-	pkg, err := NewPackageFromDir(absDir)
+	pkgs, err := PackagesInDir(absDir)
 	if err != nil {
 		return nil, err
 	}
-	file, ok := pkg.Files[absPath]
-	if !ok {
-		return nil, fmt.Errorf("could not find file %s in package %s", absPath, pkg.Name)
+	var file *ast.File
+	var pkg Package
+	for _, pkg = range pkgs {
+		var ok bool
+		if file, ok = pkg.Files[absPath]; ok {
+			break
+		}
+	}
+	if file == nil {
+		return nil, fmt.Errorf("could not find file %s in any package in dir %s", absPath, absDir)
 	}
 
 	relPath, _ := filepath.Rel(l.Root.AbsDir, absPath)

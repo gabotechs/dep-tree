@@ -8,7 +8,7 @@ linters-settings:
   gocyclo:
     min-complexity: 16
   godot:
-    check-all: true
+    scope: all
   goimports:
     local-prefixes: dep-tree
   gocritic:
