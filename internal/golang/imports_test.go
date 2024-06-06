@@ -3,9 +3,9 @@ package golang
 import (
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -63,22 +63,42 @@ func TestImports(t *testing.T) {
 	}
 }
 
-func Test_importToPath(t *testing.T) {
+func Test_ImportStmt(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Expected string
+		Name    string
+		IsLocal bool
+		RelPath string
+		Alias   string
 	}{
 		{
-			Name:     "github.com/stretchr/testify/require",
-			Expected: "",
+			Name:    "github.com/stretchr/testify/require",
+			IsLocal: false,
+			RelPath: "",
+			Alias:   "require",
 		},
 		{
-			Name:     "github.com/gabotechs/dep-tree",
-			Expected: "",
+			Name:    "github.com/gabotechs/dep-tree",
+			IsLocal: false,
+			RelPath: "",
+			Alias:   "tree",
 		},
 		{
-			Name:     "github.com/gabotechs/dep-tree/internal/golang",
-			Expected: "internal/golang",
+			Name:    "dep_tree github.com/gabotechs/dep-tree",
+			IsLocal: false,
+			RelPath: "",
+			Alias:   "dep_tree",
+		},
+		{
+			Name:    "github.com/gabotechs/dep-tree/internal/golang",
+			IsLocal: true,
+			RelPath: "internal/golang",
+			Alias:   "golang",
+		},
+		{
+			Name:    "go github.com/gabotechs/dep-tree/internal/golang",
+			IsLocal: true,
+			RelPath: "internal/golang",
+			Alias:   "go",
 		},
 	}
 
@@ -87,39 +107,17 @@ func Test_importToPath(t *testing.T) {
 			a := require.New(t)
 			lang, err := NewLanguage(".", &Config{})
 			a.NoError(err)
-			result := lang.importToPath(tt.Name)
-			a.Equal(tt.Expected, result)
-			if result != "" {
-				absDir := filepath.Join(lang.Root.AbsDir, result)
-				a.Equal(true, utils.DirExists(absDir))
+			nameSlices := strings.Split(tt.Name, " ")
+			var importStmt ImportStmt
+			if len(nameSlices) == 1 {
+				importStmt.importPath = nameSlices[0]
+			} else {
+				importStmt.importName = nameSlices[0]
+				importStmt.importPath = nameSlices[1]
 			}
-		})
-	}
-}
-
-func Test_importToAlias(t *testing.T) {
-	tests := []struct {
-		Name     string
-		Expected string
-	}{
-		{
-			Name:     "github.com/stretchr/testify/require",
-			Expected: "require",
-		},
-		{
-			Name:     "github.com/gabotechs/dep-tree",
-			Expected: "tree",
-		},
-		{
-			Name:     "github.com/gabotechs/dep-tree/internal/golang",
-			Expected: "golang",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.Name, func(t *testing.T) {
-			a := require.New(t)
-			a.Equal(tt.Expected, importToAlias(tt.Name))
+			a.Equal(tt.IsLocal, importStmt.IsLocal(lang.GoMod.Module))
+			a.Equal(tt.Alias, importStmt.Alias())
+			a.Equal(tt.RelPath, importStmt.RelPath(lang.GoMod.Module))
 		})
 	}
 }

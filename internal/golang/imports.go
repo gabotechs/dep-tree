@@ -9,103 +9,86 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-// ParseImports TODO: refactor this.
-//
-//nolint:gocyclo
 func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResult, error) {
 	content := file.Content.(*File)
 	result := language.ImportsResult{}
 
 	// 1. Load all the exported symbols in the current package. They can
 	//    be referenced without the package name prefix in this file.
-	thisPackageSymbols := make(map[string]string)
-	thisDir := filepath.Dir(file.AbsPath)
-	thisPackage, err := NewPackageFromDir(thisDir)
+	thisPackage, err := NewPackageFromDir(filepath.Dir(file.AbsPath))
 	if err != nil {
 		return nil, err
 	}
-	for filePath, packageFile := range thisPackage.Files {
-		for symbol := range packageFile.Scope.Objects {
-			thisPackageSymbols[symbol] = filePath
-		}
-	}
 
-	// 2. Walk all the unresolved symbols, and try to match them either with
-	//    the standard library or the symbols for the current local package.
-	//    if neither of those match, then the symbol is referencing an imported
-	//    package. The imported package can be either a third party lib or another
-	//    local package.
-	resolved := map[string]struct{}{}
+	// 2. Walk all the unresolved symbols, and try to match them with the ones
+	//    exported by the current package. An unresolved symbol might be:
+	//    1. a standard library identifier (string, panic, make, ...)
+	//    2. a type of function declared in this same package
+	//    3. a reference to an imported package (e.g. this file: `ast`, `path`, `filepath`, ...)
+	//    This step resolves only symbols from 2.
+	localResolutions := map[string]struct{}{}
 	for _, unresolved := range content.Unresolved {
-		if _, ok := stdLibSymbols[unresolved.Name]; ok {
-			// we don't care about std lib symbols.
+		if _, ok := localResolutions[unresolved.Name]; ok {
 			continue
 		}
 
-		if _, ok := resolved[unresolved.Name]; ok {
-			// this was already resolved.
-			continue
-		}
-
-		if filePath, ok := thisPackageSymbols[unresolved.Name]; ok {
-			// The symbol comes from a file in the same dir.
-			result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, filePath))
-			resolved[unresolved.Name] = struct{}{}
+		if f, ok := thisPackage.SymbolToFile[unresolved.Name]; ok {
+			result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, f.AbsPath))
+			localResolutions[unresolved.Name] = struct{}{}
 		}
 	}
 
 	// 3. Load all the local packages imported by the file that are not
 	//    third party libraries, and that in fact are part of the codebase.
 	importedPackages := make(map[string]*Package)
-	for _, imp := range content.Imports {
+	module := l.GoMod.Module + "/"
+	for _, importSpec := range content.Imports {
 		// TODO: what about dot imports?
 
-		// For some reason, import statements come surrounded by quotes ('"path/filepath"').
-		importPath := imp.Path.Value[1 : len(imp.Path.Value)-1]
+		importStmt := NewImportStmt(importSpec)
 
-		packagePath := l.importToPath(importPath)
-		if packagePath == "" {
+		if !importStmt.IsLocal(module) {
 			continue
 		}
-		pkg, err := NewPackageFromDir(filepath.Join(l.Root.AbsDir, packagePath))
+		pkgDir := filepath.Join(l.Root.AbsDir, importStmt.RelPath(module))
+		importedPackages[importStmt.Alias()], err = NewPackageFromDir(pkgDir)
 		if err != nil {
 			result.Errors = append(result.Errors, err)
-			continue
 		}
-		var alias string
-		if imp.Name != nil {
-			alias = imp.Name.Name
-		} else {
-			alias = importToAlias(importPath)
-		}
-		importedPackages[alias] = pkg
 	}
 
 	// 4. Walk the ast looking for references to imported packages.
-	resolved2 := map[[2]string]struct{}{}
+	otherPackageResolutions := map[[2]string]struct{}{}
 	for _, decl := range content.Decls {
 		ast.Inspect(decl, func(node ast.Node) bool {
 			selectorExpr, ok := node.(*ast.SelectorExpr)
+
 			// 4.1 the node needs to be a `selectorExpr`.
 			if !ok || selectorExpr.Sel == nil {
 				return true
 			}
+
 			// 4.2 the selector element needs to be an identifier.
 			libAlias, ok := selectorExpr.X.(*ast.Ident)
 			if !ok {
 				return true
 			}
 
-			if _, ok = resolved2[[2]string{libAlias.Name, selectorExpr.Sel.Name}]; ok {
+			// 4.3 this was already resolved before.
+			key := [2]string{libAlias.Name, selectorExpr.Sel.Name}
+			if _, ok = otherPackageResolutions[key]; ok {
 				return true
 			}
 
-			// 4.3 the selected lib must be in the list of imported packages.
+			// 4.4 the selected lib must be in the list of imported packages,
+			//     otherwise it might be a third party library.
 			pkg, ok := importedPackages[libAlias.Name]
-			if !ok {
+			if !ok || pkg == nil {
 				return true
 			}
-			// 4.4 the selector identifier must be in the list of exported symbols.
+
+			// 4.5 the selector identifier (the right side of the dot) must be in the
+			//     list symbols exported from that package.
 			f, ok := pkg.SymbolToFile[selectorExpr.Sel.Name]
 			if !ok {
 				return true
@@ -115,7 +98,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 				[]string{selectorExpr.Sel.Name},
 				f.AbsPath,
 			))
-			resolved2[[2]string{libAlias.Name, selectorExpr.Sel.Name}] = struct{}{}
+			otherPackageResolutions[key] = struct{}{}
 			return true
 		})
 	}
@@ -123,53 +106,48 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	return &result, nil
 }
 
-// / importToPath receives an import string and attempts to retrieve the
-// / folder where the package that is being imported lives. If the folder
-// / is not found, it returns an empty string. For third party libraries,
-// / this will always be empty. It returns the path relative to the root.
-func (l *Language) importToPath(imp string) string {
-	pref := l.GoMod.Module + "/"
-	if strings.HasPrefix(imp, pref) {
-		p := strings.TrimPrefix(imp, pref)
-		return filepath.Join(strings.Split(p, "/")...)
-	}
-	return ""
+type ImportStmt struct {
+	importPath string
+	importName string
 }
 
-// / importToAlias receives an import string and returns the alias that
-// / is expected to be used in the code for accessing the contents of
-// / the package.
-func importToAlias(imp string) string {
-	base := path.Base(imp)
+func NewImportStmt(imp *ast.ImportSpec) ImportStmt {
+	var importName string
+	if imp.Name != nil {
+		importName = imp.Name.Name
+	}
+	return ImportStmt{
+		importPath: imp.Path.Value[1 : len(imp.Path.Value)-1],
+		importName: importName,
+	}
+}
+
+func (i *ImportStmt) IsLocal(moduleName string) bool {
+	if !strings.HasSuffix(moduleName, "/") {
+		moduleName += "/"
+	}
+	return strings.HasPrefix(i.importPath, moduleName)
+}
+
+func (i *ImportStmt) RelPath(moduleName string) string {
+	if !strings.HasSuffix(moduleName, "/") {
+		moduleName += "/"
+	}
+	if !i.IsLocal(moduleName) {
+		return ""
+	}
+	return strings.TrimPrefix(i.importPath, moduleName)
+}
+
+func (i *ImportStmt) Alias() string {
+	if i.importName != "" {
+		return i.importName
+	}
+
+	base := path.Base(i.importPath)
 	for _, split := range []string{".", "-"} {
 		baseSplit := strings.Split(base, split)
 		base = baseSplit[len(baseSplit)-1]
 	}
 	return base
-}
-
-var stdLibSymbols = map[string]bool{
-	"string":     true,
-	"bool":       true,
-	"byte":       true,
-	"rune":       true,
-	"int":        true,
-	"int8":       true,
-	"int16":      true,
-	"int32":      true,
-	"int64":      true,
-	"uint":       true,
-	"uint8":      true,
-	"uint16":     true,
-	"uint32":     true,
-	"uint64":     true,
-	"uintptr":    true,
-	"float32":    true,
-	"float64":    true,
-	"complex64":  true,
-	"complex128": true,
-	"nil":        true,
-	"make":       true,
-	"panic":      true,
-	// TODO: there's more...
 }
