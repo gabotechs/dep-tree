@@ -24,13 +24,15 @@ type Node struct {
 	Size         int    `json:"size"`
 	Color        []int  `json:"color,omitempty"`
 	IsDir        bool   `json:"isDir"`
+	IsPackage    bool   `json:"isPackage"`
 }
 
 type Link struct {
-	From     int64 `json:"from"`
-	To       int64 `json:"to"`
-	IsDir    bool  `json:"isDir"`
-	IsCyclic bool  `json:"isCyclic"`
+	From      int64 `json:"from"`
+	To        int64 `json:"to"`
+	IsDir     bool  `json:"isDir"`
+	IsPackage bool  `json:"isPackage"`
+	IsCyclic  bool  `json:"isCyclic"`
 }
 
 type Graph struct {
@@ -47,6 +49,7 @@ func toInt(arr []float64) []int {
 	return result
 }
 
+// TODO: factor this out
 func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], loadCallbacks graph.LoadCallbacks[*language.FileInfo]) (Graph, error) {
 	g := graph.NewGraph[*language.FileInfo]()
 	err := g.Load(files, parser, loadCallbacks)
@@ -84,6 +87,7 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 	}
 
 	addedFolders := map[string]bool{}
+	addedPackages := map[string]bool{}
 
 	for _, node := range allNodes {
 		dirName := filepath.Dir(node.Data.RelPath)
@@ -122,6 +126,22 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 					IsDir: true,
 				})
 			}
+		}
+
+		if node.Data.Package != "" {
+			packageNode := graph.MakeNode(node.Data.Package, 0)
+			if _, ok := addedPackages[node.Data.Package]; !ok {
+				addedPackages[node.Data.Package] = true
+				out.Nodes = append(out.Nodes, Node{
+					Id:        packageNode.ID(),
+					IsPackage: true,
+				})
+			}
+			out.Links = append(out.Links, Link{
+				From:      node.ID(),
+				To:        packageNode.ID(),
+				IsPackage: true,
+			})
 		}
 	}
 

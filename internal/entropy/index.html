@@ -20,7 +20,7 @@
 
 <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}</script>
 <script type="module">
-    import {UnrealBloomPass} from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import { UnrealBloomPass } from 'https://unpkg.com/three/examples/jsm/postprocessing/UnrealBloomPass.js';
     import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
 
     const DATA = {}
@@ -40,8 +40,10 @@
         LINK_DISTANCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
         FILE_NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
         DIR_NODE_REPULSION_FORCE: 40,
+        PACKAGE_NODE_REPULSION_FORCE: 40,
         FILE_LINK_STRENGTH_FACTOR: 1,
         DIR_LINK_STRENGTH_FACTOR: 2.5,
+        PACKAGE_LINK_STRENGTH_FACTOR: 5,
         HIGHLIGHT_CYCLES: false
     }
 
@@ -158,7 +160,7 @@
         .nodeThreeObject(nodeThreeObject)
         .nodeThreeObjectExtend(true)
         .nodeVal('size')
-        .nodeVisibility(node => !node['isDir'])
+        .nodeVisibility(node => !node['isDir'] && !node['isPackage'])
         .nodeColor(colorNode)
         .onNodeClick(node => {
             selectNode(node)
@@ -171,7 +173,7 @@
         .linkDirectionalArrowColor(colorLink)
         .linkSource('from')
         .linkTarget('to')
-        .linkVisibility(link => !link['isDir'])
+        .linkVisibility(link => !link['isDir'] && !link['isPackage'])
         .linkWidth(link => highlightLinks.has(link) ? SETTINGS.LINK_HIGHLIGHT_WIDTH : undefined)
         .linkDirectionalParticles(link => highlightLinks.has(link) ? 2 : 0)
         .linkDirectionalParticleWidth(SETTINGS.LINK_HIGHLIGHT_WIDTH);
@@ -182,13 +184,20 @@
         .d3Force('link')
         .distance(_link => SETTINGS.LINK_DISTANCE)
         .strength(link => {
-            const f = link['isDir'] ? SETTINGS.DIR_LINK_STRENGTH_FACTOR : SETTINGS.FILE_LINK_STRENGTH_FACTOR
+            let f = SETTINGS.FILE_LINK_STRENGTH_FACTOR
+            if (link['isDir']) f = SETTINGS.DIR_LINK_STRENGTH_FACTOR
+            if (link['isPackage']) f = SETTINGS.PACKAGE_LINK_STRENGTH_FACTOR
             return f / Math.min(NODES[link.from].neighbors.length, NODES[link.to].neighbors.length);
         })
 
     Graph
         .d3Force('charge')
-        .strength(node => -(node['isDir'] ? SETTINGS.DIR_NODE_REPULSION_FORCE : SETTINGS.FILE_NODE_REPULSION_FORCE))
+        .strength(node => {
+            let f = SETTINGS.FILE_NODE_REPULSION_FORCE
+            if (node['isDir']) f = SETTINGS.DIR_NODE_REPULSION_FORCE
+            if (node['isPackage']) f = SETTINGS.PACKAGE_NODE_REPULSION_FORCE
+            return -f
+        })
 
     let recomputeTimeout
     function debouncedRecompute() {
