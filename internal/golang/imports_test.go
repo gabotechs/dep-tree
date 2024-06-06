@@ -26,6 +26,23 @@ func TestImports(t *testing.T) {
 				{"File", "internal/golang/package.go"},
 			},
 		},
+		{
+			Name: "exports.go",
+			Expected: [][2]string{
+				{"Language", "internal/golang/language.go"},
+				{"FileInfo", "internal/language/language.go"},
+				{"File", "internal/golang/package.go"},
+				{"ExportsResult", "internal/language/language.go"},
+				{"ExportSymbol", "internal/language/language.go"},
+				{"ExportEntry", "internal/language/language.go"},
+			},
+		},
+		{
+			Name: "package.go",
+			Expected: [][2]string{
+				{"Cached1In1OutErr", "internal/utils/cached.go"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
