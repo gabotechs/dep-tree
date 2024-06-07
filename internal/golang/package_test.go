@@ -25,7 +25,7 @@ func TestPackage(t *testing.T) {
 		{
 			Name:                "NewPackageFromDir function on this package",
 			Path:                ".",
-			ExpectedSymbol:      "NewPackageFromDir",
+			ExpectedSymbol:      "PackagesInDir",
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
 		},
 		{
@@ -43,11 +43,14 @@ func TestPackage(t *testing.T) {
 			result, err := PackagesInDir(tt.Path)
 			a.NoError(err)
 			var pkg Package
+			found := false
 			for _, pkg = range result {
 				if _, ok := pkg.SymbolToFile[tt.ExpectedSymbol]; ok {
+					found = true
 					break
 				}
 			}
+			a.Equal(true, found)
 
 			a.Equal(
 				tt.ExpectedFileAbsPath,
