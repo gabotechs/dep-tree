@@ -67,3 +67,32 @@ func TestPackage(t *testing.T) {
 		})
 	}
 }
+
+func TestFile(t *testing.T) {
+	tests := []struct {
+		Name        string
+		PackageName string
+	}{
+		{
+			Name:        "package.go",
+			PackageName: "golang",
+		},
+		{
+			Name:        "imports_test.go",
+			PackageName: "golang_test",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+
+			file, err := NewFile(tt.Name)
+			a.NoError(err)
+
+			a.Equal(tt.PackageName, file.Package.Name)
+			a.NotNil(file.Package)
+			a.NotNil(file.TokenFile)
+		})
+	}
+}
