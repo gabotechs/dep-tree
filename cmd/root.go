@@ -145,7 +145,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		}
 	}
 	if top.lang == "" {
-		return nil, errors.New("any of the provided files belong to the a supported language")
+		return nil, errors.New("none of the provided files belong to the a supported language")
 	}
 	switch top.lang {
 	case "js":
