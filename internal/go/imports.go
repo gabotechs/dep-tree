@@ -2,7 +2,6 @@ package golang
 
 import (
 	"go/ast"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -29,7 +28,13 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			result.Errors = append(result.Errors, err)
 			continue
 		}
-		importedPackages[importStmt.Alias()] = pkgs
+		for _, pkg := range pkgs {
+			name := pkg.Name
+			if importStmt.ImportName != "" {
+				name = importStmt.ImportName
+			}
+			importedPackages[name] = append(importedPackages[name], pkg)
+		}
 	}
 
 	// 2. Walk all the unresolved symbols, and try to match them with the ones
@@ -38,9 +43,9 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	//    2. a type of function declared in this same package
 	//    3. a reference to an imported package (e.g. this file: `ast`, `path`, `filepath`, ...)
 	//    This step resolves only symbols from 2.
-	localResolutions := map[string]struct{}{}
+	nonQualifiedResolutions := map[string]struct{}{}
 	for _, unresolved := range content.AstFile.Unresolved {
-		if _, ok := localResolutions[unresolved.Name]; ok {
+		if _, ok := nonQualifiedResolutions[unresolved.Name]; ok {
 			continue
 		}
 
@@ -52,14 +57,14 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 		for _, pkg := range pkgLookup {
 			if f, ok := pkg.SymbolToFile[unresolved.Name]; ok {
 				result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, f.AbsPath))
-				localResolutions[unresolved.Name] = struct{}{}
+				nonQualifiedResolutions[unresolved.Name] = struct{}{}
 				break
 			}
 		}
 	}
 
 	// 3. Walk the ast looking for references to imported packages.
-	otherPackageResolutions := map[[2]string]struct{}{}
+	fullyQualifiedResolutions := map[[2]string]struct{}{}
 	for _, decl := range content.AstFile.Decls {
 		ast.Inspect(decl, func(node ast.Node) bool {
 			selectorExpr, ok := node.(*ast.SelectorExpr)
@@ -77,7 +82,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 
 			// 3.3 this was already resolved before.
 			key := [2]string{libAlias.Name, selectorExpr.Sel.Name}
-			if _, ok = otherPackageResolutions[key]; ok {
+			if _, ok = fullyQualifiedResolutions[key]; ok {
 				return true
 			}
 
@@ -105,7 +110,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 				[]string{selectorExpr.Sel.Name},
 				absPath,
 			))
-			otherPackageResolutions[key] = struct{}{}
+			fullyQualifiedResolutions[key] = struct{}{}
 			return true
 		})
 	}
@@ -144,17 +149,4 @@ func (i *ImportStmt) RelPath(moduleName string) string {
 		return ""
 	}
 	return strings.TrimPrefix(i.ImportPath, moduleName)
-}
-
-func (i *ImportStmt) Alias() string {
-	if i.ImportName != "" {
-		return i.ImportName
-	}
-
-	base := path.Base(i.ImportPath)
-	for _, split := range []string{".", "-"} {
-		baseSplit := strings.Split(base, split)
-		base = baseSplit[len(baseSplit)-1]
-	}
-	return base
 }

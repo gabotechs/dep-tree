@@ -98,37 +98,31 @@ func Test_ImportStmt(t *testing.T) {
 		Name    string
 		IsLocal bool
 		RelPath string
-		Alias   string
 	}{
 		{
 			Name:    "github.com/stretchr/testify/require",
 			IsLocal: false,
 			RelPath: "",
-			Alias:   "require",
 		},
 		{
 			Name:    "github.com/gabotechs/dep-tree",
 			IsLocal: false,
 			RelPath: "",
-			Alias:   "tree",
 		},
 		{
 			Name:    "dep_tree github.com/gabotechs/dep-tree",
 			IsLocal: false,
 			RelPath: "",
-			Alias:   "dep_tree",
 		},
 		{
 			Name:    "github.com/gabotechs/dep-tree/internal/golang",
 			IsLocal: true,
 			RelPath: "internal/golang",
-			Alias:   "golang",
 		},
 		{
 			Name:    "go github.com/gabotechs/dep-tree/internal/golang",
 			IsLocal: true,
 			RelPath: "internal/golang",
-			Alias:   "go",
 		},
 	}
 
@@ -146,7 +140,6 @@ func Test_ImportStmt(t *testing.T) {
 				importStmt.ImportPath = nameSlices[1]
 			}
 			a.Equal(tt.IsLocal, importStmt.IsLocal(lang.GoMod.Module))
-			a.Equal(tt.Alias, importStmt.Alias())
 			a.Equal(tt.RelPath, importStmt.RelPath(lang.GoMod.Module))
 		})
 	}

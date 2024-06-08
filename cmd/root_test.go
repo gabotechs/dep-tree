@@ -138,7 +138,7 @@ func TestInferLang(t *testing.T) {
 		{
 			Name:  "no match",
 			Files: []string{"foo.pdf", "bar.docx"},
-			Error: "any of the provided files belong to the a supported language",
+			Error: "none of the provided files belong to the a supported language",
 		},
 	}
 
