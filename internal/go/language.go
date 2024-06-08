@@ -62,8 +62,8 @@ func (l *Language) ParseFile(path string) (*language.FileInfo, error) {
 		AbsPath: absPath,
 		RelPath: relPath,
 		Package: file.Package.Name,
-		Size:    int(file.FileEnd),
-		Loc:     0, // TODO: I still don't know how to extract the LOC from an `ast.File` object.
+		Size:    file.TokenFile.Size(),
+		Loc:     file.TokenFile.LineCount(),
 	}, nil
 }
 

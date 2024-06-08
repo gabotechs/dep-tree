@@ -18,7 +18,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	//    third party libraries, and that in fact are part of the codebase.
 	importedPackages := make(map[string][]*Package)
 	thisModule := l.GoMod.Module + "/"
-	for _, importSpec := range content.Imports {
+	for _, importSpec := range content.AstFile.Imports {
 		importStmt := NewImportStmt(importSpec)
 
 		if !importStmt.IsLocal(thisModule) {
@@ -39,7 +39,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	//    3. a reference to an imported package (e.g. this file: `ast`, `path`, `filepath`, ...)
 	//    This step resolves only symbols from 2.
 	localResolutions := map[string]struct{}{}
-	for _, unresolved := range content.Unresolved {
+	for _, unresolved := range content.AstFile.Unresolved {
 		if _, ok := localResolutions[unresolved.Name]; ok {
 			continue
 		}
@@ -60,7 +60,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 
 	// 3. Walk the ast looking for references to imported packages.
 	otherPackageResolutions := map[[2]string]struct{}{}
-	for _, decl := range content.Decls {
+	for _, decl := range content.AstFile.Decls {
 		ast.Inspect(decl, func(node ast.Node) bool {
 			selectorExpr, ok := node.(*ast.SelectorExpr)
 

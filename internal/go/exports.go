@@ -9,7 +9,7 @@ import (
 func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsResult, error) {
 	content := file.Content.(*File)
 	results := language.ExportsResult{}
-	for symbol := range content.Scope.Objects {
+	for symbol := range content.AstFile.Scope.Objects {
 		if len(symbol) == 0 {
 			continue
 		}

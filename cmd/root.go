@@ -8,7 +8,7 @@ import (
 
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dummy"
-	"github.com/gabotechs/dep-tree/internal/go"
+	golang "github.com/gabotechs/dep-tree/internal/go"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"

@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gabotechs/dep-tree/internal/go"
 	"gopkg.in/yaml.v3"
 
 	"github.com/gabotechs/dep-tree/internal/check"
+	golang "github.com/gabotechs/dep-tree/internal/go"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/python"
 	"github.com/gabotechs/dep-tree/internal/rust"

@@ -11,9 +11,10 @@ import (
 )
 
 type File struct {
-	*ast.File
-	Package *Package
-	AbsPath string
+	AstFile   *ast.File
+	TokenFile *token.File
+	Package   *Package
+	AbsPath   string
 }
 
 func _newFile(path string) (*File, error) {
@@ -40,7 +41,7 @@ func _newFile(path string) (*File, error) {
 var NewFile = utils.Cached1In1OutErr(_newFile)
 
 type Package struct {
-	*ast.Package
+	Name          string
 	SymbolToFile  map[string]*File
 	AbsPathToFile map[string]*File
 }
@@ -55,27 +56,33 @@ func _packagesInDir(dir string) ([]*Package, error) {
 	if err != nil {
 		return nil, err
 	}
+	fsetMap := make(map[string]*token.File)
+	fset.Iterate(func(file *token.File) bool {
+		fsetMap[file.Name()] = file
+		return true
+	})
 
 	result := make([]*Package, len(pkgs))
 	i := 0
-	for _, pkg := range pkgs {
-		filePkg := Package{
-			Package:       pkg,
+	for _, goPkg := range pkgs {
+		pkg := Package{
+			Name:          goPkg.Name,
 			SymbolToFile:  make(map[string]*File),
 			AbsPathToFile: make(map[string]*File),
 		}
-		for absFilePath, file := range pkg.Files {
+		for absFilePath, file := range goPkg.Files {
 			f := File{
-				File:    file,
-				AbsPath: absFilePath,
-				Package: &filePkg,
+				AstFile:   file,
+				TokenFile: fsetMap[absFilePath],
+				AbsPath:   absFilePath,
+				Package:   &pkg,
 			}
-			filePkg.AbsPathToFile[absFilePath] = &f
+			pkg.AbsPathToFile[absFilePath] = &f
 			for name := range file.Scope.Objects {
-				filePkg.SymbolToFile[name] = &f
+				pkg.SymbolToFile[name] = &f
 			}
 		}
-		result[i] = &filePkg
+		result[i] = &pkg
 		i += 1
 	}
 	return result, nil
