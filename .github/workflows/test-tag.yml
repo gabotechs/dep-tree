@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.0
       - run: golangci-lint run -v
 
   tag:

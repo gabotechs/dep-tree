@@ -42,7 +42,7 @@ func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg Ren
 	} else {
 		temp = filepath.Join(os.TempDir(), "index.html")
 	}
-	err = os.WriteFile(temp, rendered, os.ModePerm)
+	err = os.WriteFile(temp, rendered, 0o600)
 	if err != nil {
 		return err
 	}

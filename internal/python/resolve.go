@@ -122,7 +122,7 @@ func ResolveRelative(slices []string, dir string, stepsBack int) (*ResolveResult
 	return result, nil
 }
 
-var rootFiles = []string{
+var findClosestDirWithRootFile = utils.MakeCachedFindClosestDirWithRootFile([]string{
 	"pyproject.toml",
 	"setup.py",
 	"poetry.toml",
@@ -130,24 +130,7 @@ var rootFiles = []string{
 	"requirements.txt",
 	".pylintrc",
 	".git/index",
-}
-
-func _findClosestDirWithRootFile(searchPath string) string {
-	for _, rootFile := range rootFiles {
-		if utils.FileExists(filepath.Join(searchPath, rootFile)) {
-			return searchPath
-		}
-	}
-	nextSearchPath := filepath.Dir(searchPath)
-
-	if nextSearchPath != searchPath {
-		return _findClosestDirWithRootFile(nextSearchPath)
-	} else {
-		return ""
-	}
-}
-
-var findClosestDirWithRootFile = utils.Cached1In1Out(_findClosestDirWithRootFile)
+})
 
 // ResolveAbsolute never fails, if nothing is found it just returns nil.
 //
@@ -156,8 +139,8 @@ var findClosestDirWithRootFile = utils.Cached1In1Out(_findClosestDirWithRootFile
 func (l *Language) ResolveAbsolute(slices []string, currDir string) *ResolveResult {
 	searchPaths := []string{currDir}
 	dirWithRootFile := findClosestDirWithRootFile(currDir)
-	if dirWithRootFile != "" {
-		searchPaths = append(searchPaths, dirWithRootFile)
+	if dirWithRootFile != nil {
+		searchPaths = append(searchPaths, dirWithRootFile.AbsDir)
 	}
 	if l.cfg != nil {
 		searchPaths = append(searchPaths, l.cfg.PythonPath...)

@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/gabotechs/dep-tree/internal/check"
+	golang "github.com/gabotechs/dep-tree/internal/go"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/python"
 	"github.com/gabotechs/dep-tree/internal/rust"
@@ -28,6 +29,7 @@ type Config struct {
 	Js            js.Config     `yaml:"js"`
 	Rust          rust.Config   `yaml:"rust"`
 	Python        python.Config `yaml:"python"`
+	Golang        golang.Config `yaml:"golang"`
 }
 
 func (c *Config) UnwrapProxyExports() bool {
