@@ -50,34 +50,18 @@ func (l *Language) ParseFile(path string) (*language.FileInfo, error) {
 		return nil, err
 	}
 
-	absDir := filepath.Dir(absPath)
-
-	pkgs, err := PackagesInDir(absDir)
+	file, err := NewFile(path)
 	if err != nil {
 		return nil, err
-	}
-	var file *ast.File
-	var pkg Package
-	for _, pkg = range pkgs {
-		var ok bool
-		if file, ok = pkg.Files[absPath]; ok {
-			break
-		}
-	}
-	if file == nil {
-		return nil, fmt.Errorf("could not find file %s in any package in dir %s", absPath, absDir)
 	}
 
 	relPath, _ := filepath.Rel(l.Root.AbsDir, absPath)
 
 	return &language.FileInfo{
-		Content: &File{
-			File:    file,
-			AbsPath: absPath,
-		},
+		Content: file,
 		AbsPath: absPath,
 		RelPath: relPath,
-		Package: pkg.Name,
+		Package: file.Package.Name,
 		Size:    int(file.FileEnd),
 		Loc:     0, // TODO: I still don't know how to extract the LOC from an `ast.File` object.
 	}, nil

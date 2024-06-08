@@ -14,11 +14,22 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 	content := file.Content.(*File)
 	result := language.ImportsResult{}
 
-	// 1. Load all the exported symbols in the current package. They can
-	//    be referenced without the package name prefix in this file.
-	thisPackages, err := PackagesInDir(filepath.Dir(file.AbsPath))
-	if err != nil {
-		return nil, err
+	// 1. Load all the local packages imported by the file that are not
+	//    third party libraries, and that in fact are part of the codebase.
+	importedPackages := make(map[string][]*Package)
+	thisModule := l.GoMod.Module + "/"
+	for _, importSpec := range content.Imports {
+		importStmt := NewImportStmt(importSpec)
+
+		if !importStmt.IsLocal(thisModule) {
+			continue
+		}
+		pkgs, err := PackagesInDir(filepath.Join(l.Root.AbsDir, importStmt.RelPath(thisModule)))
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+			continue
+		}
+		importedPackages[importStmt.Alias()] = pkgs
 	}
 
 	// 2. Walk all the unresolved symbols, and try to match them with the ones
@@ -33,65 +44,51 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 			continue
 		}
 
-		for _, pkg := range thisPackages {
+		pkgLookup := []*Package{content.Package}
+		// Dot imports make a package's symbols available as if they were
+		// local imports.
+		pkgLookup = append(pkgLookup, importedPackages["."]...)
+
+		for _, pkg := range pkgLookup {
 			if f, ok := pkg.SymbolToFile[unresolved.Name]; ok {
 				result.Imports = append(result.Imports, language.SymbolsImport([]string{unresolved.Name}, f.AbsPath))
 				localResolutions[unresolved.Name] = struct{}{}
+				break
 			}
 		}
 	}
 
-	// 3. Load all the local packages imported by the file that are not
-	//    third party libraries, and that in fact are part of the codebase.
-	importedPackages := make(map[string][]Package)
-	module := l.GoMod.Module + "/"
-	for _, importSpec := range content.Imports {
-		// TODO: what about dot imports?
-
-		importStmt := NewImportStmt(importSpec)
-
-		if !importStmt.IsLocal(module) {
-			continue
-		}
-		pkgs, err := PackagesInDir(filepath.Join(l.Root.AbsDir, importStmt.RelPath(module)))
-		if err != nil {
-			result.Errors = append(result.Errors, err)
-			continue
-		}
-		importedPackages[importStmt.Alias()] = pkgs
-	}
-
-	// 4. Walk the ast looking for references to imported packages.
+	// 3. Walk the ast looking for references to imported packages.
 	otherPackageResolutions := map[[2]string]struct{}{}
 	for _, decl := range content.Decls {
 		ast.Inspect(decl, func(node ast.Node) bool {
 			selectorExpr, ok := node.(*ast.SelectorExpr)
 
-			// 4.1 the node needs to be a `selectorExpr`.
+			// 3.1 the node needs to be a `selectorExpr`.
 			if !ok || selectorExpr.Sel == nil {
 				return true
 			}
 
-			// 4.2 the selector element needs to be an identifier.
+			// 3.2 the selector element needs to be an identifier.
 			libAlias, ok := selectorExpr.X.(*ast.Ident)
 			if !ok {
 				return true
 			}
 
-			// 4.3 this was already resolved before.
+			// 3.3 this was already resolved before.
 			key := [2]string{libAlias.Name, selectorExpr.Sel.Name}
 			if _, ok = otherPackageResolutions[key]; ok {
 				return true
 			}
 
-			// 4.4 the selected lib must be in the list of imported packages,
+			// 3.4 the selected lib must be in the list of imported packages,
 			//     otherwise it might be a third party library.
 			pkgs, ok := importedPackages[libAlias.Name]
 			if !ok {
 				return true
 			}
 
-			// 4.5 the selector identifier (the right side of the dot) must be in the
+			// 3.5 the selector identifier (the right side of the dot) must be in the
 			//     list symbols exported from that package.
 			var absPath string
 			for _, pkg := range pkgs {

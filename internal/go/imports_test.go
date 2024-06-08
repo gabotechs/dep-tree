@@ -6,9 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gabotechs/dep-tree/internal/golang"
+	golang "github.com/gabotechs/dep-tree/internal/go"
+	. "github.com/gabotechs/dep-tree/internal/language"
 	"github.com/stretchr/testify/require"
 )
+
+type dummy = Language
 
 func TestImports(t *testing.T) {
 	tests := []struct {
@@ -19,20 +22,20 @@ func TestImports(t *testing.T) {
 			Name: "imports.go",
 			Expected: [][2]string{
 				{"SymbolsImport", "internal/language/language.go"},
-				{"Package", "internal/golang/package.go"},
-				{"PackagesInDir", "internal/golang/package.go"},
-				{"Language", "internal/golang/language.go"},
+				{"Package", "internal/go/package.go"},
+				{"PackagesInDir", "internal/go/package.go"},
+				{"Language", "internal/go/language.go"},
 				{"ImportsResult", "internal/language/language.go"},
 				{"FileInfo", "internal/language/language.go"},
-				{"File", "internal/golang/package.go"},
+				{"File", "internal/go/package.go"},
 			},
 		},
 		{
 			Name: "exports.go",
 			Expected: [][2]string{
-				{"Language", "internal/golang/language.go"},
+				{"Language", "internal/go/language.go"},
 				{"FileInfo", "internal/language/language.go"},
-				{"File", "internal/golang/package.go"},
+				{"File", "internal/go/package.go"},
 				{"ExportsResult", "internal/language/language.go"},
 				{"ExportSymbol", "internal/language/language.go"},
 				{"ExportEntry", "internal/language/language.go"},
@@ -42,6 +45,15 @@ func TestImports(t *testing.T) {
 			Name: "package.go",
 			Expected: [][2]string{
 				{"Cached1In1OutErr", "internal/utils/cached.go"},
+			},
+		},
+		{
+			Name: "imports_test.go",
+			Expected: [][2]string{
+				{"NewLanguage", "internal/go/language.go"},
+				{"ImportStmt", "internal/go/imports.go"},
+				{"Config", "internal/go/config.go"},
+				{"Language", "internal/language/language.go"},
 			},
 		},
 	}

@@ -15,24 +15,28 @@ func TestPackage(t *testing.T) {
 		Path                string
 		ExpectedSymbol      string
 		ExpectedFileAbsPath string
+		ExpectedPackage     string
 	}{
 		{
 			Name:                "File type on this package",
 			Path:                ".",
 			ExpectedSymbol:      "File",
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
+			ExpectedPackage:     "golang",
 		},
 		{
 			Name:                "NewPackageFromDir function on this package",
 			Path:                ".",
 			ExpectedSymbol:      "PackagesInDir",
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
+			ExpectedPackage:     "golang",
 		},
 		{
 			Name:                "_packagesInDir function on this package",
 			Path:                ".",
 			ExpectedSymbol:      "_packagesInDir",
 			ExpectedFileAbsPath: filepath.Join(absPath, "package.go"),
+			ExpectedPackage:     "golang",
 		},
 	}
 
@@ -42,10 +46,12 @@ func TestPackage(t *testing.T) {
 
 			result, err := PackagesInDir(tt.Path)
 			a.NoError(err)
-			var pkg Package
+			var pkg *Package
+			var file *File
 			found := false
 			for _, pkg = range result {
-				if _, ok := pkg.SymbolToFile[tt.ExpectedSymbol]; ok {
+				var ok bool
+				if file, ok = pkg.SymbolToFile[tt.ExpectedSymbol]; ok {
 					found = true
 					break
 				}
@@ -56,6 +62,8 @@ func TestPackage(t *testing.T) {
 				tt.ExpectedFileAbsPath,
 				pkg.SymbolToFile[tt.ExpectedSymbol].AbsPath,
 			)
+
+			a.Equal(tt.ExpectedPackage, file.Package.Name)
 		})
 	}
 }
