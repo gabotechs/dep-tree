@@ -48,10 +48,10 @@ func (t *Tree[T]) makeStructuredTree(
 	return result, nil
 }
 
-func (t *Tree[T]) RenderStructured() ([]byte, error) {
+func (t *Tree[T]) RenderStructured() (string, error) {
 	tree, err := t.makeStructuredTree(t.entrypoint.Id, nil, nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	structuredTree := StructuredTree{
@@ -81,5 +81,10 @@ func (t *Tree[T]) RenderStructured() ([]byte, error) {
 		}
 	}
 
-	return json.MarshalIndent(structuredTree, "", "  ")
+	result, err := json.MarshalIndent(structuredTree, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(result), nil
 }
