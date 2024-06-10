@@ -65,7 +65,7 @@ Contributions are always welcome!
 On Mac and Linux, it can be installed using brew:
 
 ```shell
-brew install gabotechs/taps/dep-tree
+brew install dep-tree
 ```
 
 Alternatively, on any platform including Windows it can be installed with `pip`...
