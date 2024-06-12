@@ -12,11 +12,11 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-//go:embed index.html
+//go:embed generated/index.html
 var index []byte
 
-const ToReplace = "const DATA = {}"
-const ReplacePrefix = "const DATA = "
+const ToReplace = `"__INLINE_DATA",{}`
+const ReplacePrefix = `"__INLINE_DATA",`
 
 type RenderConfig struct {
 	NoOpen        bool
