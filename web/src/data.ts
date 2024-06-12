@@ -5,4 +5,3 @@ import { Graph } from "./types.ts";
 export class Data {
   static __INLINE_DATA = {} as Graph
 }
-
