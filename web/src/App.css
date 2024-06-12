@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  background-color: #000015;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nodeLabel {
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+  color: white;
+  background-color: #000015;
+  padding: .5rem;
+  border-radius: .5rem
+}
+
+.nodeLabelSelected {
+  opacity: 0.75;
+  position: relative;
+  background-color: #00000088;
+  top: 32px;
+}
