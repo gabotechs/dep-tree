@@ -56,6 +56,8 @@ $ dep-tree check`,
 `,
 	}
 
+	root.SetOut(os.Stdout)
+	root.SetErr(os.Stderr)
 	root.SetArgs(args)
 
 	root.AddCommand(
