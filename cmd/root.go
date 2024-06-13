@@ -216,7 +216,7 @@ func loadConfig() (*config.Config, error) {
 			absExclude[i] = file
 		}
 	}
-	cfg.Exclude = append(cfg.Exclude, exclude...)
+	cfg.Exclude = append(cfg.Exclude, absExclude...)
 	// validate exclusion patterns.
 	for _, exclusion := range cfg.Exclude {
 		if _, err := utils.GlobstarMatch(exclusion, ""); err != nil {

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/tree"
@@ -50,7 +48,7 @@ func TreeCmd() *cobra.Command {
 				}
 
 				rendered, err := t.RenderStructured()
-				fmt.Println(rendered)
+				cmd.Println(rendered)
 				return err
 			} else {
 				return tui.Loop[*language.FileInfo](

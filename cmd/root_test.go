@@ -68,6 +68,12 @@ func TestRoot(t *testing.T) {
 			Name: "tree .root_test/main.py --json",
 		},
 		{
+			Name: "tree .root_test/main.py --json --exclude .root_test/dep.py",
+		},
+		{
+			Name: "tree .root_test/main.py --json --exclude .root_test/*.py",
+		},
+		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml",
 		},
 		{
@@ -94,6 +100,7 @@ func TestRoot(t *testing.T) {
 			name := tt.Name + ".txt"
 			name = strings.ReplaceAll(name, "/", "_")
 			name = strings.ReplaceAll(name, "-", "_")
+			name = strings.ReplaceAll(name, "*", "_")
 			if tt.JustExpectAtLeast > 0 {
 				a := require.New(t)
 				a.Greater(len(b.String()), tt.JustExpectAtLeast)
