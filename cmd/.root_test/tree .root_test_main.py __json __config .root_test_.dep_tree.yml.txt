@@ -1,0 +1,9 @@
+{
+  "tree": {
+    "cmd/.root_test/main.py": {
+      "cmd/.root_test/dep.py": null
+    }
+  },
+  "circularDependencies": [],
+  "errors": {}
+}
