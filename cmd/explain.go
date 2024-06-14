@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"slices"
+
 	"github.com/gabotechs/dep-tree/internal/explain"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -45,6 +47,7 @@ func ExplainCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			slices.Sort(deps)
 			for _, result := range deps {
 				cmd.Println(result)
 			}
