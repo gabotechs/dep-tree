@@ -87,7 +87,13 @@ func TestRoot(t *testing.T) {
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
 		},
 		{
-			Name: "explain .root_test/*.py ./**/deps.py",
+			Name: "explain .root_test/*.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/dep.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/deps.py foo.bar",
 		},
 	}
 

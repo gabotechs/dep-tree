@@ -20,7 +20,7 @@ func ExplainCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			toFiles, err := filesFromArgs([]string{args[0]})
+			toFiles, err := filesFromArgs([]string{args[1]})
 			if err != nil {
 				return err
 			}
