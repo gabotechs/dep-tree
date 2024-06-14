@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 
 	"github.com/gabotechs/dep-tree/internal/check"
-	"github.com/gabotechs/dep-tree/internal/config"
 )
 
 func CheckCmd() *cobra.Command {
@@ -26,7 +26,7 @@ func CheckCmd() *cobra.Command {
 				return err
 			}
 			if len(cfg.Check.Entrypoints) == 0 {
-				return fmt.Errorf(`config file "%s" has no entrypoints`, configPath)
+				return fmt.Errorf(`config file "%s" has no entrypoints`, cfg.Path)
 			}
 			lang, err := inferLang(cfg.Check.Entrypoints, cfg)
 			if err != nil {

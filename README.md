@@ -143,6 +143,30 @@ clustering and no clear separation between them:
     <img height="200px" src="docs/coupled-code-base-3.png">
 </div>
 
+### Explain
+
+Given two pieces of code, displays what are the dependencies between them, for example:
+
+```shell
+dep-tree explain 'src/products/**/*.go' 'src/orders/**/*.go'
+```
+
+> [!WARNING]  
+> Make sure you wrap the two glob patterns with single quotes ('') or double quotes (""),
+> otherwise your shell might expand the globstars, and `dep-tree explain` will receive
+> an incorrect number of arguments.
+
+
+This command will display what Golang files under the `src/products` directory depend on
+other Golang files under the `src/orders` directory.
+
+It will output something like this:
+```shell
+src/products/books/book.go -> src/orders/renting.go
+src/products/price.go  -> src/orders/order_manager.go
+src/products/storage.go -> src/orders/order_manager.go
+```
+
 ### Tree
 
 Choose the file that will act as the root of the dependency graph (for example `my-file.py`), and run:

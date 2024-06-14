@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -85,6 +86,15 @@ func TestRoot(t *testing.T) {
 		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
 		},
+		{
+			Name: "explain .root_test/*.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/dep.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/deps.py foo.bar",
+		},
 	}
 
 	for _, tt := range tests {
@@ -158,6 +168,90 @@ func TestInferLang(t *testing.T) {
 			} else {
 				a.NoError(err)
 				a.IsType(tt.Expected, lang)
+			}
+		})
+	}
+}
+
+func TestFilesFromArgs(t *testing.T) {
+	absPath, _ := filepath.Abs("..")
+
+	tests := []struct {
+		Name     string
+		Input    []string
+		Expected []string
+		Error    string
+	}{
+		{
+			Name:  "Single file",
+			Input: []string{"root_test.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Two files",
+			Input: []string{"root_test.go", "root.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+				filepath.Join("cmd", "root.go"),
+			},
+		},
+		{
+			Name:  "Non existing file",
+			Input: []string{"NON_EXISTING_FILE.go"},
+			Error: "NON_EXISTING_FILE.go does not match with any existing file",
+		},
+		{
+			Name:  "With relative path",
+			Input: []string{filepath.Join("..", "cmd", "root_test.go")},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Single globstar expansion",
+			Input: []string{"*oot_test.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "With relative path and single globstar expansion",
+			Input: []string{filepath.Join("..", "cmd", "*oot_test.go")},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion",
+			Input: []string{"../internal/**/*mports_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "go", "imports_test.go"),
+				filepath.Join("internal", "js", "imports_test.go"),
+				filepath.Join("internal", "python", "imports_test.go"),
+				filepath.Join("internal", "rust", "imports_test.go"),
+				filepath.Join("internal", "language", "imports_test.go"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			result, err := filesFromArgs(tt.Input)
+			if tt.Error != "" {
+				a.ErrorContains(err, tt.Error)
+			} else {
+				a.NoError(err)
+				slices.Sort(tt.Expected)
+				slices.Sort(result)
+				expected := make([]string, len(tt.Expected))
+				for i, f := range tt.Expected {
+					expected[i] = filepath.Join(absPath, f)
+				}
+
+				a.Equal(expected, result)
 			}
 		})
 	}

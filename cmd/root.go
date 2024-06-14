@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dummy"
 	golang "github.com/gabotechs/dep-tree/internal/go"
@@ -18,6 +19,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const explainGroupId = "explain"
 const renderGroupId = "render"
 const checkGroupId = "check"
 const defaultCommand = "entropy"
@@ -65,10 +67,12 @@ $ dep-tree check`,
 		TreeCmd(),
 		CheckCmd(),
 		ConfigCmd(),
+		ExplainCmd(),
 	)
 
 	root.AddGroup(&cobra.Group{ID: renderGroupId, Title: "Visualize your dependencies graphically"})
 	root.AddGroup(&cobra.Group{ID: checkGroupId, Title: "Check your dependencies against your own rules"})
+	root.AddGroup(&cobra.Group{ID: explainGroupId, Title: "Display what are the dependencies between two portions of code"})
 
 	root.Flags().SortFlags = false
 	root.PersistentFlags().SortFlags = false
@@ -167,21 +171,28 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 
 func filesFromArgs(args []string) ([]string, error) {
 	var result []string
-	var errs []error
 	for _, arg := range args {
-		abs, err := filepath.Abs(arg)
+		basepath, pattern := doublestar.SplitPattern(arg)
+		fsys := os.DirFS(basepath)
+		matches, err := doublestar.Glob(fsys, pattern)
 		if err != nil {
-			errs = append(errs, err)
-		} else if !utils.FileExists(abs) {
-			errs = append(errs, fmt.Errorf("file %s does not exist", arg))
-		} else {
-			result = append(result, abs)
+			return nil, err
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("%s does not match with any existing file", arg)
+		}
+		for _, match := range matches {
+			abs, err := filepath.Abs(filepath.Join(basepath, match))
+			if err != nil {
+				return nil, err
+			} else if !utils.FileExists(abs) {
+				return nil, fmt.Errorf("file %s does not exist", match)
+			} else {
+				result = append(result, abs)
+			}
 		}
 	}
 	if len(result) == 0 {
-		if len(errs) == 1 {
-			return result, errs[0]
-		}
 		return result, errors.New("no valid files where provided")
 	}
 
