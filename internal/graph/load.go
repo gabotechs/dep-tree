@@ -144,4 +144,5 @@ func (s *StdErrCallbacks[T]) onFinishLoad() {
 	s.bar.Describe("Finished loading")
 	_ = s.bar.Finish()
 	_ = s.bar.Clear()
+	_, _ = os.Stderr.Write([]byte{'\n'})
 }
