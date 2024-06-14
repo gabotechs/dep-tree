@@ -9,9 +9,8 @@ func Explain[T any](
 	parser graph.NodeParser[T],
 	fromFiles []string,
 	toFiles []string,
-	display func(node *graph.Node[T]) string,
 	callbacks graph.LoadCallbacks[T],
-) ([]string, error) {
+) ([][2]*graph.Node[T], error) {
 	// 1. Build the graph.
 	g := graph.NewGraph[T]()
 	err := g.Load(append(fromFiles, toFiles...), parser, callbacks)
@@ -35,11 +34,5 @@ func Explain[T any](
 		}
 	}
 
-	// 3. Display the dependencies.
-	result := make([]string, len(deps))
-	for i, dep := range deps {
-		result[i] = display(dep[0]) + " -> " + display(dep[1])
-	}
-
-	return result, nil
+	return deps, nil
 }

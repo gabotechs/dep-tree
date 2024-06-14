@@ -38,11 +38,12 @@ func CheckCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			return check.Check[*language.FileInfo](
 				parser,
-				func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+				relPathDisplay,
 				&cfg.Check,
-				graph.NewStdErrCallbacks[*language.FileInfo](),
+				graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay),
 			)
 		},
 	}

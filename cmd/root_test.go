@@ -224,7 +224,7 @@ func TestFilesFromArgs(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Double globstar expansion",
+			Name:  "Double globstar expansion (1)",
 			Input: []string{"../internal/**/*mports_test.go"},
 			Expected: []string{
 				filepath.Join("internal", "go", "imports_test.go"),
@@ -232,6 +232,27 @@ func TestFilesFromArgs(t *testing.T) {
 				filepath.Join("internal", "python", "imports_test.go"),
 				filepath.Join("internal", "rust", "imports_test.go"),
 				filepath.Join("internal", "language", "imports_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (2)",
+			Input: []string{"../internal/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (3)",
+			Input: []string{"../../dep-tree/inte*/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (4)",
+			Input: []string{filepath.Join(absPath, "../dep-tree/internal/**/grammar_test.go")},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
 			},
 		},
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dummy"
 	golang "github.com/gabotechs/dep-tree/internal/go"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -221,9 +222,9 @@ func loadConfig() (*config.Config, error) {
 	cfg.Python.IgnoreDirectoryImports = true
 
 	absExclude := make([]string, len(exclude))
+	cwd, _ := os.Getwd()
 	for i, file := range exclude {
 		if !filepath.IsAbs(file) {
-			cwd, _ := os.Getwd()
 			absExclude[i] = filepath.Join(cwd, file)
 		} else {
 			absExclude[i] = file
@@ -237,4 +238,8 @@ func loadConfig() (*config.Config, error) {
 		}
 	}
 	return cfg, nil
+}
+
+func relPathDisplay(node *graph.Node[*language.FileInfo]) string {
+	return node.Data.RelPath
 }

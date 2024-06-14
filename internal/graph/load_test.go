@@ -66,9 +66,8 @@ func TestLoadDeps_Callbacks(t *testing.T) {
 	a.NoError(err)
 
 	a.Equal(1, testCallbacks.startLoad)
-	a.Equal(5, testCallbacks.startNode)
 	a.Equal(1, testCallbacks.finishLoad)
-	a.Equal(5, testCallbacks.finishNode)
+	a.Equal(5, testCallbacks.nodeLoaded)
 }
 
 func TestLoadDeps_loadGraph(t *testing.T) {
