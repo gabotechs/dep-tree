@@ -90,6 +90,9 @@ func TestRoot(t *testing.T) {
 			Name: "explain .root_test/*.py",
 		},
 		{
+			Name: "explain .root_test/* ./**/dep.py",
+		},
+		{
 			Name: "explain .root_test/*.py ./**/dep.py",
 		},
 		{
@@ -221,6 +224,19 @@ func TestFilesFromArgs(t *testing.T) {
 			Input: []string{filepath.Join("..", "cmd", "*oot_test.go")},
 			Expected: []string{
 				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Single globstar should not include dirs",
+			Input: []string{filepath.Join("..", "cmd", "*")},
+			Expected: []string{
+				filepath.Join("cmd", "check.go"),
+				filepath.Join("cmd", "config.go"),
+				filepath.Join("cmd", "entropy.go"),
+				filepath.Join("cmd", "explain.go"),
+				filepath.Join("cmd", "root.go"),
+				filepath.Join("cmd", "root_test.go"),
+				filepath.Join("cmd", "tree.go"),
 			},
 		},
 		{

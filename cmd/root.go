@@ -187,7 +187,9 @@ func filesFromArgs(args []string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			} else if !utils.FileExists(abs) {
-				return nil, fmt.Errorf("file %s does not exist", match)
+				if !utils.DirExists(abs) {
+					return nil, fmt.Errorf("file %s does not exist", match)
+				}
 			} else {
 				result = append(result, abs)
 			}
