@@ -86,6 +86,9 @@ func TestRoot(t *testing.T) {
 		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
 		},
+		{
+			Name: "explain .root_test/*.py ./**/deps.py",
+		},
 	}
 
 	for _, tt := range tests {

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/gabotechs/dep-tree/internal/explain"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 )
@@ -33,9 +35,19 @@ func ExplainCmd() *cobra.Command {
 			parser.UnwrapProxyExports = cfg.UnwrapExports
 			parser.Exclude = cfg.Exclude
 
-			// TODO: perform the `explain` here
-			println(fromFiles, toFiles)
-
+			deps, err := explain.Explain(
+				parser,
+				fromFiles,
+				toFiles,
+				func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+				graph.NewStdErrCallbacks[*language.FileInfo](),
+			)
+			if err != nil {
+				return err
+			}
+			for _, result := range deps {
+				cmd.Println(result)
+			}
 			return nil
 		},
 	}
