@@ -10,6 +10,7 @@ type Parser struct {
 	Lang               Language
 	UnwrapProxyExports bool
 	Exclude            []string
+	Include            []string
 	// cache
 	FileCache    map[string]*FileInfo
 	ImportsCache map[string]*ImportsResult
@@ -35,7 +36,16 @@ func (p *Parser) shouldExclude(path string) bool {
 			return true
 		}
 	}
-	return false
+	if len(p.Include) > 0 {
+		for _, inclusion := range p.Include {
+			if ok, _ := utils.GlobstarMatch(inclusion, path); ok {
+				return false
+			}
+		}
+		return true
+	} else {
+		return false
+	}
 }
 
 func (p *Parser) Node(id string) (*graph.Node[*FileInfo], error) {

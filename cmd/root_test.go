@@ -90,6 +90,9 @@ func TestRoot(t *testing.T) {
 			Name: "explain .root_test/*.py",
 		},
 		{
+			Name: "explain .root_test/* ./**/dep.py",
+		},
+		{
 			Name: "explain .root_test/*.py ./**/dep.py",
 		},
 		{
@@ -224,7 +227,20 @@ func TestFilesFromArgs(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Double globstar expansion",
+			Name:  "Single globstar should not include dirs",
+			Input: []string{filepath.Join("..", "cmd", "*")},
+			Expected: []string{
+				filepath.Join("cmd", "check.go"),
+				filepath.Join("cmd", "config.go"),
+				filepath.Join("cmd", "entropy.go"),
+				filepath.Join("cmd", "explain.go"),
+				filepath.Join("cmd", "root.go"),
+				filepath.Join("cmd", "root_test.go"),
+				filepath.Join("cmd", "tree.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (1)",
 			Input: []string{"../internal/**/*mports_test.go"},
 			Expected: []string{
 				filepath.Join("internal", "go", "imports_test.go"),
@@ -232,6 +248,27 @@ func TestFilesFromArgs(t *testing.T) {
 				filepath.Join("internal", "python", "imports_test.go"),
 				filepath.Join("internal", "rust", "imports_test.go"),
 				filepath.Join("internal", "language", "imports_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (2)",
+			Input: []string{"../internal/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (3)",
+			Input: []string{"../../dep-tree/inte*/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (4)",
+			Input: []string{filepath.Join(absPath, "../dep-tree/internal/**/grammar_test.go")},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
 			},
 		},
 	}

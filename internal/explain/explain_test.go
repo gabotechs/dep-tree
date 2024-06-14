@@ -65,15 +65,18 @@ func TestExplain(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
 
-			result, err := Explain(
+			result, err := Explain[[]int](
 				&graph.TestParser{Spec: tt.Spec},
 				tt.From,
 				tt.To,
-				func(node *graph.Node[[]int]) string { return node.Id },
 				nil,
 			)
 			a.NoError(err)
-			a.Equal(tt.Expected, result)
+			rendered := make([]string, len(result))
+			for i, r := range result {
+				rendered[i] = r[0].Id + " -> " + r[1].Id
+			}
+			a.Equal(tt.Expected, rendered)
 		})
 	}
 }

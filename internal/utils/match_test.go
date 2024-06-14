@@ -27,6 +27,18 @@ func TestMatch(t *testing.T) {
 			Path:     "/this/does/not/match.txt",
 			Expected: false,
 		},
+		{
+			Name:     "3",
+			Pattern:  "**/this/**",
+			Path:     "/this/matches.txt",
+			Expected: true,
+		},
+		{
+			Name:     "4",
+			Pattern:  "**/that/**",
+			Path:     "/this/does/not/match.txt",
+			Expected: false,
+		},
 	}
 
 	for _, tt := range tests {

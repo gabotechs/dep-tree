@@ -40,8 +40,8 @@ func TreeCmd() *cobra.Command {
 				t, err := tree.NewTree[*language.FileInfo](
 					files,
 					parser,
-					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
-					graph.NewStdErrCallbacks[*language.FileInfo](),
+					relPathDisplay,
+					graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay),
 				)
 				if err != nil {
 					return err
@@ -54,11 +54,11 @@ func TreeCmd() *cobra.Command {
 				return tui.Loop[*language.FileInfo](
 					files,
 					parser,
-					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+					relPathDisplay,
 					nil,
 					true,
 					nil,
-					graph.NewStdErrCallbacks[*language.FileInfo]())
+					graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay))
 			}
 		},
 	}

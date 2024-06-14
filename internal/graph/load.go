@@ -3,7 +3,6 @@ package graph
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gammazero/deque"
 	"github.com/schollz/progressbar/v3"
@@ -21,7 +20,7 @@ func (g *Graph[T]) Load(ids []string, parser NodeParser[T], callbacks LoadCallba
 		callbacks = &EmptyCallbacks[T]{}
 	}
 	visited := make(map[string]bool)
-	callbacks.onStartLoading()
+	callbacks.onStartLoading(ids)
 
 	for _, id := range ids {
 		node, err := parser.Node(id)
@@ -38,7 +37,6 @@ func (g *Graph[T]) Load(ids []string, parser NodeParser[T], callbacks LoadCallba
 			if _, ok := visited[node.Id]; ok {
 				continue
 			}
-			callbacks.onNodeStartLoad(node)
 			visited[node.Id] = true
 
 			deps, err := parser.Deps(node)
@@ -46,7 +44,7 @@ func (g *Graph[T]) Load(ids []string, parser NodeParser[T], callbacks LoadCallba
 				node.AddErrors(err)
 				continue
 			}
-			callbacks.onNodeFinishLoad(node, deps)
+			callbacks.onNodeLoaded(node, deps)
 
 			for _, dep := range deps {
 				// No own child.
@@ -70,79 +68,70 @@ func (g *Graph[T]) Load(ids []string, parser NodeParser[T], callbacks LoadCallba
 }
 
 type LoadCallbacks[T any] interface {
-	onStartLoading()
-	onNodeStartLoad(node *Node[T])
-	onNodeFinishLoad(node *Node[T], deps []*Node[T])
+	onStartLoading(initialIds []string)
+	onNodeLoaded(node *Node[T], deps []*Node[T])
 	onFinishLoad()
 }
 
 type EmptyCallbacks[T any] struct{}
 
-func (e EmptyCallbacks[T]) onStartLoading()                           {}
-func (e EmptyCallbacks[T]) onNodeStartLoad(_ *Node[T])                {}
-func (e EmptyCallbacks[T]) onNodeFinishLoad(_ *Node[T], _ []*Node[T]) {}
-func (e EmptyCallbacks[T]) onFinishLoad()                             {}
+func (e EmptyCallbacks[T]) onStartLoading([]string)               {}
+func (e EmptyCallbacks[T]) onNodeLoaded(_ *Node[T], _ []*Node[T]) {}
+func (e EmptyCallbacks[T]) onFinishLoad()                         {}
 
 type TestCallbacks[T any] struct {
 	startLoad  int
-	startNode  int
 	finishLoad int
-	finishNode int
+	nodeLoaded int
 }
 
-func (t *TestCallbacks[T]) onStartLoading() {
-	t.startLoad++
-}
-func (t *TestCallbacks[T]) onNodeStartLoad(_ *Node[T]) {
-	t.startNode++
-}
-func (t *TestCallbacks[T]) onNodeFinishLoad(_ *Node[T], _ []*Node[T]) {
-	t.finishNode++
-}
-func (t *TestCallbacks[T]) onFinishLoad() {
-	t.finishLoad++
-}
+func (t *TestCallbacks[T]) onStartLoading([]string)               { t.startLoad++ }
+func (t *TestCallbacks[T]) onNodeLoaded(_ *Node[T], _ []*Node[T]) { t.nodeLoaded++ }
+func (t *TestCallbacks[T]) onFinishLoad()                         { t.finishLoad++ }
 
 type StdErrCallbacks[T any] struct {
-	bar   *progressbar.ProgressBar
-	nodes map[string]struct{}
-	done  int
+	bar     *progressbar.ProgressBar
+	seen    map[string]struct{}
+	done    map[string]struct{}
+	display func(node *Node[T]) string
 }
 
-func NewStdErrCallbacks[T any]() *StdErrCallbacks[T] {
-	bar := progressbar.NewOptions64(
+func NewStdErrCallbacks[T any](
+	display func(node *Node[T]) string,
+) *StdErrCallbacks[T] {
+	bar := progressbar.NewOptions(
 		-1,
-		progressbar.OptionSetDescription("Loading graph..."),
 		progressbar.OptionSetWriter(os.Stderr),
-		progressbar.OptionSetWidth(10),
-		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionShowIts(),
 		progressbar.OptionSpinnerType(14),
-		progressbar.OptionFullWidth(),
 		progressbar.OptionSetRenderBlankState(true),
 	)
-	return &StdErrCallbacks[T]{bar, map[string]struct{}{}, 0}
+	return &StdErrCallbacks[T]{
+		bar,
+		map[string]struct{}{},
+		map[string]struct{}{},
+		display,
+	}
 }
 
-func (s *StdErrCallbacks[T]) onStartLoading() {
+func (s *StdErrCallbacks[T]) onStartLoading(initialNodes []string) {
 	s.bar.Reset()
-	s.nodes = map[string]struct{}{}
-	s.done = 0
-}
-func (s *StdErrCallbacks[T]) onNodeStartLoad(node *Node[T]) {
-	s.done += 1
-	_ = s.bar.Set(s.done)
-	s.bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", s.done, len(s.nodes), node.Id))
-}
-func (s *StdErrCallbacks[T]) onNodeFinishLoad(node *Node[T], deps []*Node[T]) {
-	for _, n := range deps {
-		s.nodes[n.Id] = struct{}{}
+	for _, nodeId := range initialNodes {
+		s.seen[nodeId] = struct{}{}
 	}
-	s.bar.Describe(fmt.Sprintf("(%d/%d) Loading %s...", s.done, len(s.nodes), node.Id))
 }
+
+func (s *StdErrCallbacks[T]) onNodeLoaded(n *Node[T], deps []*Node[T]) {
+	_ = s.bar.Add(1)
+	s.done[n.Id] = struct{}{}
+	for _, n := range deps {
+		s.seen[n.Id] = struct{}{}
+	}
+	s.bar.Describe(fmt.Sprintf("(%d/%d) Loading Files...", len(s.done), len(s.seen)))
+}
+
 func (s *StdErrCallbacks[T]) onFinishLoad() {
-	s.bar.Describe("Finished loading")
+	s.bar.Describe(fmt.Sprintf("(%d/%d) Finished loading", len(s.done), len(s.seen)))
 	_ = s.bar.Finish()
-	_ = s.bar.Clear()
 	_, _ = os.Stderr.Write([]byte{'\n'})
 }

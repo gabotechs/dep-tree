@@ -37,7 +37,7 @@ func EntropyCmd() *cobra.Command {
 			err = entropy.Render(files, parser, entropy.RenderConfig{
 				NoOpen:        noBrowserOpen,
 				EnableGui:     enableGui,
-				LoadCallbacks: graph.NewStdErrCallbacks[*language.FileInfo](),
+				LoadCallbacks: graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay),
 				RenderPath:    renderPath,
 			})
 			return err
