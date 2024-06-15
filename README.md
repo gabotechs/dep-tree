@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-    The more decoupled and modular a code base is, the more spread the graph will look like.
+    The more decoupled and modular a code base is, the more spread and clustered the graph will look like.
 </p>
 
 <p align="center">
