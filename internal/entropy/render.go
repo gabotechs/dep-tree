@@ -35,6 +35,7 @@ func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg Ren
 	if err != nil {
 		return err
 	}
+	//os.WriteFile("web/src/testData.json", marshaled, os.ModePerm)
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
 	var temp string
 	if cfg.RenderPath != "" {

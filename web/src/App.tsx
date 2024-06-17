@@ -11,6 +11,7 @@ import { Data } from "./data.ts";
 import { useData, XLink, XNode } from "./useData.ts";
 import './App.css'
 import { Leva, useControls } from "leva";
+import { HSVtoRGB } from "./@utils/HSVtoRGB.ts";
 
 
 const DEFAULT_SETTINGS = {
@@ -62,9 +63,10 @@ function App () {
   }
 
   function colorNode (node: XNode) {
-    const [r, g, b] = node.isEntrypoint || node.color === undefined ? [255, 255, 255] : node.color
     let alpha = SETTINGS.NODE_ALPHA
     if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = SETTINGS.UNSELECTED_NODE_ALPHA
+    const { h, s, v } = (node.isEntrypoint || node.__color === undefined) ? { h: 0, s: 0, v: 1 } : node.__color
+    const [ r, g, b ] = HSVtoRGB(h, s, v)
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
@@ -193,9 +195,10 @@ function App () {
         linkDirectionalParticles={link => highlightLinks.has(link) ? 2 : 0}
         linkDirectionalParticleWidth={SETTINGS.LINK_HIGHLIGHT_WIDTH}
       />
-      <Leva hidden={!data.enableGui} />
+      <Leva hidden={!data.enableGui}/>
     </>
   )
 }
 
 export default App
+

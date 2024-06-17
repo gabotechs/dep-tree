@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -15,16 +16,17 @@ const (
 )
 
 type Node struct {
-	Id           int64  `json:"id"`
-	IsEntrypoint bool   `json:"isEntrypoint"`
-	FileName     string `json:"fileName"`
-	Group        string `json:"group,omitempty"`
-	DirName      string `json:"dirName"`
-	Loc          int    `json:"loc"`
-	Size         int    `json:"size"`
-	Color        []int  `json:"color,omitempty"`
-	IsDir        bool   `json:"isDir"`
-	IsPackage    bool   `json:"isPackage"`
+	Id           int64    `json:"id"`
+	IsEntrypoint bool     `json:"isEntrypoint"`
+	FileName     string   `json:"fileName"`
+	PathBuf      []string `json:"pathBuf"`
+	Group        string   `json:"group,omitempty"`
+	DirName      string   `json:"dirName"`
+	Loc          int      `json:"loc"`
+	Size         int      `json:"size"`
+	Color        []int    `json:"color,omitempty"`
+	IsDir        bool     `json:"isDir"`
+	IsPackage    bool     `json:"isPackage"`
 }
 
 type Link struct {
@@ -95,6 +97,7 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			Id:           node.ID(),
 			IsEntrypoint: node.Data.AbsPath == singleEntrypointAbsPath,
 			FileName:     filepath.Base(node.Data.RelPath),
+			PathBuf:      strings.Split(node.Data.AbsPath, string(os.PathSeparator)),
 			Group:        node.Data.Package,
 			DirName:      dirName + string(os.PathSeparator),
 			Loc:          node.Data.Loc,

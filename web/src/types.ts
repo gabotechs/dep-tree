@@ -7,6 +7,7 @@ export interface Node {
   id: number /* int64 */;
   isEntrypoint: boolean;
   fileName: string;
+  pathBuf: string[];
   group?: string;
   dirName: string;
   loc: number /* int */;
