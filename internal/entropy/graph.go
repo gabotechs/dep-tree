@@ -24,17 +24,12 @@ type Node struct {
 	DirName      string   `json:"dirName"`
 	Loc          int      `json:"loc"`
 	Size         int      `json:"size"`
-	Color        []int    `json:"color,omitempty"`
-	IsDir        bool     `json:"isDir"`
-	IsPackage    bool     `json:"isPackage"`
 }
 
 type Link struct {
-	From      int64 `json:"from"`
-	To        int64 `json:"to"`
-	IsDir     bool  `json:"isDir"`
-	IsPackage bool  `json:"isPackage"`
-	IsCyclic  bool  `json:"isCyclic"`
+	From     int64 `json:"from"`
+	To       int64 `json:"to"`
+	IsCyclic bool  `json:"isCyclic"`
 }
 
 type Graph struct {
@@ -43,15 +38,6 @@ type Graph struct {
 	EnableGui bool   `json:"enableGui"`
 }
 
-func toInt(arr []float64) []int {
-	result := make([]int, len(arr))
-	for i, v := range arr {
-		result[i] = int(v)
-	}
-	return result
-}
-
-// TODO: factor this out
 func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], loadCallbacks graph.LoadCallbacks[*language.FileInfo]) (Graph, error) {
 	g := graph.NewGraph[*language.FileInfo]()
 	err := g.Load(files, parser, loadCallbacks)
@@ -82,15 +68,6 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 		return n.Data.Loc
 	}), 1)
 
-	dirTree := NewDirTree()
-
-	for _, node := range allNodes {
-		dirTree.AddDirsFromFileInfo(node.Data)
-	}
-
-	addedFolders := map[string]bool{}
-	addedPackages := map[string]bool{}
-
 	for _, node := range allNodes {
 		dirName := filepath.Dir(node.Data.RelPath)
 		n := Node{
@@ -102,7 +79,6 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			DirName:      dirName + string(os.PathSeparator),
 			Loc:          node.Data.Loc,
 			Size:         maxNodeSize * node.Data.Loc / maxLoc,
-			Color:        toInt(dirTree.ColorForFileInfo(node.Data, RGB)),
 		}
 		out.Nodes = append(out.Nodes, n)
 
@@ -110,40 +86,6 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			out.Links = append(out.Links, Link{
 				From: node.ID(),
 				To:   to.ID(),
-			})
-		}
-
-		for _, parentFolder := range dirTree.GroupingsForFileInfo(node.Data) {
-			folderNode := graph.MakeNode(parentFolder, 0)
-			out.Links = append(out.Links, Link{
-				From:  node.ID(),
-				To:    folderNode.ID(),
-				IsDir: true,
-			})
-			if _, ok := addedFolders[parentFolder]; ok {
-				continue
-			} else {
-				addedFolders[parentFolder] = true
-				out.Nodes = append(out.Nodes, Node{
-					Id:    folderNode.ID(),
-					IsDir: true,
-				})
-			}
-		}
-
-		if node.Data.Package != "" {
-			packageNode := graph.MakeNode(node.Data.Package, 0)
-			if _, ok := addedPackages[node.Data.Package]; !ok {
-				addedPackages[node.Data.Package] = true
-				out.Nodes = append(out.Nodes, Node{
-					Id:        packageNode.ID(),
-					IsPackage: true,
-				})
-			}
-			out.Links = append(out.Links, Link{
-				From:      node.ID(),
-				To:        packageNode.ID(),
-				IsPackage: true,
 			})
 		}
 	}

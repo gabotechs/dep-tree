@@ -128,7 +128,7 @@ function it (
     // check the parent dirs for each node
     const parents: string[][] = []
     for (const n of nodes) {
-      parents.push(FileTree.parents(n))
+      parents.push(FileTree.parentFolders(n))
     }
     expect(parents).to.deep.equal(expected.parents)
 

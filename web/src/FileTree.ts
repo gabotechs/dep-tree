@@ -129,7 +129,7 @@ export class FileTree<T = object> {
    *
    * ['a', 'a/b', 'a/b/c']
    */
-  static parents<T> (node: FileLeaf<T>): string[] {
+  static parentFolders<T> (node: FileLeaf<T>): string[] {
     const parents: string[] = []
     let curr = node.__parent
     while (curr !== undefined && curr.name !== this.ROOT_NAME) {

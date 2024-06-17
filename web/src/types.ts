@@ -12,15 +12,10 @@ export interface Node {
   dirName: string;
   loc: number /* int */;
   size: number /* int */;
-  color?: number /* int */[];
-  isDir: boolean;
-  isPackage: boolean;
 }
 export interface Link {
   from: number /* int64 */;
   to: number /* int64 */;
-  isDir: boolean;
-  isPackage: boolean;
   isCyclic: boolean;
 }
 export interface Graph {
