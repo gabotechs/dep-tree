@@ -58,6 +58,22 @@ jobs:
       - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.0
       - run: golangci-lint run -v
 
+  web-lint:
+    if: ${{ !startsWith(github.event.head_commit.message, 'tag') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm i
+        working-directory: web
+      - name: Test
+        run: npm run lint
+        working-directory: web
+
   tag:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -66,6 +82,7 @@ jobs:
 #      - unit-test-windows
       - web-unit-test
       - lint
+      - web-lint
     steps:
       - uses: actions/checkout@v3
         with:

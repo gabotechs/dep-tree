@@ -1,4 +1,4 @@
-export type FileLeaf<T = {}> = {
+export type FileLeaf<T = object> = {
   id: number
   pathBuf: string[]
   __parent?: FileTree<T>
@@ -26,7 +26,7 @@ export interface NodeStats {
   total: number
 }
 
-export class FileTree<T = {}> {
+export class FileTree<T = object> {
   static readonly ROOT_NAME = '__dep_tree_root__'
 
   name: string
@@ -40,7 +40,7 @@ export class FileTree<T = {}> {
     this.name = name;
   }
 
-  static root<T = {}> (): FileTree<T> {
+  static root<T = object> (): FileTree<T> {
     return new FileTree<T>(this.ROOT_NAME)
   }
 
@@ -197,7 +197,7 @@ export class FileTree<T = {}> {
       line += opts.renderTree(node)
       const lines = [line]
       const newIndent = indent + 1
-      for (const [_, child] of node.subTrees.entries()) {
+      for (const child of node.subTrees.values()) {
         lines.push(...render(child, newIndent))
       }
       for (const [name, child] of node.leafs.entries()) {

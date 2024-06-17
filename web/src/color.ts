@@ -5,14 +5,14 @@ export interface ColoredFileLeaf {
   __color?: { h: number, s: number, v: number }
 }
 
-export function color<T extends {}>(tree: FileTree<T>): FileTree<T & ColoredFileLeaf> {
+export function color<T extends object>(tree: FileTree<T>): FileTree<T & ColoredFileLeaf> {
   for (const leaf of tree.iterLeafs()) {
     colorNode(leaf)
   }
   return tree
 }
 
-function colorNode<T extends {}> (node: FileTree<T> | FileLeaf<T>): { h: number, s: number, v: number } {
+function colorNode<T extends object> (node: FileTree<T> | FileLeaf<T>): { h: number, s: number, v: number } {
   if (node.__parent === undefined) {
     // This is the root node, we want it white.
     const color = { h: 0, s: 0, v: 1 }
@@ -22,18 +22,15 @@ function colorNode<T extends {}> (node: FileTree<T> | FileLeaf<T>): { h: number,
     return color
   }
 
-  let { h, s, v } = colorNode(node.__parent)
+  const { h, s, v } = colorNode(node.__parent)
   if (node instanceof FileTree) {
     // this node is a tree, need to accumulate colors.
     const stats = node.stats()
 
     const nh = (h + 360 * stats.index / stats.total) % 360
 
-    if (s === 0) {
-      s = 1
-    }
-    s -= .2
-    const ns = scale(s, 0, 1, .2, .9)
+    let ns = s === 0 ? 1 : s
+    ns = scale(ns - .2, 0, 1, .2, .9)
 
     const color = { h: nh, s: ns, v }
     const n = (node as FileTree<ColoredFileLeaf>)
