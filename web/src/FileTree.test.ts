@@ -144,7 +144,7 @@ function it (
   })
 }
 
-function ensureChildrenParents (tree: FileTree<any>): void {
+function ensureChildrenParents (tree: FileTree): void {
   for (const [name, child] of tree.subTrees.entries()) {
     if (child.__parent !== tree) throw new Error(`${name} is a child of ${tree.name}, but ${name}'s parent is ${child.__parent?.name}`)
     ensureChildrenParents(child)

@@ -40,14 +40,14 @@ export class FileTree<T = {}> {
     this.name = name;
   }
 
-  static root<T> (): FileTree<T> {
+  static root<T = {}> (): FileTree<T> {
     return new FileTree<T>(this.ROOT_NAME)
   }
 
   /**
    * Pushes a node into the tree based on its path buffer.
    */
-  pushNode (node: FileLeaf<any>, i = 0) {
+  pushNode (node: FileLeaf<T>, i = 0) {
     if (i >= node.pathBuf.length) return
 
     const tree = this.subTrees.get(node.pathBuf[i])

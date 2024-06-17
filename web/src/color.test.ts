@@ -47,7 +47,7 @@ function it (
   }
 
   test(name, () => {
-    const fileTree = FileTree.root<{}>()
+    const fileTree = FileTree.root<object>()
     for (const node of input.nodes) {
       fileTree.pushNode(newNode(node))
     }
