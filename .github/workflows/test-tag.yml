@@ -39,6 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: npm
+          cache-dependency-path: web/package-lock.json
       - name: Install
         run: npm i
         working-directory: web
