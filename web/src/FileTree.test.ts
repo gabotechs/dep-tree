@@ -81,22 +81,22 @@ __dep_tree_root__
   e.ts -> 4
  f.ts -> 5`,
       parents: [
+        ['foo', 'foo/bar', 'foo/bar/a/b'],
         ['foo', 'foo/bar'],
         ['foo', 'foo/bar'],
         ['foo', 'foo/baz'],
         ['foo'],
         ['a/b/c/d'],
         [],
-        ['foo', 'foo/bar', 'foo/bar/a/b']
       ],
       parentStats: [
+        { kind: 'tree', depth: 3, total: 1, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 1 },
         { kind: 'tree', depth: 1, total: 2, index: 0 },
         { kind: 'tree', depth: 1, total: 2, index: 1 },
         { kind: 'tree', depth: 0, total: 1, index: 0 },
-        { kind: 'tree', depth: 3, total: 1, index: 0 },
       ],
       leafs: [6, 0, 1, 2, 3, 4, 5]
     }
@@ -116,10 +116,8 @@ function it (
 
   test(name, () => {
     const fileTree = FileTree.root()
-    const nodes: FileLeaf[] = []
     for (const node of input.nodes) {
       const n = newNode(node)
-      nodes.push(n)
       fileTree.pushNode(n)
     }
     if (input.squash) fileTree.squash()
@@ -132,14 +130,14 @@ function it (
 
     // check the parent dirs for each node
     const parents: string[][] = []
-    for (const n of nodes) {
+    for (const n of fileTree.iterLeafs()) {
       parents.push(FileTree.parentFolders(n))
     }
     expect(parents).to.deep.equal(expected.parents)
 
     // check the stats of each node
     const stats = []
-    for (const n of nodes) {
+    for (const n of fileTree.iterLeafs()) {
       stats.push(FileTree.stats(FileTree.parentTree(n)))
     }
     expect(stats).to.deep.equal(expected.parentStats)
