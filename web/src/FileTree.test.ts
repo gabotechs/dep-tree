@@ -60,7 +60,8 @@ __dep_tree_root__
         ['foo', 'baz', 'c.ts'],
         ['foo', 'd.ts'],
         ['a', 'b', 'c', 'd', 'e.ts'],
-        ['f.ts']
+        ['f.ts'],
+        ['foo', 'bar', 'a', 'b', 'g.ts']
       ],
       squash: true
     },
@@ -69,6 +70,8 @@ __dep_tree_root__
 __dep_tree_root__
  foo
   bar
+   a/b
+    g.ts -> 6
    a.ts -> 0
    b.ts -> 1
   baz
@@ -83,7 +86,8 @@ __dep_tree_root__
         ['foo', 'foo/baz'],
         ['foo'],
         ['a/b/c/d'],
-        []
+        [],
+        ['foo', 'foo/bar', 'foo/bar/a/b']
       ],
       parentStats: [
         { kind: 'tree', depth: 2, total: 2, index: 0 },
@@ -92,8 +96,9 @@ __dep_tree_root__
         { kind: 'tree', depth: 1, total: 2, index: 0 },
         { kind: 'tree', depth: 1, total: 2, index: 1 },
         { kind: 'tree', depth: 0, total: 1, index: 0 },
+        { kind: 'tree', depth: 3, total: 1, index: 0 },
       ],
-      leafs: [0, 1, 2, 3, 4, 5]
+      leafs: [6, 0, 1, 2, 3, 4, 5]
     }
   )
 })
