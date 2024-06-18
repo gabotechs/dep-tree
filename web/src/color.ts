@@ -22,24 +22,29 @@ function colorNode<T extends object> (node: FileTree<T> | FileLeaf<T>): { h: num
     return color
   }
 
-  const { h, s, v } = colorNode(node.__parent)
+  const parentColor = colorNode(node.__parent)
   if (node instanceof FileTree) {
-    // this node is a tree, need to accumulate colors.
+    // This node is a tree, need to accumulate colors.
     const stats = node.stats()
 
-    const nh = (h + 360 * stats.index / stats.total) % 360
+    // For each subdir in the parent dir, rotate in the color wheel an angle proportional
+    // to the total amount of subdirs in the parent dir.
+    const h = (parentColor.h + 360 * stats.index / stats.total) % 360
 
-    let ns = s === 0 ? 1 : s
-    ns = scale(ns - .2, 0, 1, .2, .9)
+    // The deeper we go into the dir structure, the more faded the colors will appear.
+    const s = scale(parentColor.s === 0 ? 1 : (parentColor.s - .2), 0, 1, .2, .95)
 
-    const color = { h: nh, s: ns, v }
+    // Just pass through the HSV value (V)
+    const v = parentColor.v
+
     const n = (node as FileTree<ColoredFileLeaf>)
     n.__data ??= {}
-    n.__data.__color = color
-    return color
+    n.__data.__color = { h, s, v }
+    return { h, s, v }
+
   } else {
     // this is a leaf, just show the parent tree color.
-    const color = { h, s, v }
+    const color = parentColor
     ;(node as ColoredFileLeaf).__color = color
     return color
   }
