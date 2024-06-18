@@ -184,17 +184,17 @@ export class FileTree<T = object> {
    * Renders the tree in a human-readable format.
    */
   render (
-    opts: {
-      renderLeaf: (leaf: FileLeaf<T>) => string,
-      renderTree: (tree: FileTree<T>) => string,
-    } = {
-      renderTree: () => '',
-      renderLeaf: leaf => ` -> ${leaf.id}`
-    }
+    {
+      renderTree = () => '',
+      renderLeaf = leaf => ` -> ${leaf.id}`
+    }: {
+      renderLeaf?: (leaf: FileLeaf<T>) => string,
+      renderTree?: (tree: FileTree<T>) => string,
+    } = {}
   ): string {
     function render (node: FileTree<T>, indent: number): string[] {
       let line = `${' '.repeat(indent)}${node.name}`
-      line += opts.renderTree(node)
+      line += renderTree(node)
       const lines = [line]
       const newIndent = indent + 1
       for (const child of node.subTrees.values()) {
@@ -202,7 +202,7 @@ export class FileTree<T = object> {
       }
       for (const [name, child] of node.leafs.entries()) {
         let line = `${' '.repeat(newIndent)}${name}`
-        line += opts.renderLeaf(child)
+        line += renderLeaf(child)
         lines.push(line)
       }
       return lines
