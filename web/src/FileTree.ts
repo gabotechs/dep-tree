@@ -127,7 +127,7 @@ export class FileTree<T = object> {
    *
    * will return:
    *
-   * ['a', 'a/b', 'a/b/c']
+   * ['a', 'b', 'c']
    */
   static parentFolders<T> (node: FileLeaf<T>): string[] {
     const parents: string[] = []
@@ -137,9 +137,6 @@ export class FileTree<T = object> {
       curr = curr.__parent
     }
     parents.reverse()
-    for (let i = 1; i < parents.length; i++) {
-      parents[i] = parents[i - 1] + '/' + parents[i]
-    }
     return parents
   }
 
@@ -164,7 +161,7 @@ export class FileTree<T = object> {
     }
   }
 
-  stats(): NodeStats {
+  stats (): NodeStats {
     return FileTree.stats(this)
   }
 

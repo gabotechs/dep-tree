@@ -23,6 +23,10 @@ export interface XGraph extends Graph {
   links: XLink[];
 }
 
+// TODO: There was a bug that was preventing dirs to being added as nodes. And now,
+//  if they are added, the visualization breaks.
+const IGNORE_DIR_NODES = true
+
 /**
  * Processes the graph performing some operations like:
  * - storing the nodes in a Record format
@@ -56,6 +60,7 @@ export function buildXGraph (graph: Graph) {
   // together, and will stabilize the visualization.
   for (const node of Object.values(nodes)) {
     if (needsToAddGroups) {
+      // Add the groups as virtual nodes if more than 1 group
       const groupId = hashInt(`__dep_tree_group__${node.group}`)
       if (!(groupId in nodes)) {
         nodes[groupId] = newGroupNode(groupId)
@@ -64,11 +69,20 @@ export function buildXGraph (graph: Graph) {
       graph.links.push(newGroupLink(node.id, groupId))
     }
 
+    let acc: string | null = null
     for (const folderName of FileTree.parentFolders(node)) {
-      if (folderName.startsWith(FileTree.ROOT_NAME)) continue
+      // All the nodes in the graph are children of the root node, so
+      // adding a virtual node for the root node will just squash all nodes together
+      // which does not add value.
+      if (folderName.startsWith(FileTree.ROOT_NAME) || IGNORE_DIR_NODES) {
+        continue
+      }
+      // Some folder names might be repeated, instead of forming the node id based on
+      // the folder name, concatenate all the folder names up to the top level one.
+      acc = acc == null ? folderName : `${acc}/${folderName}`
       const folderId = hashInt(`__dep_tree_folder__${folderName}`)
       if (!(folderId in nodes)) {
-        nodes[folderId] = newFolderNode(folderId)
+        nodes[folderId] = newDirNode(folderId)
         graph.nodes.push(nodes[folderId])
       }
       graph.links.push(newFolderLink(node.id, folderId))
@@ -90,10 +104,10 @@ export function buildXGraph (graph: Graph) {
     b.links.push(link);
   });
 
-  return { xGraph: graph as XGraph, nodes }
+  return { xGraph: graph as XGraph, nodes, fileTree }
 }
 
-function newFolderNode (id: number): XNode {
+function newDirNode (id: number): XNode {
   return {
     id,
     isDir: true,
