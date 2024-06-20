@@ -23,9 +23,16 @@ export interface XGraph extends Graph {
   links: XLink[];
 }
 
-// TODO: There was a bug that was preventing dirs to being added as nodes. And now,
-//  if they are added, the visualization breaks.
-const IGNORE_DIR_NODES = true
+enum VirtualDirMode {
+  /** Does not create any virtual dir node */
+  IGNORE,
+  /** creates just virtual dirs for the immediate folder where the nodes are */
+  ONLY_ONE,
+  /** creates one virtual dir for each parent folder that a node has */
+  ALL
+}
+
+const VIRTUAL_DIR_MODE: VirtualDirMode = VirtualDirMode.ONLY_ONE
 
 /**
  * Processes the graph performing some operations like:
@@ -69,23 +76,37 @@ export function buildXGraph (graph: Graph) {
       graph.links.push(newGroupLink(node.id, groupId))
     }
 
-    let acc: string | null = null
-    for (const folderName of FileTree.parentFolders(node)) {
-      // All the nodes in the graph are children of the root node, so
-      // adding a virtual node for the root node will just squash all nodes together
-      // which does not add value.
-      if (folderName.startsWith(FileTree.ROOT_NAME) || IGNORE_DIR_NODES) {
-        continue
-      }
-      // Some folder names might be repeated, instead of forming the node id based on
-      // the folder name, concatenate all the folder names up to the top level one.
-      acc = acc == null ? folderName : `${acc}/${folderName}`
+    if (VIRTUAL_DIR_MODE === VirtualDirMode.IGNORE) {
+      // Nothing to do here
+
+    } else if (VIRTUAL_DIR_MODE === VirtualDirMode.ONLY_ONE) {
+      const folderName = FileTree.parentFolders(node).join('/')
       const folderId = hashInt(`__dep_tree_folder__${folderName}`)
       if (!(folderId in nodes)) {
         nodes[folderId] = newDirNode(folderId)
         graph.nodes.push(nodes[folderId])
       }
       graph.links.push(newFolderLink(node.id, folderId))
+
+    } else if (VIRTUAL_DIR_MODE === VirtualDirMode.ALL) {
+      let acc: string | null = null
+      for (const folderName of FileTree.parentFolders(node)) {
+        // All the nodes in the graph are children of the root node, so
+        // adding a virtual node for the root node will just squash all nodes together
+        // which does not add value.
+        if (folderName.startsWith(FileTree.ROOT_NAME)) {
+          continue
+        }
+        // Some folder names might be repeated, instead of forming the node id based on
+        // the folder name, concatenate all the folder names up to the top level one.
+        acc = acc == null ? folderName : `${acc}/${folderName}`
+        const folderId = hashInt(`__dep_tree_folder__${folderName}`)
+        if (!(folderId in nodes)) {
+          nodes[folderId] = newDirNode(folderId)
+          graph.nodes.push(nodes[folderId])
+        }
+        graph.links.push(newFolderLink(node.id, folderId))
+      }
     }
   }
 
