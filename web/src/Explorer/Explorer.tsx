@@ -13,28 +13,42 @@ export interface ExplorerProps {
   fileTree: FileTree<XNode>
   selected?: number
   highlighted?: Set<number>
+  onSelectNode?: (x: XNode) => void
 }
 
-export function Explorer ({ className = '', fileTree }: ExplorerProps) {
-  const folderState = useMemo(() => {
+export function Explorer (
+  {
+    className = '',
+    fileTree,
+    onSelectNode
+  }: ExplorerProps
+) {
+  const [folderState,] = useMemo(() => {
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.name = folderState.name.replace(FileTree.ROOT_NAME + "/", "")
     folderState.unfold()
-    return folderState
+
+    const fileMap = new Map<number, string[]>()
+    for (const node of fileTree.iterLeafs()) {
+      fileMap.set(node.id, FileTree.parentFolders(node).concat(node.fileName))
+    }
+
+    return [folderState, fileMap]
   }, [fileTree])
 
   return <div className={`${className} flex flex-col overflow-y-auto`}>
-    <ExplorerFolder folderState={folderState}/>
+    <ExplorerFolder folderState={folderState} onSelectNode={onSelectNode}/>
   </div>
 }
 
-interface ExplorerLevelProps {
+interface ExplorerFolderProps {
+  onSelectNode?: (x: XNode) => void
   folderState: FolderState<XNode>
 }
 
-function ExplorerFolder (props: ExplorerLevelProps & HTMLProps<HTMLDivElement>) {
-  const { folderState } = props
-  const folderStyle: CSSProperties = { color: folderState.color, cursor: 'pointer' }
+function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>) {
+  const { folderState, onSelectNode } = props
+  const folderStyle: CSSProperties = { color: folderState.color }
   const fileStyle: CSSProperties = { color: folderState.color, marginLeft: 16 }
 
   const forceUpdate = useForceUpdate()
@@ -60,17 +74,23 @@ function ExplorerFolder (props: ExplorerLevelProps & HTMLProps<HTMLDivElement>) 
         style={{ marginLeft: 16 }}
         key={folder.name}
         folderState={folder}
+        onSelectNode={onSelectNode}
       />
     )}
     {[...folderState.files.values()].map(file =>
-      <File key={file.id} name={file.fileName} style={fileStyle}/>
+      <File
+        key={file.id}
+        name={file.fileName}
+        style={fileStyle}
+        onClick={() => onSelectNode?.(file)}
+      />
     )}
   </div>
 }
 
 
 function Folder ({ name, ...rest }: { name: string } & HTMLProps<HTMLDivElement>) {
-  return <div className={'flex flex-row items-center '} {...rest}>
+  return <div className={'flex flex-row items-center cursor-pointer'} {...rest}>
     <FontAwesomeIcon icon={faFolder} color={rest.style?.color}/>
     <span className={'text-white ml-2'}>{name}</span>
   </div>
@@ -78,7 +98,7 @@ function Folder ({ name, ...rest }: { name: string } & HTMLProps<HTMLDivElement>
 
 function File ({ name, ...rest }: { name: string } & HTMLProps<HTMLDivElement>) {
   const ext = name.split('.').slice(-1)[0]
-  return <div className='flex flex-row items-center' {...rest}>
+  return <div className='flex flex-row items-center cursor-pointer' {...rest}>
     <FontAwesomeIcon icon={FA_MAP[ext] ?? faFile} color={rest.style?.color}/>
     <span className={'text-white ml-2'}>{name}</span>
   </div>

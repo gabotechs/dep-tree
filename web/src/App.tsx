@@ -134,6 +134,11 @@ function App () {
     graph.current?.cameraPosition({ x: x * distRatio, y: y * distRatio, z: z * distRatio }, { x, y, z }, 1000)
   }
 
+  function nodeClick(node: XNode) {
+    selectNode(node)
+    centerOnNode(node)
+  }
+
   useEffect(() => {
     graph.current?.postProcessingComposer().removePass(UNREAL_BLOOM_PASS)
     UNREAL_BLOOM_PASS.strength = settings.BLOOM_PASS_STRENGTH
@@ -190,10 +195,7 @@ function App () {
         nodeVisibility={node => !node.isDir && !node.isPackage}
         nodeColor={colorNode}
         nodeOpacity={1}
-        onNodeClick={node => {
-          selectNode(node)
-          centerOnNode(node)
-        }}
+        onNodeClick={nodeClick}
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
         linkColor={colorLink}
@@ -208,6 +210,7 @@ function App () {
       <Explorer
         className={'fixed top-1 left-1 max-h-full bg-transparent'}
         fileTree={FILE_TREE}
+        onSelectNode={nodeClick}
       />
       <Leva hidden={!X_GRAPH.enableGui}/>
     </>

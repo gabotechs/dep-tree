@@ -14,7 +14,10 @@ describe('FolderState', () => {
         ['a', 'b', 'c', 'd', 'e.ts'],
         ['f.ts']
       ],
-      modify: folderState => folderState.unfoldAll().collapseByName(['a', 'b', 'c'])
+      modify: folderState => {
+        folderState.unfoldAll()
+        folderState.collapseByName(['a', 'b', 'c'])
+      }
     },
     {
       render: `\
