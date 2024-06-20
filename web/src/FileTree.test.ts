@@ -32,11 +32,11 @@ __dep_tree_root__
      e.ts -> 4
  f.ts -> 5`,
       parents: [
-        ['foo', 'foo/bar'],
-        ['foo', 'foo/bar'],
-        ['foo', 'foo/baz'],
+        ['foo', 'bar'],
+        ['foo', 'bar'],
+        ['foo', 'baz'],
         ['foo'],
-        ['a', 'a/b', 'a/b/c', 'a/b/c/d'],
+        ['a', 'b', 'c', 'd'],
         []
       ],
       parentStats: [
@@ -81,10 +81,10 @@ __dep_tree_root__
   e.ts -> 4
  f.ts -> 5`,
       parents: [
-        ['foo', 'foo/bar', 'foo/bar/a/b'],
-        ['foo', 'foo/bar'],
-        ['foo', 'foo/bar'],
-        ['foo', 'foo/baz'],
+        ['foo', 'bar', 'a/b'],
+        ['foo', 'bar'],
+        ['foo', 'bar'],
+        ['foo', 'baz'],
         ['foo'],
         ['a/b/c/d'],
         [],
@@ -117,8 +117,7 @@ function it (
   test(name, () => {
     const fileTree = FileTree.root()
     for (const node of input.nodes) {
-      const n = newNode(node)
-      fileTree.pushNode(n)
+      fileTree.pushNode(newNode(node))
     }
     if (input.squash) fileTree.squash()
 
