@@ -1,4 +1,4 @@
-import { HTMLProps, useEffect, useMemo } from "react";
+import { CSSProperties, HTMLProps, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { faGolang, faJs, faPython, faRust, IconDefinition } from "@fortawesome/free-brands-svg-icons";
@@ -24,7 +24,7 @@ enum VALUES {
 
 enum COLORS {
   DIR_SELECTED = '#ffffff11',
-  FILE_SELECTED = 'rgba(23,212,241,0.4)',
+  FILE_SELECTED = 'rgba(31,194,218,0.34)',
   FILE_IN_HIGHLIGHTED = 'rgba(31,218,47,0.16)',
   FILE_OUT_HIGHLIGHTED = 'rgba(218,187,31,0.16)'
 }
@@ -97,8 +97,13 @@ interface ExplorerFolderProps {
   folderState: FolderState<XNode>
 }
 
-function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>) {
-  const { folderState, onSelectNode } = props
+function ExplorerFolder (
+  {
+    folderState,
+    onSelectNode,
+    style,
+    ...props
+  }: ExplorerFolderProps & HTMLProps<HTMLDivElement>) {
   const forceUpdate = useForceUpdate()
 
   useEffect(() => folderState.registerListener('update', forceUpdate), [folderState, forceUpdate]);
@@ -106,22 +111,19 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
   if (!folderState.tags[TAGS.EXPANDED]) {
     return <Folder
       name={folderState.name}
-      style={{
-        color: folderState.color,
-        backgroundColor: folderState.tags[TAGS.SELECTED] ? COLORS.DIR_SELECTED : undefined,
-        ...props.style
-      }}
+      tags={folderState.tags}
+      logoColor={folderState.color}
+      style={style}
       onClick={() => folderState.tag(TAGS.EXPANDED, VALUES.YES)} dir={props.dir}
+      {...props}
     />
   }
 
-  return <div className="flex flex-col" {...props}>
+  return <div className="flex flex-col" style={style} {...props}>
     <Folder
       name={folderState.name}
-      style={{
-        color: folderState.color,
-        backgroundColor: folderState.tags[TAGS.SELECTED] ? COLORS.DIR_SELECTED : undefined,
-      }}
+      logoColor={folderState.color}
+      tags={folderState.tags}
       onClick={() => folderState.untagAllFolders(TAGS.EXPANDED)}
     />
     {[...folderState.folders.values()].map(folder =>
@@ -137,18 +139,9 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
         id={`${ID_PREFIX}${file.id}`}
         key={file.id}
         name={file.fileName}
-        style={{
-          color: folderState.color,
-          marginLeft: 16,
-          backgroundColor:
-            folderState.fileTags[file.fileName]?.[TAGS.SELECTED]
-              ? COLORS.FILE_SELECTED
-              : folderState.fileTags[file.fileName]?.[TAGS.HIGHLIGHTED] === VALUES.IN
-                ? COLORS.FILE_IN_HIGHLIGHTED
-                : folderState.fileTags[file.fileName]?.[TAGS.HIGHLIGHTED] === VALUES.OUT
-                  ? COLORS.FILE_OUT_HIGHLIGHTED
-                  : undefined
-        }}
+        logoColor={folderState.color}
+        tags={folderState.fileTags[file.fileName]}
+        style={{ marginLeft: 16 }}
         onClick={() => onSelectNode?.(file)}
       />
     )}
@@ -156,17 +149,53 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
 }
 
 
-function Folder ({ name, ...rest }: { name: string } & HTMLProps<HTMLDivElement>) {
-  return <div className={'flex flex-row items-center cursor-pointer'} {...rest}>
-    <FontAwesomeIcon icon={faFolder} color={rest.style?.color}/>
+function Folder (
+  {
+    name,
+    logoColor,
+    tags,
+    style,
+    ...props
+  }: {
+    name: string
+    logoColor: string,
+    tags: Record<string, string>
+  } & HTMLProps<HTMLDivElement>) {
+  let backgroundColor: CSSProperties['color'] = undefined
+  if (tags[TAGS.SELECTED] === VALUES.YES) backgroundColor = COLORS.DIR_SELECTED
+  return <div
+    className={'flex flex-row items-center cursor-pointer'}
+    style={{ backgroundColor, ...style }}
+    {...props}
+  >
+    <FontAwesomeIcon icon={faFolder} color={logoColor}/>
     <span className={'text-white ml-2'}>{name}</span>
   </div>
 }
 
-function File ({ name, ...rest }: { name: string } & HTMLProps<HTMLDivElement>) {
-  const ext = name.split('.').slice(-1)[0]
-  return <div className='flex flex-row items-center cursor-pointer' {...rest}>
-    <FontAwesomeIcon icon={FA_MAP[ext] ?? faFile} color={rest.style?.color}/>
+function File (
+  {
+    name,
+    logoColor,
+    style,
+    tags,
+    ...props
+  }: {
+    name: string,
+    logoColor: string,
+    tags?: Record<string, string>
+  } & HTMLProps<HTMLDivElement>) {
+  const ext = useMemo(() => name.split('.').slice(-1)[0], [name])
+  let backgroundColor: CSSProperties['color'] = undefined
+  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.OUT) backgroundColor = COLORS.FILE_OUT_HIGHLIGHTED
+  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.IN) backgroundColor = COLORS.FILE_IN_HIGHLIGHTED
+  if (tags?.[TAGS.SELECTED] === VALUES.YES) backgroundColor = COLORS.FILE_SELECTED
+  return <div
+    className='flex flex-row items-center cursor-pointer'
+    style={{ backgroundColor, ...style }}
+    {...props}
+  >
+    <FontAwesomeIcon icon={FA_MAP[ext] ?? faFile} color={logoColor}/>
     <span className={'text-white ml-2'}>{name}</span>
   </div>
 }
