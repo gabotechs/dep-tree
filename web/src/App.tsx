@@ -11,6 +11,7 @@ import { Leva, useControls } from "leva";
 import { buildXGraph, XLink, XNode } from "./XGraph.ts";
 import { HSVtoRGB } from "./@utils/HSVtoRGB.ts";
 import { Graph } from "./types.ts";
+import { Explorer } from "./Explorer/Explorer.tsx";
 
 import './App.css'
 
@@ -49,7 +50,7 @@ const DEFAULT_SETTINGS = {
 
 const UNREAL_BLOOM_PASS = new UnrealBloomPass()
 
-const { xGraph: X_GRAPH, nodes: NODES } = buildXGraph(Data.__INLINE_DATA)
+const { xGraph: X_GRAPH, nodes: NODES, fileTree: FILE_TREE } = buildXGraph(Data.__INLINE_DATA)
 
 function App () {
   const [highlightNodes, setHighlightNodes] = useState(new Set<XNode>())
@@ -133,6 +134,11 @@ function App () {
     graph.current?.cameraPosition({ x: x * distRatio, y: y * distRatio, z: z * distRatio }, { x, y, z }, 1000)
   }
 
+  function nodeClick(node: XNode) {
+    selectNode(node)
+    centerOnNode(node)
+  }
+
   useEffect(() => {
     graph.current?.postProcessingComposer().removePass(UNREAL_BLOOM_PASS)
     UNREAL_BLOOM_PASS.strength = settings.BLOOM_PASS_STRENGTH
@@ -189,10 +195,7 @@ function App () {
         nodeVisibility={node => !node.isDir && !node.isPackage}
         nodeColor={colorNode}
         nodeOpacity={1}
-        onNodeClick={node => {
-          selectNode(node)
-          centerOnNode(node)
-        }}
+        onNodeClick={nodeClick}
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
         linkColor={colorLink}
@@ -203,6 +206,13 @@ function App () {
         linkWidth={link => highlightLinks.has(link) ? settings.LINK_HIGHLIGHT_WIDTH : settings.LINK_WIDTH}
         linkDirectionalParticles={link => highlightLinks.has(link) ? 2 : 0}
         linkDirectionalParticleWidth={settings.LINK_HIGHLIGHT_WIDTH}
+      />
+      <Explorer
+        className={'fixed top-0 left-0 max-h-full bg-transparent'}
+        fileTree={FILE_TREE}
+        onSelectNode={nodeClick}
+        selected={selectedNode}
+        highlighted={highlightNodes}
       />
       <Leva hidden={!X_GRAPH.enableGui}/>
     </>
