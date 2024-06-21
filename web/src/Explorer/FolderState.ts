@@ -2,7 +2,11 @@ import { FileTree } from "../FileTree.ts";
 import { HSVtoRGB } from "../@utils/HSVtoRGB.ts";
 import { ColoredFileLeaf } from "../color.ts";
 
-export type Message = ['collapsed'] | ['expanded'] | ['tagged'] | ['untagged'] | ['fileTagged', string]
+export type Message =
+  ['tagged', string, string] |
+  ['untagged', string] |
+  ['fileTagged', string, string, string] |
+  ['fileUntagged', string, string]
 
 export class FolderState<F> {
   /** the name of the folder */
@@ -11,8 +15,6 @@ export class FolderState<F> {
   folders: Map<string, FolderState<F>> = new Map();
   /** the files that live in this folder */
   files: Map<string, F> = new Map();
-  /** whether the folder is collapsed or not */
-  isCollapsed: boolean = true
   /** the color of the folder */
   color: string = 'white'
   /** tags for this folder */
@@ -21,7 +23,7 @@ export class FolderState<F> {
   fileTags: Record<string, Record<string, string>> = {}
   /** record for accessing nested tags in O(1) time */
   private taggedFolders: Record<string, Set<string>> = {}
-
+  private parent?: FolderState<F>
 
   private listeners: Record<string, (message: Message) => void> = {}
 
@@ -35,57 +37,40 @@ export class FolderState<F> {
     }
   }
 
-  expandAll () {
-    for (const folder of this.folders.values()) folder.expandAll()
-    this.expand()
+  tagAllFolders (tag: string, value: string) {
+    for (const folder of this.folders.values()) folder.tagAllFolders(tag, value)
+    this.tag(tag, value)
   }
 
-  expand () {
-    this.isCollapsed = false
-    this.notifyListeners(['expanded'])
-  }
-
-  expandRecursive (name: string[], i = 0) {
-    this.expand()
-    if (i >= name.length) return
-    const folder = this.folders.get(name[i])
-    if (folder !== undefined) {
-      folder.expandRecursive(name, i + 1)
+  untagAllFolders (tag: string) {
+    for (const folder of this.taggedFolders[tag]?.values() ?? []) {
+      this.folders.get(folder)?.untagAllFolders(tag)
     }
+    this.untag(tag)
   }
 
-  collapseAll () {
-    for (const folder of this.folders.values()) folder.collapse()
-    this.collapse()
-  }
-
-  collapse () {
-    this.isCollapsed = true
-    this.notifyListeners(['collapsed'])
-  }
-
-  collapseRecursive (name: string[], i = 0) {
-    if (i >= name.length) return
-    const folder = this.folders.get(name[i])
-    if (folder !== undefined) {
-      if (i === name.length - 1) {
-        folder.collapseAll()
-      } else {
-        folder.expandRecursive(name, i + 1)
-      }
+  untagAllFoldersFrom (name: string[], tag: string) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let folder: FolderState<F> | undefined = this
+    for (const n of name) {
+      folder = folder.folders.get(n)
+      if (!folder) return
     }
+    folder.untagAllFolders(tag)
   }
 
   untag (tag: string) {
     delete this.tags[tag]
-    this.notifyListeners(['untagged'])
+    if (this.parent !== undefined) {
+      delete this.parent.taggedFolders[tag]
+    }
+    this.notifyListeners(['untagged', tag])
   }
 
   untagAll (tag: string) {
     for (const folder of this.taggedFolders[tag]?.values() ?? []) {
       this.folders.get(folder)?.untagAll(tag)
     }
-    delete this.taggedFolders[tag]
     for (const tags of Object.values(this.fileTags)) {
       delete tags[tag]
     }
@@ -94,36 +79,36 @@ export class FolderState<F> {
 
   tag (tag: string, value: string) {
     this.tags[tag] = value
-    this.notifyListeners(['tagged'])
+    if (this.parent !== undefined) {
+      this.parent.taggedFolders[tag] ??= new Set<string>()
+      this.parent.taggedFolders[tag].add(this.name)
+    }
+    this.notifyListeners(['tagged', tag, value])
   }
 
   tagFile (file: string, tag: string, value: string) {
     if (this.files.has(file)) {
       this.fileTags[file] ??= {}
       this.fileTags[file][tag] = value
-      this.notifyListeners(['fileTagged', file])
+      this.notifyListeners(['fileTagged', file, tag, value])
     }
   }
 
-  tagRecursive (name: string[], tag: string, value: string, i = 0) {
-    if (i >= name.length) {
-      // nothing
-    } else if (i === name.length - 1) {
-      if (this.files.has(name[i])) {
-        this.tagFile(name[i], tag, value)
-      } else if (this.folders.has(name[i])) {
-        this.taggedFolders[tag] ??= new Set<string>()
-        this.taggedFolders[tag].add(name[i])
-        this.folders.get(name[i])!.tag(tag, value)
-      }
-    } else {
-      if (this.folders.has(name[i])) {
-        this.taggedFolders[tag] ??= new Set<string>()
-        this.taggedFolders[tag].add(name[i])
-        const folder = this.folders.get(name[i])!
-        folder.tag(tag, value)
-        folder.tagRecursive(name, tag, value, i + 1)
-      }
+  tagRecursive (name: string[], tag: string, value: string) {
+    if (name.length === 0) return
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let folder: FolderState<F> | undefined = this
+    for (const n of name.slice(0, name.length-1)) {
+      folder = folder.folders.get(n)
+      if (!folder) return
+      folder.tag(tag, value)
+    }
+    const last = name[name.length-1]
+
+    if (folder.files.has(last)) {
+      folder.tagFile(last, tag, value)
+    } else if (folder.folders.has(last)) {
+      folder.folders.get(last)!.tag(tag, value)
     }
   }
 
@@ -131,7 +116,9 @@ export class FolderState<F> {
     const folderState = new FolderState<T>()
     const folderKeys = [...tree.subTrees.keys()].sort()
     for (const folder of folderKeys) {
-      folderState.folders.set(folder, FolderState.fromFileTree(tree.subTrees.get(folder)!))
+      const childFolderState = FolderState.fromFileTree(tree.subTrees.get(folder)!)
+      childFolderState.parent = folderState
+      folderState.folders.set(folder, childFolderState)
     }
 
     const fileKeys = [...tree.leafs.keys()].sort()
@@ -146,7 +133,6 @@ export class FolderState<F> {
   }
 
   render (lvl = 0): string {
-    if (this.isCollapsed) return ''
     const stringBuilder: string[] = []
     for (const [name, folder] of this.folders.entries()) {
       stringBuilder.push(' '.repeat(lvl) + '> ' + name + " " + JSON.stringify(folder.tags))

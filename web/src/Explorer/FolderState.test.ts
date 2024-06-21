@@ -10,19 +10,19 @@ describe('FolderState', () => {
         ['foo', 'bar', 'a.ts'],
       ],
       modify: folderState => {
-        folderState.expandAll()
+        folderState.tagAllFolders('expanded', 'true')
         folderState.tagRecursive(['foo', 'bar', 'a.ts'], 'selected', 'true')
         folderState.untagAll('selected')
       }
     },
     {
       render: `\
-> foo {}
- > bar {}
+> foo {"expanded":"true"}
+ > bar {"expanded":"true"}
   a.ts {}`,
       events: [
-        ['expanded'],
-        ['untagged'],
+        ["tagged", "expanded", "true"],
+        ["untagged", "selected"],
       ]
     }
   );
@@ -40,39 +40,39 @@ describe('FolderState', () => {
         ['a', 'b', 'c1', 'd1', 'g.ts'],
       ],
       modify: folderState => {
-        folderState.collapseAll()
-        folderState.expandAll()
-        folderState.collapseRecursive(['a', 'b', 'c'])
-        folderState.folders.get('foo')!.folders.get('baz')!.collapse()
+        folderState.tagAllFolders('expanded', 'true')
+        folderState.untagAllFoldersFrom(['a', 'b', 'c'], 'expanded')
+        folderState.folders.get('foo')!.folders.get('baz')!.untag('expanded')
         folderState.tagRecursive(['a', 'b', 'c', 'd', 'e.ts'], 'selected', 'true')
         folderState.untagAll('selected')
         folderState.tagRecursive(['foo', 'bar', 'a.ts'], 'selected', 'true')
         folderState.tagRecursive(['f.ts'], 'selected', 'true')
-        folderState.folders.get('a')!.folders.get('b')!.folders.get('c1')!.collapseAll()
-        folderState.folders.get('a')!.folders.get('b')!.folders.get('c1')!.expand()
+        folderState.folders.get('a')!.folders.get('b')!.folders.get('c1')!.untagAll('expanded')
+        folderState.folders.get('a')!.folders.get('b')!.folders.get('c1')!.tag('expanded', 'true')
       }
     },
     {
       render: `\
-> a {}
- > b {}
+> a {"expanded":"true"}
+ > b {"expanded":"true"}
   > c {}
    > d {}
     e.ts {}
-  > c1 {}
+  > c1 {"expanded":"true"}
    > d1 {}
-> foo {"selected":"true"}
- > bar {"selected":"true"}
+    g.ts undefined
+> foo {"expanded":"true","selected":"true"}
+ > bar {"expanded":"true","selected":"true"}
   a.ts {"selected":"true"}
   b.ts undefined
  > baz {}
+  c.ts undefined
  d.ts undefined
 f.ts {"selected":"true"}`,
       events: [
-        ['collapsed'],
-        ['expanded'],
-        ["untagged"],
-        ["fileTagged", "f.ts"],
+        ["tagged", "expanded", "true"],
+        ["untagged", "selected"],
+        ["fileTagged", "f.ts", "selected", "true"],
       ]
     }
   )

@@ -9,14 +9,25 @@ import { FolderState } from "./FolderState.ts";
 import { useForceUpdate } from "../@utils/useForceUpdate.ts";
 
 const ID_PREFIX = '__explorer_'
-const SELECTED_TAG = 's'
-const HIGHLIGHTED_TAG = 'h'
-const IN_TAG_VALUE = 'in'
-const OUT_TAG_VALUE = 'out'
-const DIR_SELECTED_COLOR = '#ffffff11'
-const FILE_SELECTED_COLOR = 'rgba(31,194,218,0.34)'
-const FILE_IN_HIGHLIGHTED_COLOR = 'rgba(31,218,47,0.16)'
-const FILE_OUT_HIGHLIGHTED_COLOR = 'rgba(218,187,31,0.16)'
+
+enum TAGS {
+  SELECTED = 's',
+  HIGHLIGHTED = 'h',
+  EXPANDED = 'x'
+}
+
+enum VALUES {
+  IN = 'in',
+  OUT = 'Out',
+  YES = 'y'
+}
+
+enum COLORS {
+  DIR_SELECTED = '#ffffff11',
+  FILE_SELECTED = 'rgba(23,212,241,0.4)',
+  FILE_IN_HIGHLIGHTED = 'rgba(31,218,47,0.16)',
+  FILE_OUT_HIGHLIGHTED = 'rgba(218,187,31,0.16)'
+}
 
 export interface ExplorerProps {
   className?: string;
@@ -38,19 +49,19 @@ export function Explorer (
   const folderState = useMemo(() => {
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.name = folderState.name.replace(FileTree.ROOT_NAME + "/", "")
-    folderState.expand()
+    folderState.tag(TAGS.EXPANDED, VALUES.YES)
 
     return folderState
   }, [fileTree])
 
   useEffect(() => {
-    folderState.untagAll(SELECTED_TAG)
+    folderState.untagAll(TAGS.SELECTED)
     if (selected !== undefined) {
       const names = FileTree.parentFolders(selected)
       names.shift()
-      folderState.expandRecursive(names)
+      folderState.tagRecursive(names, TAGS.EXPANDED, VALUES.YES)
       names.push(selected.fileName)
-      folderState.tagRecursive(names, SELECTED_TAG, 'true')
+      folderState.tagRecursive(names, TAGS.SELECTED, VALUES.YES)
       setTimeout(
         () => document.getElementById(ID_PREFIX + selected.id.toString())
           ?.scrollIntoView({ behavior: "smooth", block: 'nearest' }),
@@ -58,15 +69,15 @@ export function Explorer (
       )
     }
 
-    folderState.untagAll(HIGHLIGHTED_TAG)
+    folderState.untagAll(TAGS.HIGHLIGHTED)
     if (highlighted !== undefined && highlighted.size > 0) {
       const outLinks = selected?.links?.reduce((acc, link) => (acc.add(link.to)), new Set<number>())
       for (const node of highlighted?.values() ?? []) {
         const names = FileTree.parentFolders(node)
         names.shift()
-        folderState.expandRecursive(names)
+        folderState.tagRecursive(names, TAGS.EXPANDED, VALUES.YES)
         names.push(node.fileName)
-        folderState.tagRecursive(names, HIGHLIGHTED_TAG, outLinks?.has(node.id) ? IN_TAG_VALUE : OUT_TAG_VALUE)
+        folderState.tagRecursive(names, TAGS.HIGHLIGHTED, outLinks?.has(node.id) ? VALUES.IN : VALUES.OUT)
       }
     }
   }, [folderState, highlighted, selected])
@@ -92,15 +103,15 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
 
   useEffect(() => folderState.registerListener('update', forceUpdate), [folderState, forceUpdate]);
 
-  if (folderState.isCollapsed) {
+  if (!folderState.tags[TAGS.EXPANDED]) {
     return <Folder
       name={folderState.name}
       style={{
         color: folderState.color,
-        backgroundColor: folderState.tags[SELECTED_TAG] ? DIR_SELECTED_COLOR : undefined,
+        backgroundColor: folderState.tags[TAGS.SELECTED] ? COLORS.DIR_SELECTED : undefined,
         ...props.style
       }}
-      onClick={() => folderState.expand()} dir={props.dir}
+      onClick={() => folderState.tag(TAGS.EXPANDED, VALUES.YES)} dir={props.dir}
     />
   }
 
@@ -109,9 +120,9 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
       name={folderState.name}
       style={{
         color: folderState.color,
-        backgroundColor: folderState.tags[SELECTED_TAG] ? DIR_SELECTED_COLOR : undefined,
+        backgroundColor: folderState.tags[TAGS.SELECTED] ? COLORS.DIR_SELECTED : undefined,
       }}
-      onClick={() => folderState.collapseAll()}
+      onClick={() => folderState.untagAllFolders(TAGS.EXPANDED)}
     />
     {[...folderState.folders.values()].map(folder =>
       <ExplorerFolder
@@ -130,12 +141,12 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
           color: folderState.color,
           marginLeft: 16,
           backgroundColor:
-            folderState.fileTags[file.fileName]?.[SELECTED_TAG]
-              ? FILE_SELECTED_COLOR
-              : folderState.fileTags[file.fileName]?.[HIGHLIGHTED_TAG] === IN_TAG_VALUE
-                ? FILE_IN_HIGHLIGHTED_COLOR
-                : folderState.fileTags[file.fileName]?.[HIGHLIGHTED_TAG] === OUT_TAG_VALUE
-                  ? FILE_OUT_HIGHLIGHTED_COLOR
+            folderState.fileTags[file.fileName]?.[TAGS.SELECTED]
+              ? COLORS.FILE_SELECTED
+              : folderState.fileTags[file.fileName]?.[TAGS.HIGHLIGHTED] === VALUES.IN
+                ? COLORS.FILE_IN_HIGHLIGHTED
+                : folderState.fileTags[file.fileName]?.[TAGS.HIGHLIGHTED] === VALUES.OUT
+                  ? COLORS.FILE_OUT_HIGHLIGHTED
                   : undefined
         }}
         onClick={() => onSelectNode?.(file)}
