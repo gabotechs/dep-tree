@@ -208,9 +208,11 @@ function App () {
         linkDirectionalParticleWidth={settings.LINK_HIGHLIGHT_WIDTH}
       />
       <Explorer
-        className={'fixed top-1 left-1 max-h-full bg-transparent'}
+        className={'fixed top-0 left-0 max-h-full bg-transparent'}
         fileTree={FILE_TREE}
         onSelectNode={nodeClick}
+        selected={selectedNode}
+        highlighted={highlightNodes}
       />
       <Leva hidden={!X_GRAPH.enableGui}/>
     </>

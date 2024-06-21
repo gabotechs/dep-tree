@@ -1,4 +1,4 @@
-import { CSSProperties, HTMLProps, useMemo } from "react";
+import { HTMLProps, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { faGolang, faJs, faPython, faRust, IconDefinition } from "@fortawesome/free-brands-svg-icons";
@@ -8,11 +8,21 @@ import { XNode } from "../XGraph.ts";
 import { FolderState } from "./FolderState.ts";
 import { useForceUpdate } from "../@utils/useForceUpdate.ts";
 
+const ID_PREFIX = '__explorer_'
+const SELECTED_TAG = 's'
+const HIGHLIGHTED_TAG = 'h'
+const IN_TAG_VALUE = 'in'
+const OUT_TAG_VALUE = 'out'
+const DIR_SELECTED_COLOR = '#ffffff11'
+const FILE_SELECTED_COLOR = 'rgba(31,194,218,0.34)'
+const FILE_IN_HIGHLIGHTED_COLOR = 'rgba(31,218,47,0.16)'
+const FILE_OUT_HIGHLIGHTED_COLOR = 'rgba(218,187,31,0.16)'
+
 export interface ExplorerProps {
   className?: string;
   fileTree: FileTree<XNode>
-  selected?: number
-  highlighted?: Set<number>
+  selected?: XNode
+  highlighted?: Set<XNode>
   onSelectNode?: (x: XNode) => void
 }
 
@@ -20,25 +30,55 @@ export function Explorer (
   {
     className = '',
     fileTree,
-    onSelectNode
+    onSelectNode,
+    highlighted,
+    selected
   }: ExplorerProps
 ) {
-  const [folderState,] = useMemo(() => {
+  const folderState = useMemo(() => {
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.name = folderState.name.replace(FileTree.ROOT_NAME + "/", "")
-    folderState.unfold()
+    folderState.expand()
 
-    const fileMap = new Map<number, string[]>()
-    for (const node of fileTree.iterLeafs()) {
-      fileMap.set(node.id, FileTree.parentFolders(node).concat(node.fileName))
-    }
-
-    return [folderState, fileMap]
+    return folderState
   }, [fileTree])
 
-  return <div className={`${className} flex flex-col overflow-y-auto`}>
-    <ExplorerFolder folderState={folderState} onSelectNode={onSelectNode}/>
-  </div>
+  useEffect(() => {
+    folderState.untagAll(SELECTED_TAG)
+    if (selected !== undefined) {
+      const names = FileTree.parentFolders(selected)
+      names.shift()
+      folderState.expandRecursive(names)
+      names.push(selected.fileName)
+      folderState.tagRecursive(names, SELECTED_TAG, 'true')
+      setTimeout(
+        () => document.getElementById(ID_PREFIX + selected.id.toString())
+          ?.scrollIntoView({ behavior: "smooth", block: 'nearest' }),
+        50
+      )
+    }
+
+    folderState.untagAll(HIGHLIGHTED_TAG)
+    if (highlighted !== undefined && highlighted.size > 0) {
+      const outLinks = selected?.links?.reduce((acc, link) => (acc.add(link.to)), new Set<number>())
+      for (const node of highlighted?.values() ?? []) {
+        const names = FileTree.parentFolders(node)
+        names.shift()
+        folderState.expandRecursive(names)
+        names.push(node.fileName)
+        folderState.tagRecursive(names, HIGHLIGHTED_TAG, outLinks?.has(node.id) ? IN_TAG_VALUE : OUT_TAG_VALUE)
+      }
+    }
+  }, [folderState, highlighted, selected])
+
+  return (
+    <div
+      className={`${className} flex flex-col overflow-y-scroll pb-8 pt-1 scrollbar-thin scrollbar-transparent`}
+      dir={'rtl'}
+    >
+      <ExplorerFolder folderState={folderState} onSelectNode={onSelectNode} dir={'ltr'}/>
+    </div>
+  )
 }
 
 interface ExplorerFolderProps {
@@ -48,27 +88,31 @@ interface ExplorerFolderProps {
 
 function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>) {
   const { folderState, onSelectNode } = props
-  const folderStyle: CSSProperties = { color: folderState.color }
-  const fileStyle: CSSProperties = { color: folderState.color, marginLeft: 16 }
-
   const forceUpdate = useForceUpdate()
 
-  function unfold () {
-    folderState.unfold()
-    forceUpdate()
-  }
+  useEffect(() => folderState.registerListener('update', forceUpdate), [folderState, forceUpdate]);
 
-  function collapse () {
-    folderState.collapseAll()
-    forceUpdate()
-  }
-
-  if (folderState.folded) {
-    return <Folder name={folderState.name} style={{ ...folderStyle, ...props.style }} onClick={unfold}/>
+  if (folderState.isCollapsed) {
+    return <Folder
+      name={folderState.name}
+      style={{
+        color: folderState.color,
+        backgroundColor: folderState.tags[SELECTED_TAG] ? DIR_SELECTED_COLOR : undefined,
+        ...props.style
+      }}
+      onClick={() => folderState.expand()} dir={props.dir}
+    />
   }
 
   return <div className="flex flex-col" {...props}>
-    <Folder name={folderState.name} style={folderStyle} onClick={collapse}/>
+    <Folder
+      name={folderState.name}
+      style={{
+        color: folderState.color,
+        backgroundColor: folderState.tags[SELECTED_TAG] ? DIR_SELECTED_COLOR : undefined,
+      }}
+      onClick={() => folderState.collapseAll()}
+    />
     {[...folderState.folders.values()].map(folder =>
       <ExplorerFolder
         style={{ marginLeft: 16 }}
@@ -79,9 +123,21 @@ function ExplorerFolder (props: ExplorerFolderProps & HTMLProps<HTMLDivElement>)
     )}
     {[...folderState.files.values()].map(file =>
       <File
+        id={`${ID_PREFIX}${file.id}`}
         key={file.id}
         name={file.fileName}
-        style={fileStyle}
+        style={{
+          color: folderState.color,
+          marginLeft: 16,
+          backgroundColor:
+            folderState.fileTags[file.fileName]?.[SELECTED_TAG]
+              ? FILE_SELECTED_COLOR
+              : folderState.fileTags[file.fileName]?.[HIGHLIGHTED_TAG] === IN_TAG_VALUE
+                ? FILE_IN_HIGHLIGHTED_COLOR
+                : folderState.fileTags[file.fileName]?.[HIGHLIGHTED_TAG] === OUT_TAG_VALUE
+                  ? FILE_OUT_HIGHLIGHTED_COLOR
+                  : undefined
+        }}
         onClick={() => onSelectNode?.(file)}
       />
     )}
