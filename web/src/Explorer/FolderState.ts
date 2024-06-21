@@ -9,6 +9,7 @@ export type Message =
   ['fileUntagged', string, string]
 
 export class FolderState<F> {
+
   /** the name of the folder */
   name: string = ''
   /** the subfolders that live in this folder */
@@ -18,9 +19,17 @@ export class FolderState<F> {
   /** the color of the folder */
   color: string = 'white'
   /** tags for this folder */
-  tags: Record<string, string> = {}
+  private _tags: Record<string, string> = {}
+  get tags (): Record<string, string> {
+    return this._tags;
+  }
+
   /** tags for each file, the first level is a file */
-  fileTags: Record<string, Record<string, string>> = {}
+  private _fileTags: Record<string, Record<string, string>> = {}
+  get fileTags (): Record<string, Record<string, string>> {
+    return this._fileTags;
+  }
+
   /** record for accessing nested tags in O(1) time */
   private taggedFolders: Record<string, Set<string>> = {}
   private parent?: FolderState<F>
@@ -60,7 +69,7 @@ export class FolderState<F> {
   }
 
   untag (tag: string) {
-    delete this.tags[tag]
+    delete this._tags[tag]
     if (this.parent !== undefined) {
       delete this.parent.taggedFolders[tag]
     }
@@ -71,14 +80,14 @@ export class FolderState<F> {
     for (const folder of this.taggedFolders[tag]?.values() ?? []) {
       this.folders.get(folder)?.untagAll(tag)
     }
-    for (const tags of Object.values(this.fileTags)) {
+    for (const tags of Object.values(this._fileTags)) {
       delete tags[tag]
     }
     this.untag(tag)
   }
 
   tag (tag: string, value: string) {
-    this.tags[tag] = value
+    this._tags[tag] = value
     if (this.parent !== undefined) {
       this.parent.taggedFolders[tag] ??= new Set<string>()
       this.parent.taggedFolders[tag].add(this.name)
@@ -88,22 +97,23 @@ export class FolderState<F> {
 
   tagFile (file: string, tag: string, value: string) {
     if (this.files.has(file)) {
-      this.fileTags[file] ??= {}
-      this.fileTags[file][tag] = value
+      this._fileTags[file] ??= {}
+      this._fileTags[file][tag] = value
       this.notifyListeners(['fileTagged', file, tag, value])
     }
   }
 
   tagRecursive (name: string[], tag: string, value: string) {
     if (name.length === 0) return
+    this.tag(tag, value)
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let folder: FolderState<F> | undefined = this
-    for (const n of name.slice(0, name.length-1)) {
+    for (const n of name.slice(0, name.length - 1)) {
       folder = folder.folders.get(n)
       if (!folder) return
       folder.tag(tag, value)
     }
-    const last = name[name.length-1]
+    const last = name[name.length - 1]
 
     if (folder.files.has(last)) {
       folder.tagFile(last, tag, value)
@@ -135,11 +145,11 @@ export class FolderState<F> {
   render (lvl = 0): string {
     const stringBuilder: string[] = []
     for (const [name, folder] of this.folders.entries()) {
-      stringBuilder.push(' '.repeat(lvl) + '> ' + name + " " + JSON.stringify(folder.tags))
+      stringBuilder.push(' '.repeat(lvl) + '> ' + name + " " + JSON.stringify(folder._tags))
       stringBuilder.push(folder.render(lvl + 1))
     }
     for (const name of this.files.keys()) {
-      stringBuilder.push(' '.repeat(lvl) + name +  " " +JSON.stringify(this.fileTags[name]))
+      stringBuilder.push(' '.repeat(lvl) + name + " " + JSON.stringify(this._fileTags[name]))
     }
     return stringBuilder.filter(_ => _.length > 0).join('\n')
   }

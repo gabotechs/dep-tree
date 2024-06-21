@@ -22,6 +22,7 @@ describe('FolderState', () => {
   a.ts {}`,
       events: [
         ["tagged", "expanded", "true"],
+        ['tagged', 'selected', 'true'],
         ["untagged", "selected"],
       ]
     }
@@ -71,7 +72,10 @@ describe('FolderState', () => {
 f.ts {"selected":"true"}`,
       events: [
         ["tagged", "expanded", "true"],
+        ["tagged", "selected", "true"],
         ["untagged", "selected"],
+        ["tagged", "selected", "true"],
+        ["tagged", "selected", "true"],
         ["fileTagged", "f.ts", "selected", "true"],
       ]
     }
