@@ -1,0 +1,37 @@
+@keyframes moveLeftRight {
+    0% {
+        left: 50%;
+        opacity: 0;
+    }
+    50% {
+        left: 75%;
+        opacity: 1;
+    }
+    100% {
+        left: 100%;
+        opacity: 0;
+    }
+}
+
+.animate-left-right {
+    animation: moveLeftRight 500ms linear infinite;
+}
+
+@keyframes moveRightLeft {
+    0% {
+        left: 100%;
+        opacity: 0;
+    }
+    50% {
+        left: 75%;
+        opacity: 1;
+    }
+    100% {
+        left: 50%;
+        opacity: 0;
+    }
+}
+
+.animate-right-left {
+    animation: moveRightLeft 500ms linear infinite;
+}

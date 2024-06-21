@@ -1,4 +1,4 @@
-import { CSSProperties, HTMLProps, useEffect, useMemo } from "react";
+import { CSSProperties, HTMLProps, ReactNode, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { faGolang, faJs, faPython, faRust, IconDefinition } from "@fortawesome/free-brands-svg-icons";
@@ -7,6 +7,7 @@ import { FileTree } from "../FileTree.ts";
 import { XNode } from "../XGraph.ts";
 import { FolderState } from "./FolderState.ts";
 import { useForceUpdate } from "../@utils/useForceUpdate.ts";
+import './Explorer.css'
 
 const ID_PREFIX = '__explorer_'
 
@@ -18,15 +19,36 @@ enum TAGS {
 
 enum VALUES {
   IN = 'in',
-  OUT = 'Out',
+  OUT = 'out',
+  BOTH = 'both',
   YES = 'y'
 }
 
 enum COLORS {
   DIR_SELECTED = '#ffffff11',
-  FILE_SELECTED = 'rgba(31,194,218,0.34)',
+  FILE_SELECTED = 'rgba(31,194,218,0.5)',
   FILE_IN_HIGHLIGHTED = 'rgba(31,218,47,0.16)',
-  FILE_OUT_HIGHLIGHTED = 'rgba(218,187,31,0.16)'
+  FILE_OUT_HIGHLIGHTED = 'rgba(238,255,2,0.16)',
+  FILE_BOTH_HIGHLIGHTED = 'rgba(231,116,54,0.16)'
+}
+
+const FA_MAP: Record<string, IconDefinition> = {
+  // python
+  py: faPython,
+  pyi: faPython,
+  pyx: faPython,
+  // golang
+  go: faGolang,
+  // rust
+  rs: faRust,
+  // js/ts
+  js: faJs,
+  cjs: faJs,
+  mjs: faJs,
+  jsx: faJs, // TODO
+  ts: faJs, // TODO
+  tsx: faJs, // TODO
+  'd.ts': faJs, // TODO
 }
 
 export interface ExplorerProps {
@@ -72,12 +94,19 @@ export function Explorer (
     folderState.untagAll(TAGS.HIGHLIGHTED)
     if (highlighted !== undefined && highlighted.size > 0) {
       const outLinks = selected?.links?.reduce((acc, link) => (acc.add(link.to)), new Set<number>())
+      const inLinks = selected?.links?.reduce((acc, link) => (acc.add(link.from)), new Set<number>())
       for (const node of highlighted?.values() ?? []) {
         const names = FileTree.parentFolders(node)
         names.shift()
         folderState.tagRecursive(names, TAGS.EXPANDED, VALUES.YES)
         names.push(node.fileName)
-        folderState.tagRecursive(names, TAGS.HIGHLIGHTED, outLinks?.has(node.id) ? VALUES.IN : VALUES.OUT)
+        if (outLinks?.has(node.id) && inLinks?.has(node.id)) {
+          folderState.tagRecursive(names, TAGS.HIGHLIGHTED, VALUES.BOTH)
+        } else if (outLinks?.has(node.id)) {
+          folderState.tagRecursive(names, TAGS.HIGHLIGHTED, VALUES.IN)
+        } else if (inLinks?.has(node.id)) {
+          folderState.tagRecursive(names, TAGS.HIGHLIGHTED, VALUES.OUT)
+        }
       }
     }
   }, [folderState, highlighted, selected])
@@ -187,35 +216,49 @@ function File (
   } & HTMLProps<HTMLDivElement>) {
   const ext = useMemo(() => name.split('.').slice(-1)[0], [name])
   let backgroundColor: CSSProperties['color'] = undefined
-  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.OUT) backgroundColor = COLORS.FILE_OUT_HIGHLIGHTED
-  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.IN) backgroundColor = COLORS.FILE_IN_HIGHLIGHTED
-  if (tags?.[TAGS.SELECTED] === VALUES.YES) backgroundColor = COLORS.FILE_SELECTED
+  let animation: ReactNode = null
+  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.OUT) {
+    backgroundColor = COLORS.FILE_OUT_HIGHLIGHTED
+    animation = <AnimatedDot dir={'ltr'}/>
+  }
+  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.IN) {
+    backgroundColor = COLORS.FILE_IN_HIGHLIGHTED
+    animation = <AnimatedDot dir={'rtl'}/>
+  }
+  if (tags?.[TAGS.HIGHLIGHTED] === VALUES.BOTH) {
+    backgroundColor = COLORS.FILE_BOTH_HIGHLIGHTED
+    animation = <AnimatedDot dir={'both'}/>
+  }
+  if (tags?.[TAGS.SELECTED] === VALUES.YES) {
+    backgroundColor = COLORS.FILE_SELECTED
+    animation = null
+  }
   return <div
     className='flex flex-row items-center cursor-pointer'
     style={{ backgroundColor, ...style }}
     {...props}
   >
     <FontAwesomeIcon icon={FA_MAP[ext] ?? faFile} color={logoColor}/>
-    <span className={'text-white ml-2'}>{name}</span>
+    <span className={'text-white mx-2'}>{name}</span>
+    <div className={'flex-1 min-w-12'}>
+      {animation}
+    </div>
   </div>
 }
 
-const FA_MAP: Record<string, IconDefinition> = {
-  // python
-  py: faPython,
-  pyi: faPython,
-  pyx: faPython,
-  // golang
-  go: faGolang,
-  // rust
-  rs: faRust,
-  // js/ts
-  js: faJs,
-  cjs: faJs,
-  mjs: faJs,
-  jsx: faJs, // TODO
-  ts: faJs, // TODO
-  tsx: faJs, // TODO
-  'd.ts': faJs, // TODO
-}
 
+function AnimatedDot ({ dir }: { dir: 'ltr' | 'rtl' | 'both' }) {
+  return (
+    <div className="relative w-full h-2 overflow-hidden">
+      {dir === 'ltr'
+        ? <div className={`absolute h-full w-2 bg-gray-500 rounded-full animate-left-right`}/>
+        : dir === 'rtl'
+          ? <div className={`absolute h-full w-2 bg-gray-500 rounded-full animate-right-left`}/>
+          : <>
+            <div className={`absolute h-full w-2 bg-gray-500 rounded-full animate-left-right`}/>
+            <div className={`absolute h-full w-2 bg-gray-500 rounded-full animate-right-left`}/>
+          </>
+      }
+    </div>
+  )
+}
