@@ -80,7 +80,7 @@ $ dep-tree check`,
 		fileCfg.EnsureAbsPaths()
 		cliCfg.EnsureAbsPaths()
 
-		// These settings prefer the CLI over the file config
+		// For these settings, prefer the CLI over the file config.
 		for _, a := range []struct {
 			name   string
 			source *bool
