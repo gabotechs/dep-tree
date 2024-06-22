@@ -131,15 +131,12 @@ func (p *Parser) Deps(n *graph.Node[*FileInfo]) ([]*graph.Node[*FileInfo], error
 
 	deps := make([]*graph.Node[*FileInfo], 0)
 	for _, imported := range resolvedImports.Keys() {
-		if p.shouldExclude(imported) {
-			continue
-		}
 		node, err := p.Node(imported)
 		if err != nil {
 			n.AddErrors(err)
-			continue
+		} else if node != nil {
+			deps = append(deps, node)
 		}
-		deps = append(deps, node)
 	}
 	return deps, nil
 }

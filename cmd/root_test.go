@@ -75,6 +75,9 @@ func TestRoot(t *testing.T) {
 			Name: "tree .root_test/main.py --json --exclude .root_test/*.py",
 		},
 		{
+			Name: "tree .root_test/main.py --json --exclude .root_test/d*.py",
+		},
+		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml",
 		},
 		{
