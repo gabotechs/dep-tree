@@ -74,8 +74,9 @@ func TestParseConfig(t *testing.T) {
 			if tt.File != "" {
 				tt.File = filepath.Join(testFolder, tt.File)
 			}
-			cfg, err := ParseConfig(tt.File)
+			cfg, err := ParseConfigFromFile(tt.File)
 			a.NoError(err)
+			cfg.EnsureAbsPaths()
 
 			a.Equal(tt.ExpectedWhiteList, cfg.Check.WhiteList)
 			a.Equal(tt.ExpectedBlackList, cfg.Check.BlackList)
@@ -110,7 +111,7 @@ func TestConfig_ErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			_, err := ParseConfig(tt.File)
+			_, err := ParseConfigFromFile(tt.File)
 			a.ErrorContains(err, tt.Expected)
 		})
 	}
@@ -118,6 +119,6 @@ func TestConfig_ErrorHandling(t *testing.T) {
 
 func TestSampleConfig(t *testing.T) {
 	a := require.New(t)
-	_, err := ParseConfig("sample-config.yml")
+	_, err := ParseConfigFromFile("sample-config.yml")
 	a.NoError(err)
 }

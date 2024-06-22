@@ -290,6 +290,11 @@ that contains the following settings:
 exclude:
   - 'some-glob-pattern/**/*.ts'
 
+# The only files that will be included by dep-tree. If a file does not
+# match any of the provided patters, it is ignored.
+only:
+  - 'some-glob-pattern/**/*.ts'
+
 # Whether to unwrap re-exports to the target file or not.
 # Imagine that you have the following setup:
 #

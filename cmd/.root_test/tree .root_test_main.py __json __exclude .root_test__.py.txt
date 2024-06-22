@@ -1,7 +1,1 @@
-{
-  "tree": {
-    "cmd/.root_test/main.py": null
-  },
-  "circularDependencies": [],
-  "errors": {}
-}
+selected entrypoint /Users/gabriel/dep-tree/dep-tree/cmd/.root_test/main.py is explicitly ignored

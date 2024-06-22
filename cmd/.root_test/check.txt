@@ -1,1 +1,1 @@
-open .dep-tree.yml: no such file or directory
+when using the `check` subcommand, a .dep-tree.yml file must be provided, you can create one sample .dep-tree.yml file executing `dep-tree config` in your terminal

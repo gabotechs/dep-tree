@@ -27,6 +27,9 @@ func (g *Graph[T]) Load(ids []string, parser NodeParser[T], callbacks LoadCallba
 		if err != nil {
 			return err
 		}
+		if node == nil {
+			continue
+		}
 		var queue deque.Deque[*Node[T]]
 		queue.PushBack(node)
 		if !g.Has(node.Id) {

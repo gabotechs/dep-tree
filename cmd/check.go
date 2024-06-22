@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gabotechs/dep-tree/internal/config"
@@ -11,20 +12,21 @@ import (
 	"github.com/gabotechs/dep-tree/internal/check"
 )
 
-func CheckCmd() *cobra.Command {
+func CheckCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 	return &cobra.Command{
 		Use:     "check",
 		Short:   "Checks that the dependency rules defined in the configuration file are not broken",
 		GroupID: checkGroupId,
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if configPath == "" {
-				configPath = config.DefaultConfigPath
-			}
-			cfg, err := loadConfig()
+			cfg, err := cfgF()
 			if err != nil {
 				return err
 			}
+			if cfg.Source == "default" {
+				return errors.New("when using the `check` subcommand, a .dep-tree.yml file must be provided, you can create one sample .dep-tree.yml file executing `dep-tree config` in your terminal")
+			}
+
 			if len(cfg.Check.Entrypoints) == 0 {
 				return fmt.Errorf(`config file "%s" has no entrypoints`, cfg.Path)
 			}
@@ -33,11 +35,7 @@ func CheckCmd() *cobra.Command {
 				return err
 			}
 			parser := language.NewParser(lang)
-			parser.UnwrapProxyExports = cfg.UnwrapExports
-			parser.Exclude = cfg.Exclude
-			if err != nil {
-				return err
-			}
+			applyConfigToParser(parser, cfg)
 
 			return check.Check[*language.FileInfo](
 				parser,
