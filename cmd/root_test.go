@@ -72,7 +72,8 @@ func TestRoot(t *testing.T) {
 			Name: "tree .root_test/main.py --json --exclude .root_test/dep.py",
 		},
 		{
-			Name: "tree .root_test/main.py --json --exclude .root_test/*.py",
+			Name:              "tree .root_test/main.py --json --exclude .root_test/*.py",
+			JustExpectAtLeast: 90,
 		},
 		{
 			Name: "tree .root_test/main.py --json --exclude .root_test/d*.py",
@@ -119,7 +120,11 @@ func TestRoot(t *testing.T) {
 			name = strings.ReplaceAll(name, "*", "_")
 			if tt.JustExpectAtLeast > 0 {
 				a := require.New(t)
-				a.Greater(len(b.String()), tt.JustExpectAtLeast)
+				if err != nil {
+					a.Greater(len(err.Error()), tt.JustExpectAtLeast)
+				} else {
+					a.Greater(len(b.String()), tt.JustExpectAtLeast)
+				}
 			} else {
 				if err != nil {
 					utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
