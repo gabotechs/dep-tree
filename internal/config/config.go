@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gabotechs/dep-tree/internal/utils"
 	"gopkg.in/yaml.v3"
 
 	"github.com/gabotechs/dep-tree/internal/check"
@@ -23,7 +24,9 @@ var SampleConfig string
 
 type Config struct {
 	Path          string
+	Source        string
 	Exclude       []string      `yaml:"exclude"`
+	Only          []string      `yaml:"only"`
 	UnwrapExports bool          `yaml:"unwrapExports"`
 	Check         check.Config  `yaml:"check"`
 	Js            js.Config     `yaml:"js"`
@@ -32,17 +35,46 @@ type Config struct {
 	Golang        golang.Config `yaml:"golang"`
 }
 
-func (c *Config) UnwrapProxyExports() bool {
-	return c.UnwrapExports
+func NewConfigCwd() Config {
+	var cwd, _ = os.Getwd()
+	return Config{Path: cwd}
 }
 
-func (c *Config) IgnoreFiles() []string {
-	return c.Exclude
+func (c *Config) EnsureAbsPaths() {
+	for i, file := range c.Exclude {
+		if !filepath.IsAbs(file) {
+			c.Exclude[i] = filepath.Join(c.Path, file)
+		}
+	}
+
+	for i, file := range c.Only {
+		if !filepath.IsAbs(file) {
+			c.Only[i] = filepath.Join(c.Path, file)
+		}
+	}
 }
 
-func ParseConfig(cfgPath string) (*Config, error) {
+func (c *Config) ValidatePatterns() error {
+	for _, pattern := range c.Exclude {
+		if _, err := utils.GlobstarMatch(pattern, ""); err != nil {
+			return fmt.Errorf("exclude pattern '%s' is not correctly formatted", pattern)
+		}
+	}
+
+	for _, pattern := range c.Only {
+		if _, err := utils.GlobstarMatch(pattern, ""); err != nil {
+			return fmt.Errorf("only pattern '%s' is not correctly formatted", pattern)
+		}
+	}
+
+	return nil
+}
+
+func ParseConfigFromFile(cfgPath string) (*Config, error) {
 	// Default values.
 	cfg := Config{
+		Path:          cfgPath,
+		Source:        "default",
 		UnwrapExports: false,
 		Js: js.Config{
 			Workspaces:    true,
@@ -54,45 +86,36 @@ func ParseConfig(cfgPath string) (*Config, error) {
 		Rust: rust.Config{},
 	}
 
-	isDefault := cfgPath == ""
+	var isDefault bool
 	if cfgPath == "" {
+		isDefault = true
 		cfgPath = DefaultConfigPath
-	}
-	content, err := os.ReadFile(cfgPath)
-	// If a specific path was requested, and it does not exist, fail
-	// If no specific path was requested, and the default config path does not exist, succeed
-	if os.IsNotExist(err) {
-		if !isDefault {
-			return &cfg, err
-		} else {
-			return &cfg, nil
-		}
-	} else if err != nil {
-		return &cfg, err
 	}
 	absCfgPath, err := filepath.Abs(cfgPath)
 	if err != nil {
-		return &cfg, err
+		return nil, err
 	}
 	cfg.Path = filepath.Dir(absCfgPath)
+	cfg.Check.Path = cfg.Path
+
+	// If a specific path was requested, and it does not exist, fail
+	// If no specific path was requested, and the default config path does not exist, succeed
+	content, err := os.ReadFile(cfgPath)
+	if os.IsNotExist(err) {
+		if isDefault {
+			return &cfg, nil
+		}
+		return nil, err
+	} else if err != nil {
+		return nil, err
+	}
+	cfg.Source = "file"
 
 	decoder := yaml.NewDecoder(bytes.NewReader(content))
 	decoder.KnownFields(true)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		return &cfg, fmt.Errorf(`config file "%s" is not a valid yml file: %w`, cfgPath, err)
-	}
-
-	exclude := make([]string, len(cfg.Exclude))
-	for i, pattern := range cfg.Exclude {
-		if !filepath.IsAbs(pattern) {
-			exclude[i] = filepath.Join(cfg.Path, pattern)
-		} else {
-			exclude[i] = pattern
-		}
-	}
-	if len(exclude) > 0 {
-		cfg.Exclude = exclude
+		return nil, fmt.Errorf(`config file "%s" is not a valid yml file: %w`, cfgPath, err)
 	}
 
 	cfg.Check.Init(filepath.Dir(absCfgPath))

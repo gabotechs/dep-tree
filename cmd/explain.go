@@ -2,17 +2,17 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
+	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/explain"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 )
 
-func ExplainCmd() *cobra.Command {
+func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "explain",
 		Short:   "Shows all the dependencies between two parts of the code",
@@ -29,26 +29,23 @@ func ExplainCmd() *cobra.Command {
 				return err
 			}
 
-			cfg, err := loadConfig()
+			cfg, err := cfgF()
 			if err != nil {
 				return err
 			}
+
 			lang, err := inferLang(fromFiles, cfg)
 			if err != nil {
 				return err
 			}
 
 			parser := language.NewParser(lang)
-			parser.UnwrapProxyExports = cfg.UnwrapExports
-			parser.Exclude = cfg.Exclude
+			applyConfigToParser(parser, cfg)
+
 			cwd, _ := os.Getwd()
-			for _, arg := range args {
-				if filepath.IsAbs(arg) {
-					parser.Include = append(parser.Include, arg)
-				} else {
-					parser.Include = append(parser.Include, filepath.Join(cwd, arg))
-				}
-			}
+			tempCfg := config.Config{Path: cwd, Only: args}
+			tempCfg.EnsureAbsPaths()
+			parser.Include = tempCfg.Only
 
 			deps, err := explain.Explain[*language.FileInfo](
 				parser,
