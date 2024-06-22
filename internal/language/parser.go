@@ -49,6 +49,9 @@ func (p *Parser) shouldExclude(path string) bool {
 }
 
 func (p *Parser) Node(id string) (*graph.Node[*FileInfo], error) {
+	if p.shouldExclude(id) {
+		return nil, nil
+	}
 	file, err := p.parseFile(id)
 	if err != nil {
 		return nil, err
