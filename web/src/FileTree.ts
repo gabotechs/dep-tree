@@ -90,9 +90,12 @@ export class FileTree<T = object> {
   squash (): void {
     if (this.subTrees.size === 1 && this.leafs.size === 0) {
       const child = [...this.subTrees.values()][0]
+      const oldName = this.name
       this.name += '/' + child.name
       this.subTrees = child.subTrees
       this.leafs = child.leafs
+      this.__parent?.subTrees.delete(oldName)
+      this.__parent?.subTrees.set(this.name, this)
       this.squash()
       for (const tree of this.subTrees.values()) {
         tree.__parent = this

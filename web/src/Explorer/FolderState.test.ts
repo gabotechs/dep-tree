@@ -29,6 +29,34 @@ describe('FolderState', () => {
   );
 
   it(
+    'should work with squashed folders',
+    {
+      nodes: [
+        ['foo', 'bar', 'a.ts'],
+        ['foo', 'bar', 'b.ts'],
+        ['bar', 'c.ts'],
+        ['d.ts']
+      ],
+      squash: true,
+      modify: folderState => {
+        folderState.tagAllFolders('expanded', 'true')
+      }
+    },
+    {
+      render: `\
+> bar {"expanded":"true"}
+ c.ts undefined
+> foo/bar {"expanded":"true"}
+ a.ts undefined
+ b.ts undefined
+d.ts undefined`,
+      events: [
+        ['tagged', 'expanded', 'true']
+      ]
+    }
+  )
+
+  it(
     'Multiple operations',
     {
       nodes: [
@@ -86,11 +114,12 @@ function it (
   name: string,
   input: {
     nodes: string[][],
-    modify: (folderState: FolderState<object>) => void
+    modify: (folderState: FolderState<object>) => void,
+    squash?: boolean
   },
   expected: {
     render: string,
-    events: Message[]
+    events: Message[],
   }
 ) {
   let id = 0
@@ -104,6 +133,7 @@ function it (
     for (const node of input.nodes) {
       fileTree.pushNode(newNode(node))
     }
+    if (input.squash) fileTree.squash()
     const evs: Message[] = []
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.registerListener('test', (m) => evs.push(m))

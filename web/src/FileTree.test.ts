@@ -121,8 +121,9 @@ function it (
     }
     if (input.squash) fileTree.squash()
 
-    // ensure children parent consistency
+    // ensure tree integrity
     ensureChildrenParents(fileTree)
+    ensureFolderNamesMatchKeys(fileTree)
 
     // expect the serialization to be equal
     expect(fileTree.toString()).to.equal(expected.render)
@@ -153,5 +154,12 @@ function ensureChildrenParents (tree: FileTree): void {
   }
   for (const [name, child] of tree.leafs.entries()) {
     if (child.__parent !== tree) throw new Error(`${name} is a child of ${tree.name}, but ${name}'s parent is ${child.__parent?.name}`)
+  }
+}
+
+function ensureFolderNamesMatchKeys (tree: FileTree): void {
+  for (const [name, child] of tree.subTrees.entries()) {
+    if (child.name !== name) throw new Error(`sub-tree ${tree.name} has a child named ${child.name} under the key ${name}. They key should match the child's name`)
+    ensureFolderNamesMatchKeys(child)
   }
 }
