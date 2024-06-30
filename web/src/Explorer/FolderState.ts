@@ -30,7 +30,11 @@ export class FolderState<F> {
     return this._fileTags;
   }
 
-  /** record for accessing nested tags in O(1) time */
+  /**
+   * record for accessing nested tags in O(1) time.
+   *
+   * This is a record from tag -> folder set
+   */
   private taggedFolders: Record<string, Set<string>> = {}
   private parent?: FolderState<F>
 
@@ -49,6 +53,14 @@ export class FolderState<F> {
   tagAllFolders (tag: string, value: string) {
     for (const folder of this.folders.values()) folder.tagAllFolders(tag, value)
     this.tag(tag, value)
+  }
+
+  tagAll (tag: string, value: string) {
+    for (const folder of this.folders.values()) folder.tagAll(tag, value)
+    this.tag(tag, value)
+    for (const file of this.files.keys()) {
+      this.tagFile(file, tag, value)
+    }
   }
 
   untagAllFolders (tag: string) {
@@ -71,7 +83,7 @@ export class FolderState<F> {
   untag (tag: string) {
     delete this._tags[tag]
     if (this.parent !== undefined) {
-      delete this.parent.taggedFolders[tag]
+      this.parent.taggedFolders[tag]?.delete(this.name)
     }
     this.notifyListeners(['untagged', tag])
   }
@@ -119,6 +131,15 @@ export class FolderState<F> {
       folder.tagFile(last, tag, value)
     } else if (folder.folders.has(last)) {
       folder.folders.get(last)!.tag(tag, value)
+    }
+  }
+
+  * allFiles (): Generator<F> {
+    for (const folder of this.folders.values()) {
+      yield  * folder.allFiles()
+    }
+    for (const file of this.files.values()) {
+      yield file
     }
   }
 
