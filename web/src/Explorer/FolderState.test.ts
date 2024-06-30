@@ -134,6 +134,7 @@ function it (
       fileTree.pushNode(newNode(node))
     }
     if (input.squash) fileTree.squash()
+    fileTree.order()
     const evs: Message[] = []
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.registerListener('test', (m) => evs.push(m))

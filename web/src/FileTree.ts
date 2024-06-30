@@ -111,6 +111,33 @@ export class FileTree<T = object> {
   }
 
   /**
+   * A Map in JS will be iterated in the order of insertion. This function
+   * orders the internal Maps alphabetically.
+   */
+  order() {
+    const subTrees = [...this.subTrees.entries()]
+    this.subTrees.clear()
+    subTrees.sort(([a], [b]) => a > b ? 1 : -1)
+    let i = 0
+    for (const [k, v] of subTrees) {
+      v.__index = i
+      v.order()
+      this.subTrees.set(k, v)
+      i++
+    }
+
+    const leafs = [...this.leafs.entries()]
+    this.leafs.clear()
+    leafs.sort(([a], [b]) => a > b ? 1 : -1)
+    i = 0
+    for (const [k, v] of leafs) {
+      v.__index = i
+      this.leafs.set(k, v)
+      i++
+    }
+  }
+
+  /**
    * Retrieves the parent {@link FileTree} of a leaf node.
    */
   static parentTree<T> (leaf: FileLeaf<T>): FileTree<T> {
@@ -148,7 +175,7 @@ export class FileTree<T = object> {
    * @param node
    */
   static stats<T> (node: FileLeaf<T> | FileTree<T>): NodeStats {
-    let depth = 0 // starts with -1 because there's always going to be at least 1 parent.
+    let depth = 0
     let parent = node.__parent
     while (parent !== undefined) {
       depth++
