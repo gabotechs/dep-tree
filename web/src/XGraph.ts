@@ -52,6 +52,7 @@ export function buildXGraph (graph: Graph) {
   const fileTree = FileTree.root<XNode>()
   graph.nodes.forEach(node => fileTree.pushNode(node))
   fileTree.squash()
+  fileTree.order()
   color(fileTree)
 
   // Check if there are more than one groups in all the nodes.

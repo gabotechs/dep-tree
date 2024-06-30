@@ -124,15 +124,13 @@ export class FolderState<F> {
 
   static fromFileTree<T extends ColoredFileLeaf> (tree: FileTree<T>): FolderState<T> {
     const folderState = new FolderState<T>()
-    const folderKeys = [...tree.subTrees.keys()].sort()
-    for (const folder of folderKeys) {
+    for (const folder of tree.subTrees.keys()) {
       const childFolderState = FolderState.fromFileTree(tree.subTrees.get(folder)!)
       childFolderState.parent = folderState
       folderState.folders.set(folder, childFolderState)
     }
 
-    const fileKeys = [...tree.leafs.keys()].sort()
-    for (const file of fileKeys) {
+    for (const file of tree.leafs.keys()) {
       folderState.files.set(file, tree.leafs.get(file)!)
     }
     const { h, s, v } = tree.__data?.__color ?? { h: 0, s: 0, v: 1 }
