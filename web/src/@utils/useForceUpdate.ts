@@ -1,6 +1,6 @@
 import React from "react";
 
 export function useForceUpdate() {
-  const [, updateState] = React.useState({});
-  return React.useCallback(() => updateState({}), []);
+  const [updateForced, updateState] = React.useState({});
+  return [updateForced as never, React.useCallback(() => updateState({}), [])]
 }
