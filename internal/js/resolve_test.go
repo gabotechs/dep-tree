@@ -69,7 +69,7 @@ func TestParser_ResolvePath(t *testing.T) {
 			Name:          "Does not resolve invalid path override import",
 			Cwd:           filepath.Join(resolverTestFolder, "src"),
 			Unresolved:    "@/helpers/bar",
-			ExpectedError: "import '@/helpers/bar' was matched to path '@/helpers/' in tscofing's paths option, but the resolved path did not match an existing file",
+			ExpectedError: "import '@/helpers/bar' was matched to path '.resolve_test/src/helpers/bar' in tscofing's paths option, but the resolved path did not match an existing file",
 		},
 		{
 			Name:          "Empty name does not panic",

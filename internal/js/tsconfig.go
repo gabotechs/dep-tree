@@ -2,7 +2,6 @@ package js
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,13 +40,12 @@ func ParseTsConfig(filePath string) (TsConfig, error) {
 }
 
 func (t *TsConfig) ResolveFromBaseUrl(unresolved string) string {
-	baseUrl := t.CompilerOptions.BaseUrl
-	importFromBaseUrl := filepath.Join(t.path, baseUrl, unresolved)
-	return getFileAbsPath(importFromBaseUrl)
+	return filepath.Join(t.path, t.CompilerOptions.BaseUrl, unresolved)
 }
 
-func (t *TsConfig) ResolveFromPaths(unresolved string) (string, error) {
-	var failedMatches []string
+func (t *TsConfig) ResolveFromPaths(unresolved string) []string {
+	var candidates []string
+
 	for pathOverride, searchPaths := range t.CompilerOptions.Paths {
 		pathOverride = strings.ReplaceAll(pathOverride, "*", "")
 		if strings.HasPrefix(unresolved, pathOverride) {
@@ -55,17 +53,9 @@ func (t *TsConfig) ResolveFromPaths(unresolved string) (string, error) {
 				searchPath = strings.ReplaceAll(searchPath, "*", "")
 				newImportFrom := strings.ReplaceAll(unresolved, pathOverride, searchPath)
 				importFromBaseUrlAndPaths := filepath.Join(t.path, t.CompilerOptions.BaseUrl, newImportFrom)
-				absPath := getFileAbsPath(importFromBaseUrlAndPaths)
-				if absPath != "" {
-					return absPath, nil
-				}
+				candidates = append(candidates, importFromBaseUrlAndPaths)
 			}
-			failedMatches = append(failedMatches, pathOverride)
 		}
 	}
-	if failedMatches != nil {
-		return "", fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, strings.Join(failedMatches, "', '"))
-	} else {
-		return "", nil
-	}
+	return candidates
 }
