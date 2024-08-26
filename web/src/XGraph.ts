@@ -34,7 +34,7 @@ enum VirtualDirMode {
   ALL
 }
 
-const VIRTUAL_DIR_MODE: VirtualDirMode = VirtualDirMode.ONLY_ONE
+const VIRTUAL_DIR_MODE: VirtualDirMode = VirtualDirMode.ALL
 
 /**
  * Processes the graph performing some operations like:
@@ -44,7 +44,7 @@ const VIRTUAL_DIR_MODE: VirtualDirMode = VirtualDirMode.ONLY_ONE
  *
  * WARNING: this function mutates the provided graph for performance reasons
  */
-export function buildXGraph (graph: Graph) {
+export function buildXGraph(graph: Graph) {
   // Build a record of nodes. This will be useful across the application for accessing
   // a node given its id in O(1) time.
   const nodes: Record<number, XNode> = {}
@@ -131,7 +131,7 @@ export function buildXGraph (graph: Graph) {
   return { xGraph: graph as XGraph, nodes, fileTree }
 }
 
-function newDirNode (id: number): XNode {
+function newDirNode(id: number): XNode {
   return {
     id,
     isDir: true,
@@ -146,7 +146,7 @@ function newDirNode (id: number): XNode {
   }
 }
 
-function newGroupNode (id: number): XNode {
+function newGroupNode(id: number): XNode {
   return {
     id,
     isPackage: true,
@@ -161,7 +161,7 @@ function newGroupNode (id: number): XNode {
   }
 }
 
-function newFolderLink (nodeId: number, folderId: number): XLink {
+function newFolderLink(nodeId: number, folderId: number): XLink {
   return {
     from: nodeId,
     to: folderId,
@@ -172,7 +172,7 @@ function newFolderLink (nodeId: number, folderId: number): XLink {
   }
 }
 
-function newGroupLink (nodeId: number, folderId: number): XLink {
+function newGroupLink(nodeId: number, folderId: number): XLink {
   return {
     from: nodeId,
     to: folderId,
