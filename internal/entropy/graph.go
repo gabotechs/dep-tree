@@ -24,17 +24,26 @@ type Node struct {
 	DirName      string   `json:"dirName"`
 	Loc          int      `json:"loc"`
 	Size         int      `json:"size"`
+	Position     Position `json:"position"`
+	IsDirectory  bool     `json:"isDirectory"`
+	ClassName    string   `json:"className,omitempty"`
+	Type         string   `json:"type,omitempty"`
+}
+
+type Position struct {
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 type Link struct {
-	From     int64 `json:"from"`
-	To       int64 `json:"to"`
+	From     int64 `json:"source"`
+	To       int64 `json:"target"`
 	IsCyclic bool  `json:"isCyclic"`
 }
 
 type Graph struct {
 	Nodes     []Node `json:"nodes"`
-	Links     []Link `json:"links"`
+	Links     []Link `json:"edges"`
 	EnableGui bool   `json:"enableGui"`
 }
 
@@ -68,8 +77,27 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 		return n.Data.Loc
 	}), 1)
 
+	dirNodes := make(map[string]int64)
+
 	for _, node := range allNodes {
 		dirName := filepath.Dir(node.Data.RelPath)
+		isDirectory := !strings.Contains(filepath.Base(node.Data.RelPath), ".")
+		if _, exists := dirNodes[dirName]; !exists {
+			dirNode := Node{
+				Id:          int64(len(out.Nodes) + 1),
+				FileName:    dirName,
+				DirName:     filepath.Dir(dirName) + string(os.PathSeparator),
+				Position:    Position{X: 0, Y: 0},
+				PathBuf:     strings.Split(filepath.Join(node.Data.AbsPath, ".."), string(os.PathSeparator)),
+				Group:       node.Data.Package,
+				IsDirectory: true,
+				ClassName:   ".nodeDir",
+				Type:        "directory",
+			}
+			out.Nodes = append(out.Nodes, dirNode)
+			dirNodes[dirName] = dirNode.Id
+		}
+
 		n := Node{
 			Id:           node.ID(),
 			IsEntrypoint: node.Data.AbsPath == singleEntrypointAbsPath,
@@ -79,12 +107,21 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 			DirName:      dirName + string(os.PathSeparator),
 			Loc:          node.Data.Loc,
 			Size:         maxNodeSize * node.Data.Loc / maxLoc,
+			IsDirectory:  isDirectory,
+			Position:     Position{X: 0, Y: 0},
+			ClassName:    ".node",
+			Type:         "file",
 		}
 		out.Nodes = append(out.Nodes, n)
 
+		out.Links = append(out.Links, Link{
+			From: dirNodes[dirName],
+			To:   n.Id,
+		})
+
 		for _, to := range g.FromId(node.Id) {
 			out.Links = append(out.Links, Link{
-				From: node.ID(),
+				From: n.Id,
 				To:   to.ID(),
 			})
 		}
