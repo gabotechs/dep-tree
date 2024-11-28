@@ -47,10 +47,7 @@ func (l *Language) ParseImports(file *language.FileInfo) (*language.ImportsResul
 				importPath = filepath.Join(filepath.Dir(file.AbsPath), statement.Import.From)
 			}
 
-			// fmt.Println(importPath)
-			result.Imports = append(result.Imports, language.ImportEntry{
-				AbsPath: importPath,
-			})
+			result.Imports = append(result.Imports, language.EmptyImport(importPath))
 		}
 	}
 
@@ -72,7 +69,6 @@ func (l *Language) ParseExports(file *language.FileInfo) (*language.ExportsResul
 				exportPath = filepath.Join(filepath.Dir(file.AbsPath), statement.Export.From)
 			}
 
-			// fmt.Println(exportPath)
 			result.Exports = append(result.Exports, language.ExportEntry{
 				AbsPath: exportPath,
 			})
