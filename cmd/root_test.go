@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -68,6 +69,16 @@ func TestRoot(t *testing.T) {
 			Name: "tree .root_test/main.py --json",
 		},
 		{
+			Name: "tree .root_test/main.py --json --exclude .root_test/dep.py",
+		},
+		{
+			Name:              "tree .root_test/main.py --json --exclude .root_test/*.py",
+			JustExpectAtLeast: 90,
+		},
+		{
+			Name: "tree .root_test/main.py --json --exclude .root_test/d*.py",
+		},
+		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml",
 		},
 		{
@@ -78,6 +89,18 @@ func TestRoot(t *testing.T) {
 		},
 		{
 			Name: "tree .root_test/main.py --json --config .root_test/.dep-tree.yml-bad-path",
+		},
+		{
+			Name: "explain .root_test/*.py",
+		},
+		{
+			Name: "explain .root_test/* ./**/dep.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/dep.py",
+		},
+		{
+			Name: "explain .root_test/*.py ./**/deps.py foo.bar",
 		},
 	}
 
@@ -94,9 +117,14 @@ func TestRoot(t *testing.T) {
 			name := tt.Name + ".txt"
 			name = strings.ReplaceAll(name, "/", "_")
 			name = strings.ReplaceAll(name, "-", "_")
+			name = strings.ReplaceAll(name, "*", "_")
 			if tt.JustExpectAtLeast > 0 {
 				a := require.New(t)
-				a.Greater(len(b.String()), tt.JustExpectAtLeast)
+				if err != nil {
+					a.Greater(len(err.Error()), tt.JustExpectAtLeast)
+				} else {
+					a.Greater(len(b.String()), tt.JustExpectAtLeast)
+				}
 			} else {
 				if err != nil {
 					utils.GoldenTest(t, filepath.Join(testFolder, name), err.Error())
@@ -116,6 +144,11 @@ func TestInferLang(t *testing.T) {
 		Error    string
 	}{
 		{
+			Name:  "zero files",
+			Files: []string{},
+			Error: "at least 1 file must be provided for infering the language",
+		},
+		{
 			Name:     "only 1 file",
 			Files:    []string{"foo.js"},
 			Expected: &js.Language{},
@@ -133,7 +166,7 @@ func TestInferLang(t *testing.T) {
 		{
 			Name:  "no match",
 			Files: []string{"foo.pdf", "bar.docx"},
-			Error: "at least one file must be provided",
+			Error: "none of the provided files belong to the a supported language",
 		},
 	}
 
@@ -146,6 +179,124 @@ func TestInferLang(t *testing.T) {
 			} else {
 				a.NoError(err)
 				a.IsType(tt.Expected, lang)
+			}
+		})
+	}
+}
+
+func TestFilesFromArgs(t *testing.T) {
+	absPath, _ := filepath.Abs("..")
+
+	tests := []struct {
+		Name     string
+		Input    []string
+		Expected []string
+		Error    string
+	}{
+		{
+			Name:  "Single file",
+			Input: []string{"root_test.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Two files",
+			Input: []string{"root_test.go", "root.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+				filepath.Join("cmd", "root.go"),
+			},
+		},
+		{
+			Name:  "Non existing file",
+			Input: []string{"NON_EXISTING_FILE.go"},
+			Error: "NON_EXISTING_FILE.go does not match with any existing file",
+		},
+		{
+			Name:  "With relative path",
+			Input: []string{filepath.Join("..", "cmd", "root_test.go")},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Single globstar expansion",
+			Input: []string{"*oot_test.go"},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "With relative path and single globstar expansion",
+			Input: []string{filepath.Join("..", "cmd", "*oot_test.go")},
+			Expected: []string{
+				filepath.Join("cmd", "root_test.go"),
+			},
+		},
+		{
+			Name:  "Single globstar should not include dirs",
+			Input: []string{filepath.Join("..", "cmd", "*")},
+			Expected: []string{
+				filepath.Join("cmd", "check.go"),
+				filepath.Join("cmd", "config.go"),
+				filepath.Join("cmd", "entropy.go"),
+				filepath.Join("cmd", "explain.go"),
+				filepath.Join("cmd", "root.go"),
+				filepath.Join("cmd", "root_test.go"),
+				filepath.Join("cmd", "tree.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (1)",
+			Input: []string{"../internal/**/*mports_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "go", "imports_test.go"),
+				filepath.Join("internal", "js", "imports_test.go"),
+				filepath.Join("internal", "python", "imports_test.go"),
+				filepath.Join("internal", "rust", "imports_test.go"),
+				filepath.Join("internal", "language", "imports_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (2)",
+			Input: []string{"../internal/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (3)",
+			Input: []string{"../../dep-tree/inte*/**/grammar_test.go"},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+		{
+			Name:  "Double globstar expansion (4)",
+			Input: []string{filepath.Join(absPath, "../dep-tree/internal/**/grammar_test.go")},
+			Expected: []string{
+				filepath.Join("internal", "js", "js_grammar", "grammar_test.go"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			a := require.New(t)
+			result, err := filesFromArgs(tt.Input)
+			if tt.Error != "" {
+				a.ErrorContains(err, tt.Error)
+			} else {
+				a.NoError(err)
+				slices.Sort(tt.Expected)
+				slices.Sort(result)
+				expected := make([]string, len(tt.Expected))
+				for i, f := range tt.Expected {
+					expected[i] = filepath.Join(absPath, f)
+				}
+
+				a.Equal(expected, result)
 			}
 		})
 	}

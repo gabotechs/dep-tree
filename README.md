@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-    The more decoupled and modular a code base is, the more spread the graph will look like.
+    The more decoupled and modular a code base is, the more spread and clustered the graph will look like.
 </p>
 
 <p align="center">
@@ -29,20 +29,19 @@
 
 ## Checkout the entropy graph of well-known projects
 
-| Ts/Js                                                                                                                                                         | Python                                                                                                                                                               | Rust                                                                                                                                                 |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [typescript](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmicrosoft%2FTypeScript&entrypoint=src%2Ftypescript%2Ftypescript.ts)     | [langchain](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Flangchain&entrypoint=libs%2Flangchain%2Flangchain%2F__init__.py) | [deno](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fdenoland%2Fdeno&entrypoint=cli%2Fmain.rs)                            |
-| [react](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact&entrypoint=packages%2Freact-dom%2Findex.js)                 | [pytorch](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpytorch%2Fpytorch&entrypoint=torch%2Fnn%2F__init__.py)                            | [polars](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fpola-rs%2Fpolars&entrypoint=crates%2Fpolars-core%2Fsrc%2Flib.rs)   |
-| [svelte](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fsveltejs%2Fsvelte&entrypoint=packages%2Fsvelte%2Fsrc%2Fcompiler%2Findex.js) | [tensorflow](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftensorflow%2Ftensorflow&entrypoint=tensorflow%2Fpython%2Fkeras%2Fmodels.py)    | [alacritty](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Falacritty%2Falacritty&entrypoint=alacritty%2Fsrc%2Fmain.rs)     |
-| [vuejs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fvuejs%2Fvue&entrypoint=src%2Fcore%2Findex.ts)                                | [fastapi](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftiangolo%2Ffastapi&entrypoint=fastapi%2F__init__.py)                              | [bevy (ecs)](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fbevyengine%2Fbevy&entrypoint=crates%2Fbevy_ecs%2Fsrc%2Flib.rs) |
-| [angular](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fangular%2Fangular&entrypoint=packages%2Fcompiler%2Findex.ts)               | [numpy](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy&entrypoint=numpy%2F__init__.py)                                       | [rocket](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Frwf2%2FRocket&entrypoint=core%2Flib%2Fsrc%2Flib.rs)                |
-| [storybook](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fstorybookjs%2Fstorybook&entrypoint=code%2Fui%2Fblocks%2Fsrc%2Findex.ts)  | [scikit-learn](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fscikit-learn%2Fscikit-learn&entrypoint=sklearn%2F__init__.py)                | [axum](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Ftokio-rs%2Faxum&entrypoint=axum%2Fsrc%2Flib.rs)                      |
-| [three.js](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js&entrypoint=src%2FThree.js)                              |                                                                                                                                                                      |                                                                                                                                                      |
-| [expressjs](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fexpressjs%2Fexpress&entrypoint=lib%2Fexpress.js)                         |                                                                                                                                                                      |                                                                                                                                                      |
-| [material-ui](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fmui%2Fmaterial-ui&entrypoint=packages%2Fmui-material%2Fsrc%2Findex.js) |                                                                                                                                                                      |                                                                                                                                                      |
-| [eslint](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Feslint%2Feslint&entrypoint=lib%2Fcli.js)                                    |                                                                                                                                                                      |                                                                                                                                                      |
-| [prettier](https://dep-tree-explorer.vercel.app/api?repo=https%3A%2F%2Fgithub.com%2Fprettier%2Fprettier&entrypoint=index.js)                                  |                                                                                                                                                                      |                                                                                                                                                      |
-
+| Ts/Js                                                                                                            | Python                                                                                                                  | Rust                                                                                                    | Go                                                                                                                      |
+|------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|
+| [typescript](https://dep-tree.s3.amazonaws.com/^0.23.0/microsoft/TypeScript/src/typescript/typescript.ts.html)   | [langchain](https://dep-tree.s3.amazonaws.com/^0.23.0/langchain-ai/langchain/libs/langchain/langchain/__init__.py.html) | [deno](https://dep-tree.s3.amazonaws.com/^0.23.0/denoland/deno/cli/main.rs.html)                        | [Docker buildx](https://dep-tree.s3.amazonaws.com/^0.23.0/docker/buildx/cmd/buildx/main.go.html)                        |
+| [react](https://dep-tree.s3.amazonaws.com/^0.23.0/facebook/react/packages/react-dom/index.js.html)               | [pytorch](https://dep-tree.s3.amazonaws.com/^0.23.0/pytorch/pytorch/torch/nn/__init__.py.html)                          | [polars](https://dep-tree.s3.amazonaws.com/^0.23.0/pola-rs/polars/crates/polars-core/src/lib.rs.html)   | [Docker compose](https://dep-tree.s3.amazonaws.com/^0.23.0/docker/compose/cmd/main.go.html)                             |
+| [svelte](https://dep-tree.s3.amazonaws.com/^0.23.0/sveltejs/svelte/packages/svelte/src/compiler/index.js.html)   | [tensorflow](https://dep-tree.s3.amazonaws.com/^0.23.0/tensorflow/tensorflow/tensorflow/python/keras/models.py.html)    | [alacritty](https://dep-tree.s3.amazonaws.com/^0.23.0/alacritty/alacritty/alacritty/src/main.rs.html)   | [Kubernetes kubelet](https://dep-tree.s3.amazonaws.com/^0.23.0/kubernetes/kubernetes/cmd/kubelet/app/server.go.html)    |
+| [vuejs](https://dep-tree.s3.amazonaws.com/^0.23.0/vuejs/vue/src/core/index.ts.html)                              | [fastapi](https://dep-tree.s3.amazonaws.com/^0.23.0/tiangolo/fastapi/fastapi/__init__.py.html)                          | [bevy (ecs)](https://dep-tree.s3.amazonaws.com/^0.23.0/bevyengine/bevy/crates/bevy_ecs/src/lib.rs.html) | [Ollama](https://dep-tree.s3.amazonaws.com/^0.23.0/ollama/ollama/main.go.html)                                          |
+| [angular](https://dep-tree.s3.amazonaws.com/^0.23.0/angular/angular/packages/compiler/index.ts.html)             | [numpy](https://dep-tree.s3.amazonaws.com/^0.23.0/numpy/numpy/numpy/__init__.py.html)                                   | [rocket](https://dep-tree.s3.amazonaws.com/^0.23.0/rwf2/Rocket/core/lib/src/lib.rs.html)                | [Gin](https://dep-tree.s3.amazonaws.com/^0.23.0/gin-gonic/gin/*.go.html)                                                |
+| [storybook](https://dep-tree.s3.amazonaws.com/^0.23.0/storybookjs/storybook/code/ui/blocks/src/index.ts.html)    | [scikit-learn](https://dep-tree.s3.amazonaws.com/^0.23.0/scikit-learn/scikit-learn/sklearn/__init__.py.html)            | [axum](https://dep-tree.s3.amazonaws.com/^0.23.0/tokio-rs/axum/axum/src/lib.rs.html)                    | [Go's crypto std](https://dep-tree.s3.amazonaws.com/^0.23.0/golang/go/src/crypto/**/*.go.html)                          |
+| [three.js](https://dep-tree.s3.amazonaws.com/^0.23.0/mrdoob/three.js/src/Three.js.html)                          | [audiocraft](https://dep-tree.s3.amazonaws.com/^0.23.0/facebookresearch/audiocraft/audiocraft/models/__init__.py.html)  | [MusicGPT](https://dep-tree.s3.amazonaws.com/^0.23.0/gabotechs/MusicGPT/src/main.rs.html)               | [Dep Tree](https://dep-tree.s3.amazonaws.com/^0.23.0/gabotechs/dep-tree/main.go.html)                                   |
+| [expressjs](https://dep-tree.s3.amazonaws.com/^0.23.0/expressjs/express/lib/express.js.html)                     |                                                                                                                         |                                                                                                         | [Cockroach DB SQL parser](https://dep-tree.s3.amazonaws.com/^0.23.0/cockroachdb/cockroach/pkg/sql/parser/parse.go.html) |
+| [material-ui](https://dep-tree.s3.amazonaws.com/^0.23.0/mui/material-ui/packages/mui-material/src/index.js.html) |                                                                                                                         |                                                                                                         | [Ethereum](https://dep-tree.s3.amazonaws.com/^0.23.0/ethereum/go-ethereum/cmd/**/*.go.html)                             |
+| [eslint](https://dep-tree.s3.amazonaws.com/^0.23.0/eslint/eslint/lib/cli.js.html)                                |                                                                                                                         |                                                                                                         |                                                                                                                         |
+| [prettier](https://dep-tree.s3.amazonaws.com/^0.23.0/prettier/prettier/index.js.html)                            |                                                                                                                         |                                                                                                         |                                                                                                                         |
 
 ## Supported languages
 
@@ -51,6 +50,7 @@
     <img height="40px" src="docs/ts-logo.png">
     <img height="40px" src="docs/python-logo.png">
     <img height="40px" src="docs/rust-logo.png">
+    <img height="36px" src="docs/go-logo.png">
 </div>
 
 ## Contributing additional languages
@@ -65,7 +65,7 @@ Contributions are always welcome!
 On Mac and Linux, it can be installed using brew:
 
 ```shell
-brew install gabotechs/taps/dep-tree
+brew install dep-tree
 ```
 
 Alternatively, on any platform including Windows it can be installed with `pip`...
@@ -142,6 +142,31 @@ clustering and no clear separation between them:
     <img height="200px" src="docs/coupled-code-base-2.png">
     <img height="200px" src="docs/coupled-code-base-3.png">
 </div>
+
+### Explain
+
+Given two pieces of code, displays what are the dependencies between them, for example:
+
+```shell
+dep-tree explain 'src/products/**/*.go' 'src/orders/**/*.go'
+```
+
+> [!WARNING]  
+> Make sure you wrap the two glob patterns with single quotes ('') or double quotes (""),
+> otherwise your shell might expand the globstars, and `dep-tree explain` will receive
+> an incorrect number of arguments.
+
+
+This command will display what Golang files under the `src/products` directory depend on
+other Golang files under the `src/orders` directory.
+
+It will output something like this:
+
+```shell
+src/products/books/book.go -> src/orders/renting.go
+src/products/price.go  -> src/orders/order_manager.go
+src/products/storage.go -> src/orders/order_manager.go
+```
 
 ### Tree
 
@@ -263,6 +288,11 @@ that contains the following settings:
 # some big files that everyone depends on and that don't add
 # value to the visualization, like auto generated code.
 exclude:
+  - 'some-glob-pattern/**/*.ts'
+
+# The only files that will be included by dep-tree. If a file does not
+# match any of the provided patters, it is ignored.
+only:
   - 'some-glob-pattern/**/*.ts'
 
 # Whether to unwrap re-exports to the target file or not.

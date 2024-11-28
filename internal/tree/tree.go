@@ -45,6 +45,9 @@ func NewTree[T any](
 	if err != nil {
 		return nil, err
 	}
+	if entrypoint == nil {
+		return nil, fmt.Errorf("selected entrypoint %s is explicitly ignored", files[0])
+	}
 
 	cycles := g.RemoveCyclesStartingFromNode(entrypoint)
 

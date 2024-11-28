@@ -6,9 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/dart"
 	"github.com/gabotechs/dep-tree/internal/dummy"
+	golang "github.com/gabotechs/dep-tree/internal/go"
+	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -18,27 +21,19 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const explainGroupId = "explain"
 const renderGroupId = "render"
 const checkGroupId = "check"
 const defaultCommand = "entropy"
-
-var configPath string
-var unwrapExports bool
-var jsTsConfigPaths bool
-var jsWorkspaces bool
-var pythonExcludeConditionalImports bool
-var exclude []string
-
-var root *cobra.Command
 
 func NewRoot(args []string) *cobra.Command {
 	if args == nil {
 		args = os.Args[1:]
 	}
 
-	root = &cobra.Command{
+	root := &cobra.Command{
 		Use:               "dep-tree",
-		Version:           "v0.19.9",
+		Version:           "v0.23.0",
 		Short:             "Visualize and check your project's dependency graph",
 		SilenceUsage:      true,
 		Args:              cobra.ArbitraryArgs,
@@ -56,26 +51,69 @@ $ dep-tree check`,
 `,
 	}
 
+	root.SetOut(os.Stdout)
+	root.SetErr(os.Stderr)
 	root.SetArgs(args)
-
-	root.AddCommand(
-		EntropyCmd(),
-		TreeCmd(),
-		CheckCmd(),
-		ConfigCmd(),
-	)
 
 	root.AddGroup(&cobra.Group{ID: renderGroupId, Title: "Visualize your dependencies graphically"})
 	root.AddGroup(&cobra.Group{ID: checkGroupId, Title: "Check your dependencies against your own rules"})
+	root.AddGroup(&cobra.Group{ID: explainGroupId, Title: "Display what are the dependencies between two portions of code"})
+
+	cliCfg := config.NewConfigCwd()
+
+	var fileConfigPath string
 
 	root.Flags().SortFlags = false
 	root.PersistentFlags().SortFlags = false
-	root.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to dep-tree's config file. (default .dep-tree.yml)")
-	root.PersistentFlags().BoolVar(&unwrapExports, "unwrap-exports", false, "trace re-exported symbols to the file where they are declared. (default false)")
-	root.PersistentFlags().StringArrayVar(&exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags.")
-	root.PersistentFlags().BoolVar(&jsTsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports.")
-	root.PersistentFlags().BoolVar(&jsWorkspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths.")
-	root.PersistentFlags().BoolVar(&pythonExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude imports wrapped inside if or try statements. (default false)")
+	root.PersistentFlags().StringVarP(&fileConfigPath, "config", "c", "", "path to dep-tree's config file. (default .dep-tree.yml)")
+	root.PersistentFlags().BoolVar(&cliCfg.UnwrapExports, "unwrap-exports", false, "trace re-exported symbols to the file where they are declared. (default false)")
+	root.PersistentFlags().BoolVar(&cliCfg.Js.TsConfigPaths, "js-tsconfig-paths", true, "follow the tsconfig.json paths while resolving imports.")
+	root.PersistentFlags().BoolVar(&cliCfg.Js.Workspaces, "js-workspaces", true, "take the workspaces attribute in the root package.json into account for resolving paths.")
+	root.PersistentFlags().BoolVar(&cliCfg.Python.ExcludeConditionalImports, "python-exclude-conditional-imports", false, "exclude imports wrapped inside if or try statements. (default false)")
+	root.PersistentFlags().StringArrayVar(&cliCfg.Only, "only", nil, "Files that do not match this glob pattern will be ignored. You can provide an arbitrary number of --only flags.")
+	root.PersistentFlags().StringArrayVar(&cliCfg.Exclude, "exclude", nil, "Files that match this glob pattern will be ignored. You can provide an arbitrary number of --exclude flags.")
+
+	cfgF := func() (*config.Config, error) {
+		fileCfg, err := config.ParseConfigFromFile(fileConfigPath)
+		if err != nil {
+			return nil, err
+		}
+		fileCfg.EnsureAbsPaths()
+		cliCfg.EnsureAbsPaths()
+
+		// For these settings, prefer the CLI over the file config.
+		for _, a := range []struct {
+			name   string
+			source *bool
+			dest   *bool
+		}{
+			{"unwrap-exports", &cliCfg.UnwrapExports, &fileCfg.UnwrapExports},
+			{"js-tsconfig-paths", &cliCfg.Js.TsConfigPaths, &fileCfg.Js.TsConfigPaths},
+			{"js-workspaces", &cliCfg.Js.Workspaces, &fileCfg.Js.Workspaces},
+			{"python-exclude-conditional-imports", &cliCfg.Python.ExcludeConditionalImports, &fileCfg.Python.ExcludeConditionalImports},
+		} {
+			if !root.PersistentFlags().Changed(a.name) {
+				*a.dest = *a.source
+			}
+		}
+		// NOTE: hard-enable this for now, as they don't produce a very good output.
+		fileCfg.Python.IgnoreFromImportsAsExports = true
+		fileCfg.Python.IgnoreDirectoryImports = true
+
+		// merge the exclusions and inclusions from the CLI and from the config.
+		fileCfg.Exclude = append(fileCfg.Exclude, cliCfg.Exclude...)
+		fileCfg.Only = append(fileCfg.Only, cliCfg.Only...)
+
+		return fileCfg, fileCfg.ValidatePatterns()
+	}
+
+	root.AddCommand(
+		EntropyCmd(cfgF),
+		TreeCmd(cfgF),
+		CheckCmd(cfgF),
+		ConfigCmd(cfgF),
+		ExplainCmd(cfgF),
+	)
 
 	switch {
 	case len(args) > 0 && utils.InArray(args[0], []string{"help", "completion", "-v", "--version", "-h", "--help"}):
@@ -94,11 +132,16 @@ $ dep-tree check`,
 	return root
 }
 
+//nolint:gocyclo
 func inferLang(files []string, cfg *config.Config) (language.Language, error) {
+	if len(files) == 0 {
+		return nil, fmt.Errorf("at least 1 file must be provided for infering the language")
+	}
 	score := struct {
 		js     int
 		python int
 		rust   int
+		golang int
 		dummy  int
 		dart   int
 	}{}
@@ -126,6 +169,12 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 				top.v = score.python
 				top.lang = "python"
 			}
+		case utils.EndsWith(file, golang.Extensions):
+			score.golang += 1
+			if score.golang > top.v {
+				top.v = score.golang
+				top.lang = "golang"
+			}
 		case utils.EndsWith(file, dummy.Extensions):
 			score.dummy += 1
 			if score.dummy > top.v {
@@ -141,7 +190,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		}
 	}
 	if top.lang == "" {
-		return nil, errors.New("at least one file must be provided")
+		return nil, errors.New("none of the provided files belong to the a supported language")
 	}
 	switch top.lang {
 	case "js":
@@ -150,6 +199,8 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		return rust.MakeRustLanguage(&cfg.Rust)
 	case "python":
 		return python.MakePythonLanguage(&cfg.Python)
+	case "golang":
+		return golang.NewLanguage(files[0], &cfg.Golang)
 	case "dart":
 		return &dart.Language{}, nil
 	case "dummy":
@@ -161,63 +212,42 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 
 func filesFromArgs(args []string) ([]string, error) {
 	var result []string
-	var errs []error
 	for _, arg := range args {
-		abs, err := filepath.Abs(arg)
+		basepath, pattern := doublestar.SplitPattern(arg)
+		fsys := os.DirFS(basepath)
+		matches, err := doublestar.Glob(fsys, pattern)
 		if err != nil {
-			errs = append(errs, err)
-		} else if !utils.FileExists(abs) {
-			errs = append(errs, fmt.Errorf("file %s does not exist", arg))
-		} else {
-			result = append(result, abs)
+			return nil, err
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("%s does not match with any existing file", arg)
+		}
+		for _, match := range matches {
+			abs, err := filepath.Abs(filepath.Join(basepath, match))
+			if err != nil {
+				return nil, err
+			} else if !utils.FileExists(abs) {
+				if !utils.DirExists(abs) {
+					return nil, fmt.Errorf("file %s does not exist", match)
+				}
+			} else {
+				result = append(result, abs)
+			}
 		}
 	}
 	if len(result) == 0 {
-		if len(errs) == 1 {
-			return result, errs[0]
-		}
 		return result, errors.New("no valid files where provided")
 	}
 
 	return result, nil
 }
 
-func loadConfig() (*config.Config, error) {
-	cfg, err := config.ParseConfig(configPath)
-	if err != nil {
-		return nil, err
-	}
-	if root.PersistentFlags().Changed("unwrap-exports") {
-		cfg.UnwrapExports = unwrapExports
-	}
-	if root.PersistentFlags().Changed("js-tsconfig-paths") {
-		cfg.Js.TsConfigPaths = jsTsConfigPaths
-	}
-	if root.PersistentFlags().Changed("js-workspaces") {
-		cfg.Js.Workspaces = jsWorkspaces
-	}
-	if root.PersistentFlags().Changed("python-exclude-conditional-imports") {
-		cfg.Python.ExcludeConditionalImports = pythonExcludeConditionalImports
-	}
-	// NOTE: hard-enable this for now, as they don't produce a very good output.
-	cfg.Python.IgnoreFromImportsAsExports = true
-	cfg.Python.IgnoreDirectoryImports = true
+func applyConfigToParser(parser *language.Parser, cfg *config.Config) {
+	parser.UnwrapProxyExports = cfg.UnwrapExports
+	parser.Exclude = cfg.Exclude
+	parser.Include = cfg.Only
+}
 
-	absExclude := make([]string, len(exclude))
-	for i, file := range exclude {
-		if !filepath.IsAbs(file) {
-			cwd, _ := os.Getwd()
-			absExclude[i] = filepath.Join(cwd, file)
-		} else {
-			absExclude[i] = file
-		}
-	}
-	cfg.Exclude = append(cfg.Exclude, exclude...)
-	// validate exclusion patterns.
-	for _, exclusion := range cfg.Exclude {
-		if _, err := utils.GlobstarMatch(exclusion, ""); err != nil {
-			return nil, fmt.Errorf("exclude pattern '%s' is not correctly formatted", exclusion)
-		}
-	}
-	return cfg, nil
+func relPathDisplay(node *graph.Node[*language.FileInfo]) string {
+	return node.Data.RelPath
 }

@@ -1,6 +1,10 @@
 package graph
 
 import (
+	"fmt"
+	"time"
+
+	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/topo"
 
 	"github.com/gabotechs/dep-tree/internal/utils"
@@ -53,7 +57,15 @@ func (g *Graph[T]) RemoveCyclesStartingFromNode(node *Node[T]) []Cycle {
 // RemoveElementaryCycles removes all the elementary cycles in the graph. The result
 // of this can be non-deterministic.
 func (g *Graph[T]) RemoveElementaryCycles() []Cycle {
-	johnsonCycles := topo.DirectedCyclesIn(g)
+	johnsonCycles, err := utils.ExecuteWithTimeout(
+		time.Second*3,
+		func() ([][]graph.Node, error) { return topo.DirectedCyclesIn(g), nil },
+	)
+	// TODO: there's a bug in topo.DirectedCyclesIn. In certain cases, the function can
+	//  freeze forever.
+	if err != nil {
+		fmt.Println("error executing topo.DirectedCyclesIn: ", err)
+	}
 	cycles := make([]Cycle, len(johnsonCycles))
 	for i, c := range johnsonCycles {
 		stack := make([]string, len(c))

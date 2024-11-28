@@ -92,7 +92,7 @@ func TestDepTree_RenderStructuredGraph(t *testing.T) {
 			a.NoError(err)
 
 			renderOutFile := filepath.Join(structuredDir, filepath.Base(tt.Name+".json"))
-			utils.GoldenTest(t, renderOutFile, string(rendered))
+			utils.GoldenTest(t, renderOutFile, rendered)
 		})
 	}
 }

@@ -1,18 +1,19 @@
 package cmd
 
 import (
-	"github.com/gabotechs/dep-tree/internal/graph"
-	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/spf13/cobra"
 
+	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/entropy"
+	"github.com/gabotechs/dep-tree/internal/graph"
+	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-var noBrowserOpen bool
-var enableGui bool
-var renderPath string
+func EntropyCmd(cfgF func() (*config.Config, error)) *cobra.Command {
+	var noBrowserOpen bool
+	var enableGui bool
+	var renderPath string
 
-func EntropyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "entropy",
 		Short:   "(default) Renders a 3d force-directed graph in the browser",
@@ -23,7 +24,7 @@ func EntropyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			cfg, err := loadConfig()
+			cfg, err := cfgF()
 			if err != nil {
 				return err
 			}
@@ -32,12 +33,12 @@ func EntropyCmd() *cobra.Command {
 				return err
 			}
 			parser := language.NewParser(lang)
-			parser.UnwrapProxyExports = cfg.UnwrapExports
-			parser.Exclude = cfg.Exclude
+			applyConfigToParser(parser, cfg)
+
 			err = entropy.Render(files, parser, entropy.RenderConfig{
 				NoOpen:        noBrowserOpen,
 				EnableGui:     enableGui,
-				LoadCallbacks: graph.NewStdErrCallbacks[*language.FileInfo](),
+				LoadCallbacks: graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay),
 				RenderPath:    renderPath,
 			})
 			return err

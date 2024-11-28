@@ -43,7 +43,9 @@ func (l *Language) ParseFile(id string) (*language.FileInfo, error) {
 		return nil, err
 	}
 	basePath := findClosestDirWithRootFile(filepath.Dir(id))
+	if basePath != nil {
+		file.RelPath, _ = filepath.Rel(basePath.AbsDir, id)
+	}
 	// NOTE: Python has no sense of packages
-	file.RelPath, _ = filepath.Rel(basePath, id)
 	return file, nil
 }

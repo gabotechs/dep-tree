@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
@@ -15,21 +16,19 @@ const (
 )
 
 type Node struct {
-	Id           int64  `json:"id"`
-	IsEntrypoint bool   `json:"isEntrypoint"`
-	FileName     string `json:"fileName"`
-	Group        string `json:"group,omitempty"`
-	DirName      string `json:"dirName"`
-	Loc          int    `json:"loc"`
-	Size         int    `json:"size"`
-	Color        []int  `json:"color,omitempty"`
-	IsDir        bool   `json:"isDir"`
+	Id           int64    `json:"id"`
+	IsEntrypoint bool     `json:"isEntrypoint"`
+	FileName     string   `json:"fileName"`
+	PathBuf      []string `json:"pathBuf"`
+	Group        string   `json:"group,omitempty"`
+	DirName      string   `json:"dirName"`
+	Loc          int      `json:"loc"`
+	Size         int      `json:"size"`
 }
 
 type Link struct {
 	From     int64 `json:"from"`
 	To       int64 `json:"to"`
-	IsDir    bool  `json:"isDir"`
 	IsCyclic bool  `json:"isCyclic"`
 }
 
@@ -37,14 +36,6 @@ type Graph struct {
 	Nodes     []Node `json:"nodes"`
 	Links     []Link `json:"links"`
 	EnableGui bool   `json:"enableGui"`
-}
-
-func toInt(arr []float64) []int {
-	result := make([]int, len(arr))
-	for i, v := range arr {
-		result[i] = int(v)
-	}
-	return result
 }
 
 func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], loadCallbacks graph.LoadCallbacks[*language.FileInfo]) (Graph, error) {
@@ -77,25 +68,17 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 		return n.Data.Loc
 	}), 1)
 
-	dirTree := NewDirTree()
-
-	for _, node := range allNodes {
-		dirTree.AddDirsFromFileInfo(node.Data)
-	}
-
-	addedFolders := map[string]bool{}
-
 	for _, node := range allNodes {
 		dirName := filepath.Dir(node.Data.RelPath)
 		n := Node{
 			Id:           node.ID(),
 			IsEntrypoint: node.Data.AbsPath == singleEntrypointAbsPath,
 			FileName:     filepath.Base(node.Data.RelPath),
+			PathBuf:      strings.Split(node.Data.AbsPath, string(os.PathSeparator)),
 			Group:        node.Data.Package,
 			DirName:      dirName + string(os.PathSeparator),
 			Loc:          node.Data.Loc,
 			Size:         maxNodeSize * node.Data.Loc / maxLoc,
-			Color:        toInt(dirTree.ColorForFileInfo(node.Data, RGB)),
 		}
 		out.Nodes = append(out.Nodes, n)
 
@@ -104,24 +87,6 @@ func makeGraph(files []string, parser graph.NodeParser[*language.FileInfo], load
 				From: node.ID(),
 				To:   to.ID(),
 			})
-		}
-
-		for _, parentFolder := range dirTree.GroupingsForFileInfo(node.Data) {
-			folderNode := graph.MakeNode(parentFolder, 0)
-			out.Links = append(out.Links, Link{
-				From:  node.ID(),
-				To:    folderNode.ID(),
-				IsDir: true,
-			})
-			if _, ok := addedFolders[parentFolder]; ok {
-				continue
-			} else {
-				addedFolders[parentFolder] = true
-				out.Nodes = append(out.Nodes, Node{
-					Id:    folderNode.ID(),
-					IsDir: true,
-				})
-			}
 		}
 	}
 

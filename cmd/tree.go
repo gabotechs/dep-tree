@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/gabotechs/dep-tree/internal/config"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
 	"github.com/gabotechs/dep-tree/internal/tree"
@@ -11,9 +10,9 @@ import (
 	"github.com/gabotechs/dep-tree/internal/tui"
 )
 
-var jsonFormat bool
+func TreeCmd(cfgF func() (*config.Config, error)) *cobra.Command {
+	var jsonFormat bool
 
-func TreeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tree",
 		Short:   "Render the dependency tree starting from the provided entrypoint",
@@ -24,7 +23,8 @@ func TreeCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			cfg, err := loadConfig()
+
+			cfg, err := cfgF()
 			if err != nil {
 				return err
 			}
@@ -35,32 +35,31 @@ func TreeCmd() *cobra.Command {
 			}
 
 			parser := language.NewParser(lang)
-			parser.UnwrapProxyExports = cfg.UnwrapExports
-			parser.Exclude = cfg.Exclude
+			applyConfigToParser(parser, cfg)
 
 			if jsonFormat {
 				t, err := tree.NewTree[*language.FileInfo](
 					files,
 					parser,
-					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
-					graph.NewStdErrCallbacks[*language.FileInfo](),
+					relPathDisplay,
+					graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay),
 				)
 				if err != nil {
 					return err
 				}
 
 				rendered, err := t.RenderStructured()
-				fmt.Println(rendered)
+				cmd.Println(rendered)
 				return err
 			} else {
 				return tui.Loop[*language.FileInfo](
 					files,
 					parser,
-					func(node *graph.Node[*language.FileInfo]) string { return node.Data.RelPath },
+					relPathDisplay,
 					nil,
 					true,
 					nil,
-					graph.NewStdErrCallbacks[*language.FileInfo]())
+					graph.NewStdErrCallbacks[*language.FileInfo](relPathDisplay))
 			}
 		},
 	}

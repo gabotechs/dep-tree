@@ -22,6 +22,6 @@ changelog:
 brews:
   - name: 'dep-tree'
     homepage: https://github.com/gabotechs/dep-tree
-    tap:
+    repository:
       owner: gabotechs
       name: homebrew-taps

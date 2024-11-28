@@ -12,11 +12,11 @@ import (
 	"github.com/gabotechs/dep-tree/internal/language"
 )
 
-//go:embed index.html
+//go:embed generated/index.html
 var index []byte
 
-const ToReplace = "const DATA = {}"
-const ReplacePrefix = "const DATA = "
+const ToReplace = `"__INLINE_DATA",{}`
+const ReplacePrefix = `"__INLINE_DATA",`
 
 type RenderConfig struct {
 	NoOpen        bool
@@ -35,6 +35,7 @@ func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg Ren
 	if err != nil {
 		return err
 	}
+	// os.WriteFile("web/src/testData.json", marshaled, os.ModePerm)
 	rendered := bytes.ReplaceAll(index, []byte(ToReplace), append([]byte(ReplacePrefix), marshaled...))
 	var temp string
 	if cfg.RenderPath != "" {
@@ -42,7 +43,7 @@ func Render(files []string, parser graph.NodeParser[*language.FileInfo], cfg Ren
 	} else {
 		temp = filepath.Join(os.TempDir(), "index.html")
 	}
-	err = os.WriteFile(temp, rendered, os.ModePerm)
+	err = os.WriteFile(temp, rendered, 0o600)
 	if err != nil {
 		return err
 	}

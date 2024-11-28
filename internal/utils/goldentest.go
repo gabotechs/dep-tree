@@ -22,7 +22,7 @@ func GoldenTest(t *testing.T, file string, content string) {
 		expected := strings.ReplaceAll(string(expectedBytes), "\r\n", "\n")
 		a.Equal(expected, content)
 	} else {
-		err := os.WriteFile(file, []byte(content), os.ModePerm)
+		err := os.WriteFile(file, []byte(content), 0o600)
 		a.NoError(err)
 	}
 }

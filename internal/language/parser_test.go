@@ -11,19 +11,32 @@ func TestParser_shouldExclude(t *testing.T) {
 		Name     string
 		Paths    []string
 		Exclude  []string
+		Include  []string
 		Expected []string
 	}{
 		{
-			Name:     "simple",
+			Name:     "simple exclude",
 			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
 			Exclude:  []string{"/foo/bar.ts"},
 			Expected: []string{"/foo/baz.ts"},
+		},
+		{
+			Name:     "simple include",
+			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
+			Include:  []string{"/foo/bar.ts"},
+			Expected: []string{"/foo/bar.ts"},
 		},
 		{
 			Name:     "globstar",
 			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
 			Exclude:  []string{"/foo/*.ts"},
 			Expected: nil,
+		},
+		{
+			Name:     "globstar include",
+			Paths:    []string{"/foo/bar.ts", "/foo/baz.ts"},
+			Include:  []string{"/foo/*.ts"},
+			Expected: []string{"/foo/bar.ts", "/foo/baz.ts"},
 		},
 		{
 			Name:     "globstar 2",
@@ -48,7 +61,7 @@ func TestParser_shouldExclude(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			a := require.New(t)
-			parser := Parser{Exclude: tt.Exclude}
+			parser := Parser{Exclude: tt.Exclude, Include: tt.Include}
 			var result []string
 			for _, path := range tt.Paths {
 				if !parser.shouldExclude(path) {

@@ -14,9 +14,9 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v6
         with:
-          args: release --rm-dist
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
 
