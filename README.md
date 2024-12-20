@@ -9,6 +9,7 @@
     <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main"/>
     <img src="https://goreportcard.com/badge/github.com/gabotechs/dep-tree"/>
     <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff"/>
+    <img src="https://raw.githubusercontent.com/nikolaydubina/go-recipes/main/badge.svg?raw=true"/>
 </p>
 
 <p align="center">
