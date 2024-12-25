@@ -39,11 +39,11 @@ func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 			}
 
 			if overlapLeft {
-				fromFiles = utils.RemoveOverlap(fromFiles, toFiles)
+				toFiles = utils.RemoveOverlap(toFiles, fromFiles)
 			}
 
 			if overlapRight {
-				toFiles = utils.RemoveOverlap(toFiles, fromFiles)
+				fromFiles = utils.RemoveOverlap(fromFiles, toFiles)
 			}
 
 			cfg, err := cfgF()
