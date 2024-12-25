@@ -145,7 +145,8 @@ clustering and no clear separation between them:
 
 ### Explain
 
-Given two pieces of code, displays what are the dependencies between them, for example:
+Given two pieces of code, displays what are the dependencies between them. These pieces
+of code are specified using a glob patterns, for example:
 
 ```shell
 dep-tree explain 'src/products/**/*.go' 'src/orders/**/*.go'
@@ -166,6 +167,23 @@ It will output something like this:
 src/products/books/book.go -> src/orders/renting.go
 src/products/price.go  -> src/orders/order_manager.go
 src/products/storage.go -> src/orders/order_manager.go
+```
+
+Additionally, the `--overlap-left` (`-ol`) or `--overlap-right` (`-or`) arguments can be passed:
+- `--overlap-left`: when the left and right glob patterns have some files in common, keep only the
+  common files at the left, and discard them from the right. This flag is useful for retrieving any
+  external dependencies of a specific folder: 
+```shell
+# Retrieves dependencies from files in src/products to any other file that is not inside src/products
+dep-tree explain 'src/products/**/*.go' '**/*.go' --overlap-left
+```
+
+- `--overlap-right`: when the left and right glob patterns have some files in common, keep only the
+  common files at the right, and discard them from the left. This flag is useful for retrieving
+  any file outside a specific folder that depends on that folder.
+```shell
+# Retrieves dependencies from any folder but src/products that point to files inside src/products
+dep-tree explain '**/*.go' 'src/products/**/*.go' --overlap-right
 ```
 
 ### Tree
