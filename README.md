@@ -169,7 +169,7 @@ src/products/price.go  -> src/orders/order_manager.go
 src/products/storage.go -> src/orders/order_manager.go
 ```
 
-Additionally, the `--overlap-left` (`-ol`) or `--overlap-right` (`-or`) arguments can be passed:
+Additionally, the `--overlap-left` (`-l`) or `--overlap-right` (`-r`) arguments can be passed:
 - `--overlap-left`: when the left and right glob patterns have some files in common, keep only the
   common files at the left, and discard them from the right. This flag is useful for retrieving any
   external dependencies of a specific folder: 

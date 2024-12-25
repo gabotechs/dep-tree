@@ -25,7 +25,7 @@ func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 		Args:    cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if overlapLeft && overlapRight {
-				return errors.New("only one of --overlap-left (-ol) or --overlap-right (-or) can be used at a time")
+				return errors.New("only one of --overlap-left (-l) or --overlap-right (-r) can be used at a time")
 			}
 
 			fromFiles, err := filesFromArgs([]string{args[0]})
@@ -102,8 +102,8 @@ func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVarP(&overlapLeft, "overlap-left", "ol", false, "When there's an overlap between the files at the left and the right, keep the ones at the left")
-	cmd.Flags().BoolVarP(&overlapRight, "overlap-right", "or", false, "When there's an overlap between the files at the left and the right, keep the ones at the right")
+	cmd.Flags().BoolVarP(&overlapLeft, "overlap-left", "l", false, "When there's an overlap between the files at the left and the right, keep the ones at the left")
+	cmd.Flags().BoolVarP(&overlapRight, "overlap-right", "r", false, "When there's an overlap between the files at the left and the right, keep the ones at the right")
 
 	return cmd
 }
