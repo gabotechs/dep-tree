@@ -36,7 +36,6 @@ func TestRemoveOverlap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			assert.Equal(t, tt.Expected, RemoveOverlap(tt.A, tt.B))
-
 		})
 	}
 }
