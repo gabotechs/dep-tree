@@ -313,7 +313,7 @@ exclude:
   - 'some-glob-pattern/**/*.ts'
 
 # The only files that will be included by dep-tree. If a file does not
-# match any of the provided patters, it is ignored.
+# match any of the provided patterns, it is ignored.
 only:
   - 'some-glob-pattern/**/*.ts'
 

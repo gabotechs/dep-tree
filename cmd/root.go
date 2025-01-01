@@ -134,7 +134,7 @@ $ dep-tree check`,
 //nolint:gocyclo
 func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 	if len(files) == 0 {
-		return nil, fmt.Errorf("at least 1 file must be provided for infering the language")
+		return nil, fmt.Errorf("at least 1 file must be provided for inferring the language")
 	}
 	score := struct {
 		js     int

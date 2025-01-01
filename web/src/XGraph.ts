@@ -66,7 +66,7 @@ export function buildXGraph (graph: Graph) {
   const needsToAddGroups = groups.size > 1
 
   // Create virtual nodes representing folders and packages, so that additional forces are applied
-  // between nodes withing the same folder/package. This will artificially concentrate related files
+  // between nodes within the same folder/package. This will artificially concentrate related files
   // together, and will stabilize the visualization.
   for (const node of Object.values(nodes)) {
     if (needsToAddGroups) {
@@ -135,7 +135,7 @@ function newDirNode (id: number): XNode {
   return {
     id,
     isDir: true,
-    // bellow are just defaults
+    // below are just defaults
     dirName: "",
     fileName: "",
     isEntrypoint: false,
@@ -150,7 +150,7 @@ function newGroupNode (id: number): XNode {
   return {
     id,
     isPackage: true,
-    // bellow are just defaults
+    // below are just defaults
     dirName: "",
     fileName: "",
     isEntrypoint: false,
