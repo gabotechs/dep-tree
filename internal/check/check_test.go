@@ -10,10 +10,10 @@ import (
 
 func TestCheck(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Spec     [][]int
-		Config   *Config
-		Failures []string
+		Name    string
+		Spec    [][]int
+		Config  *Config
+		Failure string
 	}{
 		{
 			Name: "Simple",
@@ -26,18 +26,48 @@ func TestCheck(t *testing.T) {
 			},
 			Config: &Config{
 				Entrypoints: []string{"0"},
-				WhiteList: map[string][]string{
+				WhiteList: map[string]WhiteListEntries{
 					"4": {},
 				},
-				BlackList: map[string][]string{
-					"0": {"3"},
+				BlackList: map[string][]BlackListEntry{
+					"0": {{To: "3"}},
 				},
 			},
-			Failures: []string{
-				"0 -> 3",
-				"4 -> 3",
-				"detected circular dependency: 4 -> 3 -> 4",
+			Failure: `
+Check failed, the following dependencies are not allowed:
+- 0 -> 3
+- 4 -> 3
+
+detected circular dependencies:
+- 4 -> 3 -> 4`,
+		},
+		{
+			Name: "With description",
+			Spec: [][]int{
+				0: {1, 2, 3},
+				1: {2, 4},
+				2: {3, 4},
+				3: {4},
+				4: {3},
 			},
+			Config: &Config{
+				Entrypoints: []string{"0"},
+				WhiteList: map[string]WhiteListEntries{
+					"4": {Reason: "4 Should not be importing anything"},
+				},
+				BlackList: map[string][]BlackListEntry{
+					"0": {{To: "3", Reason: "0 should not import 3"}},
+				},
+			},
+			Failure: `
+Check failed, the following dependencies are not allowed:
+- 0 -> 3
+  0 should not import 3
+- 4 -> 3
+  4 Should not be importing anything
+
+detected circular dependencies:
+- 4 -> 3 -> 4`,
 		},
 	}
 
@@ -51,11 +81,11 @@ func TestCheck(t *testing.T) {
 				tt.Config,
 				nil,
 			)
-			if tt.Failures != nil {
-				msg := err.Error()
-				failures := strings.Split(msg, "\n")
-				failures = failures[1:]
-				a.Equal(tt.Failures, failures)
+			if tt.Failure != "" {
+				a.Equal(
+					strings.TrimSpace(tt.Failure),
+					strings.TrimSpace(err.Error()),
+				)
 			}
 		})
 	}
