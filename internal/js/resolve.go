@@ -34,6 +34,9 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	// 2. If is imported from a workspace.
 	if l.Cfg == nil || l.Cfg.Workspaces {
 		workspaces, err := NewWorkspaces(dir)
+		if err != nil {
+			return "", err
+		}
 		absPath, err = workspaces.ResolveFromWorkspaces(unresolved)
 		if absPath != "" || err != nil {
 			return absPath, err
@@ -59,20 +62,26 @@ func (l *Language) ResolvePath(unresolved string, dir string) (string, error) {
 	}
 
 	// 3.2 then use it for resolving the base url.
-	absPath = tsConfig.ResolveFromBaseUrl(unresolved)
+	resolved := tsConfig.ResolveFromBaseUrl(unresolved)
+	absPath = getFileAbsPath(resolved)
 	if absPath != "" {
 		return absPath, nil
 	}
 
 	// 4. If imported from a path override.
 	if l.Cfg == nil || l.Cfg.TsConfigPaths {
-		absPath, err = tsConfig.ResolveFromPaths(unresolved)
-		if err != nil {
-			return "", err
+		candidates := tsConfig.ResolveFromPaths(unresolved)
+
+		for _, candidate := range candidates {
+			absPath = getFileAbsPath(candidate)
+			if absPath != "" {
+				break
+			}
 		}
-		if absPath != "" {
-			return absPath, nil
+		if absPath == "" && len(candidates) > 0 {
+			return "", fmt.Errorf("import '%s' was matched to path '%s' in tscofing's paths option, but the resolved path did not match an existing file", unresolved, strings.Join(candidates, "', '"))
 		}
+		return absPath, nil
 	}
 	return "", nil
 }
