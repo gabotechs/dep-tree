@@ -299,6 +299,9 @@ check:
 
 ### Example configuration file
 
+A `schema.json` file is provided in https://github.com/gabotechs/dep-tree/blob/main/schema.json which can be
+used in IDEs for providing autocompletion on `.dep-tree.yml` files.
+
 Dep Tree by default will read the configuration file in `.dep-tree.yml`, which is expected to be a file
 that contains the following settings:
 
@@ -360,6 +363,13 @@ check:
     'src/products/**':
       - 'src/products/**'
       - 'src/helpers/**'
+    # additionally, instead of providing a simple list of allowed dependencies, you
+    # can also provide the reason for this restriction to exist, that way, when if the
+    # check fails, an informative error is displayed through stderr.
+    'src/users/**':
+      to:
+        - 'src/helpers/**'
+      reason: The Users domain is only allowed to import helper code, nothing else
 
   # map from glob pattern to array of glob patterns that determines forbidden
   # dependencies. If a file that matches a key glob pattern depends on another
@@ -370,6 +380,14 @@ check:
     # as they are supposed to belong to different domains.
     'src/products/**':
       - 'src/users/**'
+    # additionally, instead of providing a simple list of forbidden dependencies, you
+    # can also provide the reason for each individual restriction to exist. If one of
+    # these rules is broken, the reason will be displayed through stderr
+    'src/users/**':
+      - to: 'src/products/**'
+        reason: The Users domain should not import anything from the Products domain
+      - to: 'src/orders/**'
+        reason: The Users domain should not import anything from the Orders domain
 
   # typically, in a project, there is a set of files that are always good to depend
   # on, because they are supposed to be common helpers, or parts that are actually

@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gabotechs/dep-tree/internal/check"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,8 +17,8 @@ func TestParseConfig(t *testing.T) {
 	tests := []struct {
 		Name              string
 		File              string
-		ExpectedWhiteList map[string][]string
-		ExpectedBlackList map[string][]string
+		ExpectedWhiteList map[string]check.WhiteListEntries
+		ExpectedBlackList map[string][]check.BlackListEntry
 		ExpectedExclude   []string
 	}{
 		{
@@ -26,32 +28,58 @@ func TestParseConfig(t *testing.T) {
 		{
 			Name: "Simple",
 			File: ".parse.yml",
-			ExpectedWhiteList: map[string][]string{
-				"foo": {"bar"},
+			ExpectedWhiteList: map[string]check.WhiteListEntries{
+				"foo": {To: []string{"bar"}},
 			},
-			ExpectedBlackList: map[string][]string{
-				"bar": {"baz"},
+			ExpectedBlackList: map[string][]check.BlackListEntry{
+				"bar": {{To: "baz"}},
 			},
 		},
 		{
 			Name: "Aliased",
 			File: ".aliases.yml",
-			ExpectedWhiteList: map[string][]string{
-				"src/users/**": {
+			ExpectedWhiteList: map[string]check.WhiteListEntries{
+				"src/users/**": {To: []string{
 					"src/users/**",
 					"src/@*/**",
 					"src/config.js",
 					"src/common.js",
+				}},
+			},
+			ExpectedBlackList: map[string][]check.BlackListEntry{
+				"src/products/**": {
+					{To: "src/users/**"},
+					{To: "src/@*/**"},
+					{To: "src/config.js"},
+					{To: "src/common.js"},
+					{To: "src/generated/**"},
+					{To: "generated/**"},
 				},
 			},
-			ExpectedBlackList: map[string][]string{
+		},
+		{
+			Name: "With descriptions",
+			File: ".with-descriptions.yml",
+			ExpectedWhiteList: map[string]check.WhiteListEntries{
+				"src/users/**": {
+					To: []string{
+						"src/users/**",
+						"1.js",
+						"2.js",
+						"3.js",
+					},
+					Reason: "only users and common allowed",
+				},
+			},
+			ExpectedBlackList: map[string][]check.BlackListEntry{
 				"src/products/**": {
-					"src/users/**",
-					"src/@*/**",
-					"src/config.js",
-					"src/common.js",
-					"src/generated/**",
-					"generated/**",
+					{To: "src/users/**", Reason: "users not allowed"},
+					{To: "src/products/**"},
+					{To: "1.js", Reason: "common 1-3 not allowed,\ndouble check your dependencies\n"},
+					{To: "2.js", Reason: "common 1-3 not allowed,\ndouble check your dependencies\n"},
+					{To: "3.js", Reason: "common 1-3 not allowed,\ndouble check your dependencies\n"},
+					{To: "4.js"},
+					{To: "5.js"},
 				},
 			},
 		},
@@ -69,18 +97,16 @@ func TestParseConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			a := require.New(t)
-
 			if tt.File != "" {
 				tt.File = filepath.Join(testFolder, tt.File)
 			}
 			cfg, err := ParseConfigFromFile(tt.File)
-			a.NoError(err)
+			require.NoError(t, err)
 			cfg.EnsureAbsPaths()
 
-			a.Equal(tt.ExpectedWhiteList, cfg.Check.WhiteList)
-			a.Equal(tt.ExpectedBlackList, cfg.Check.BlackList)
-			a.Equal(tt.ExpectedExclude, cfg.Exclude)
+			assert.Equal(t, tt.ExpectedWhiteList, cfg.Check.WhiteList)
+			assert.Equal(t, tt.ExpectedBlackList, cfg.Check.BlackList)
+			assert.Equal(t, tt.ExpectedExclude, cfg.Exclude)
 		})
 	}
 }

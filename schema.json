@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Files that should be completely ignored by dep-tree, typically large files or auto-generated code."
+    },
+    "only": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The only files to be included by dep-tree. Files not matching these patterns will be ignored."
+    },
+    "unwrapExports": {
+      "type": "boolean",
+      "description": "Determines whether re-exports should be unwrapped to the target file."
+    },
+    "check": {
+      "type": "object",
+      "properties": {
+        "entrypoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The entrypoints to the application. These files act as root nodes for dependency checks."
+        },
+        "allowCircularDependencies": {
+          "type": "boolean",
+          "description": "Whether circular dependencies are allowed in the project."
+        },
+        "allow": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "to": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "A list of file patterns that the parent is allowed to depend on."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "description": "The reason for this restriction to exist."
+                    }
+                  },
+                  "required": ["to"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "description": "Defines allowed dependencies for files matching specific patterns, optionally with reasons."
+        },
+        "deny": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "to": {
+                        "type": "string",
+                        "description": "The file pattern to which the parent should never depend on."
+                      },
+                      "reason": {
+                        "type": "string",
+                        "description": "The reason for this restriction to exist."
+                      }
+                    },
+                    "required": ["to"]
+                  }
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "description": "Defines forbidden dependencies for files matching specific patterns, optionally with reasons."
+        },
+        "aliases": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "description": "Defines aliases for groups of files that are commonly depended upon, such as helpers or utilities."
+        }
+      },
+      "required": [],
+      "description": "Configuration for dependency checks, including allowed and forbidden dependencies, entrypoints, and aliases."
+    },
+    "js": {
+      "type": "object",
+      "properties": {
+        "workspaces": {
+          "type": "boolean",
+          "description": "Whether to account for package.json workspaces when resolving paths."
+        },
+        "tsConfigPaths": {
+          "type": "boolean",
+          "description": "Whether to follow TypeScript tsconfig.json paths for module resolution."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings specific to JavaScript and TypeScript projects."
+    },
+    "python": {
+      "type": "object",
+      "properties": {
+        "excludeConditionalImports": {
+          "type": "boolean",
+          "description": "Whether to consider conditional imports as dependencies."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings specific to Python projects."
+    },
+    "rust": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Settings specific to Rust projects (currently none available)."
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "description": "Schema for dep-tree configuration files, used to manage and validate project dependencies."
+}
