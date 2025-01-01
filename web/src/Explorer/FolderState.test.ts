@@ -57,6 +57,36 @@ d.ts undefined`,
   )
 
   it(
+    'Untag does not remove all parent tag folders',
+    {
+      nodes: [
+        ['foo', 'bar', 'a.ts'],
+        ['foo', 'baz', 'b.ts'],
+        ['_']
+      ],
+      squash: true,
+      modify: folderState => {
+        folderState.tagAllFolders('expanded', 'true')
+        folderState.folders.get('foo')!.folders.get('bar')!.untag('expanded')
+        folderState.untagAllFolders('expanded')
+      }
+    },
+    {
+      render: `\
+> foo {}
+ > bar {}
+  a.ts undefined
+ > baz {}
+  b.ts undefined
+_ undefined`,
+      events: [
+        ['tagged', 'expanded', 'true'],
+        ['untagged', 'expanded']
+      ]
+    }
+  )
+
+  it(
     'Multiple operations',
     {
       nodes: [
@@ -134,6 +164,7 @@ function it (
       fileTree.pushNode(newNode(node))
     }
     if (input.squash) fileTree.squash()
+    fileTree.order()
     const evs: Message[] = []
     const folderState = FolderState.fromFileTree(fileTree)
     folderState.registerListener('test', (m) => evs.push(m))

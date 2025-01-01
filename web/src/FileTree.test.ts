@@ -18,6 +18,11 @@ describe("FileTree", () => {
     {
       render: `\
 __dep_tree_root__
+ a
+  b
+   c
+    d
+     e.ts -> 4
  foo
   bar
    a.ts -> 0
@@ -25,29 +30,24 @@ __dep_tree_root__
   baz
    c.ts -> 2
   d.ts -> 3
- a
-  b
-   c
-    d
-     e.ts -> 4
  f.ts -> 5`,
       parents: [
+        ['a', 'b', 'c', 'd'],
         ['foo', 'bar'],
         ['foo', 'bar'],
         ['foo', 'baz'],
         ['foo'],
-        ['a', 'b', 'c', 'd'],
         []
       ],
       parentStats: [
+        { kind: 'tree', depth: 4, total: 1, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 1 },
-        { kind: 'tree', depth: 1, total: 2, index: 0 },
-        { kind: 'tree', depth: 4, total: 1, index: 0 },
+        { kind: 'tree', depth: 1, total: 2, index: 1 },
         { kind: 'tree', depth: 0, total: 1, index: 0 },
       ],
-      leafs: [0, 1, 2, 3, 4, 5]
+      leafs: [4, 0, 1, 2, 3, 5]
     }
   )
 
@@ -55,11 +55,11 @@ __dep_tree_root__
     'squash',
     {
       nodes: [
+        ['a', 'b', 'c', 'd', 'e.ts'],
         ['foo', 'bar', 'a.ts'],
         ['foo', 'bar', 'b.ts'],
         ['foo', 'baz', 'c.ts'],
         ['foo', 'd.ts'],
-        ['a', 'b', 'c', 'd', 'e.ts'],
         ['f.ts'],
         ['foo', 'bar', 'a', 'b', 'g.ts']
       ],
@@ -68,37 +68,37 @@ __dep_tree_root__
     {
       render: `\
 __dep_tree_root__
+ a/b/c/d
+  e.ts -> 0
  foo
   bar
    a/b
     g.ts -> 6
-   a.ts -> 0
-   b.ts -> 1
+   a.ts -> 1
+   b.ts -> 2
   baz
-   c.ts -> 2
-  d.ts -> 3
- a/b/c/d
-  e.ts -> 4
+   c.ts -> 3
+  d.ts -> 4
  f.ts -> 5`,
       parents: [
+        ['a/b/c/d'],
         ['foo', 'bar', 'a/b'],
         ['foo', 'bar'],
         ['foo', 'bar'],
         ['foo', 'baz'],
         ['foo'],
-        ['a/b/c/d'],
         [],
       ],
       parentStats: [
+        { kind: 'tree', depth: 1, total: 2, index: 0 },
         { kind: 'tree', depth: 3, total: 1, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 0 },
         { kind: 'tree', depth: 2, total: 2, index: 1 },
-        { kind: 'tree', depth: 1, total: 2, index: 0 },
         { kind: 'tree', depth: 1, total: 2, index: 1 },
         { kind: 'tree', depth: 0, total: 1, index: 0 },
       ],
-      leafs: [6, 0, 1, 2, 3, 4, 5]
+      leafs: [0, 6, 1, 2, 3, 4, 5]
     }
   )
 })
@@ -120,6 +120,7 @@ function it (
       fileTree.pushNode(newNode(node))
     }
     if (input.squash) fileTree.squash()
+    fileTree.order()
 
     // ensure tree integrity
     ensureChildrenParents(fileTree)

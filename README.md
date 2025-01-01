@@ -9,6 +9,7 @@
     <img src="https://coveralls.io/repos/github/gabotechs/dep-tree/badge.svg?branch=main"/>
     <img src="https://goreportcard.com/badge/github.com/gabotechs/dep-tree"/>
     <img src="https://img.shields.io/github/v/release/gabotechs/dep-tree?color=%e535abff"/>
+    <img src="https://raw.githubusercontent.com/nikolaydubina/go-recipes/main/badge.svg?raw=true"/>
 </p>
 
 <p align="center">
@@ -31,17 +32,17 @@
 
 | Ts/Js                                                                                                            | Python                                                                                                                  | Rust                                                                                                    | Go                                                                                                                      |
 |------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|
-| [typescript](https://dep-tree.s3.amazonaws.com/^0.22.2/microsoft/TypeScript/src/typescript/typescript.ts.html)   | [langchain](https://dep-tree.s3.amazonaws.com/^0.22.2/langchain-ai/langchain/libs/langchain/langchain/__init__.py.html) | [deno](https://dep-tree.s3.amazonaws.com/^0.22.2/denoland/deno/cli/main.rs.html)                        | [Docker buildx](https://dep-tree.s3.amazonaws.com/^0.22.2/docker/buildx/cmd/buildx/main.go.html)                        |
-| [react](https://dep-tree.s3.amazonaws.com/^0.22.2/facebook/react/packages/react-dom/index.js.html)               | [pytorch](https://dep-tree.s3.amazonaws.com/^0.22.2/pytorch/pytorch/torch/nn/__init__.py.html)                          | [polars](https://dep-tree.s3.amazonaws.com/^0.22.2/pola-rs/polars/crates/polars-core/src/lib.rs.html)   | [Docker compose](https://dep-tree.s3.amazonaws.com/^0.22.2/docker/compose/cmd/main.go.html)                             |
-| [svelte](https://dep-tree.s3.amazonaws.com/^0.22.2/sveltejs/svelte/packages/svelte/src/compiler/index.js.html)   | [tensorflow](https://dep-tree.s3.amazonaws.com/^0.22.2/tensorflow/tensorflow/tensorflow/python/keras/models.py.html)    | [alacritty](https://dep-tree.s3.amazonaws.com/^0.22.2/alacritty/alacritty/alacritty/src/main.rs.html)   | [Kubernetes kubelet](https://dep-tree.s3.amazonaws.com/^0.22.2/kubernetes/kubernetes/cmd/kubelet/app/server.go.html)    |
-| [vuejs](https://dep-tree.s3.amazonaws.com/^0.22.2/vuejs/vue/src/core/index.ts.html)                              | [fastapi](https://dep-tree.s3.amazonaws.com/^0.22.2/tiangolo/fastapi/fastapi/__init__.py.html)                          | [bevy (ecs)](https://dep-tree.s3.amazonaws.com/^0.22.2/bevyengine/bevy/crates/bevy_ecs/src/lib.rs.html) | [Ollama](https://dep-tree.s3.amazonaws.com/^0.22.2/ollama/ollama/main.go.html)                                          |
-| [angular](https://dep-tree.s3.amazonaws.com/^0.22.2/angular/angular/packages/compiler/index.ts.html)             | [numpy](https://dep-tree.s3.amazonaws.com/^0.22.2/numpy/numpy/numpy/__init__.py.html)                                   | [rocket](https://dep-tree.s3.amazonaws.com/^0.22.2/rwf2/Rocket/core/lib/src/lib.rs.html)                | [Gin](https://dep-tree.s3.amazonaws.com/^0.22.2/gin-gonic/gin/*.go.html)                                                |
-| [storybook](https://dep-tree.s3.amazonaws.com/^0.22.2/storybookjs/storybook/code/ui/blocks/src/index.ts.html)    | [scikit-learn](https://dep-tree.s3.amazonaws.com/^0.22.2/scikit-learn/scikit-learn/sklearn/__init__.py.html)            | [axum](https://dep-tree.s3.amazonaws.com/^0.22.2/tokio-rs/axum/axum/src/lib.rs.html)                    | [Go's crypto std](https://dep-tree.s3.amazonaws.com/^0.22.2/golang/go/src/crypto/**/*.go.html)                          |
-| [three.js](https://dep-tree.s3.amazonaws.com/^0.22.2/mrdoob/three.js/src/Three.js.html)                          | [audiocraft](https://dep-tree.s3.amazonaws.com/^0.22.2/facebookresearch/audiocraft/audiocraft/models/__init__.py.html)  | [MusicGPT](https://dep-tree.s3.amazonaws.com/^0.22.2/gabotechs/MusicGPT/src/main.rs.html)               | [Dep Tree](https://dep-tree.s3.amazonaws.com/^0.22.2/gabotechs/dep-tree/main.go.html)                                   |
-| [expressjs](https://dep-tree.s3.amazonaws.com/^0.22.2/expressjs/express/lib/express.js.html)                     |                                                                                                                         |                                                                                                         | [Cockroach DB SQL parser](https://dep-tree.s3.amazonaws.com/^0.22.2/cockroachdb/cockroach/pkg/sql/parser/parse.go.html) |
-| [material-ui](https://dep-tree.s3.amazonaws.com/^0.22.2/mui/material-ui/packages/mui-material/src/index.js.html) |                                                                                                                         |                                                                                                         | [Ethereum](https://dep-tree.s3.amazonaws.com/^0.22.2/ethereum/go-ethereum/cmd/**/*.go.html)                             |
-| [eslint](https://dep-tree.s3.amazonaws.com/^0.22.2/eslint/eslint/lib/cli.js.html)                                |                                                                                                                         |                                                                                                         |                                                                                                                         |
-| [prettier](https://dep-tree.s3.amazonaws.com/^0.22.2/prettier/prettier/index.js.html)                            |                                                                                                                         |                                                                                                         |                                                                                                                         |
+| [typescript](https://dep-tree.s3.amazonaws.com/^0.23.0/microsoft/TypeScript/src/typescript/typescript.ts.html)   | [langchain](https://dep-tree.s3.amazonaws.com/^0.23.0/langchain-ai/langchain/libs/langchain/langchain/__init__.py.html) | [deno](https://dep-tree.s3.amazonaws.com/^0.23.0/denoland/deno/cli/main.rs.html)                        | [Docker buildx](https://dep-tree.s3.amazonaws.com/^0.23.0/docker/buildx/cmd/buildx/main.go.html)                        |
+| [react](https://dep-tree.s3.amazonaws.com/^0.23.0/facebook/react/packages/react-dom/index.js.html)               | [pytorch](https://dep-tree.s3.amazonaws.com/^0.23.0/pytorch/pytorch/torch/nn/__init__.py.html)                          | [polars](https://dep-tree.s3.amazonaws.com/^0.23.0/pola-rs/polars/crates/polars-core/src/lib.rs.html)   | [Docker compose](https://dep-tree.s3.amazonaws.com/^0.23.0/docker/compose/cmd/main.go.html)                             |
+| [svelte](https://dep-tree.s3.amazonaws.com/^0.23.0/sveltejs/svelte/packages/svelte/src/compiler/index.js.html)   | [tensorflow](https://dep-tree.s3.amazonaws.com/^0.23.0/tensorflow/tensorflow/tensorflow/python/keras/models.py.html)    | [alacritty](https://dep-tree.s3.amazonaws.com/^0.23.0/alacritty/alacritty/alacritty/src/main.rs.html)   | [Kubernetes kubelet](https://dep-tree.s3.amazonaws.com/^0.23.0/kubernetes/kubernetes/cmd/kubelet/app/server.go.html)    |
+| [vuejs](https://dep-tree.s3.amazonaws.com/^0.23.0/vuejs/vue/src/core/index.ts.html)                              | [fastapi](https://dep-tree.s3.amazonaws.com/^0.23.0/tiangolo/fastapi/fastapi/__init__.py.html)                          | [bevy (ecs)](https://dep-tree.s3.amazonaws.com/^0.23.0/bevyengine/bevy/crates/bevy_ecs/src/lib.rs.html) | [Ollama](https://dep-tree.s3.amazonaws.com/^0.23.0/ollama/ollama/main.go.html)                                          |
+| [angular](https://dep-tree.s3.amazonaws.com/^0.23.0/angular/angular/packages/compiler/index.ts.html)             | [numpy](https://dep-tree.s3.amazonaws.com/^0.23.0/numpy/numpy/numpy/__init__.py.html)                                   | [rocket](https://dep-tree.s3.amazonaws.com/^0.23.0/rwf2/Rocket/core/lib/src/lib.rs.html)                | [Gin](https://dep-tree.s3.amazonaws.com/^0.23.0/gin-gonic/gin/*.go.html)                                                |
+| [storybook](https://dep-tree.s3.amazonaws.com/^0.23.0/storybookjs/storybook/code/ui/blocks/src/index.ts.html)    | [scikit-learn](https://dep-tree.s3.amazonaws.com/^0.23.0/scikit-learn/scikit-learn/sklearn/__init__.py.html)            | [axum](https://dep-tree.s3.amazonaws.com/^0.23.0/tokio-rs/axum/axum/src/lib.rs.html)                    | [Go's crypto std](https://dep-tree.s3.amazonaws.com/^0.23.0/golang/go/src/crypto/**/*.go.html)                          |
+| [three.js](https://dep-tree.s3.amazonaws.com/^0.23.0/mrdoob/three.js/src/Three.js.html)                          | [audiocraft](https://dep-tree.s3.amazonaws.com/^0.23.0/facebookresearch/audiocraft/audiocraft/models/__init__.py.html)  | [MusicGPT](https://dep-tree.s3.amazonaws.com/^0.23.0/gabotechs/MusicGPT/src/main.rs.html)               | [Dep Tree](https://dep-tree.s3.amazonaws.com/^0.23.0/gabotechs/dep-tree/main.go.html)                                   |
+| [expressjs](https://dep-tree.s3.amazonaws.com/^0.23.0/expressjs/express/lib/express.js.html)                     |                                                                                                                         |                                                                                                         | [Cockroach DB SQL parser](https://dep-tree.s3.amazonaws.com/^0.23.0/cockroachdb/cockroach/pkg/sql/parser/parse.go.html) |
+| [material-ui](https://dep-tree.s3.amazonaws.com/^0.23.0/mui/material-ui/packages/mui-material/src/index.js.html) |                                                                                                                         |                                                                                                         | [Ethereum](https://dep-tree.s3.amazonaws.com/^0.23.0/ethereum/go-ethereum/cmd/**/*.go.html)                             |
+| [eslint](https://dep-tree.s3.amazonaws.com/^0.23.0/eslint/eslint/lib/cli.js.html)                                |                                                                                                                         |                                                                                                         |                                                                                                                         |
+| [prettier](https://dep-tree.s3.amazonaws.com/^0.23.0/prettier/prettier/index.js.html)                            |                                                                                                                         |                                                                                                         |                                                                                                                         |
 
 ## Supported languages
 
@@ -145,7 +146,8 @@ clustering and no clear separation between them:
 
 ### Explain
 
-Given two pieces of code, displays what are the dependencies between them, for example:
+Given two pieces of code, displays what are the dependencies between them. These pieces
+of code are specified using a glob patterns, for example:
 
 ```shell
 dep-tree explain 'src/products/**/*.go' 'src/orders/**/*.go'
@@ -166,6 +168,23 @@ It will output something like this:
 src/products/books/book.go -> src/orders/renting.go
 src/products/price.go  -> src/orders/order_manager.go
 src/products/storage.go -> src/orders/order_manager.go
+```
+
+Additionally, the `--overlap-left` (`-l`) or `--overlap-right` (`-r`) arguments can be passed:
+- `--overlap-left`: when the left and right glob patterns have some files in common, keep only the
+  common files at the left, and discard them from the right. This flag is useful for retrieving any
+  external dependencies of a specific folder: 
+```shell
+# Retrieves dependencies from files in src/products to any other file that is not inside src/products
+dep-tree explain 'src/products/**/*.go' '**/*.go' --overlap-left
+```
+
+- `--overlap-right`: when the left and right glob patterns have some files in common, keep only the
+  common files at the right, and discard them from the left. This flag is useful for retrieving
+  any file outside a specific folder that depends on that folder.
+```shell
+# Retrieves dependencies from any folder but src/products that point to files inside src/products
+dep-tree explain '**/*.go' 'src/products/**/*.go' --overlap-right
 ```
 
 ### Tree
@@ -280,6 +299,9 @@ check:
 
 ### Example configuration file
 
+A `schema.json` file is provided in https://github.com/gabotechs/dep-tree/blob/main/schema.json which can be
+used in IDEs for providing autocompletion on `.dep-tree.yml` files.
+
 Dep Tree by default will read the configuration file in `.dep-tree.yml`, which is expected to be a file
 that contains the following settings:
 
@@ -341,6 +363,13 @@ check:
     'src/products/**':
       - 'src/products/**'
       - 'src/helpers/**'
+    # additionally, instead of providing a simple list of allowed dependencies, you
+    # can also provide the reason for this restriction to exist, that way, when if the
+    # check fails, an informative error is displayed through stderr.
+    'src/users/**':
+      to:
+        - 'src/helpers/**'
+      reason: The Users domain is only allowed to import helper code, nothing else
 
   # map from glob pattern to array of glob patterns that determines forbidden
   # dependencies. If a file that matches a key glob pattern depends on another
@@ -351,6 +380,14 @@ check:
     # as they are supposed to belong to different domains.
     'src/products/**':
       - 'src/users/**'
+    # additionally, instead of providing a simple list of forbidden dependencies, you
+    # can also provide the reason for each individual restriction to exist. If one of
+    # these rules is broken, the reason will be displayed through stderr
+    'src/users/**':
+      - to: 'src/products/**'
+        reason: The Users domain should not import anything from the Products domain
+      - to: 'src/orders/**'
+        reason: The Users domain should not import anything from the Orders domain
 
   # typically, in a project, there is a set of files that are always good to depend
   # on, because they are supposed to be common helpers, or parts that are actually

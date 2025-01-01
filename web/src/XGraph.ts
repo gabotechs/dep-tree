@@ -6,6 +6,7 @@ import { hashInt } from "./@utils/hashInt.ts";
 export interface XLink extends Link {
   isDir?: boolean
   isPackage?: boolean
+  ignore?: boolean
 }
 
 export interface XNode extends Node, ColoredFileLeaf {
@@ -16,6 +17,7 @@ export interface XNode extends Node, ColoredFileLeaf {
   z?: number
   isDir?: boolean
   isPackage?: boolean
+  ignore?: boolean
 }
 
 export interface XGraph extends Graph {
@@ -52,6 +54,7 @@ export function buildXGraph (graph: Graph) {
   const fileTree = FileTree.root<XNode>()
   graph.nodes.forEach(node => fileTree.pushNode(node))
   fileTree.squash()
+  fileTree.order()
   color(fileTree)
 
   // Check if there are more than one groups in all the nodes.

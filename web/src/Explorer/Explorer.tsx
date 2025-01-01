@@ -1,4 +1,4 @@
-import { CSSProperties, HTMLProps, ReactNode, useEffect, useMemo } from "react";
+import React, { CSSProperties, HTMLProps, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { faGolang, faJs, faPython, faRust, IconDefinition } from "@fortawesome/free-brands-svg-icons";
@@ -14,7 +14,8 @@ const ID_PREFIX = '__explorer_'
 enum TAGS {
   SELECTED = 's',
   HIGHLIGHTED = 'h',
-  EXPANDED = 'x'
+  EXPANDED = 'x',
+  IGNORE = 'i'
 }
 
 enum VALUES {
@@ -57,6 +58,7 @@ export interface ExplorerProps {
   selected?: XNode
   highlighted?: Set<XNode>
   onSelectNode?: (x: XNode) => void
+  onNodesMutated?: () => void
 }
 
 export function Explorer (
@@ -65,7 +67,8 @@ export function Explorer (
     fileTree,
     onSelectNode,
     highlighted,
-    selected
+    selected,
+    onNodesMutated
   }: ExplorerProps
 ) {
   const folderState = useMemo(() => {
@@ -111,18 +114,98 @@ export function Explorer (
     }
   }, [folderState, highlighted, selected])
 
+  const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>()
+
   return (
     <div
       className={`${className} flex flex-col overflow-y-scroll pb-8 pt-1 scrollbar-thin scrollbar-transparent`}
       dir={'rtl'}
     >
-      <ExplorerFolder folderState={folderState} onSelectNode={onSelectNode} dir={'ltr'}/>
+      {contextMenuProps && <ContextMenu
+        {...contextMenuProps}
+        onClose={() => setContextMenuProps(undefined)}
+        onNodesMutated={onNodesMutated}
+      />}
+      <ExplorerFolder
+        folderState={folderState}
+        onSelectNode={onSelectNode}
+        onRightClick={setContextMenuProps}
+        dir={'ltr'}
+      />
     </div>
   )
 }
 
+export interface ContextMenuProps {
+  x: number
+  y: number
+  folderState: FolderState<XNode>
+  onClose?: () => void
+  onNodesMutated?: () => void
+}
+
+function ContextMenu (
+  {
+    onClose,
+    x,
+    y,
+    folderState,
+    onNodesMutated
+  }: ContextMenuProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleOutsideClick (event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose?.();
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [onClose]);
+
+  function ignore () {
+    for (const node of folderState.allFiles()) {
+      node.ignore = true
+      node.links?.forEach(link => (link.ignore = true))
+    }
+    folderState.tagAll(TAGS.IGNORE, VALUES.YES)
+    onClose?.()
+    onNodesMutated?.()
+  }
+
+  function unIgnore () {
+    for (const node of folderState.allFiles()) {
+      node.ignore = false
+      node.links?.forEach(link => (link.ignore = false))
+    }
+    folderState.untagAll(TAGS.IGNORE)
+    onClose?.()
+    onNodesMutated?.()
+  }
+
+  return (
+    <div
+      ref={menuRef}
+      className="absolute bg-white border border-gray-300 z-50 rounded shadow-md w-[100px]"
+      style={{ top: y, left: x }}
+    >
+      <ul className="space-y-2">
+        <li
+          className="cursor-pointer px-2 py-1 hover:bg-gray-200 text-center"
+          onClick={folderState.tags[TAGS.IGNORE] ? unIgnore : ignore}
+        >
+          {folderState.tags[TAGS.IGNORE] ? 'un-ignore' : 'ignore'}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 interface ExplorerFolderProps {
   onSelectNode?: (x: XNode) => void
+  onRightClick?: (props: ContextMenuProps) => void
   folderState: FolderState<XNode>
 }
 
@@ -130,12 +213,22 @@ function ExplorerFolder (
   {
     folderState,
     onSelectNode,
+    onRightClick,
     style,
     ...props
   }: ExplorerFolderProps & HTMLProps<HTMLDivElement>) {
-  const forceUpdate = useForceUpdate()
+  const [, forceUpdate] = useForceUpdate()
 
   useEffect(() => folderState.registerListener('update', forceUpdate), [folderState, forceUpdate]);
+
+  function onContextMenu (e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault()
+    onRightClick?.({
+      folderState,
+      x: e.clientX,
+      y: e.clientY,
+    })
+  }
 
   if (!folderState.tags[TAGS.EXPANDED]) {
     return <Folder
@@ -144,6 +237,7 @@ function ExplorerFolder (
       logoColor={folderState.color}
       style={style}
       onClick={() => folderState.tag(TAGS.EXPANDED, VALUES.YES)} dir={props.dir}
+      onContextMenu={onContextMenu}
       {...props}
     />
   }
@@ -154,6 +248,7 @@ function ExplorerFolder (
       logoColor={folderState.color}
       tags={folderState.tags}
       onClick={() => folderState.untagAllFolders(TAGS.EXPANDED)}
+      onContextMenu={onContextMenu}
     />
     {[...folderState.folders.values()].map(folder =>
       <ExplorerFolder
@@ -161,6 +256,7 @@ function ExplorerFolder (
         key={folder.name}
         folderState={folder}
         onSelectNode={onSelectNode}
+        onRightClick={onRightClick}
       />
     )}
     {[...folderState.files.values()].map(file =>
@@ -191,10 +287,12 @@ function Folder (
     tags: Record<string, string>
   } & HTMLProps<HTMLDivElement>) {
   let backgroundColor: CSSProperties['color'] = undefined
+  let opacity = 1
   if (tags[TAGS.SELECTED] === VALUES.YES) backgroundColor = COLORS.DIR_SELECTED
+  if (tags[TAGS.IGNORE] === VALUES.YES) opacity = 0.2
   return <div
     className={'flex flex-row items-center cursor-pointer'}
-    style={{ backgroundColor, ...style }}
+    style={{ backgroundColor, opacity, ...style }}
     {...props}
   >
     <FontAwesomeIcon icon={faFolder} color={logoColor}/>
@@ -217,6 +315,7 @@ function File (
   const ext = useMemo(() => name.split('.').slice(-1)[0], [name])
   let backgroundColor: CSSProperties['color'] = undefined
   let animation: ReactNode = null
+  let opacity = 1
   if (tags?.[TAGS.HIGHLIGHTED] === VALUES.OUT) {
     backgroundColor = COLORS.FILE_OUT_HIGHLIGHTED
     animation = <AnimatedDot dir={'ltr'}/>
@@ -233,9 +332,12 @@ function File (
     backgroundColor = COLORS.FILE_SELECTED
     animation = null
   }
+  if (tags?.[TAGS.IGNORE] === VALUES.YES) {
+    opacity = 0.2
+  }
   return <div
     className='flex flex-row items-center cursor-pointer'
-    style={{ backgroundColor, ...style }}
+    style={{ backgroundColor, opacity, ...style }}
     {...props}
   >
     <FontAwesomeIcon icon={FA_MAP[ext] ?? faFile} color={logoColor}/>

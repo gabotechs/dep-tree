@@ -14,6 +14,7 @@ import { Graph } from "./types.ts";
 import { Explorer } from "./Explorer/Explorer.tsx";
 
 import './App.css'
+import { useForceUpdate } from "./@utils/useForceUpdate.ts";
 
 
 class Data {
@@ -35,8 +36,10 @@ const DEFAULT_SETTINGS = {
 
   NODE_ALPHA: 1,
   UNSELECTED_NODE_ALPHA: 0.1,
+  IGNORED_NODE_ALPHA: 0.05,
   LINK_ALPHA: 0.3,
   UNSELECTED_LINK_ALPHA: 0.1,
+  IGNORED_LINK_ALPHA: 0.02,
 
   LINK_DISTANCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#link_distance
   FILE_NODE_REPULSION_FORCE: 30, // https://github.com/vasturiano/d3-force-3d?tab=readme-ov-file#manyBody_strength
@@ -56,6 +59,7 @@ function App () {
   const [highlightNodes, setHighlightNodes] = useState(new Set<XNode>())
   const [highlightLinks, setHighlightLinks] = useState(new Set<XLink>())
   const [selectedNode, setSelectedNode] = useState<XNode>()
+  const [updateForced, forceUpdate] = useForceUpdate()
 
   const graph = useRef<ForceGraphMethods<NodeObject<XNode>, LinkObject<XNode, XLink>>>();
   const settings = useControls(DEFAULT_SETTINGS)
@@ -77,6 +81,7 @@ function App () {
   function colorNode (node: XNode) {
     let alpha = settings.NODE_ALPHA
     if (highlightNodes.size > 0 && !highlightNodes.has(node)) alpha = settings.UNSELECTED_NODE_ALPHA
+    if (node.ignore) alpha = settings.IGNORED_NODE_ALPHA
     const { h, s, v } = (node.isEntrypoint || node.__color === undefined) ? { h: 0, s: 0, v: 1 } : node.__color
     const [r, g, b] = HSVtoRGB(h, s, v)
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
@@ -85,6 +90,7 @@ function App () {
   function colorLink (link: XLink) {
     let alpha = settings.LINK_ALPHA
     if (highlightLinks.size > 0 && !highlightLinks.has(link)) alpha = settings.UNSELECTED_LINK_ALPHA
+    if (link.ignore) alpha = settings.IGNORED_LINK_ALPHA
     if (link.isCyclic && settings.HIGHLIGHT_CYCLES) return `indianred`;
     return `rgba(255, 255, 255, ${alpha})`;
   }
@@ -154,10 +160,11 @@ function App () {
         let f = settings.FILE_LINK_STRENGTH_FACTOR
         if (link.isDir) f = settings.DIR_LINK_STRENGTH_FACTOR
         if (link.isPackage) f = settings.PACKAGE_LINK_STRENGTH_FACTOR
+        if (link.ignore) f = 0
         return f / Math.min(NODES[link.from].neighbors?.length ?? 1, NODES[link.to].neighbors?.length ?? 1);
       })
     graph.current?.d3ReheatSimulation()
-  }, [settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR])
+  }, [settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR, updateForced])
 
   useEffect(() => {
     graph.current?.d3Force('charge')
@@ -165,10 +172,11 @@ function App () {
         let f = settings.FILE_NODE_REPULSION_FORCE
         if (node.isDir) f = settings.DIR_NODE_REPULSION_FORCE
         if (node.isPackage) f = settings.PACKAGE_NODE_REPULSION_FORCE
+        if (node.ignore) f = 0
         return -f
       })
     graph.current?.d3ReheatSimulation()
-  }, [settings.DIR_NODE_REPULSION_FORCE, settings.FILE_NODE_REPULSION_FORCE, settings.PACKAGE_NODE_REPULSION_FORCE])
+  }, [settings.DIR_NODE_REPULSION_FORCE, settings.FILE_NODE_REPULSION_FORCE, settings.PACKAGE_NODE_REPULSION_FORCE, updateForced])
 
   useEffect(() => {
     setTimeout(() => graph.current?.zoomToFit(settings.DEFAULT_DISTANCE), 1000)
@@ -213,6 +221,7 @@ function App () {
         onSelectNode={nodeClick}
         selected={selectedNode}
         highlighted={highlightNodes}
+        onNodesMutated={forceUpdate}
       />
       <Leva hidden={!X_GRAPH.enableGui}/>
     </>
