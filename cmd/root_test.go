@@ -146,7 +146,7 @@ func TestInferLang(t *testing.T) {
 		{
 			Name:  "zero files",
 			Files: []string{},
-			Error: "at least 1 file must be provided for infering the language",
+			Error: "at least 1 file must be provided for inferring the language",
 		},
 		{
 			Name:     "only 1 file",
