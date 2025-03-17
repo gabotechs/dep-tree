@@ -241,7 +241,7 @@ function FilePicker({ onFilePicked }: { onFilePicked: (file: File | undefined) =
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full text-gray-200">
+    <>
       <h2 className="text-xl font-semibold mb-2">Drop Dep-Tree JSON Graph File Here</h2>
       <p className="text-gray-400 mb-4">or</p>
       <input
@@ -250,7 +250,7 @@ function FilePicker({ onFilePicked }: { onFilePicked: (file: File | undefined) =
         onChange={handleFileSelected}
         className="bg-gray-800 px-4 py-2 rounded cursor-pointer hover:bg-gray-700"
       />
-    </div>
+    </>
   )
 }
 
@@ -298,7 +298,13 @@ function App() {
       {isDragging
         ? <DropPlaceholder />
         : (!graphData.nodes?.length
-          ? <FilePicker onFilePicked={handleFilePicked} />
+          ? <div className="flex flex-col items-center justify-center min-h-screen w-full text-gray-200">
+            <FilePicker onFilePicked={handleFilePicked} />
+            <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
+              <span className="text-yellow-500 font-medium">⚠️ Experimental</span>
+              <p className="text-yellow-400/80 text-sm mt-1">This feature relies on an internal structure that may break in the future.</p>
+            </div>
+          </div>
           : <GraphExplorer key={forceRemountKey} graphData={graphData} />)}
     </div>
   )
