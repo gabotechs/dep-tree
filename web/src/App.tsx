@@ -254,29 +254,22 @@ function FilePicker({ onFilePicked }: { onFilePicked: (file: File | undefined) =
   )
 }
 
-async function readFileText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsText(file)
-  })
-}
-
 function App() {
   const [graphData, setGraphData] = useState<Graph>(Data.__INLINE_DATA)
   const [isDragging, setIsDragging] = useState(false)
   const [forceRemountKey, setForceRemountKey] = useState(0)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   async function handleFilePicked(file: File | undefined) {
     if (!file) return
     try {
-      const text = await readFileText(file)
-      const data = JSON.parse(text)
+      const data = JSON.parse(await file.text())
       setGraphData(data)
       setForceRemountKey((x) => x + 1)
-    } catch (error) {
-      console.error('Error reading file:', error)
+      setErrorMessage(null)
+    } catch (e) {
+      console.error('Failed to read file:', e)
+      setErrorMessage('' + e)
     }
   }
 
@@ -297,13 +290,19 @@ function App() {
       onDragLeave={() => setIsDragging(false)}>
       {isDragging
         ? <DropPlaceholder />
-        : (!graphData.nodes?.length
+        : ((!graphData.nodes?.length || errorMessage)
           ? <div className="flex flex-col items-center justify-center min-h-screen w-full text-gray-200">
             <FilePicker onFilePicked={handleFilePicked} />
-            <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
-              <span className="text-yellow-500 font-medium">⚠️ Experimental</span>
-              <p className="text-yellow-400/80 text-sm mt-1">This feature relies on an internal structure that may break in the future.</p>
-            </div>
+            {errorMessage ? (
+              <div className="bg-red-600/20 border border-red-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
+                <span className="text-red-500 font-medium">🚨 Error</span>
+                <p className="text-red-400/80 text-sm mt-1">{errorMessage}</p>
+              </div>
+            ) : (
+              <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
+                <span className="text-yellow-500 font-medium">⚠️ Experimental</span>
+                <p className="text-yellow-400/80 text-sm mt-1">This feature relies on an internal structure that may break in the future.</p>
+              </div>)}
           </div>
           : <GraphExplorer key={forceRemountKey} graphData={graphData} />)}
     </div>
