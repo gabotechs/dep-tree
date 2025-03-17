@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 // @ts-expect-error
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 import ForceGraph, { ForceGraphMethods, LinkObject, NodeObject } from "react-force-graph-3d";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Leva, useControls } from "leva";
 
 import { buildXGraph, XLink, XNode } from "./XGraph.ts";
@@ -283,7 +283,7 @@ function App() {
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
     setIsDragging(false)
-    handleFilePicked(e.dataTransfer.files[0])
+    void handleFilePicked(e.dataTransfer.files[0])
   }
 
   return (
