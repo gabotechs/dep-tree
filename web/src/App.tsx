@@ -54,7 +54,7 @@ const DEFAULT_SETTINGS = {
 const UNREAL_BLOOM_PASS = new UnrealBloomPass()
 
 function GraphExplorer({ graphData }: { graphData: Graph }) {
-  const { xGraph: X_GRAPH, nodes: NODES, fileTree: FILE_TREE } = useMemo(() => buildXGraph(graphData), [graphData])
+  const { xGraph, nodes, fileTree } = useMemo(() => buildXGraph(graphData), [graphData])
   const [highlightNodes, setHighlightNodes] = useState(new Set<XNode>())
   const [highlightLinks, setHighlightLinks] = useState(new Set<XLink>())
   const [selectedNode, setSelectedNode] = useState<XNode>()
@@ -160,10 +160,10 @@ function GraphExplorer({ graphData }: { graphData: Graph }) {
         if (link.isDir) f = settings.DIR_LINK_STRENGTH_FACTOR
         if (link.isPackage) f = settings.PACKAGE_LINK_STRENGTH_FACTOR
         if (link.ignore) f = 0
-        return f / Math.min(NODES[link.from].neighbors?.length ?? 1, NODES[link.to].neighbors?.length ?? 1);
+        return f / Math.min(nodes[link.from].neighbors?.length ?? 1, nodes[link.to].neighbors?.length ?? 1);
       })
     graph.current?.d3ReheatSimulation()
-  }, [NODES, settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR, updateForced])
+  }, [nodes, settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR, updateForced])
 
   useEffect(() => {
     graph.current?.d3Force('charge')
@@ -186,7 +186,7 @@ function GraphExplorer({ graphData }: { graphData: Graph }) {
       <ForceGraph
         ref={graph}
         extraRenderers={[new CSS2DRenderer()]}
-        graphData={X_GRAPH}
+        graphData={xGraph}
         backgroundColor={'#000003'}
         nodeResolution={settings.NODE_RESOLUTION}
         onBackgroundClick={backgroundClick}
@@ -216,13 +216,13 @@ function GraphExplorer({ graphData }: { graphData: Graph }) {
       />
       <Explorer
         className={'fixed top-0 left-0 max-h-full bg-transparent'}
-        fileTree={FILE_TREE}
+        fileTree={fileTree}
         onSelectNode={nodeClick}
         selected={selectedNode}
         highlighted={highlightNodes}
         onNodesMutated={forceUpdate}
       />
-      <Leva hidden={!X_GRAPH.enableGui}/>
+      <Leva hidden={!xGraph.enableGui}/>
     </>
   )
 }
