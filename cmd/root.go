@@ -8,6 +8,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gabotechs/dep-tree/internal/config"
+	"github.com/gabotechs/dep-tree/internal/dart"
 	"github.com/gabotechs/dep-tree/internal/dummy"
 	golang "github.com/gabotechs/dep-tree/internal/go"
 	"github.com/gabotechs/dep-tree/internal/graph"
@@ -142,6 +143,7 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		rust   int
 		golang int
 		dummy  int
+		dart   int
 	}{}
 	top := struct {
 		lang string
@@ -179,6 +181,12 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 				top.v = score.dummy
 				top.lang = "dummy"
 			}
+		case utils.EndsWith(file, dart.Extensions):
+			score.dart += 1
+			if score.dart > top.v {
+				top.v = score.dart
+				top.lang = "dart"
+			}
 		}
 	}
 	if top.lang == "" {
@@ -193,6 +201,8 @@ func inferLang(files []string, cfg *config.Config) (language.Language, error) {
 		return python.MakePythonLanguage(&cfg.Python)
 	case "golang":
 		return golang.NewLanguage(files[0], &cfg.Golang)
+	case "dart":
+		return &dart.Language{}, nil
 	case "dummy":
 		return &dummy.Language{}, nil
 	default:
