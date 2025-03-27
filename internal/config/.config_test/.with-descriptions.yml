@@ -1,0 +1,27 @@
+check:
+  entrypoints:
+    - src/index.js
+  aliases:
+    common_1-3:
+      - "1.js"
+      - "2.js"
+      - "3.js"
+    common_4-5:
+      - "4.js"
+      - "5.js"
+  allow:
+    "src/users/**":
+      to:
+        - "src/users/**"
+        - "common_1-3"
+      reason: only users and common allowed
+  deny:
+    "src/products/**":
+      - to: "src/users/**"
+        reason: users not allowed
+      - "src/products/**"
+      - to: "common_1-3"
+        reason: |
+          common 1-3 not allowed,
+          double check your dependencies
+      - "common_4-5"

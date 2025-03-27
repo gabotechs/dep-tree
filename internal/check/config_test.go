@@ -19,8 +19,8 @@ func TestConfig_Check(t *testing.T) {
 		{
 			Name: "white list passes",
 			Config: Config{
-				WhiteList: map[string][]string{
-					"white": {"**pass**"},
+				WhiteList: map[string]WhiteListEntries{
+					"white": {To: []string{"**pass**"}},
 				},
 			},
 			From:   "white",
@@ -30,8 +30,8 @@ func TestConfig_Check(t *testing.T) {
 		{
 			Name: "white list fails",
 			Config: Config{
-				WhiteList: map[string][]string{
-					"white": {"**pass**"},
+				WhiteList: map[string]WhiteListEntries{
+					"white": {To: []string{"**pass**"}},
 				},
 			},
 			From:   "white",
@@ -41,8 +41,8 @@ func TestConfig_Check(t *testing.T) {
 		{
 			Name: "black list passes",
 			Config: Config{
-				BlackList: map[string][]string{
-					"black": {"**fail**"},
+				BlackList: map[string][]BlackListEntry{
+					"black": {{To: "**fail**"}},
 				},
 			},
 			From:   "black",
@@ -52,8 +52,8 @@ func TestConfig_Check(t *testing.T) {
 		{
 			Name: "black list fails",
 			Config: Config{
-				BlackList: map[string][]string{
-					"black": {"**fail**"},
+				BlackList: map[string][]BlackListEntry{
+					"black": {{To: "**fail**"}},
 				},
 			},
 			From:   "black",
@@ -63,8 +63,8 @@ func TestConfig_Check(t *testing.T) {
 		{
 			Name: "this should never pass",
 			Config: Config{
-				BlackList: map[string][]string{
-					"**": {"**"},
+				BlackList: map[string][]BlackListEntry{
+					"**": {{To: "**"}},
 				},
 			},
 			From:   "black",
@@ -75,7 +75,7 @@ func TestConfig_Check(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			pass, err := tt.Config.Check(tt.From, tt.To)
+			pass, _, err := tt.Config.Check(tt.From, tt.To)
 			a.NoError(err)
 			a.Equal(tt.Passes, pass)
 		})

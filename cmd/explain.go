@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"slices"
 	"strings"
@@ -9,16 +10,24 @@ import (
 	"github.com/gabotechs/dep-tree/internal/explain"
 	"github.com/gabotechs/dep-tree/internal/graph"
 	"github.com/gabotechs/dep-tree/internal/language"
+	"github.com/gabotechs/dep-tree/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
+	var overlapLeft bool
+	var overlapRight bool
+
 	cmd := &cobra.Command{
 		Use:     "explain",
 		Short:   "Shows all the dependencies between two parts of the code",
 		GroupID: explainGroupId,
 		Args:    cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if overlapLeft && overlapRight {
+				return errors.New("only one of --overlap-left (-l) or --overlap-right (-r) can be used at a time")
+			}
+
 			fromFiles, err := filesFromArgs([]string{args[0]})
 			if err != nil {
 				return err
@@ -27,6 +36,14 @@ func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 			toFiles, err := filesFromArgs([]string{args[1]})
 			if err != nil {
 				return err
+			}
+
+			if overlapLeft {
+				toFiles = utils.RemoveOverlap(toFiles, fromFiles)
+			}
+
+			if overlapRight {
+				fromFiles = utils.RemoveOverlap(fromFiles, toFiles)
 			}
 
 			cfg, err := cfgF()
@@ -84,6 +101,9 @@ func ExplainCmd(cfgF func() (*config.Config, error)) *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVarP(&overlapLeft, "overlap-left", "l", false, "When there's an overlap between the files at the left and the right, keep the ones at the left")
+	cmd.Flags().BoolVarP(&overlapRight, "overlap-right", "r", false, "When there's an overlap between the files at the left and the right, keep the ones at the right")
 
 	return cmd
 }

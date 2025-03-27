@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 // @ts-expect-error
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 import ForceGraph, { ForceGraphMethods, LinkObject, NodeObject } from "react-force-graph-3d";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Leva, useControls } from "leva";
 
 import { buildXGraph, XLink, XNode } from "./XGraph.ts";
@@ -53,9 +53,8 @@ const DEFAULT_SETTINGS = {
 
 const UNREAL_BLOOM_PASS = new UnrealBloomPass()
 
-const { xGraph: X_GRAPH, nodes: NODES, fileTree: FILE_TREE } = buildXGraph(Data.__INLINE_DATA)
-
-function App () {
+function GraphExplorer({ graphData }: { graphData: Graph }) {
+  const { xGraph, nodes, fileTree } = useMemo(() => buildXGraph(graphData), [graphData])
   const [highlightNodes, setHighlightNodes] = useState(new Set<XNode>())
   const [highlightLinks, setHighlightLinks] = useState(new Set<XLink>())
   const [selectedNode, setSelectedNode] = useState<XNode>()
@@ -161,10 +160,10 @@ function App () {
         if (link.isDir) f = settings.DIR_LINK_STRENGTH_FACTOR
         if (link.isPackage) f = settings.PACKAGE_LINK_STRENGTH_FACTOR
         if (link.ignore) f = 0
-        return f / Math.min(NODES[link.from].neighbors?.length ?? 1, NODES[link.to].neighbors?.length ?? 1);
+        return f / Math.min(nodes[link.from].neighbors?.length ?? 1, nodes[link.to].neighbors?.length ?? 1);
       })
     graph.current?.d3ReheatSimulation()
-  }, [settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR, updateForced])
+  }, [nodes, settings.DIR_LINK_STRENGTH_FACTOR, settings.FILE_LINK_STRENGTH_FACTOR, settings.LINK_DISTANCE, settings.PACKAGE_LINK_STRENGTH_FACTOR, updateForced])
 
   useEffect(() => {
     graph.current?.d3Force('charge')
@@ -187,7 +186,7 @@ function App () {
       <ForceGraph
         ref={graph}
         extraRenderers={[new CSS2DRenderer()]}
-        graphData={X_GRAPH}
+        graphData={xGraph}
         backgroundColor={'#000003'}
         nodeResolution={settings.NODE_RESOLUTION}
         onBackgroundClick={backgroundClick}
@@ -217,14 +216,96 @@ function App () {
       />
       <Explorer
         className={'fixed top-0 left-0 max-h-full bg-transparent'}
-        fileTree={FILE_TREE}
+        fileTree={fileTree}
         onSelectNode={nodeClick}
         selected={selectedNode}
         highlighted={highlightNodes}
         onNodesMutated={forceUpdate}
       />
-      <Leva hidden={!X_GRAPH.enableGui}/>
+      <Leva hidden={!xGraph.enableGui}/>
     </>
+  )
+}
+
+function DropPlaceholder() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen w-full text-gray-200">
+      <h2 className="text-xl font-semibold mb-2">Drop Here!</h2>
+    </div>
+  )
+}
+
+function FilePicker({ onFilePicked }: { onFilePicked: (file: File | undefined) => void }) {
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFilePicked(e.target.files?.[0]);
+  };
+
+  return (
+    <>
+      <h2 className="text-xl font-semibold mb-2">Drop Dep-Tree JSON Graph File Here</h2>
+      <p className="text-gray-400 mb-4">or</p>
+      <input
+        type="file"
+        accept=".json"
+        onChange={handleFileSelected}
+        className="bg-gray-800 px-4 py-2 rounded cursor-pointer hover:bg-gray-700"
+      />
+    </>
+  )
+}
+
+function App() {
+  const [graphData, setGraphData] = useState<Graph>(Data.__INLINE_DATA)
+  const [isDragging, setIsDragging] = useState(false)
+  const [forceRemountKey, setForceRemountKey] = useState(0)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  async function handleFilePicked(file: File | undefined) {
+    if (!file) return
+    try {
+      const data = JSON.parse(await file.text())
+      setGraphData(data)
+      setForceRemountKey((x) => x + 1)
+      setErrorMessage(null)
+    } catch (e) {
+      console.error('Failed to read file:', e)
+      setErrorMessage('' + e)
+    }
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault()
+    setIsDragging(false)
+    void handleFilePicked(e.dataTransfer.files[0])
+  }
+
+  return (
+    <div
+      className={`fixed top-0 left-0 w-full h-full ${isDragging ? 'border-2 border-dashed rounded-lg border-gray-500' : ''}`}
+      onDrop={handleDrop}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setIsDragging(true)
+      }}
+      onDragLeave={() => setIsDragging(false)}>
+      {isDragging
+        ? <DropPlaceholder />
+        : ((!graphData.nodes?.length || errorMessage)
+          ? <div className="flex flex-col items-center justify-center min-h-screen w-full text-gray-200">
+            <FilePicker onFilePicked={handleFilePicked} />
+            {errorMessage ? (
+              <div className="bg-red-600/20 border border-red-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
+                <span className="text-red-500 font-medium">🚨 Error</span>
+                <p className="text-red-400/80 text-sm mt-1">{errorMessage}</p>
+              </div>
+            ) : (
+              <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-lg px-4 py-2 mt-12 max-w-lg text-center">
+                <span className="text-yellow-500 font-medium">⚠️ Experimental</span>
+                <p className="text-yellow-400/80 text-sm mt-1">This feature relies on an internal structure that may break in the future.</p>
+              </div>)}
+          </div>
+          : <GraphExplorer key={forceRemountKey} graphData={graphData} />)}
+    </div>
   )
 }
 
