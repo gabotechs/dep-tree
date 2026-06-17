@@ -52,6 +52,7 @@
     <img height="40px" src="docs/python-logo.png">
     <img height="40px" src="docs/rust-logo.png">
     <img height="36px" src="docs/go-logo.png">
+    <img height="40px" src="docs/dart-logo.svg">
 </div>
 
 ## Contributing additional languages
@@ -433,6 +434,10 @@ python:
 # Rust specific settings.
 rust:
 # None available at the moment.
+
+# Dart specific settings.
+dart:
+# None available at the moment.
 ```
 
 ## Motivation
@@ -461,4 +466,6 @@ the tool ensures that this architectural "harmony" remains undisturbed.
 - Python
 - JavaScript/TypeScript (es imports/exports)
 - Rust (beta)
+- Go
+- Dart (beta)
 

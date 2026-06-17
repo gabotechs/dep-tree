@@ -1,0 +1,6 @@
+name: sample_app
+description: A sample Dart project used for testing dep-tree.
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'

@@ -125,3 +125,7 @@ python:
 # Rust specific settings.
 rust:
   # None available at the moment.
+
+# Dart specific settings.
+dart:
+  # None available at the moment.

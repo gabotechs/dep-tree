@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/gabotechs/dep-tree/internal/check"
+	"github.com/gabotechs/dep-tree/internal/dart"
 	golang "github.com/gabotechs/dep-tree/internal/go"
 	"github.com/gabotechs/dep-tree/internal/js"
 	"github.com/gabotechs/dep-tree/internal/python"
@@ -33,6 +34,7 @@ type Config struct {
 	Rust          rust.Config   `yaml:"rust"`
 	Python        python.Config `yaml:"python"`
 	Golang        golang.Config `yaml:"golang"`
+	Dart          dart.Config   `yaml:"dart"`
 }
 
 func NewConfigCwd() Config {

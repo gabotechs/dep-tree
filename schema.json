@@ -149,6 +149,11 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Settings specific to Rust projects (currently none available)."
+    },
+    "dart": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Settings specific to Dart projects (currently none available)."
     }
   },
   "required": [],
